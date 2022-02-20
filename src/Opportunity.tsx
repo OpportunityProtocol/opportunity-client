@@ -149,7 +149,11 @@ export default function Opportunity() {
             <Grid
               item
               xs={4}
-              className={classes.flexRowEnd}
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'flex-end' 
+              }}
             >
               <Blockies
                 seed="Max"

@@ -9,6 +9,9 @@ const useStyles = makeStyles((theme) =>
             justifyContent: 'center',
             alignItems: 'center',
     },
+    flexRowEnd: {
+      display: 'flex', alignItems: 'center', justifyContent: 'flex-end'
+    },
     radio: {
       paddingBottom: '0px !important',
       marginBottom: '0px !important',
@@ -22,4 +25,4 @@ const useStyles = makeStyles((theme) =>
   }),
 );
 
-  export default useStyles;
+  export default useStyles; 

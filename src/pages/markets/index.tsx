@@ -160,7 +160,7 @@ const Markets = () => {
         direction="row"
         xs={12}
         justifyContent="space-between"
-        className={classes.gridContainer}
+        sx={{ padding: '1% 4%' }}
       >
         <Grid
           xs={12}

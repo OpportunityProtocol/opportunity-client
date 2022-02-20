@@ -7,6 +7,8 @@ import {
     Button
 } from '@mui/material'
 
+import Link from 'next/link'
+
 import { useStyles } from './MarketToolbarStyles'
 
 const MarketToolbar = () => {
@@ -74,7 +76,11 @@ const MarketToolbar = () => {
           direction="row"
           alignItems="center"
           height={60}
-          className={classes.buttonContainer}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+          }}
         >
           <Grid item mx={1}>
             <Button color="secondary" variant="contained" size='small'>
@@ -93,6 +99,7 @@ const MarketToolbar = () => {
           </Grid>
 
           <Grid item mx={1}>
+            <Link href='/contract/create'>
             <Button
               color="secondary"
               variant="outlined"
@@ -100,6 +107,7 @@ const MarketToolbar = () => {
             >
               Post Contract
             </Button>
+            </Link>
           </Grid>
         </Box>
       </Grid>

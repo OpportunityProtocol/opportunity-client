@@ -18,11 +18,6 @@ const useStyles = makeStyles((theme) => {
       backgroundColor: '#f5f5f5',
       width: '100%',
     },
-    buttonContainer: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-    },
   }
 })
 

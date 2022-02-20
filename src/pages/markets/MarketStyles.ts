@@ -23,9 +23,6 @@ const useStyles = makeStyles((theme) => {
       alignItems: 'center',
       justifyContent: 'flex-end',
     },
-    gridContainer: {
-      padding: '1% 4%',
-    },
     containerCentered: {
       width: '100%',
       display: 'flex',
