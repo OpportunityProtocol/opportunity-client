@@ -7,10 +7,7 @@ import {
   Box,
   Drawer,
   Grid,
-  IconButton,
-  Fab,
   CssBaseline,
-  Popover,
   FormLabel,
   FormControl,
   RadioGroup,
@@ -18,53 +15,9 @@ import {
   FormControlLabel,
   AppBar,
   Toolbar,
-  Avatar,
-  List,
-  InputBase,
   Typography,
   Divider,
-  TextField,
-  Button,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListItemButton,
-  Collapse,
-  Tooltip,
-  ListItemAvatar,
-  Checkbox,
-  Badge,
-  Stack,
 } from '@mui/material'
-
-import {
-  Work,
-  AttachMoney,
-  Search,
-  Add,
-  AccountBalance,
-  Email,
-  Menu,
-  ExpandLess,
-  ExpandMore,
-  Notifications,
-  Inbox as InboxIcon,
-  StarBorder,
-  Mail as MailIcon,
-  Home as HomeIcon,
-  Help,
-  CallMade,
-} from '@mui/icons-material'
-
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-
-import {
-  useTheme,
-  withStyles,
-  styled,
-  emphasize,
-  alpha,
-} from '@mui/material/styles'
 
 import Markets from './pages/markets/'
 
@@ -119,27 +72,43 @@ const MARKETS = [
   },
 ]
 
+const CONTINENTS = [
+  'North America',
+  'South America',
+  'Europe',
+  'Asia',
+  'Africa',
+  'Antartica'
+]
 
+const MARKET_TYPES = [
+  {
+    label: 'Opportunity Markets',
+    type: 'default'
+  },
+  {
+    label: 'Custom',
+    type: 'custom'
+  }
+]
 
 
 export default function Opportunity() {
   const classes = useStyles()
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar
         variant="outlined"
         position="fixed"
-        sx={{ bgcolor: 'rgba(33, 33, 33, .85)', height: 65, zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{ 
+          bgcolor: '#424242', 
+          height: 65, 
+          zIndex: (theme) => theme.zIndex.drawer + 1 
+        }}
       >
-        <Toolbar
-          style={{
-              width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
+        <Toolbar className={classes.toolbar}
         >
           <Grid
           width='100%'
@@ -158,7 +127,7 @@ export default function Opportunity() {
             </Grid>
 
             <Grid item xs={4}>
-              <div style={{ display: 'flex', alignItems: 'center'}}>
+              <div className={classes.flexRow}>
                 <Typography mx={2} variant="button" color="secondary">
                   Markets
                 </Typography>
@@ -180,7 +149,7 @@ export default function Opportunity() {
             <Grid
               item
               xs={4}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}
+              className={classes.flexRowEnd}
             >
               <Blockies
                 seed="Max"
@@ -218,232 +187,81 @@ export default function Opportunity() {
           <Typography variant="h6" fontSize={15}>
             Filters
           </Typography>
+          
           <FormControl sx={{ my: 1 }}>
-            <FormLabel
-              id="demo-radio-buttons-group-label"
+          <FormLabel
+              id="market-type-form-label"
               sx={{ fontSize: 15, fontWeight: 'medium' }}
             >
               Market Type
             </FormLabel>
             <RadioGroup
-              aria-labelledby="demo-radio-buttons-group-label"
+              aria-labelledby="market-type-form-label"
               defaultValue="female"
-              name="radio-buttons-group"
+              name="market-type-radio-button-group"
             >
+                          {
+              MARKET_TYPES.map(marketType => {
+                  return (
               <FormControlLabel
                 componentsProps={{
                   typography: {
                     fontSize: 12,
                   },
                 }}
-                sx={{ padding: '0px !important', margin: '5px 0px !important' }}
-                value="female"
+                className={classes.formControlLabel}
+                value={String(marketType.type).toLowerCase()}
                 control={
                   <Radio
                   color='secondary'
-                    sx={{
-                      paddingBottom: '0px !important',
-                      marginBottom: '0px !important',
-                      paddingTop: '0px !important',
-                      marginTop: '0px !important',
-                    }}
+                  className={classes.radio}
                     size="small"
                   />
                 }
-                label="Opportunity Markets"
+                label={marketType.label}
               />
-              <FormControlLabel
-                componentsProps={{
-                  typography: {
-                    fontSize: 12,
-                  },
-                }}
-                sx={{ padding: '0px !important', margin: '5px 0px !important' }}
-                value="male"
-                control={
-                  <Radio
-                  color='secondary'
-                    size="small"
-                    sx={{
-                      paddingBottom: '0px !important',
-                      marginBottom: '0px !important',
-                      paddingTop: '0px !important',
-                      marginTop: '0px !important',
-                    }}
-                  />
-                }
-                label="Custom"
-              />
+                  )
+              })
+            }
             </RadioGroup>
           </FormControl>
+
           <FormControl sx={{ my: 1 }}>
             <FormLabel
-              id="demo-radio-buttons-group-label"
+              id="region-form-label"
               sx={{ fontSize: 15, fontWeight: 'medium' }}
             >
               Region
             </FormLabel>
             <RadioGroup
-                              color='secondary'
-              aria-labelledby="demo-radio-buttons-group-label"
+              color='secondary'
+              aria-labelledby="region-form-label"
               defaultValue="worldwide"
-              name="radio-buttons-group"
+              name="region-radio-button-group"
             >
-              <FormControlLabel
-                componentsProps={{
-                  typography: {
-                    fontSize: 12,
-                  },
-                }}
-                sx={{ padding: '0px !important', margin: '5px 0px !important' }}
-                value="worldwide"
-                control={
-                  <Radio
-                  color='secondary'
-                    size="small"
-                    sx={{
-                      paddingBottom: '0px !important',
-                      marginBottom: '0px !important',
-                      paddingTop: '0px !important',
-                      marginTop: '0px !important',
-                    }}
+              {
+                CONTINENTS.map(continent => {
+                  return (
+                    <FormControlLabel
+                      componentsProps={{
+                        typography: {
+                          fontSize: 12,
+                        },
+                      }}
+                    className={classes.formControlLabel}
+                    value={String(continent).toLowerCase()}
+                    control={
+                      <Radio
+                        color='secondary'
+                        size="small"
+                        className={classes.radio}
+                      />
+                    }
+                    label={continent}
                   />
-                }
-                label="Worldwide"
-              />
-
-              <FormControlLabel
-                componentsProps={{
-                  typography: {
-                    fontSize: 12,
-                  },
-                }}
-                sx={{ padding: '0px !important', margin: '5px 0px !important' }}
-                value="male"
-                control={
-                  <Radio
-                  color='secondary'
-                    size="small"
-                    sx={{
-                      paddingBottom: '0px !important',
-                      marginBottom: '0px !important',
-                      paddingTop: '0px !important',
-                      marginTop: '0px !important',
-                    }}
-                  />
-                }
-                label="North America"
-              />
-              <FormControlLabel
-                componentsProps={{
-                  typography: {
-                    fontSize: 12,
-                  },
-                }}
-                sx={{ padding: '0px !important', margin: '5px 0px !important' }}
-                value="female"
-                control={
-                  <Radio
-                  color='secondary'
-                    size="small"
-                    sx={{
-                      paddingBottom: '0px !important',
-                      marginBottom: '0px !important',
-                      paddingTop: '0px !important',
-                      marginTop: '0px !important',
-                    }}
-                  />
-                }
-                label="South America"
-              />
-              <FormControlLabel
-                componentsProps={{
-                  typography: {
-                    fontSize: 12,
-                  },
-                }}
-                sx={{ padding: '0px !important', margin: '5px 0px !important' }}
-                value="male"
-                control={
-                  <Radio
-                  color='secondary'
-                    size="small"
-                    sx={{
-                      paddingBottom: '0px !important',
-                      marginBottom: '0px !important',
-                      paddingTop: '0px !important',
-                      marginTop: '0px !important',
-                    }}
-                  />
-                }
-                label="Europe"
-              />
-              <FormControlLabel
-                componentsProps={{
-                  typography: {
-                    fontSize: 12,
-                  },
-                }}
-                sx={{ padding: '0px !important', margin: '5px 0px !important' }}
-                value="female"
-                control={
-                  <Radio
-                  color='secondary'
-                    size="small"
-                    sx={{
-                      paddingBottom: '0px !important',
-                      marginBottom: '0px !important',
-                      paddingTop: '0px !important',
-                      marginTop: '0px !important',
-                    }}
-                  />
-                }
-                label="Asia"
-              />
-              <FormControlLabel
-                componentsProps={{
-                  typography: {
-                    fontSize: 12,
-                  },
-                }}
-                sx={{ padding: '0px !important', margin: '5px 0px !important' }}
-                value="male"
-                control={
-                  <Radio
-                  color='secondary'
-                    size="small"
-                    sx={{
-                      paddingBottom: '0px !important',
-                      marginBottom: '0px !important',
-                      paddingTop: '0px !important',
-                      marginTop: '0px !important',
-                    }}
-                  />
-                }
-                label="Africa"
-              />
-              <FormControlLabel
-                componentsProps={{
-                  typography: {
-                    fontSize: 12,
-                  },
-                }}
-                sx={{ padding: '0px !important', margin: '5px 0px !important' }}
-                value="female"
-                control={
-                  <Radio
-                  color='secondary'
-                    size="small"
-                    sx={{
-                      paddingBottom: '0px !important',
-                      marginBottom: '0px !important',
-                      paddingTop: '0px !important',
-                      marginTop: '0px !important',
-                    }}
-                  />
-                }
-                label="Antartica"
-              />
+                  )
+                })
+              }
             </RadioGroup>
           </FormControl>
         </Box>
@@ -483,11 +301,9 @@ export default function Opportunity() {
       <Box
         component="main"
         sx={{
-          flexGrow: 1,
-          bgcolor: 'background.default',
+          backgroundColor: 'inherit',
           position: 'relative',
           paddingTop: 8,
-          bgcolor: '#fff',
         }}
       >
           <MarketToolbar />

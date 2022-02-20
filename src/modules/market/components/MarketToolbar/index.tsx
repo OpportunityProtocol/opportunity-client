@@ -7,9 +7,10 @@ import {
     Button
 } from '@mui/material'
 
-import { FaEthereum } from "react-icons/fa";
+import { useStyles } from './MarketToolbarStyles'
 
 const MarketToolbar = () => {
+  const classes = useStyles()
     return (
         <Grid
         flexWrap="nowrap"
@@ -17,13 +18,13 @@ const MarketToolbar = () => {
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        sx={{ backgroundColor: '#fafafa', width: '100%' }}
+        className={classes.container}
       >
         <Box
           component={Grid}
           item
           container
-          xs={6}
+          xs={8}
           direction="row"
           alignItems="center"
           height={60}
@@ -48,9 +49,6 @@ const MarketToolbar = () => {
 
           <Grid item mx={5}>
             <Typography fontWeight="medium" fontSize={12}>
-                <span>
-                    <FaEthereum />
-                </span>
               ETH Balance:{' '}
             </Typography>
             <Typography fontWeight="light" fontSize={12}>
@@ -72,18 +70,14 @@ const MarketToolbar = () => {
           component={Grid}
           container
           item
-          xs={6}
+          xs={4}
           direction="row"
           alignItems="center"
           height={60}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-          }}
+          className={classes.buttonContainer}
         >
           <Grid item mx={1}>
-            <Button color="secondary" variant="contained">
+            <Button color="secondary" variant="contained" size='small'>
               Add Funds
             </Button>
           </Grid>
@@ -92,11 +86,7 @@ const MarketToolbar = () => {
             <Button
               color="secondary"
               variant="outlined"
-              sx={{
-                fontSize: 12,
-                backgroundColor: '#eee',
-                border: '1px solid #eee',
-              }}
+              size='small'
             >
               Create Market
             </Button>
@@ -106,11 +96,7 @@ const MarketToolbar = () => {
             <Button
               color="secondary"
               variant="outlined"
-              sx={{
-                fontSize: 12,
-                backgroundColor: '#eee',
-                border: '1px solid #eee',
-              }}
+              size='small'
             >
               Post Contract
             </Button>

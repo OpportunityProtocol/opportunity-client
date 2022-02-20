@@ -1,39 +1,21 @@
 import React, { useState } from 'react'
-import useStyles from './MarketDisplayStyles'
+import { useStyles } from './MarketDisplayStyles'
 
 
 import {
-  Paper,
-  Box,
   Grid,
-  Divider,
   Typography,
-  TableRow,
-  Tooltip,
   Icon,
-  TableCell,
-  Button,
-  IconButton,
   Card,
-  CardActions,
   Chip,
   CardContent,
-  CardMedia,
-  useTheme
 } from '@mui/material'
-
-import { green } from '@mui/material/colors';
 
 const MarketDisplay = () => {
   const classes = useStyles()
 
   return (
-    <>
-      <Card
-        variant='outlined'
-        classes={{ root: classes.cardRoot }}
-        className={classes.card}
-      >
+      <Card variant='outlined'>
         <CardContent>
           <Grid container direction='row' alignItems='center' justifyContent='space-between'>
             <Grid item>
@@ -43,7 +25,16 @@ const MarketDisplay = () => {
             </Grid>
 
             <Grid item>
-            <Chip variant='outlined' icon={<Icon fontSize='small' color='secondary' >language</Icon>} label="Worldwide" sx={{border: '1px solid #eee'}} />
+              <Chip 
+              variant='outlined' 
+              icon={
+                <Icon 
+                fontSize='small' 
+                color='secondary'>
+                  language
+                </Icon>} 
+                label="Worldwide" 
+              />
             </Grid>
           </Grid>
 
@@ -53,7 +44,6 @@ const MarketDisplay = () => {
           </Typography>
         </CardContent>
       </Card>
-    </>
   )
 }
 

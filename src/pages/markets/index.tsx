@@ -1,39 +1,18 @@
-import React, { useEffect, useState } from 'react'
-import useStyles from './MarketStyles'
-
-import { alpha } from '@mui/material/styles'
+import React from 'react'
+import { useStyles }  from './MarketStyles'
 
 import {
   Grid,
-  Button,
-  Switch,
-  Chip,
-  Badge,
-  Divider,
-  Icon,
   IconButton,
-  List,
-  ListItem,
   Typography,
-  FormGroup,
-  FormControlLabel,
-  CardContent,
-  Card,
   Pagination,
-  TextField,
-  Tab,
   Paper,
-  Tabs,
   Box,
-  useTheme,
-  InputBase,
-  ListItemText
+  InputBase
 } from '@mui/material'
 
 import { Search } from '@mui/icons-material'
-
 import MarketDisplay from '../../modules/market/components/MarketDisplay'
-import MarketToolbar from '../../modules/market/components/MarketToolbar'
 
 const dummyMarkets = [
   {
@@ -171,7 +150,7 @@ const dummyMarkets = [
   },
 ]
 
-const Home = () => {
+const Markets = () => {
   const classes = useStyles()
 
   return (
@@ -181,7 +160,7 @@ const Home = () => {
         direction="row"
         xs={12}
         justifyContent="space-between"
-        style={{ padding: '1% 4%' }}
+        className={classes.gridContainer}
       >
         <Grid
           xs={12}
@@ -189,7 +168,7 @@ const Home = () => {
           item
           flexDirection="column"
           direction="column"
-          alignItems="cetnter"
+          alignItems="center"
         >
           <Grid item>
             <Box sx={{ width: '100%', margin: '30px 0px' }}>
@@ -205,7 +184,6 @@ const Home = () => {
                     Explore markets
                   </Typography>
                 </Grid>
-
                 <Grid item>
                   <Paper
                     component="form"
@@ -230,20 +208,18 @@ const Home = () => {
                       placeholder="Search contracts, employers or workers across any network"
                     />
 
-                    <IconButton sx={{ p: '10px' }} aria-label="menu">
+                    <IconButton  aria-label="menu">
                       <Search />
                     </IconButton>
                   </Paper>
                 </Grid>
               </Grid>
-
               <Grid
                 container
                 direction="row"
                 flexDirection="row"
                 alignItems="center"
-                spacing={2}
-              >
+                spacing={2}>
                 {dummyMarkets.map((market) => (
                   <Grid item sm={4}>
                     <MarketDisplay />
@@ -251,14 +227,7 @@ const Home = () => {
                 ))}
               </Grid>
             </Box>
-            <Box
-              sx={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
+            <Box className={classes.containerCentered}>
               <Pagination count={10} variant="outlined" shape="rounded" />
             </Box>
           </Grid>
@@ -268,4 +237,4 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Markets
