@@ -5,6 +5,7 @@ import styles from '../../styles/Home.module.css'
 
 import theme from '../../material_theme'
 import Opportunity from '../Opportunity'
+import Markets from './markets';
 
 const Home: NextPage = () => {
   return (
@@ -22,9 +23,7 @@ const Home: NextPage = () => {
         href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
         />
       </Head>
-      <ThemeProvider theme={theme}>
-        <Opportunity />
-      </ThemeProvider>
+      <Markets />
     </div>
   )
 }

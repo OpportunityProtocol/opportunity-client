@@ -10,12 +10,13 @@ import {
   Chip,
   CardContent,
 } from '@mui/material'
+import ClickableCard from '../../../../common/components/ClickableCard/ClickableCard'
 
 const MarketDisplay = () => {
   const classes = useStyles()
 
   return (
-      <Card variant='outlined'>
+      <ClickableCard variant='outlined'>
         <CardContent>
           <Grid container direction='row' alignItems='center' justifyContent='space-between'>
             <Grid item>
@@ -43,7 +44,7 @@ const MarketDisplay = () => {
             species, ranging across all continents except Antarctica
           </Typography>
         </CardContent>
-      </Card>
+      </ClickableCard>
   )
 }
 

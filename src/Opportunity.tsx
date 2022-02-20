@@ -19,7 +19,7 @@ import {
   Divider,
 } from '@mui/material'
 
-import Markets from './pages/markets/'
+import router, { useRouter } from 'next/router'
 
 import Blockies from 'react-blockies'
 import useStyles from './OpportunityStyles'
@@ -93,8 +93,11 @@ const MARKET_TYPES = [
 ]
 
 
-export default function Opportunity() {
+export default function Opportunity({ children }) {
   const classes = useStyles()
+  const router = useRouter()
+
+  const isDrawerShowing = router.pathname.includes('create') ? false : true
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -167,8 +170,10 @@ export default function Opportunity() {
           </Grid>
         </Toolbar>
       </AppBar>
-
-      <Drawer
+      
+      {
+        isDrawerShowing ?
+        <Drawer
         component={Paper}
         elevation={3}
         sx={{
@@ -183,6 +188,7 @@ export default function Opportunity() {
             boxSizing: 'border-box',
           },
         }}
+        anchor='left'
         variant="permanent"
       >
         <Toolbar />
@@ -301,17 +307,18 @@ export default function Opportunity() {
           })}
         </Box>
       </Drawer>
+        :
+        null
+      }
 
       <Box
         component="main"
         sx={{
-          backgroundColor: 'inherit',
-          position: 'relative',
+          flexGrow: 1,
           paddingTop: 8,
         }}
       >
-          <MarketToolbar />
-          <Markets />
+          {children}
       </Box>
     </Box>
   )

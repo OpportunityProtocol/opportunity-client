@@ -20,8 +20,7 @@ const MarketToolbar = () => {
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        className={classes.container}
-      >
+        sx={{ backgroundColor: '#f5f5f5' }}>
         <Box
           component={Grid}
           item

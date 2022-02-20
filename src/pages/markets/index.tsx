@@ -13,6 +13,7 @@ import {
 
 import { Search } from '@mui/icons-material'
 import MarketDisplay from '../../modules/market/components/MarketDisplay'
+import MarketToolbar from '../../modules/market/components/MarketToolbar'
 
 const dummyMarkets = [
   {
@@ -155,6 +156,7 @@ const Markets = () => {
 
   return (
     <Box className={classes.root}>
+      <MarketToolbar />
       <Grid
         container
         direction="row"

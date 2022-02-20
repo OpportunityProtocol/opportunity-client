@@ -2,27 +2,49 @@ import { createStyles, makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme) =>
   createStyles({
-    toolbar: {
-      width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
+    container: {
+        marginTop: '4%',
     },
-    flexRowEnd: {
-      display: 'flex', alignItems: 'center', justifyContent: 'flex-end'
+    selectedCard: {
+        border: '5px solid #A5D6A7'
     },
-    radio: {
-      paddingBottom: '0px !important',
-      marginBottom: '0px !important',
-      paddingTop: '0px !important',
-      marginTop: '0px !important',
+    cardContent: {
+        padding: 15
     },
-    formControlLabel: {
-      padding: '0px !important', 
-      margin: '5px 0px !important'
+    marketTypeCard: {
+        width: 220,
+        height: 180,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    textField: {
+        width: 400,
+        border: '1px solid #eee',
+        backgroundColor: '#fafafa',
+    },
+    sectionHeader: {
+        fontSize: 20,
+        fontWeight: 'medium'
+    },
+    sectionSubheader: {
+        fontSize: 13,
+        fontWeight: 'regular',
+        color: '#212121'
+    },
+    subSectionHeader: {
+        fontWeight: '600',
+        color: 'rgba(33, 33, 33, .85)',
+        fontSize: 15
+    },
+    columnCenter: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
     }
   }),
 );
 
-  export default useStyles; 
+export { useStyles }
