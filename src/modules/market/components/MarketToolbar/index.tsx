@@ -4,23 +4,29 @@ import {
     Grid,
     Typography,
     Box, 
+    Paper,
+    Divider,
     Button
 } from '@mui/material'
 
 import Link from 'next/link'
 
 import { useStyles } from './MarketToolbarStyles'
+import { FaEthereum } from 'react-icons/fa'
+import { IoWalletSharp } from 'react-icons/io5'
 
 const MarketToolbar = () => {
   const classes = useStyles()
     return (
+      <Box component={Paper} elevation={2} sx={{ boxShadow:
+        '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)', width: '100%' }}>
         <Grid
         flexWrap="nowrap"
         container
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        sx={{ backgroundColor: '#f5f5f5' }}>
+        sx={{ backgroundColor: '#fff' }}>
         <Box
           component={Grid}
           item
@@ -28,41 +34,41 @@ const MarketToolbar = () => {
           xs={8}
           direction="row"
           alignItems="center"
-          height={60}
+
         >
           <Grid item mx={5}>
-            <Typography noWrap fontWeight="medium" fontSize={12}>
-              Web3/Wallet Provider:{' '}
+            <Typography color='#212121' noWrap fontWeight='bold' fontSize={12}>
+            <IoWalletSharp size={10} />  Web3/Wallet Provider:{' '}
             </Typography>
-            <Typography fontWeight="light" fontSize={12}>
+            <Typography color='#212121' fontWeight="light" fontSize={12}>
                   MetaMask
                 </Typography>
           </Grid>
 
           <Grid item mx={5}>
-            <Typography fontWeight="medium" fontSize={12}>
-              DAI Balance:{' '}
+            <Typography color='#212121' fontWeight='bold' fontSize={12}>
+              <FaEthereum size={10} /> DAI Balance:{' '}
             </Typography>
-            <Typography fontWeight="light" fontSize={12}>
-                  0.00
+            <Typography color='#212121' fontWeight="light" fontSize={12}>
+                  $125.64
                 </Typography>
           </Grid>
 
           <Grid item mx={5}>
-            <Typography fontWeight="medium" fontSize={12}>
-              ETH Balance:{' '}
+            <Typography color='#212121' fontWeight='bold' fontSize={12}>
+            <FaEthereum size={10} /> ETH Balance:{' '}
             </Typography>
-            <Typography fontWeight="light" fontSize={12}>
-                  0.00
+            <Typography color='#212121' fontWeight="light" fontSize={12}>
+                  $23.22
                 </Typography>
           </Grid>
 
           <Grid item mx={5}>
-            <Typography fontWeight="medium" fontSize={12}>
-              TIP Balance:{' '}
+            <Typography color='#212121' fontWeight='bold' fontSize={12}>
+            <FaEthereum size={10} /> Treasury Balance (TIP):{' '}
             </Typography>
-            <Typography fontWeight="light" fontSize={12}>
-                  0.00
+            <Typography color='#212121' fontWeight="light" fontSize={12}>
+                  $2342.32
                 </Typography>
           </Grid>
         </Box>
@@ -81,11 +87,6 @@ const MarketToolbar = () => {
             justifyContent: 'flex-end',
           }}
         >
-          <Grid item mx={1}>
-            <Button color="secondary" variant="contained" size='small'>
-              Add Funds
-            </Button>
-          </Grid>
 
           <Grid item mx={1}>
             <Button
@@ -110,6 +111,8 @@ const MarketToolbar = () => {
           </Grid>
         </Box>
       </Grid>
+      <Divider />
+      </Box>
     )
 }
 

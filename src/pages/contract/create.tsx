@@ -185,6 +185,23 @@ const Create = () => {
             </Card>
             </Box>
             {step === 0 ? <CreateBasicInformation /> : <CreateValueAndFees />}
+            <Divider sx={{ width: '100%' }} />
+            <Grid sx={{ my: 2 }} container direction='row' alignItems='center' justifyContent='flex-end'>
+              {
+                step === 1 ?
+                <Button sx={{ width: 120, color: '#43A047', p: 1 }} variant='outlined' onClick={() => setStep(0)}>
+                  <Typography>Back</Typography>
+                </Button>
+                :
+                null
+
+              }
+              <Grid item>
+                <Button sx={{ width: 120, color: '#43A047', p: 1 }} variant='outlined' onClick={() => setStep(1)}>
+                  {step === 0 ? <Typography>Next</Typography> : <Typography>Create</Typography>}
+                </Button>
+              </Grid>
+            </Grid>
         </Container>
     )
 }
@@ -334,13 +351,6 @@ const CreateBasicInformation = () => {
                 </FormGroup>
             </Box>
 
-            <Divider sx={{ my: 5}} />
-
-            <Grid sx={{ my: 2 }} container direction='row' alignItems='center' justifyContent='flex-end'>
-                <Button sx={{ width: 120, color: '#43A047', p: 1 }} variant='outlined'>
-                    Next
-                </Button>
-            </Grid>
         </Box>
     )
 }
@@ -349,7 +359,22 @@ const CreateValueAndFees = () => {
     const classes = useStyles()
 
     return (
-        <Box />
+      <Box sx={{ pb: 3, width: '100%' }}>
+        <Box my={2} className={classes.columnCenter}>
+            <Card variant='outlined' sx={{ p: 2, width: '100%' }}>
+                <Typography variant='body2'>
+                  Protocol Fee: 0
+                </Typography>
+                <Typography variant='body2'>
+                  Estimated Gas Fee: 0
+                </Typography>
+                <Divider sx={{ my: 2 }} />
+                <Typography fontWeight='bold' fontSize={15}>
+                  Total: 0
+                </Typography>
+            </Card>
+            </Box>
+      </Box>
     )
 }
 

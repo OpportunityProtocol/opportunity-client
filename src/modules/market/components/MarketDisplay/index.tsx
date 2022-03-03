@@ -12,11 +12,13 @@ import {
 } from '@mui/material'
 import ClickableCard from '../../../../common/components/ClickableCard/ClickableCard'
 
+import router from 'next/router'
+
 const MarketDisplay = () => {
   const classes = useStyles()
 
   return (
-      <ClickableCard variant='outlined'>
+      <ClickableCard variant='outlined' onClick={() => router.push('/jobs')}>
         <CardContent>
           <Grid container direction='row' alignItems='center' justifyContent='space-between'>
             <Grid item>
@@ -27,12 +29,13 @@ const MarketDisplay = () => {
 
             <Grid item>
               <Chip 
+              size='small'
               variant='outlined' 
               icon={
                 <Icon 
                 fontSize='small' 
                 color='secondary'>
-                  language
+                  location_on
                 </Icon>} 
                 label="Worldwide" 
               />

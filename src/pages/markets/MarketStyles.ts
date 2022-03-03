@@ -9,6 +9,7 @@ const useStyles = makeStyles((theme) => {
       flexDirection: 'column',
       overflow: 'auto',
       backgroundColor: '#fff',
+      padding: '1% 4%'
     },
     heading: {
       fontWeight: '500',

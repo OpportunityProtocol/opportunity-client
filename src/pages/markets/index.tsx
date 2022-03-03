@@ -7,6 +7,7 @@ import {
   Typography,
   Pagination,
   Paper,
+  Button,
   Box,
   InputBase
 } from '@mui/material'
@@ -156,23 +157,7 @@ const Markets = () => {
 
   return (
     <Box className={classes.root}>
-      <MarketToolbar />
-      <Grid
-        container
-        direction="row"
-        xs={12}
-        justifyContent="space-between"
-        sx={{ padding: '1% 4%' }}
-      >
-        <Grid
-          xs={12}
-          container
-          item
-          flexDirection="column"
-          direction="column"
-          alignItems="center"
-        >
-          <Grid item>
+
             <Box sx={{ width: '100%', margin: '30px 0px' }}>
               <Grid
                 pb={5}
@@ -185,37 +170,30 @@ const Markets = () => {
                   <Typography variant="h5" className={classes.heading}>
                     Explore markets
                   </Typography>
+                  <Typography variant='caption' color='rgba(33, 33, 33, .85)'>
+                    Showing 23 Opportunity markets
+                  </Typography>
                 </Grid>
-                <Grid item>
-                  <Paper
-                    component="form"
-                    sx={{
-                      p: '2px 20px',
-                      borderRadius: 2,
-                      border: '1px solid #eee',
-                      backgroundColor: 'transparent',
-                      height: 40,
-                      display: 'flex',
-                      alignItems: 'center',
-                      width: 500,
-                    }}
-                  >
-                    <InputBase
-                      sx={{
-                        fontWeight: 'regular',
-                        color: '#212121',
-                        flex: 1,
-                        fontSize: 14,
-                      }}
-                      placeholder="Search contracts, employers or workers across any network"
-                    />
 
-                    <IconButton  aria-label="menu">
-                      <Search />
-                    </IconButton>
-                  </Paper>
+                <Grid item>
+                <Paper
+                            elevation={0}
+      component="form"
+      sx={{ width: 600, p: 1, borderRadius: 20, border: '1px solid #eee', elevation: 0, display: 'flex', alignItems: 'center',  }}
+    >
+    
+      <InputBase
+      startAdornment={<Search fontSize='small' sx={{ color: '#aaa' }} />}
+        sx={{ ml: 1, flex: 2, fontSize: 14, }}
+        placeholder="Search jobs"
+        inputProps={{ 'aria-label': 'search google maps' }}
+      />
+    </Paper>
                 </Grid>
               </Grid>
+
+
+
               <Grid
                 container
                 direction="row"
@@ -232,9 +210,6 @@ const Markets = () => {
             <Box className={classes.containerCentered}>
               <Pagination count={10} variant="outlined" shape="rounded" />
             </Box>
-          </Grid>
-        </Grid>
-      </Grid>
     </Box>
   )
 }
