@@ -58,6 +58,16 @@ const useStyles = makeStyles((theme) =>
     },
     inputBase: {
         width: '100%', padding: 1
+    },
+    containerCentered: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    fileContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
     }
   }),
 );

@@ -8,7 +8,9 @@ import {
     Grid,
     ListItem,
     List,
+    Pagination,
     ListItemIcon,
+    Typography,
     IconButton,
     InputBase,
     Paper,
@@ -19,6 +21,9 @@ import {
 import { useStyles } from './ContractStyles';
 import { Attachment, ContentCopy } from '@mui/icons-material'
 import JobDisplay from '../../modules/market/components/JobDisplay';
+import BountySubmission from '../../modules/market/components/BountySubmission/BountySubmission';
+import { FileUploader } from "react-drag-drop-files";
+const fileTypes = ["PDF", "PNG", "DOC"];
 
 /**
  * For now this is the all out page for viewing contracts
@@ -29,13 +34,14 @@ const Contract : React.FunctionComponent<any> = () => {
     const classes = useStyles()
     
     return (
-        <Box component={Grid} direction='row' spacing={2} container className={classes.boxContainer}>
+        <Box component={Grid} direction='row' spacing={2} alignItems='flex-start' container className={classes.boxContainer}>
             <Grid  direction='column' container item xs={8}>
             <Grid mb={2} item flex={1}>
                 <JobDisplay hasButton={false} />             
             </Grid>
             <Grid item flex={3} sx={{   }}>
-            <Card variant='outlined' sx={{ my: 1,  borderRadius: 2, height: '100%', flexGrow: 1, flex: 1}}>
+           {/* Traditional Markets Display */}
+            {/*<Card variant='outlined' sx={{ my: 1,  borderRadius: 2, height: '100%', flexGrow: 1, flex: 1}}>
                 <Grid container direction='column' justifyContent='space-between' sx={{  height: '100%'}}>
                     <Grid item xs={9} flexGrow={1} flex={1} >
                         <CardContent sx={{ height: '100%',  }}>
@@ -45,7 +51,6 @@ const Contract : React.FunctionComponent<any> = () => {
                         </CardContent>
                     </Grid>
                 
-                    {/* Chat box is here for tradition and different for bounty and other markets.. */}
                     <Grid item xs={3} sx={{ borderTop: '1px solid #eee',  }}>
                         <CardContent className={classes.inputContainer}>
                           <IconButton>
@@ -57,7 +62,42 @@ const Contract : React.FunctionComponent<any> = () => {
                         </CardContent>
                     </Grid>
                 </Grid>
+            </Card>*/}
+
+            {/* Bounty Markets Display */}
+            {/* Submission Bar */}
+            <Card variant='outlined'>
+            <Box sx={{ p: 3}}>
+                            <Paper elevation={0} className={classes.fileContainer} sx={{display: 'flex', flexDirection: 'column', width: '100%', flex: 1}}>
+                            <FileUploader
+        multiple={false}
+        handleChange={() => {}}
+        name="file"
+        types={fileTypes}
+      />
+
+                            <Typography pt={2} variant='caption'>
+                                This bounty is still available.  You can prepare and submit work at anytime.
+                            </Typography>
+                            </Paper>
+                        </Box>
             </Card>
+
+            {/* Submissions */}
+            <Box my={1}>
+                <Typography py={1} fontWeight='bold'>
+                    Submissions
+                </Typography>
+                {
+                    new Array(5).fill(1).map(element => {
+                        return <BountySubmission />
+                    })
+                }
+
+                <Box className={classes.containerCentered}>
+                    <Pagination count={10} variant="outlined" shape="rounded" />
+                </Box>
+            </Box>
             </Grid>
             </Grid>
 
