@@ -5,9 +5,9 @@ import { createTheme } from '@mui/material/styles';
     palette: {
       divider: '#eee',
       secondary: {
-        light: '#4caf50',
-        main: '#43A047',
-        dark: '#388E3C'
+        light: 'rgb(147, 228, 178)',
+        main: '#42c976',
+        dark: 'rgb(54, 119, 74)'
       },
       primary: {
         main: '#212121',

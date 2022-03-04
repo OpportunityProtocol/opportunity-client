@@ -38,7 +38,10 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-      }
+      },
+      container: {
+        padding: '1% 4%',  width: '100%'
+    },
 }))
 
 export { useStyles }

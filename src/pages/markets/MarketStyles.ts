@@ -8,8 +8,8 @@ const useStyles = makeStyles((theme) => {
       alignItems: 'center',
       flexDirection: 'column',
       overflow: 'auto',
-      backgroundColor: '#fff',
-      padding: '1% 4%'
+      padding: '1% 4%',
+      backgroundColor: '#fbfbfd',
     },
     heading: {
       fontWeight: '500',
@@ -29,7 +29,58 @@ const useStyles = makeStyles((theme) => {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-    }
+    },
+    container: {
+      marginTop: '4%',
+    },
+    selectedCard: {
+      border: '5px solid #A5D6A7',
+    },
+    cardContent: {
+      padding: 15,
+    },
+    marketTypeCard: {
+      width: 220,
+      height: 180,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    textField: {
+      width: 400,
+      border: '1px solid #eee',
+      backgroundColor: '#fafafa',
+    },
+    sectionHeader: {
+      fontSize: 20,
+      fontWeight: 'medium',
+    },
+    sectionSubheader: {
+      fontSize: 13,
+      fontWeight: 'regular',
+      color: '#212121',
+    },
+    subSectionHeader: {
+      fontWeight: '600',
+      color: 'rgba(33, 33, 33, .85)',
+      fontSize: 15,
+    },
+    columnCenter: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    searchContainer: {
+      width: 600,
+      padding: 10,
+      borderRadius: 20,
+      border: '1px solid #eee',
+      elevation: 0,
+      display: 'flex',
+      alignItems: 'center',
+    },
   }
 })
 

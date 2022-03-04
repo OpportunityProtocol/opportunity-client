@@ -6,9 +6,13 @@ import {
   Paper,
   Box,
   Drawer,
+  InputBase,
   Grid,
   CssBaseline,
   FormLabel,
+  List,
+  Button,
+  ListItem,
   FormControl,
   RadioGroup,
   IconButton,
@@ -19,9 +23,15 @@ import {
   Toolbar,
   Typography,
   Divider,
+  ListItemText,
+  ListItemAvatar,
+  ListItemButton,
 } from '@mui/material'
 
+import { Search } from '@mui/icons-material'
+
 import router, { useRouter } from 'next/router'
+import Link from 'next/link'
 
 import Blockies from 'react-blockies'
 import useStyles from './OpportunityStyles'
@@ -85,11 +95,15 @@ const CONTINENTS = [
 
 const MARKET_TYPES = [
   {
-    label: 'Opportunity Markets',
+    label: 'Traditional',
     type: 'default'
   },
   {
-    label: 'Custom',
+    label: 'Ridesharing',
+    type: 'default'
+  },
+  {
+    label: 'Delivery',
     type: 'custom'
   }
 ]
@@ -97,23 +111,30 @@ const MARKET_TYPES = [
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { ArrowDropDown } from '@mui/icons-material'
 
-export default function Opportunity({ children }) {
-  const classes = useStyles()
+interface IOpportunityProps {
+  children: any
+}
+
+const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) => {
   const router = useRouter()
+  const classes = useStyles()
 
   const isDrawerShowing = router.pathname.includes('create') ? false : true
+
+  const renderDrawerContent = () => {
+    return <ContractChatsContent classes={classes} />
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar
-        variant="outlined"
+        elevation={0}
         position="fixed"
-        sx={{
-          bgcolor: 'rgb(245, 245, 245)',
-          borderBottom: '0.5px solid #ddd',
-          height: 65,
-          zIndex: (theme) => theme.zIndex.drawer + 1
+        sx={{ 
+          bgcolor: '#fff', 
+          height: 65, 
+          zIndex: (theme) => theme.zIndex.drawer + 1 
         }}
       >
         <Toolbar className={classes.toolbar}
@@ -124,33 +145,41 @@ export default function Opportunity({ children }) {
             xs={12}
             direction="row"
             flexDirection="row"
-
             alignItems="center"
             justifyContent="space-between"
           >
-            <Grid item xs={4}>
-              <Typography fontWeight='bold' color="black">
+            <Grid item xs={4} style={{ display: 'flex' }}>
+              <img src='/assets/logo.svg' style={{ margin: '0px 5px', width: 35, height: 35}} />
+              <Typography fontWeight='bold' fontSize={18} color="#212121">
                 Opportunity
               </Typography>
             </Grid>
 
             <Grid item xs={4}>
               <div className={classes.flexRow}>
-                <Typography mx={2} variant="button" color="secondary" fontWeight='bold'>
+                <Link href='/markets'>
+                <Typography component={Button} mx={2} variant="button" color="secondary" fontWeight='bold'>
                   Markets
                 </Typography>
+                </Link>
 
-                <Typography mx={2} variant="button" color="black" fontWeight='medium'>
+                <Link href='/jobs/myjobs'>
+                <Typography component={Button} mx={2} variant="button" color="#212121" fontWeight='bold'>
                   My Jobs
                 </Typography>
+                </Link>
 
-                <Typography mx={2} variant="button" color="black" fontWeight='medium'>
+              <Link href='/jobs/mycontracts'>
+                <Typography component={Button} mx={2} variant="button" color="#212121" fontWeight='bold'>
                   My Contracts
                 </Typography>
+                </Link>
 
-                <Typography mx={2} variant="button" color="black" fontWeight='medium'>
+                <Link href='/contract'>
+                <Typography component={Button} mx={2} variant="button" color="#212121" fontWeight='bold'>
                   Messenger
                 </Typography>
+                </Link>
               </div>
             </Grid>
 
@@ -205,6 +234,7 @@ export default function Opportunity({ children }) {
             </Grid>
           </Grid>
         </Toolbar>
+        <Divider />
         <MarketToolbar />
       </AppBar>
       {
@@ -231,8 +261,82 @@ export default function Opportunity({ children }) {
           >
             <Toolbar />
             <Toolbar />
+            <Paper elevation={0} 
+              component="form"
+              sx={{ width: '100%', p: 1, border: '1px solid #eee', borderRadius: 2}}>
+            <InputBase
+      startAdornment={<Search fontSize='small' sx={{ color: '#aaa' }} />}
+        sx={{ ml: 1, flex: 2, fontSize: 14 }}
+        placeholder="Search jobs"
+        inputProps={{ 'aria-label': 'search google maps' }}
+      />
+    </Paper>
 
-            <Box sx={{ width: '100%', p: 2 }} >
+
+            {
+              renderDrawerContent()
+            }
+            <Divider sx={{ width: '100%' }} />
+            <Box sx={{ width: '100%' }} p={2}>
+              <FormControl sx={{ my: 1 }}>
+                <FormLabel
+                  id="region-form-label"
+                  sx={{ py: 1, fontSize: 13, fontWeight: 'bold' }}
+                >
+                  Frequent Markets
+                </FormLabel>
+                <Typography variant="caption" color="#aaa">
+                  You have not participated in any markets on Opportunity
+                </Typography>
+              </FormControl>
+
+            </Box>
+
+
+            <Box sx={{ width: '100%' }} p={2}>
+              <FormControl sx={{ my: 1 }}>
+                <FormLabel
+                  id="region-form-label"
+                  sx={{ py: 1, fontSize: 13, fontWeight: 'bold' }}
+                >
+                  Default Opportunity Markets
+                </FormLabel>
+                {MARKETS.map((market) => {
+                  return (
+                    <Box
+                      component={Typography}
+                      sx={{ display: 'block', mt: 1, cursor: 'pointer' }}
+                      variant="button"
+                      color="rgba(33, 33, 33, .85)"
+                    >
+                      {market.market}
+                    </Box>
+                  )
+                })}
+              </FormControl>
+            </Box>
+          </Drawer>
+          :
+          null
+      }
+
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          paddingTop: '120px',
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  )
+}
+
+
+const MarketDrawerContent = ({ classes }) => (
+    <Box sx={{ width: '100%', p: 2 }} >
+              
               <div className={classes.row}>
                 <FilterListIcon fontSize='small' />
                 <Typography px={1} fontWeight='bold' fontSize={13}>
@@ -317,59 +421,51 @@ export default function Opportunity({ children }) {
                 </RadioGroup>
               </FormControl>
             </Box>
-            <Divider sx={{ width: '100%' }} />
-            <Box sx={{ width: '100%' }} p={2}>
-              <FormControl sx={{ my: 1 }}>
-                <FormLabel
-                  id="region-form-label"
-                  sx={{ py: 1, fontSize: 13, fontWeight: 'bold' }}
-                >
-                  Frequent Markets
-                </FormLabel>
-                <Typography variant="caption" color="#aaa">
-                  You have not participated in any markets on Opportunity
-                </Typography>
-              </FormControl>
-
-            </Box>
-
-
-            <Box sx={{ width: '100%' }} p={2}>
-              <FormControl sx={{ my: 1 }}>
-                <FormLabel
-                  id="region-form-label"
-                  sx={{ py: 1, fontSize: 13, fontWeight: 'bold' }}
-                >
-                  Default Opportunity Markets
-                </FormLabel>
-                {MARKETS.map((market) => {
-                  return (
-                    <Box
-                      component={Typography}
-                      sx={{ display: 'block', mt: 1, cursor: 'pointer' }}
-                      variant="button"
-                      color="rgba(33, 33, 33, .85)"
-                    >
-                      {market.market}
-                    </Box>
-                  )
-                })}
-              </FormControl>
-            </Box>
-          </Drawer>
-          :
-          null
-      }
-
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          paddingTop: '120px',
-        }}
-      >
-        {children}
-      </Box>
-    </Box>
   )
-}
+
+const ContractChatsContent = ({ classes, currentContracts }) =>  (
+  <Box sx={{ width: '100%', height: 500, overflow: 'scroll', }} >
+      <List>
+        {
+          new Array(100).fill(100).map(chat => {
+            return (
+              <ListItemButton component={ListItem} divider>
+              <ListItemAvatar>
+              <Blockies
+                      seed={Math.random().toString()}
+                      size={10}
+                      scale={3}
+                      className={classes.blockie}
+                    />
+    
+              </ListItemAvatar>
+              <ListItemText primary='Elijah Hampton' secondary={
+                <React.Fragment>
+                  <Typography noWrap sx={{ 
+                    fontSize: 12,
+                    fontWeight: 'medium',
+                    color: '#212121'}}>
+                      UI/UX designer needed for web development
+                  </Typography>
+                  <Typography sx={{
+                     fontSize: 12,
+                     fontWeight: 'medium',
+                     color: '#aaa'
+                  }}>
+                  'Last thing said' 
+                  </Typography>
+                </React.Fragment>
+              }
+              primaryTypographyProps={{
+                fontSize: 14,
+                fontWeight: 'bold',
+              }} />
+            </ListItemButton>
+            )
+          })
+        }
+      </List>
+  </Box>
+)
+
+export default Opportunity

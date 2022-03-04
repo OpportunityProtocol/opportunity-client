@@ -32,7 +32,7 @@ import VideoLabelIcon from '@mui/icons-material/VideoLabel';
 import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
 import { StepIconProps } from '@mui/material/StepIcon';
 
-import { useStyles } from './ContractStyles'
+import { useStyles } from './MarketStyles'
 import { alpha } from '@mui/material';
 
 import Link from 'next/link'
@@ -150,13 +150,13 @@ function CustomizedSteppers() {
     },
   }));
 
-const Create: React.FunctionComponent = () => {
+const CreateMarket: React.FunctionComponent = () => {
     const classes = useStyles()
     const [step, setStep] = useState(0)
     const router = useRouter()
 
     const onCreateRelationship = () => {
-      router.push('/jobs')
+      router.push('/markets')
     }
     
     return (
@@ -164,7 +164,7 @@ const Create: React.FunctionComponent = () => {
             <CustomizedSteppers />
             <Box my={2} className={classes.columnCenter}>
             <Typography fontWeight='bold' fontSize={25} py={1}>
-                Post a Contract
+                Create a Market
             </Typography>
             <Card variant='outlined' sx={{ p: 2, backgroundColor: '#fafafa', width: '100%' }}>
                 <Typography fontSize={14} py={1}>
@@ -212,7 +212,7 @@ const Create: React.FunctionComponent = () => {
     )
 }
 
-const CreateBasicInformation : React.FunctionComponent = () => {
+const CreateBasicInformation: React.FunctionComponent = () => {
     const classes = useStyles()
     const [contractDuration, setContractDuration] = useState('Quick Job')
 
@@ -221,7 +221,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
             <Box sx={{ width: '100%'}}>
                 <Box py={1}>
                 <Typography className={classes.sectionHeader}>
-                Contract Duration
+                Market Type
             </Typography>
             <Typography variant='body2' className={classes.sectionSubheader}>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt ipsum ut maximus malesuada.
@@ -233,11 +233,11 @@ const CreateBasicInformation : React.FunctionComponent = () => {
                     <ClickableCard variant='outlined' className={clsx(classes.marketTypeCard, contractDuration === 'Quick Job' ? classes.selectedCard : null)}>
                         <BoltIcon />
                         <Box py={2} className={classes.columnCenter}>
-                        <Typography>
-                            Quick Job
+                        <Typography fontWeight='medium'>
+                            Traditional
                         </Typography>
-                        <Typography variant='body2'>
-                            Time Range: 30min - 1 Hour
+                        <Typography variant='body2' textAlign='center'>
+                            Ex. Web Development, Accounting, Writing and Translation
                         </Typography>
                         </Box>
                     </ClickableCard>
@@ -248,28 +248,15 @@ const CreateBasicInformation : React.FunctionComponent = () => {
                         <DateRangeIcon />
                         <Box py={2} className={classes.columnCenter}>
                         <Typography>
-                            Short Term Work
+                            Bounties
                         </Typography>
                         <Typography variant='body2'>
-                            A few days - 1 Month
+                            Ex. Gitcoin Bounties
                         </Typography>
                         </Box>
                     </ClickableCard>
                 </Grid>
 
-                <Grid item>
-                <ClickableCard variant='outlined' className={clsx(classes.marketTypeCard, contractDuration === 'Long Term' ? classes.selectedCard : null)}>
-                    <HourglassTopIcon />
-                    <Box py={2} className={classes.columnCenter}>
-                    <Typography>
-                        Long Term Work
-                    </Typography>
-                    <Typography variant='body2'>
-                            A Month or Longer
-                        </Typography>
-                        </Box>
-                    </ClickableCard>
-                </Grid>
             </Grid>
             </Box>
 
@@ -278,7 +265,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
             <Box>
                 <Box pb={1}>
                     <Typography className={classes.sectionHeader}>
-                        Basic Information
+                        Market Information
                     </Typography>
                     <Typography variant='body2' className={classes.sectionSubheader}>
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt ipsum ut maximus malesuada.
@@ -322,46 +309,22 @@ const CreateBasicInformation : React.FunctionComponent = () => {
 <Box>
     <Box pb={1}>
         <Typography className={classes.sectionHeader}>
-            Definition of Done
+            Choose a relationship manager
         </Typography>
         <Typography variant='body2' className={classes.sectionSubheader}>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt ipsum ut maximus malesuada.
         </Typography>
     </Box>
 
-    <BootstrapInput size='small' multiline rows={6} />
+    <BootstrapInput placeholder='Type the address of your manager contract' size='small' />
 </Box>
 
-<Divider sx={{ my: 5}} />
-
-            <Box>
-                <Box pb={1}>
-                    <Typography className={classes.sectionHeader}>
-                        Contract Payout Type
-                    </Typography>
-                    <Typography variant='body2' className={classes.sectionSubheader}>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt ipsum ut maximus malesuada.
-                    </Typography>
-                </Box>
-
-                <FormGroup>
-                    <FormControlLabel 
-                    control={<Checkbox defaultChecked />} 
-                    label="Do you want to payout your contract in milestones?"
-                    componentsProps={{
-                        typography: {
-                            fontSize: 15
-                        }
-                    }}
-                     />
-                </FormGroup>
-            </Box>
 
         </Box>
     )
 }
 
-const CreateValueAndFees : React.FunctionComponent = () => {
+const CreateValueAndFees: React.FunctionComponent = () => {
     const classes = useStyles()
 
     return (
@@ -384,4 +347,4 @@ const CreateValueAndFees : React.FunctionComponent = () => {
     )
 }
 
-export default Create
+export default CreateMarket

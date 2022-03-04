@@ -8,14 +8,17 @@ import {
   Icon,
   Card,
   Chip,
+  Divider,
   CardContent,
 } from '@mui/material'
 import ClickableCard from '../../../../common/components/ClickableCard/ClickableCard'
+import { useRouter } from 'next/router'
 
 import router from 'next/router'
 
-const MarketDisplay = () => {
+const MarketDisplay: React.FunctionComponent = () => {
   const classes = useStyles()
+  const router = useRouter()
 
   return (
       <ClickableCard variant='outlined' onClick={() => router.push('/jobs')}>
@@ -23,7 +26,7 @@ const MarketDisplay = () => {
           <Grid container direction='row' alignItems='center' justifyContent='space-between'>
             <Grid item>
               <Typography className={classes.marketTitle}>
-                Market Name
+                Ride Sharing (Los Angeles, CA)
               </Typography>
             </Grid>
 
@@ -45,6 +48,15 @@ const MarketDisplay = () => {
           <Typography py={1} style={{ fontSize: 15 }} color="text.secondary">
             Lizards are a widespread group of squamate reptiles, with over 6,000
             species, ranging across all continents except Antarctica
+          </Typography>
+        </CardContent>
+        <Divider />
+        <CardContent>
+          <Typography variant='caption'>
+                This market has an average trust score of: {" "}
+          </Typography>
+          <Typography color='rgb(54, 119, 74)' variant='caption' component='span'>
+          .78 (0 - 1)
           </Typography>
         </CardContent>
       </ClickableCard>

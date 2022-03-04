@@ -40,7 +40,7 @@ const useStyles = makeStyles(theme => ({
     row: {
         display: 'flex',
         alignItems: 'center'
-    }
+    },
 }))
 
 export { useStyles }

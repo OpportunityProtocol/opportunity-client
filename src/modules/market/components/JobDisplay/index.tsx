@@ -1,54 +1,49 @@
 /**
- * JobDisplay
- */
+* JobDisplay
+*/
 
- import React, { useState, useRef, useEffect } from "react";
- import { useStyles } from './JobDisplayStyles'
+import React, { useState, useRef, useEffect } from "react";
+import { useStyles } from './JobDisplayStyles'
  
- import {
-   Divider,
-   Paper,
-   Button,
-   Box,
-   Avatar,
-   Chip,
-   IconButton,
-   Card,
-   TextField,
-   CardContent,
-   CardActions,
-   Typography,
-   Grid,
-   CardActionArea
- } from '@mui/material'
- import Blockies from 'react-blockies'
- import CheckIcon from '@mui/icons-material/Check';
+import {
+  Divider,
+  Paper,
+  Button,
+  Box,
+  Avatar,
+  Chip,
+  IconButton,
+  Card,
+  TextField,
+  CardContent,
+  CardActions,
+  Typography,
+  Grid,
+  CardActionArea
+} from '@mui/material'
+ 
+import Blockies from 'react-blockies'
+import CheckIcon from '@mui/icons-material/Check';
 import { FavoriteBorder } from "@mui/icons-material";
+import { useRouter } from "next/router";
 
- const TAGS = ['Python', 'Web Development', 'Flash']
+interface IJobDisplayProps {
+  avatar?: string,
+  hasButton: boolean,
+  hasSaveIcon: boolean
+}
+
+const TAGS = ['Python', 'Web Development', 'Flash']
  
- function JobDisplay({ avatar }) {
+const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ avatar, hasButton=true, hasSaveIcon=true }) => {
    const classes = useStyles()
-   const [relationshipMetadata, setRelationshipMetadata] = useState({
-     relationshipTitle: 'Fake Title',
-     relationshipTags: ['python'],
-     relationshipDescription: 'Fake Description',
-     relationshipStatementOfWork: 'Fake SOW',
-     relationshipDefinitionsOfDone: ['Do it']
-   })
+   const router = useRouter()
  
    return (
      <Card key={Math.random()} elevation={0} sx={{ borderRadius: 2 }}>
      <CardActionArea sx={{bgcolor: 'rgb(245, 245, 245)', p: 1 }}>
         <Grid container direction='row' alignItems='center' justifyContent='space-between'>
-          <Grid item>
-          <div className={classes.row}>
-            <CheckIcon fontSize='small' color='secondary' />
-            <Typography color='secondary' variant='caption' sx={{ px: 1 }}>
-                Verified on Proof of Humanity
-            </Typography>
-        </div>
-          </Grid>
+          <Grid item />
 
           <Grid item>
           <Blockies
@@ -83,7 +78,7 @@ import { FavoriteBorder } from "@mui/icons-material";
 
            </Grid>
 
-         <Typography paragraph color='#aaa' fontSize={13} fontWeight='medium'>
+         <Typography paragraph color='#808080' fontSize={15} fontWeight='medium'>
              Lizards are a widespread group of squamate reptiles, with over 6,000
              species, ranging across all continents except Antarctica roup of squamate reptiles, with over 6,000 Lizards are a widespread
          </Typography>
@@ -103,10 +98,14 @@ import { FavoriteBorder } from "@mui/icons-material";
          </Box>
        </CardContent>
        <CardActions sx={{display: 'flex', alignItems: 'center'}}>
-             <Button color='secondary' variant='text' disableElevation sx={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: 12, p: 1}}>
+             <Button onClick={() => router.push('/contract')} color='secondary' variant='text' disableElevation sx={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: 12, p: 1}}>
                  View Details
              </Button>
          </CardActions>
+         {/*
+            TODO: If claimed the display will show general contract 
+            information here and button will change to open contract details
+         */}
      </Card>
    )          
  }
