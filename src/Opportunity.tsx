@@ -99,12 +99,8 @@ const MARKET_TYPES = [
     type: 'default'
   },
   {
-    label: 'Ridesharing',
+    label: 'Bounty',
     type: 'default'
-  },
-  {
-    label: 'Delivery',
-    type: 'custom'
   }
 ]
 
