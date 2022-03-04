@@ -42,6 +42,9 @@ const useStyles = makeStyles((theme) =>
       width: 60, 
       overflowX: 'hidden', 
       textOverflow: 'ellipsis'
+    },
+    marketContentContainer: {
+      width: '100%', display: 'flex', flexDirection: 'column'
     }
   }),
 );

@@ -107,9 +107,7 @@ const MARKET_TYPES = [
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { ArrowDropDown } from '@mui/icons-material'
 
-interface IOpportunityProps {
-  children: any
-}
+import { IOpportunityProps, IContractChatsContentProps, IMarketDrawerContentProps  } from './OpportunityInterfaces'
 
 const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) => {
   const router = useRouter()
@@ -118,7 +116,14 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
   const isDrawerShowing = router.pathname.includes('create') ? false : true
 
   const renderDrawerContent = () => {
-    return <ContractChatsContent classes={classes} />
+    switch(router.pathname) {
+      case '/contract':
+        return <ContractChatsContent classes={classes} currentContracts={[]} />
+      case '/market':
+      default:
+        return <MarketDrawerContent classes={classes} />
+    }
+    
   }
 
   return (
@@ -329,9 +334,8 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
   )
 }
 
-
-const MarketDrawerContent = ({ classes }) => (
-    <Box sx={{ width: '100%', p: 2 }} >
+const MarketDrawerContent = ({ classes }: IMarketDrawerContentProps) => (
+    <Box p={2} className={classes.marketContentContainer}>
               
               <div className={classes.row}>
                 <FilterListIcon fontSize='small' />
@@ -419,7 +423,7 @@ const MarketDrawerContent = ({ classes }) => (
             </Box>
   )
 
-const ContractChatsContent = ({ classes, currentContracts }) =>  (
+const ContractChatsContent = ({ classes, currentContracts }: IContractChatsContentProps ) =>  (
   <Box sx={{ width: '100%', height: 500, overflow: 'scroll', }} >
       <List>
         {
