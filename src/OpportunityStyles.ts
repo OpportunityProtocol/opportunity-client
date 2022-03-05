@@ -42,6 +42,14 @@ const useStyles = makeStyles((theme) =>
       width: 60, 
       overflowX: 'hidden', 
       textOverflow: 'ellipsis'
+    },
+    clickableBrand: {
+      cursor: 'pointer'
+    },
+    defaultMarketLink: {
+      '&:hover': {
+        color: '#42c976'
+      }
     }
   }),
 );
