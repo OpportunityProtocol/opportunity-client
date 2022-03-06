@@ -43,6 +43,9 @@ const useStyles = makeStyles((theme) =>
       overflowX: 'hidden', 
       textOverflow: 'ellipsis'
     },
+    marketContentContainer: {
+      width: '100%', display: 'flex', flexDirection: 'column'
+    },
     clickableBrand: {
       cursor: 'pointer'
     },
