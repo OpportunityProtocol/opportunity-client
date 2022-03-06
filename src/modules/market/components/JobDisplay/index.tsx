@@ -26,6 +26,7 @@ import Blockies from 'react-blockies'
 import CheckIcon from '@mui/icons-material/Check';
 import { FavoriteBorder } from "@mui/icons-material";
 import { useRouter } from "next/router";
+import Link from 'next/Link'
 
 interface IJobDisplayProps {
   avatar?: string,
@@ -62,8 +63,13 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ avatar, hasButt
            <Grid item>
            <Typography component='div' pb={3}>
          <Box fontWeight='bold' fontSize={18}>
-             Customer Service Representative
+             Customer Service Representative 
          </Box>
+         <Link href=''>
+            <Typography className={classes.link} fontSize={12} component='span'  variant='button' color='secondary'> 
+              /ipfs/QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4 
+            </Typography>
+          </Link>
          <Typography color='#aaa' fontSize={12} fontWeight='regular'>
              Fixed Rate Payment - Budget: $23.39 - Short Term
          </Typography>
