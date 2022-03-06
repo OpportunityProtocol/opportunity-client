@@ -68,6 +68,9 @@ const useStyles = makeStyles((theme) =>
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    link: {
+        cursor: 'pointer'
     }
   }),
 );

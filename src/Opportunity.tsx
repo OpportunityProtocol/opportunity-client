@@ -78,10 +78,6 @@ const MARKETS = [
     market: 'Engineering & Architecture',
     related: ['Architect', 'AutoCAD Drafter'],
   },
-  {
-    market: 'Deploy your own',
-    related: ['Ride Sharing', 'Food Delivery'],
-  },
 ]
 
 const CONTINENTS = [
@@ -107,9 +103,7 @@ const MARKET_TYPES = [
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { ArrowDropDown } from '@mui/icons-material'
 
-interface IOpportunityProps {
-  children: any
-}
+import { IOpportunityProps, IContractChatsContentProps, IMarketDrawerContentProps  } from './OpportunityInterfaces'
 
 const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) => {
   const router = useRouter()
@@ -118,7 +112,14 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
   const isDrawerShowing = router.pathname.includes('create') ? false : true
 
   const renderDrawerContent = () => {
-    return <ContractChatsContent classes={classes} />
+    switch(router.pathname) {
+      case '/contract':
+        return <ContractChatsContent classes={classes} currentContracts={[]} />
+      case '/market':
+      default:
+        return <MarketDrawerContent classes={classes} />
+    }
+    
   }
 
   return (
@@ -145,10 +146,15 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
             justifyContent="space-between"
           >
             <Grid item xs={4} style={{ display: 'flex' }}>
-              <img src='/assets/logo.svg' style={{ margin: '0px 5px', width: 35, height: 35}} />
-              <Typography fontWeight='bold' fontSize={18} color="#212121">
+            <Link href='/markets'>
+              <img className={classes.clickableBrand} src='/assets/logo.svg' style={{ margin: '0px 5px', width: 35, height: 35}} />
+              </Link>
+
+              <Link href='/markets'>
+              <Typography className={classes.clickableBrand} fontWeight='bold' fontSize={18} color="#212121">
                 Opportunity
               </Typography>
+              </Link>
             </Grid>
 
             <Grid item xs={4}>
@@ -299,7 +305,9 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                 </FormLabel>
                 {MARKETS.map((market) => {
                   return (
+                    <Link href='/jobs'>
                     <Box
+                    className={classes.defaultMarketLink}
                       component={Typography}
                       sx={{ display: 'block', mt: 1, cursor: 'pointer' }}
                       variant="button"
@@ -307,6 +315,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                     >
                       {market.market}
                     </Box>
+                    </Link>
                   )
                 })}
               </FormControl>
@@ -329,9 +338,8 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
   )
 }
 
-
-const MarketDrawerContent = ({ classes }) => (
-    <Box sx={{ width: '100%', p: 2 }} >
+const MarketDrawerContent = ({ classes }: IMarketDrawerContentProps) => (
+    <Box p={2} className={classes.marketContentContainer}>
               
               <div className={classes.row}>
                 <FilterListIcon fontSize='small' />
@@ -419,12 +427,13 @@ const MarketDrawerContent = ({ classes }) => (
             </Box>
   )
 
-const ContractChatsContent = ({ classes, currentContracts }) =>  (
+const ContractChatsContent = ({ classes, currentContracts }: IContractChatsContentProps ) =>  (
   <Box sx={{ width: '100%', height: 500, overflow: 'scroll', }} >
       <List>
         {
           new Array(100).fill(100).map(chat => {
             return (
+              <Link href='/contract'>
               <ListItemButton component={ListItem} divider>
               <ListItemAvatar>
               <Blockies
@@ -457,6 +466,7 @@ const ContractChatsContent = ({ classes, currentContracts }) =>  (
                 fontWeight: 'bold',
               }} />
             </ListItemButton>
+            </Link>
             )
           })
         }

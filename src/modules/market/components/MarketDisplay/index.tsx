@@ -14,19 +14,17 @@ import {
 import ClickableCard from '../../../../common/components/ClickableCard/ClickableCard'
 import { useRouter } from 'next/router'
 
-import router from 'next/router'
-
 const MarketDisplay: React.FunctionComponent = () => {
   const classes = useStyles()
   const router = useRouter()
 
   return (
       <ClickableCard variant='outlined' onClick={() => router.push('/jobs')}>
-        <CardContent>
+        <CardContent className={classes.primaryContentContainer}>
           <Grid container direction='row' alignItems='center' justifyContent='space-between'>
             <Grid item>
               <Typography className={classes.marketTitle}>
-                Ride Sharing (Los Angeles, CA)
+                Gitcoin Bounties
               </Typography>
             </Grid>
 
