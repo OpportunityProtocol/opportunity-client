@@ -5,6 +5,11 @@ const useStyles = makeStyles((theme) => {
     marketTitle: {
       fontWeight: 'bold',
     },
+    primaryContentContainer: {
+      '&:hover': {
+        color: '#42c976'
+      }
+    }
   }
 })
 

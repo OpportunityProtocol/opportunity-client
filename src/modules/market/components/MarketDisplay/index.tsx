@@ -22,11 +22,11 @@ const MarketDisplay: React.FunctionComponent = () => {
 
   return (
       <ClickableCard variant='outlined' onClick={() => router.push('/jobs')}>
-        <CardContent>
+        <CardContent className={classes.primaryContentContainer}>
           <Grid container direction='row' alignItems='center' justifyContent='space-between'>
             <Grid item>
               <Typography className={classes.marketTitle}>
-                Ride Sharing (Los Angeles, CA)
+                Gitcoin Bounties
               </Typography>
             </Grid>
 
