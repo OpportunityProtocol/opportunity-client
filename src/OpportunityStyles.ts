@@ -45,6 +45,14 @@ const useStyles = makeStyles((theme) =>
     },
     marketContentContainer: {
       width: '100%', display: 'flex', flexDirection: 'column'
+    },
+    clickableBrand: {
+      cursor: 'pointer'
+    },
+    defaultMarketLink: {
+      '&:hover': {
+        color: '#42c976'
+      }
     }
   }),
 );

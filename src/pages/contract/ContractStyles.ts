@@ -58,6 +58,9 @@ const useStyles = makeStyles((theme) =>
     },
     inputBase: {
         width: '100%', padding: 1
+    },
+    link: {
+        cursor: 'pointer'
     }
   }),
 );

@@ -98,7 +98,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ avatar, hasButt
          </Box>
        </CardContent>
        <CardActions sx={{display: 'flex', alignItems: 'center'}}>
-             <Button onClick={() => router.push('/contract')} color='secondary' variant='text' disableElevation sx={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: 12, p: 1}}>
+             <Button onClick={() => router.push('/contract/view')} color='secondary' variant='text' disableElevation sx={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: 12, p: 1}}>
                  View Details
              </Button>
          </CardActions>
