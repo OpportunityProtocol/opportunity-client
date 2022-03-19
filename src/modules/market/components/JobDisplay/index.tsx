@@ -84,7 +84,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ avatar, hasButt
 
            </Grid>
 
-         <Typography paragraph color='#808080' fontSize={15} fontWeight='medium'>
+         <Typography paragraph color='#808080' fontSize={15} fontWeight='semibold'>
              Lizards are a widespread group of squamate reptiles, with over 6,000
              species, ranging across all continents except Antarctica roup of squamate reptiles, with over 6,000 Lizards are a widespread
          </Typography>

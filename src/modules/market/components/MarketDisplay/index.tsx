@@ -14,7 +14,7 @@ import {
 import ClickableCard from '../../../../common/components/ClickableCard/ClickableCard'
 import { useRouter } from 'next/router'
 
-const MarketDisplay: React.FunctionComponent = () => {
+const MarketDisplay: React.FunctionComponent = ({ market }) => {
   const classes = useStyles()
   const router = useRouter()
 
@@ -24,23 +24,11 @@ const MarketDisplay: React.FunctionComponent = () => {
           <Grid container direction='row' alignItems='center' justifyContent='space-between'>
             <Grid item>
               <Typography className={classes.marketTitle}>
-                Gitcoin Bounties
+                {market}
               </Typography>
             </Grid>
 
-            <Grid item>
-              <Chip 
-              size='small'
-              variant='outlined' 
-              icon={
-                <Icon 
-                fontSize='small' 
-                color='secondary'>
-                  location_on
-                </Icon>} 
-                label="Worldwide" 
-              />
-            </Grid>
+            <Grid item />
           </Grid>
 
           <Typography py={1} style={{ fontSize: 15 }} color="text.secondary">
@@ -48,7 +36,7 @@ const MarketDisplay: React.FunctionComponent = () => {
             species, ranging across all continents except Antarctica
           </Typography>
         </CardContent>
-        <Divider />
+       {/*} <Divider />
         <CardContent>
           <Typography variant='caption'>
                 This market has an average trust score of: {" "}
@@ -56,7 +44,7 @@ const MarketDisplay: React.FunctionComponent = () => {
           <Typography color='rgb(54, 119, 74)' variant='caption' component='span'>
           .78 (0 - 1)
           </Typography>
-        </CardContent>
+              </CardContent>*/}
       </ClickableCard>
   )
 }

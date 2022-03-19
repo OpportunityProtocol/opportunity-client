@@ -152,7 +152,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
 
               <Link href='/markets'>
               <Typography className={classes.clickableBrand} fontWeight='bold' fontSize={18} color="#212121">
-                Opportunity
+                GigEarth
               </Typography>
               </Link>
             </Grid>
@@ -199,9 +199,6 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                   seed="Max"
                   size={10}
                   scale={3}
-                  color="#212121"
-                  bgColor="#aaa"
-                  spotColor="#eee"
                   className={classes.blockie}
                 />
 
@@ -301,7 +298,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                   id="region-form-label"
                   sx={{ py: 1, fontSize: 13, fontWeight: 'bold' }}
                 >
-                  Default Opportunity Markets
+                  Default Markets
                 </FormLabel>
                 {MARKETS.map((market) => {
                   return (
@@ -379,45 +376,6 @@ const MarketDrawerContent = ({ classes }: IMarketDrawerContentProps) => (
                             />
                           }
                           label={marketType.label}
-                        />
-                      )
-                    })
-                  }
-                </RadioGroup>
-              </FormControl>
-
-              <FormControl sx={{ my: 1 }}>
-                <FormLabel
-                  id="region-form-label"
-                  sx={{ fontSize: 13, fontWeight: 'bold' }}
-                >
-                  Region
-                </FormLabel>
-                <RadioGroup
-                  color='secondary'
-                  aria-labelledby="region-form-label"
-                  defaultValue="worldwide"
-                  name="region-radio-button-group"
-                >
-                  {
-                    CONTINENTS.map(continent => {
-                      return (
-                        <FormControlLabel
-                          componentsProps={{
-                            typography: {
-                              fontSize: 12,
-                            },
-                          }}
-                          className={classes.formControlLabel}
-                          value={String(continent).toLowerCase()}
-                          control={
-                            <Radio
-                              color='secondary'
-                              size="small"
-                              className={classes.radio}
-                            />
-                          }
-                          label={continent}
                         />
                       )
                     })

@@ -12,7 +12,6 @@ const useStyles = makeStyles((theme) => {
       backgroundColor: '#fbfbfd',
     },
     heading: {
-      fontWeight: '500',
       color: 'rgba(33, 33, 33, .85)',
     },
     container: {

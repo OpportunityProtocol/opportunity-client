@@ -11,7 +11,7 @@ const Home: NextPage = () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Opportunity</title>
+        <title>GigEarth</title>
         <meta name="description" content="Permissionless labor markets" />
         <link rel="icon" href="/favicon.ico" />
         <link

@@ -16,7 +16,13 @@ import { Search } from '@mui/icons-material'
 import MarketDisplay from '../../modules/market/components/MarketDisplay'
 import MarketToolbar from '../../modules/market/components/MarketToolbar'
 
-const dummyMarkets = new Array(25).fill(1)
+const dummyMarkets = new Array()
+dummyMarkets.push('Writing and Translation')
+dummyMarkets.push('Development & IT')
+dummyMarkets.push('Accounting and Finance')
+dummyMarkets.push('Design and Creative')
+dummyMarkets.push('Engineering and Architecture')
+dummyMarkets.push('Sales and Marketing')
 
 const Markets : React.FunctionComponent = () => {
   const classes = useStyles()
@@ -32,11 +38,11 @@ const Markets : React.FunctionComponent = () => {
         justifyContent="space-between"
         >
           <Grid item>
-            <Typography variant="h5" className={classes.heading}>
+            <Typography fontWeight='bold' fontSize={25} className={classes.heading}>
               Explore markets
             </Typography>
             <Typography variant='caption' color='rgba(33, 33, 33, .85)'>
-              Showing 23 Opportunity markets
+              Showing 23 markets
             </Typography>
           </Grid>
 
@@ -63,14 +69,14 @@ const Markets : React.FunctionComponent = () => {
         spacing={2}>
           {dummyMarkets.map((market) => (
             <Grid item sm={4}>
-              <MarketDisplay />
+              <MarketDisplay market={market} />
             </Grid>
           ))}
         </Grid>
        </Box>
       
       <Box className={classes.containerCentered}>
-        <Pagination count={10} variant="outlined" shape="rounded" />
+        <Pagination count={0} variant="outlined" shape="rounded" />
       </Box>
     </Box>
   )

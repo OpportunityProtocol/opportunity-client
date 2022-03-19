@@ -38,7 +38,7 @@ const Jobs: React.FunctionComponent = () => {
 
     const getRelationships = () => {
         return dummyRelationships.map(relationship => (
-            <Grid item xs={12}>
+            <Grid item xs={4}>
                 <JobDisplay />
              </Grid>
         ))
