@@ -8,6 +8,7 @@ const useStyles = makeStyles((theme) =>
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
+     padding: '1% 1%'
     },
     radio: {
       paddingBottom: '0px !important',

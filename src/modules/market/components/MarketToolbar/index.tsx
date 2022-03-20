@@ -21,19 +21,17 @@ const MarketToolbar: React.FunctionComponent = () => {
   const router = useRouter()
   
     return (
-      <Box component={Paper} elevation={2} 
-      sx={{ 
-        boxShadow:
-        '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)', 
-        width: '100%' 
-      }}>
+      <Box component={Paper}  elevation={0} 
+      classes={{
+        root: classes.container
+      }}
+      >
           <Grid
           flexWrap="nowrap"
           container
           direction="row"
           alignItems="center"
-          justifyContent="space-between"
-          sx={{ backgroundColor: '#fff' }}>
+          justifyContent="space-between">
             <Box
             component={Grid}
             item
@@ -41,9 +39,9 @@ const MarketToolbar: React.FunctionComponent = () => {
             xs={8}
             direction="row"
             alignItems="center"
-            spacing={10}
+            spacing={5}
             >
-              <Grid item ml={5}>
+              <Grid item >
                 <Typography color='#212121' noWrap fontWeight='bold' fontSize={12}>
                   <IoWalletSharp size={10} />  Web3/Wallet Provider:{' '}
                 </Typography>
@@ -63,7 +61,7 @@ const MarketToolbar: React.FunctionComponent = () => {
 
               <Grid item>
                 <Typography color='#212121' fontWeight='bold' fontSize={12}>
-                  <FaEthereum size={10} /> ETH Balance:{' '}
+                  <FaEthereum size={10} /> UST Balance:{' '}
                 </Typography>
                 <Typography color='#212121' fontWeight="light" fontSize={12}>
                   $23.22
@@ -85,16 +83,6 @@ const MarketToolbar: React.FunctionComponent = () => {
               justifyContent: 'flex-end',
            }}
            >
-            <Grid item mx={1}>
-              <Button
-              color="secondary"
-              variant="outlined"
-              size='small'
-              onClick={() => router.push('/markets/create')}
-              >
-                Create Market
-              </Button>
-            </Grid>
 
             <Grid item mx={1}>
               <Link href='/contract/create'>

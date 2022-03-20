@@ -9,6 +9,7 @@ import {
   InputBase,
   Grid,
   CssBaseline,
+  Stack,
   FormLabel,
   List,
   Button,
@@ -80,15 +81,6 @@ const MARKETS = [
   },
 ]
 
-const CONTINENTS = [
-  'North America',
-  'South America',
-  'Europe',
-  'Asia',
-  'Africa',
-  'Antartica'
-]
-
 const MARKET_TYPES = [
   {
     label: 'Traditional',
@@ -108,8 +100,9 @@ import { IOpportunityProps, IContractChatsContentProps, IMarketDrawerContentProp
 const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) => {
   const router = useRouter()
   const classes = useStyles()
+  const [view, setView] = useState('Market')
 
-  const isDrawerShowing = router.pathname.includes('create') ? false : true
+  const isDrawerShowing = router.pathname.includes('create') || router.pathname.includes('dashboard') ? false : true
 
   const renderDrawerContent = () => {
     switch(router.pathname) {
@@ -130,13 +123,14 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
         position="fixed"
         sx={{ 
           bgcolor: '#fff', 
-          height: 65, 
+          height: '65px', 
           zIndex: (theme) => theme.zIndex.drawer + 1 
         }}
       >
         <Toolbar className={classes.toolbar}
         >
           <Grid
+   
             width='100%'
             container
             xs={12}
@@ -147,7 +141,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
           >
             <Grid item xs={4} style={{ display: 'flex' }}>
             <Link href='/markets'>
-              <img className={classes.clickableBrand} src='/assets/logo.svg' style={{ margin: '0px 5px', width: 35, height: 35}} />
+              <img className={classes.clickableBrand} src='/assets/logo.svg' style={{  width: 35, height: 35}} />
               </Link>
 
               <Link href='/markets'>
@@ -159,26 +153,20 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
 
             <Grid item xs={4}>
               <div className={classes.flexRow}>
+              <Link href='/dashboard'>
+              <Typography onClick={() => setView('Dashboard')} component={Button} mx={2} variant="button" color={view === 'Dashboard' ? 'secondary' : '#212121'} fontWeight={view === 'Dashboard' ? 'bold' : 'medium'}>
+                  Dashboard
+                </Typography>
+                </Link>
+
                 <Link href='/markets'>
-                <Typography component={Button} mx={2} variant="button" color="secondary" fontWeight='bold'>
+                <Typography onClick={() => setView('Markets')} component={Button} mx={2} variant="button" color={view === 'Markets' ? 'secondary' : '#212121'} fontWeight={view === 'Markets' ? 'bold' : 'medium'}>
                   Markets
                 </Typography>
                 </Link>
 
-                <Link href='/jobs/myjobs'>
-                <Typography component={Button} mx={2} variant="button" color="#212121" fontWeight='bold'>
-                  My Jobs
-                </Typography>
-                </Link>
-
-              <Link href='/jobs/mycontracts'>
-                <Typography component={Button} mx={2} variant="button" color="#212121" fontWeight='bold'>
-                  My Contracts
-                </Typography>
-                </Link>
-
                 <Link href='/contract'>
-                <Typography component={Button} mx={2} variant="button" color="#212121" fontWeight='bold'>
+                <Typography onClick={() => setView('Messenger')} component={Button} mx={2} variant="button" color={view === 'Messenger' ? 'secondary' : '#212121'} fontWeight={view === 'Messenger' ? 'bold' : 'medium'}>
                   Messenger
                 </Typography>
                 </Link>
@@ -194,6 +182,16 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                 justifyContent: 'flex-end'
               }}
             >
+              <Divider orientation='vertical' sx={{height: 65}} />
+              <Stack width='auto' flexDirection='column' alignItems='center' p={2} component={CardActionArea}>
+                <Typography color='#212121' fontWeight='medium' fontSize={15}>
+                  Network
+                </Typography>
+                <Typography color='secondary' fontSize={12}>
+                {Math.floor(Math.random() * 80)} Connections
+                </Typography>
+               </Stack>
+              <Divider orientation='vertical' sx={{height: 65}} />
               <CardActionArea className={classes.identityBox}>
                 <Blockies
                   seed="Max"

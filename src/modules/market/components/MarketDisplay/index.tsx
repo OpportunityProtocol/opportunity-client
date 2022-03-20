@@ -5,6 +5,7 @@ import { useStyles } from './MarketDisplayStyles'
 import {
   Typography,
   CardContent,
+  Divider,
   Box,
   Avatar,
   Grid,
@@ -14,7 +15,12 @@ import {
 import ClickableCard from '../../../../common/components/ClickableCard/ClickableCard'
 import { useRouter } from 'next/router'
 
-const MarketDisplay: React.FunctionComponent = ({ market }) => {
+interface IMarketDisplayProps {
+  market: string,
+  isShowingStats: boolean
+}
+
+const MarketDisplay: React.FunctionComponent<IMarketDisplayProps> = ({ market, isShowingStats }) => {
   const classes = useStyles()
   const router = useRouter()
 
@@ -35,54 +41,44 @@ const MarketDisplay: React.FunctionComponent = ({ market }) => {
             Lizards are a widespread group of squamate reptiles, with over 6,000
             species, ranging across all continents except Antarctica
           </Typography>
-          <Box component={Grid} container alignItems='center' justifyContent='space-between'>
+        </CardContent>
+        {isShowingStats ? 
+        (<React.Fragment>
+                 <Divider />
+        <CardContent>
+        <Box component={Grid} container alignItems='center' justifyContent='space-between'>
             <Grid item sx={{display: 'flex', alignItems: 'center'}}>
-              <Stack direction='column' pr={1} alignItems='center'>
-                  <Typography fontSize={12} color='#bbb'>
-                    Unclaimed
-                  </Typography>
-                  <Typography fontSize={12} fontWeight='medium'>
-                    2500
-                  </Typography>
-              </Stack>
 
               <Stack direction='column' pr={1} >
-              <Typography fontSize={12} color='#bbb'>
-                    Total Contracts
+              <Typography fontSize={12} color='rgb(54, 119, 74)'>
+                    Available Contracts
                   </Typography>
                   <Typography fontSize={12} fontWeight='medium'>
-                    2500
+                    {Math.floor(Math.random() * 2000).toFixed()}
                   </Typography>
               </Stack>
 
               <Stack direction='column' pr={1}>
-              <Typography fontSize={12} color='#bbb'>
+              <Typography fontSize={12} color='rgb(54, 119, 74)'>
                     Value Settled
                   </Typography>
                   <Typography fontSize={12} fontWeight='medium'>
-                    2500
+                  ${Math.floor(Math.random() * 2000).toFixed(2)}
                   </Typography>
               </Stack>
             </Grid>
 
             <Grid item>
-            <AvatarGroup max={3} sx={{ margin: '0px !important', justifyContent: 'flex-start'}}>
-                          {
-                            new Array(3).fill(<Avatar sx={{ width: 15, height: 15 }} alt="Remy Sharp" src="/static/images/avatar/1.jpg" />).map(item => (item))
-                          }
+            <AvatarGroup max={3} sx={{ display: 'flex', alignItems: 'center', margin: '0px !important', justifyContent: 'flex-start'}}>
+            <Avatar sx={{ width: 20, height: 20 }} alt="Remy Sharp" src="/assets/images/dai.png" />
+            <Avatar sx={{ width: 15, height: 15 }} alt="Remy Sharp" src="/assets/images/terra.png" />
                     </AvatarGroup>
             </Grid>
           </Box>
-        </CardContent>
-       {/*} <Divider />
-        <CardContent>
-          <Typography variant='caption'>
-                This market has an average trust score of: {" "}
-          </Typography>
-          <Typography color='rgb(54, 119, 74)' variant='caption' component='span'>
-          .78 (0 - 1)
-          </Typography>
-              </CardContent>*/}
+              </CardContent>
+        </React.Fragment>)
+        :
+        null}
       </ClickableCard>
   )
 }
