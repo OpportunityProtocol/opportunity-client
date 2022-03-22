@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme) => {
       width: 600,
       padding: 10,
       borderRadius: 20,
-      border: '1px solid #eee',
+      border: '1px solid #ddd',
       elevation: 0,
       display: 'flex',
       alignItems: 'center',

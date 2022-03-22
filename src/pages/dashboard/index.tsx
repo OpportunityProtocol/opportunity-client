@@ -35,7 +35,7 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowDropUp } from '@mui/icons-material';
+import { ArrowDropUp, Article, AttachMoney, PriceCheck } from '@mui/icons-material';
 import MarketDisplay from '../../modules/market/components/MarketDisplay';
 import UiTableView from '../../common/components/UITableView/UITableView';
   import { HeadCell, Data } from '../../common/interface'
@@ -119,7 +119,14 @@ import UiTableView from '../../common/components/UITableView/UITableView';
       },
   ];
 
-  const myContractsRows: Array<object> = []
+  const myContractsRows: Array<object> = [{
+    title: 'hi',
+    description: 'dfsdfs',
+    link: 'sdfsdf',
+    employer: 'dsfsdfsd',
+    deadline: 'sdfsdfsdf',
+    status: 'COMPLETE'
+  }]
   const myJobsRows: Array<object>  = []
 
 const Dashboard: React.FunctionComponent = () => {
@@ -175,15 +182,23 @@ const Dashboard: React.FunctionComponent = () => {
 </Typography>
     </Box>
 
-    <Box component={Grid} container spacing={2} direction='row' alignItems='flex-start' flexWrap='nowrap' sx={{width: '100%', height: '100%', padding: '1% 1%'}}>
+<Box sx={{padding: '1% 1%'}}>
+
+    <Box component={Typography} fontWeight='bold' variant='h6'>
+      Dashboard Overview
+    </Box>
+    <Box component={Grid} container spacing={2} direction='row' alignItems='flex-start' flexWrap='nowrap' sx={{width: '100%', height: '100%'}}>
 
                         <Grid container item xs={6} direction='column' flexDirection='column'>
                             <Grid container item  direction='row' alignItems='center' sx={{ width: '100%',  my: 2 }}>
                             <Card xs={3} component={Grid} variant='outlined' item  sx={{ bgcolor: 'rgb(147, 228, 178)', mr: 2, p: 2, display: 'flex', flexDirection: 'column', height: 135,  }}>
                       <Box>
+                        <Stack direction='row' alignItems='center'>
+                        <AttachMoney fontSize='small' sx={{ color: '#fff' }} />
                         <Typography fontWeight='bold' color='#fff' fontSize={12}>
                             Your Total Profit
                         </Typography>
+                        </Stack>
 
                         </Box>
 
@@ -206,10 +221,13 @@ const Dashboard: React.FunctionComponent = () => {
 
                         <Card xs={3}  component={Grid} variant='outlined' item  sx={{ p: 2,mr: 2, display: 'flex', flexDirection: 'column', height: 'auto', height: 135,  }}>
                       <Box>
-                      <Typography fontWeight='bold' color={alpha('#42c976', 0.65)} fontSize={12}>
-                            Total Value Settled
+                   
+                        <Stack direction='row' alignItems='center'>
+                        <PriceCheck fontSize='small' sx={{ color: alpha('#42c976', 0.65) }} />
+                        <Typography fontWeight='bold' color={alpha('#42c976', 0.65)} fontSize={12}>
+                        Total Value Settled
                         </Typography>
-
+                        </Stack>
                         </Box>
 
                         <Typography py={1} fontWeight='bold' color='#212121' fontSize={30}>
@@ -231,10 +249,12 @@ const Dashboard: React.FunctionComponent = () => {
 
                         <Card xs={3} component={Grid} variant='outlined' item  sx={{  p: 2,mr: 2, display: 'flex', flexDirection: 'column', height: 135, }}>
                       <Box>
+                        <Stack direction='row' alignItems='center'>
+                        <Article fontSize='small' sx={{ color: alpha('#42c976', 0.65) }} />
                         <Typography fontWeight='bold' color={alpha('#42c976', 0.65)} fontSize={12}>
-                            Total Contracts Available
+                        Total Contracts Available
                         </Typography>
-
+                        </Stack>
                         </Box>
 
                         <Typography py={1} fontWeight='bold' color='#212121' fontSize={30}>
@@ -246,6 +266,7 @@ const Dashboard: React.FunctionComponent = () => {
                             <Grid item sx={{flex: 1, height: 420}}>
                         
                     <UiTableView 
+                         hasHead={true}
                     title='My Contracts' 
                     page={0} 
                     rows={myContractsRows} 
@@ -285,6 +306,7 @@ const Dashboard: React.FunctionComponent = () => {
 
                                 <Grid item>
         <UiTableView 
+        hasHead={true}
         title='My Jobs' 
         page={0} 
         rows={myJobsRows} 
@@ -301,8 +323,85 @@ const Dashboard: React.FunctionComponent = () => {
                 
 
                 </Box>
+                </Box>
         </Box>
     )
 }
 
 export default Dashboard
+
+
+/*
+const myWorkHeadCells: HeadCell[] = [
+  {
+    id: 'a',
+    numeric: false,
+    disablePadding: false,
+    label: 'Product Name',
+    render: (item) => (
+      <Box component={Grid} container direction='row' alignItems='center'>
+        <Card style={{width: 120, height: 80}}>
+        <img src={item.one.imgUri} style={{width: '100%', height: '100%'}} />
+        </Card>
+        
+          <Box sx={{ px: 2 }}>
+            <Typography fontWeight='bold' fontSize={15}>
+                {item.one.product_name}
+            </Typography>
+            <Typography fontWeight='bold' fontSize={12} color='#ddd'> {item.two}  </Typography>
+          </Box>
+      </Box>
+    )
+  },
+  {
+    id: 'b',
+    numeric: false,
+    disablePadding: false,
+    label: 'Market',
+    render: (item) => <Typography fontWeight='bold' fontSize={13}> {item.two}  </Typography>
+  },
+  {
+    id: 'c',
+    numeric: false,
+    disablePadding: false,
+    label: 'Price',
+    render: (item) => <Typography fontWeight='bold' fontSize={13}> {item.three}  </Typography>
+  },
+  {
+    id: 'd',
+    numeric: false,
+    disablePadding: false,
+    label: 'Metadata',
+    render: (item) => <Typography fontWeight='bold' fontSize={13}> {item.four}</Typography>
+  },
+  {
+    id: 'e',
+    numeric: false,
+    disablePadding: false,
+    label: 'Num mirrored',
+    render: (item) => <Typography fontWeight='bold' fontSize={13}> {item.five}</Typography>
+  },
+  {
+    id: 'e',
+    numeric: false,
+    disablePadding: false,
+    label: 'Status',
+    render: (item) => <Typography fontWeight='bold' fontSize={13}> {item.six}</Typography>
+  },
+];
+
+const myWorkRows: Array<object> = new Array(20).fill(
+  {
+    key: 0,
+    one: {
+      imgUri: 'https://picsum.photos/seed/picsum/200/300',
+      product_name: 'Website Mockup',
+    },
+    two: 'Writing & Translation',
+    three: '$20.56',
+    four: '/ipfs/QmYA2fn8cMbVWo4v95RwcwJVyQsNtnEwHerfWR8UNtEwoE',
+    five: 25,
+    six: 'Complete'
+  },
+)
+*/

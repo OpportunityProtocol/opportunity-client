@@ -112,6 +112,7 @@ import { visuallyHidden } from '@mui/utils';
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={createSortHandler(headCell.id)}
+                sx={{fontWeight: 'bold', color: 'rgb(54, 119, 74)'}}
               >
                 {headCell.label}
                 {orderBy === headCell.id ? (
@@ -133,7 +134,7 @@ import { visuallyHidden } from '@mui/utils';
   }
   
   const UiTableViewToolbar = (props: UiTableViewToolbarProps) => {
-    const { title, numSelected } = props;
+    const { title, numSelected} = props;
   
     return (
       <Toolbar
@@ -183,6 +184,8 @@ import { visuallyHidden } from '@mui/utils';
   };
 
   interface UiTableViewProps {
+    hasHead?: boolean,
+    isElevated?: boolean,
     title: string,
     page: number,
     rowsPerPage: number,
@@ -193,9 +196,21 @@ import { visuallyHidden } from '@mui/utils';
     emptyTableCaption: string
 }
   
-const UiTableView : React.FunctionComponent<UiTableViewProps> = ({ title, page, rows, rowsPerPage, handleChangePage, handleChangeRowsPerPage, headCells, emptyTableCaption }) => {
+const UiTableView : React.FunctionComponent<UiTableViewProps> = ({ 
+  hasHead=false,
+  isElevated=true,
+  title, 
+  page, 
+  rows, 
+  rowsPerPage, 
+  handleChangePage, 
+  handleChangeRowsPerPage, 
+  headCells, 
+  emptyTableCaption,
+  
+}) => {
     const [order, setOrder] = React.useState<Order>('asc');
-    const [orderBy, setOrderBy] = React.useState<string>('calories');
+    const [orderBy, setOrderBy] = React.useState<string>('price');
     const [selected, setSelected] = React.useState<readonly string[]>([]);
   
     const handleRequestSort = (
@@ -242,12 +257,24 @@ const UiTableView : React.FunctionComponent<UiTableViewProps> = ({ title, page, 
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows =
       page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+
+
+      const generateCell = ({ col = {}, row }) => {
+        return (
+          <TableCell
+            key={col.key}
+            onClick={col.onClick ? () => col.onClick(row) : undefined}
+          >
+            {col.render ? col.render(row) : row[col.field]}
+          </TableCell>
+        )
+      }
     
   
     return (
       <Box sx={{ width: '100%' }}>
-        <Paper elevation={0} variant='outlined' sx={{ width: '100%', mb: 2 }}>
-          <UiTableViewToolbar title={title} numSelected={selected.length} />
+        <Paper variant='outlined' sx={{ width: '100%', mb: 2, border: '1px solid #ddd' }}>
+          {hasHead && (<UiTableViewToolbar title={title} numSelected={selected.length} />)}
           <TableContainer>
             <Table
               sx={{ minWidth: 750 }}
@@ -270,17 +297,17 @@ const UiTableView : React.FunctionComponent<UiTableViewProps> = ({ title, page, 
                 stableSort(rows, getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row, index) => {
-                    const isItemSelected = isSelected(row.name);
+                    const isItemSelected = isSelected(row.label);
                     const labelId = `enhanced-table-checkbox-${index}`;
   
                     return (
                       <TableRow
                         hover
-                        onClick={(event) => handleClick(event, row.name)}
+                        onClick={(event) => handleClick(event, row.label)}
                         role="checkbox"
                         aria-checked={isItemSelected}
                         tabIndex={-1}
-                        key={row.name}
+                        key={row.label}
                         selected={isItemSelected}
                       >
                         <TableCell padding="checkbox">
@@ -292,18 +319,9 @@ const UiTableView : React.FunctionComponent<UiTableViewProps> = ({ title, page, 
                             }}
                           />
                         </TableCell>
-                        <TableCell
-                          component="th"
-                          id={labelId}
-                          scope="row"
-                          padding="none"
-                        >
-                          {row.name}
-                        </TableCell>
-                        <TableCell align="right">{row.calories}</TableCell>
-                        <TableCell align="right">{row.fat}</TableCell>
-                        <TableCell align="right">{row.carbs}</TableCell>
-                        <TableCell align="right">{row.protein}</TableCell>
+                          {
+                            headCells.map(col => { return generateCell({ col, row })})
+                          }
                       </TableRow>
                     );
                   })}

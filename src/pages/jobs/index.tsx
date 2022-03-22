@@ -64,65 +64,12 @@ const Jobs: React.FunctionComponent = () => {
                     alignItems='flex-start'>
                         <Grid
                         item>
-                        <Typography flex={1} fontWeight='600' fontSize={22}>
+                        <Typography flex={1} fontWeight='600' color='rgba(33, 33, 33, .85)' fontSize={22}>
                             Opportunities available <span style={{ color: '#ddd' }}>56</span>
                         </Typography>
                 </Grid>
 
-                <Grid item>
-                    <Paper
-                    elevation={0}
-                    component="form"
-                    sx={{ width: 600, p: 2, border: '1px solid #eee', borderRadius: 2, elevation: 0, display: 'flex', alignItems: 'center',  }}>
-                        <Box sx={{ flex: 2, overflowX: 'scroll'}}>
-                            <Chip 
-                            component={Paper} 
-                            elevation={0} 
-                            variant='outlined' 
-                            label='Web Development' 
-                            onDelete={() => {}}
-                            deleteIcon={<Cancel fontSize='small' />}
-                            color='secondary' 
-                            sx={{
-                            mx: 1,
-                            fontWeight: 'bold', 
-                            border: '1px solid #C8E6C9', 
-                            backgroundColor: '#fff', 
-                            fontSize: 10 
-                            }} />
-
-                            <Chip 
-                            component={Paper} 
-                            elevation={0} 
-                            variant='outlined' 
-                            label='Python' 
-                            onDelete={() => {}}
-                            deleteIcon={<Cancel fontSize='small' />}
-                            color='secondary' 
-                            sx={{
-                                mx: 1,
-                                fontWeight: 'bold', 
-                                border: '1px solid #C8E6C9', 
-                                backgroundColor: '#fff', 
-                                fontSize: 10 
-                            }} />
-                        </Box>
-
-                    </Paper>
-                    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
-                        <Typography color='#bbb' fontWeight='bold' fontSize={12}>
-                            Sort by {" "}
-                            <span style={{ color: '#4caf50' }}> 
-                                Last posted 
-                            </span>
-                            <span>
-                                <IconButton fontSize='small'>
-                                    <ArrowDropDown sx={{ color: '#bbb' }} />
-                                </IconButton> 
-                            </span>
-                        </Typography>
-                    </Box>
-                </Grid>
+                <Grid item />
             </Grid>
             <Grid container direction='row' spacing={2}>
                 {getRelationships()}

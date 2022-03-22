@@ -3,7 +3,7 @@ import { createTheme } from '@mui/material/styles';
 
   const theme = createTheme({  
     palette: {
-      divider: '#eee',
+      divider: '#ddd',
       secondary: {
         light: 'rgb(147, 228, 178)',
         main: '#42c976',
@@ -23,14 +23,14 @@ import { createTheme } from '@mui/material/styles';
       MuiChip: {
         styleOverrides: {
           root: {
-            border: '1px solid #eee'
+            border: '1px solid #ddd'
           }
         }
       },
       MuiCard: {
         styleOverrides: {
           root: {
-            border: '1px solid #eee',
+            border: '1px solid #ddd',
           }
         }
       },

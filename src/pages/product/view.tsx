@@ -8,6 +8,7 @@ import {
     Tooltip,
     Divider,
     Box,
+    Paper,
     Stepper,
     Step,
     StepLabel,
@@ -149,22 +150,19 @@ function CustomizedSteppers({ activeStep }) {
   }));
 
 
-const ViewContract: React.FunctionComponent<any> = () => {
+const ViewProduct: React.FunctionComponent<any> = () => {
     const classes = useStyles()
 
     return (
-        <Box sx={{ width: '100%', padding: '3% 3%', bgcolor: '#fbfbfd'}}>
-            <Box sx={{ padding: '2% 5%', bgcolor: '#fff', border: '1px solid #ddd', boxShadow:
+        <Box  sx={{ width: '100%', padding: '3% 3%', bgcolor: '#fbfbfd'}}>
+            <Box component={Paper} elevation={20} sx={{ padding: '2% 5%', bgcolor: '#fff', border: '1px solid #ddd',  boxShadow:
           '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)', }}>
                 <Box sx={{ width: '100% '}}>
-                <Typography fontWeight='bold' color='rgba(33, 33, 33, .85)'>
-                  Status: Unclaimed
-                </Typography>
 
 <>  
 <Box sx={{py: 2}}>
 <Typography fontWeight='bold' fontSize={25}>
-                        Web Development
+                        Web Development Mockup Kit
                     </Typography>
                     <Link href=''>
                          <Typography className={classes.link} fontSize={12} component='span'  variant='button' color='secondary'> 
@@ -190,111 +188,17 @@ const ViewContract: React.FunctionComponent<any> = () => {
                             </Typography>
                             </Tooltip>
                         </Grid>
-
-                        <Grid item>
-                            <Typography fontWeight='bold' fontSize={14}>
-                                Budget
-                            </Typography>
-                            <Tooltip title='0x88463F785e256C04eC584559627806d909BaC0FE'>
-                            <Typography fontSize={13} color='#5e5e5e'>
-                                500 DAI ($500)
-                            </Typography>
-                            </Tooltip>
-                        </Grid>
-
-                        <Grid item>
-                            <Typography fontWeight='bold' fontSize={14}>
-                                Deadline
-                            </Typography>
-                            <Typography fontSize={13} color='#5e5e5e'>
-                            No deadline
-                            </Typography>
-                        </Grid>
-
-                        <Grid item>
-                            <Typography fontWeight='bold' fontSize={14}>
-                                Skill Level
-                            </Typography>
-                            <Typography fontSize={13} color='#5e5e5e'>
-                                Intermmediate
-                            </Typography>
-                        </Grid>
                     </Grid>
                 </Box>
-<Divider sx={{my: 5}} />
-            <Typography fontSize={16} fontWeight='bold'>
-                History
-            </Typography>
-            <Box sx={{ py: 1}}>
-                {/* 
-                <Typography variant='caption'>
-                    This contract has no history.{" "}
-                    <Typography className={classes.link} fontSize={12} component='span'  variant='button' color='secondary'>
-                        Claim it now
-                    </Typography> 
-                </Typography>
-                */}
-                
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Work fontSize='small' sx={{color: '#42c976', mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                    <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  0x88463F785e256C04eC584559627806d909BaC0FE began working this contract 10 hours ago.
-                </Typography>
-                </Box>
 
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Logout fontSize='small' sx={{mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  0x88463F785e256C04eC584559627806d909BaC0FE released this contract a few moments ago.
-                </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <LocalFireDepartment fontSize='small' sx={{color: 'red', mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  0x88463F785e256C04eC584559627806d909BaC0FE began a dispute.
-                </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <EmojiEvents fontSize='small' sx={{color: '#42c976', mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  You have been ruled the winner of this dispute.
-                </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Work fontSize='small' sx={{color: '#42c976', mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  0x88463F785e256C04eC584559627806d909BaC0FE began working this contract 10 hours ago.
-                </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Check fontSize='small' sx={{color: '#42c976', mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  You resolved this contract 2 hours ago.
-                </Typography>
-                </Box>
-            </Box>
-            <Divider />
             <Box sx={{py: 2}}>
                 <Grid container spacing={2} direction='row' alignItems='center' justifyContent='space-between'>
                 <Grid item>
                 <Button sx={{ color: '#fff' }} variant='contained' color='secondary' disableElevation>
-                    Submit Proposal
+                    Purchase
                 </Button>
 </Grid>
 
-                    <Grid item>
-                    <Button sx={{mx: 1}} variant='outlined' color='secondary' disableElevation>
-                        Release Funds
-                </Button>
-
-                <Button sx={{mx: 1}} variant='outlined' color='secondary' disableElevation>
-                        Begin Dispute
-                </Button>
-                    </Grid>
                 </Grid>
             </Box>
             </Box>
@@ -302,4 +206,4 @@ const ViewContract: React.FunctionComponent<any> = () => {
     )
 }
 
-export default ViewContract
+export default ViewProduct

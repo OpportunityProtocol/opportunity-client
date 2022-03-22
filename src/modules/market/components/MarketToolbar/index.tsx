@@ -91,7 +91,18 @@ const MarketToolbar: React.FunctionComponent = () => {
                 variant="outlined"
                 size='small'
                 >
-                  Post Contract
+                  Create Contract
+                </Button>
+              </Link>
+            </Grid>
+            <Grid item mx={1}>
+              <Link href='/contract/create'>
+                <Button
+                color="secondary"
+                variant="outlined"
+                size='small'
+                >
+                  Create Post
                 </Button>
               </Link>
             </Grid>

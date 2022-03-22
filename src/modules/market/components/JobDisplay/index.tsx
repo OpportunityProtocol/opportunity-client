@@ -66,7 +66,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ avatar, hasButt
              Customer Service Representative 
          </Box>
          <Link href=''>
-            <Typography className={classes.link} fontSize={12} component='span'  variant='button' color='secondary'> 
+            <Typography className={classes.link} fontSize={12} component='span'  variant='button' color='rgb(54, 119, 74)'> 
               /ipfs/QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4 
             </Typography>
           </Link>

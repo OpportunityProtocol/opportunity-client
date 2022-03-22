@@ -24,6 +24,7 @@ import {
   Toolbar,
   Typography,
   Divider,
+  Slider,
   ListItemText,
   ListItemAvatar,
   ListItemButton,
@@ -81,15 +82,90 @@ const MARKETS = [
   },
 ]
 
+const USER_TYPE = [
+  {
+    label: 'Employer',
+    type: 'default'
+  },
+  {
+    label: 'Worker',
+    type: 'default'
+  },
+]
+
 const MARKET_TYPES = [
   {
     label: 'Traditional',
     type: 'default'
   },
+]
+
+const CONTENT_TYPES = [
   {
-    label: 'Bounty',
+    label: 'Saleable',
+    type: 'default'
+  },
+  {
+    label: 'Service',
     type: 'default'
   }
+]
+
+const CONNECTED_SINCE_MARKS = [
+  {
+    value: 0,
+    label: '1m',
+  },
+  {
+    value: 20,
+    label: '6m',
+  },
+  {
+    value: 37,
+    label: '1y',
+  },
+  {
+    value: 100,
+    label: '5y+',
+  },
+]
+
+const MUTUAL_CONNECTIONS_MARKS = [
+  {
+    value: 0,
+    label: '1+',
+  },
+  {
+    value: 20,
+    label: '10+',
+  },
+  {
+    value: 37,
+    label: '50+',
+  },
+  {
+    value: 100,
+    label: '100+',
+  },
+]
+
+const TIMES_SOLD_MARKS = [
+  {
+    value: 0,
+    label: '10+',
+  },
+  {
+    value: 20,
+    label: '50+',
+  },
+  {
+    value: 37,
+    label: '80+',
+  },
+  {
+    value: 100,
+    label: '100+',
+  },
 ]
 
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -102,12 +178,14 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
   const classes = useStyles()
   const [view, setView] = useState('Market')
 
-  const isDrawerShowing = router.pathname.includes('create') || router.pathname.includes('dashboard') ? false : true
+  const isDrawerShowing = router.pathname.includes('create') || router.pathname.includes('dashboard') || router.pathname.includes('portfolio') ? false : true
 
   const renderDrawerContent = () => {
     switch(router.pathname) {
       case '/contract':
         return <ContractChatsContent classes={classes} currentContracts={[]} />
+      case '/network':
+        return <NetworkFilterContent classes={classes} />
       case '/market':
       default:
         return <MarketDrawerContent classes={classes} />
@@ -170,6 +248,12 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                   Messenger
                 </Typography>
                 </Link>
+
+                <Link href='/network'>
+                <Typography onClick={() => setView('Portfolio')} component={Button} mx={2} variant="button" color={view === 'Portfolio' ? 'secondary' : '#212121'} fontWeight={view === 'Portfolio' ? 'bold' : 'medium'}>
+                  Network
+                </Typography>
+                </Link>
               </div>
             </Grid>
 
@@ -208,7 +292,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                         fontWeight: 'medium',
                         color: 'black'
                       }}>
-                        Address
+                        @happytowork
                       </Box>
 
                       <Box
@@ -248,7 +332,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                 display: 'flex',
                 alignItems: 'center',
                 bgcolor: '#fbfbfd',
-                borderRight: '1px solid #eee',
+                borderRight: '1px solid #ddd',
                 p: 2,
                 width: drawerWidth,
                 boxSizing: 'border-box',
@@ -428,6 +512,148 @@ const ContractChatsContent = ({ classes, currentContracts }: IContractChatsConte
         }
       </List>
   </Box>
+)
+
+const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
+  <Box p={2} className={classes.marketContentContainer}>
+              
+  <div className={classes.row}>
+    <FilterListIcon fontSize='small' />
+    <Typography px={1} fontWeight='bold' fontSize={13}>
+      Filters
+    </Typography>
+  </div>
+<Box>
+<FormControl sx={{ my: 1 }}>
+    <FormLabel
+      id="content-type-form-label"
+      sx={{ fontSize: 13, fontWeight: 'bold' }}
+    >
+      Content Type
+    </FormLabel>
+    <RadioGroup
+      aria-labelledby="content-type-form-label"
+      defaultValue="female"
+      name="content-type-radio-button-group"
+    >
+      {
+        CONTENT_TYPES.map(marketType => {
+          return (
+            <FormControlLabel
+              componentsProps={{
+                typography: {
+                  fontSize: 12,
+                },
+              }}
+              className={classes.formControlLabel}
+              value={String(marketType.type).toLowerCase()}
+              control={
+                <Radio
+                  color='secondary'
+                  className={classes.radio}
+                  size="small"
+                />
+              }
+              label={marketType.label}
+            />
+          )
+        })
+      }
+    </RadioGroup>
+  </FormControl>
+  <FormControl sx={{ my: 1, width: '100%' }}>
+    <FormLabel
+      id="content-type-form-label"
+      sx={{ fontSize: 13, fontWeight: 'bold' }}
+    >
+      Number of times sold
+    </FormLabel>
+    <Slider
+        aria-label="Always visible"
+        defaultValue={80}
+        //getAriaValueText={valuetext}
+        step={10}
+        marks={TIMES_SOLD_MARKS}
+        valueLabelDisplay="off"
+      />
+  </FormControl>
+</Box>
+<Divider />
+<Box sx={{display: 'flex', flexDirection: 'column'}}>
+<FormControl sx={{ my: 1 }}>
+    <FormLabel
+      id="content-type-form-label"
+      sx={{ fontSize: 13, fontWeight: 'bold' }}
+    >
+      Content Type
+    </FormLabel>
+    <RadioGroup
+      aria-labelledby="content-type-form-label"
+      defaultValue="female"
+      name="content-type-radio-button-group"
+    >
+      {
+        USER_TYPE.map(marketType => {
+          return (
+            <FormControlLabel
+              componentsProps={{
+                typography: {
+                  fontSize: 12,
+                },
+              }}
+              className={classes.formControlLabel}
+              value={String(marketType.type).toLowerCase()}
+              control={
+                <Radio
+                  color='secondary'
+                  className={classes.radio}
+                  size="small"
+                />
+              }
+              label={marketType.label}
+            />
+          )
+        })
+      }
+    </RadioGroup>
+  </FormControl>
+
+<FormControl sx={{ my: 1 }}>
+    <FormLabel
+      id="content-type-form-label"
+      sx={{ fontSize: 13, fontWeight: 'bold' }}
+    >
+      Connected since
+    </FormLabel>
+    <Slider
+        aria-label="Always visible"
+        defaultValue={80}
+        //getAriaValueText={valuetext}
+        step={10}
+        marks={CONNECTED_SINCE_MARKS}
+        valueLabelDisplay="off"
+      />
+  </FormControl>
+  <FormControl sx={{ my: 1 }}>
+    <FormLabel
+      id="content-type-form-label"
+      sx={{ fontSize: 13, fontWeight: 'bold' }}
+    >
+      Number of mutual followers
+    </FormLabel>
+    <Slider
+        aria-label="Always visible"
+        defaultValue={80}
+        //getAriaValueText={valuetext}
+        step={10}
+        marks={MUTUAL_CONNECTIONS_MARKS}
+        valueLabelDisplay="off"
+      />
+  </FormControl>
+
+</Box>
+
+</Box>
 )
 
 export default Opportunity

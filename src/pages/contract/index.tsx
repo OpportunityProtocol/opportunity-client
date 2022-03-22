@@ -41,7 +41,7 @@ const Contract : React.FunctionComponent<any> = () => {
             </Grid>
             <Grid item flex={3} sx={{   }}>
            {/* Traditional Markets Display */}
-            {/*<Card variant='outlined' sx={{ my: 1,  borderRadius: 2, height: '100%', flexGrow: 1, flex: 1}}>
+            <Card variant='outlined' sx={{ my: 1,  borderRadius: 2, height: '100%', flexGrow: 1, flex: 1}}>
                 <Grid container direction='column' justifyContent='space-between' sx={{  height: '100%'}}>
                     <Grid item xs={9} flexGrow={1} flex={1} >
                         <CardContent sx={{ height: '100%',  }}>
@@ -62,42 +62,7 @@ const Contract : React.FunctionComponent<any> = () => {
                         </CardContent>
                     </Grid>
                 </Grid>
-            </Card>*/}
-
-            {/* Bounty Markets Display */}
-            {/* Submission Bar */}
-            <Card variant='outlined'>
-            <Box sx={{ p: 3}}>
-                            <Paper elevation={0} className={classes.fileContainer} sx={{display: 'flex', flexDirection: 'column', width: '100%', flex: 1}}>
-                            <FileUploader
-        multiple={false}
-        handleChange={() => {}}
-        name="file"
-        types={fileTypes}
-      />
-
-                            <Typography pt={2} variant='caption'>
-                                This bounty is still available.  You can prepare and submit work at anytime.
-                            </Typography>
-                            </Paper>
-                        </Box>
             </Card>
-
-            {/* Submissions */}
-            <Box my={1}>
-                <Typography py={1} fontWeight='bold'>
-                    Submissions
-                </Typography>
-                {
-                    new Array(5).fill(1).map(element => {
-                        return <BountySubmission />
-                    })
-                }
-
-                <Box className={classes.containerCentered}>
-                    <Pagination count={10} variant="outlined" shape="rounded" />
-                </Box>
-            </Box>
             </Grid>
             </Grid>
 
