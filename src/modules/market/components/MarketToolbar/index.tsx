@@ -21,7 +21,14 @@ const MarketToolbar: React.FunctionComponent = () => {
   const router = useRouter()
   
     return (
-      <Box component={Paper}  elevation={0} 
+      null
+    )
+}
+
+export default MarketToolbar
+
+/*
+<Box component={Paper}  elevation={0} 
       classes={{
         root: classes.container
       }}
@@ -110,7 +117,4 @@ const MarketToolbar: React.FunctionComponent = () => {
         </Grid>
         <Divider />
       </Box>
-    )
-}
-
-export default MarketToolbar
+      */

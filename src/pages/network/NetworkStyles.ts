@@ -8,7 +8,10 @@ const useStyles = makeStyles((theme) => {
       backgroundColor: '#fff',
     },
     blockie: {
+      width: 60,
+      height: 60,
       borderRadius: 20,
+      margin: '20px 0px'
     },
     productCard: {
       '&:hover': {
@@ -24,6 +27,12 @@ const useStyles = makeStyles((theme) => {
           '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)',
       },
     },
+    button: {
+      display: 'none',
+      '&:hover': {
+        display: 'flex'
+      }
+    }
   }
 })
 

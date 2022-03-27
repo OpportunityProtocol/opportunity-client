@@ -124,7 +124,7 @@ const Contract : React.FunctionComponent<any> = () => {
 
                             <ListItem>
                                 <ListItemText 
-                                primary='Definition of done' 
+                                primary='Completion definition' 
                                 secondary={
                                     <React.Fragment>
                                         <ul>
@@ -157,21 +157,6 @@ const Contract : React.FunctionComponent<any> = () => {
                     <Divider />
                     <CardContent>
                         <List>
-                            <ListItem>
-                                <ListItemText 
-                                primary='Market ID' 
-                                secondary='3243'
-                                primaryTypographyProps={{
-                                    fontSize: 14, 
-                                    fontWeight: 'bold',
-                                    color: 'rgb(33, 33, 33, .85'
-                                }}
-                                secondaryTypographyProps={{
-                                    color: '#808080',
-                                    fontSize: 12
-                                }}
-                                 />
-                            </ListItem>
 
                             <ListItem>
                                 <ListItemText 
@@ -189,28 +174,6 @@ const Contract : React.FunctionComponent<any> = () => {
                                  />
                             </ListItem>
 
-                            <ListItem>
-                                <ListItemText 
-                                primary='Relationship Manager' 
-                                secondary='0x88463F785e256C04eC584559627806d909BaC0FE'
-                                primaryTypographyProps={{
-                                    fontSize: 14, 
-                                    fontWeight: 'bold',
-                                    color: 'rgb(33, 33, 33, .85'
-                                }}
-                                secondaryTypographyProps={{
-                                    color: '#808080',
-                                    fontSize: 12,
-                                    textOverflow: 'ellipsis',
-                                    overflow: 'hidden'
-                                }}
-                                 />
-                                <ListItemIcon>
-                                    <IconButton>
-                                    <ContentCopy fontSize='small' />
-                                    </IconButton>
-                                </ListItemIcon>
-                            </ListItem>
 
                             <ListItem>
                                 <ListItemText 

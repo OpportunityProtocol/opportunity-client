@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
     Container,
     Card,
@@ -37,125 +37,14 @@ import {
     ContentCopy
 } from '@mui/icons-material'
 
-const steps = ['Claimed', 'Reviewing Work', 'Resolved' /*'Disputed' */];
-
-const QontoConnector = styled(StepConnector)(({ theme }) => ({
-    [`&.${stepConnectorClasses.alternativeLabel}`]: {
-      top: 10,
-      left: 'calc(-50% + 16px)',
-      right: 'calc(50% + 16px)',
-    },
-    [`&.${stepConnectorClasses.active}`]: {
-      [`& .${stepConnectorClasses.line}`]: {
-        borderColor: '#eee',
-      },
-    },
-    [`&.${stepConnectorClasses.completed}`]: {
-      [`& .${stepConnectorClasses.line}`]: {
-        borderColor: '#43A047',
-      },
-    },
-    [`& .${stepConnectorClasses.line}`]: {
-      borderColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#eaeaf0',
-      borderTopWidth: 3,
-      borderRadius: 1,
-    },
-  }));
-  
-  const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean } }>(
-    ({ theme, ownerState }) => ({
-      color: '#eaeaf0',
-      display: 'flex',
-      height: 22,
-      alignItems: 'center',
-      ...(ownerState.active && {
-        color: '#784af4',
-      }),
-      '& .QontoStepIcon-completedIcon': {
-        color: '#43A047',
-        zIndex: 1,
-        fontSize: 18,
-      },
-      '& .QontoStepIcon-circle': {
-        width: 8,
-        height: 8,
-        borderRadius: '50%',
-        backgroundColor: '#eee',
-      },
-    }),
-  );
-
-  function QontoStepIcon(props: StepIconProps) {
-    const { active, completed, className } = props;
-  
-    return (
-      <QontoStepIconRoot ownerState={{ active }} className={className}>
-        {completed ? (
-          <Check className="QontoStepIcon-completedIcon" />
-        ) : (
-          <div className="QontoStepIcon-circle" />
-        )}
-      </QontoStepIconRoot>
-    );
-  }
-
-function CustomizedSteppers({ activeStep }) {
-    return (
-        <Stepper sx={{ my: 5 }} alternativeLabel activeStep={activeStep} connector={<QontoConnector />}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-    );
-  }
-
-  const BootstrapInput = styled(InputBase)(({ theme }) => ({
-    'label + &': {
-      marginTop: theme.spacing(3),
-    },
-    '& .MuiInputBase-input': {
-      borderRadius: 0,
-      position: 'relative',
-      backgroundColor: theme.palette.mode === 'light' ? '#fcfcfb' : '#2b2b2b',
-      border: '1px solid #ced4da',
-      fontSize: 16,
-      width: 400,
-      padding: '10px 12px',
-      transition: theme.transitions.create([
-        'border-color',
-        'background-color',
-        'box-shadow',
-      ]),
-      // Use the system font instead of the default Roboto font.
-      fontFamily: [
-        '-apple-system',
-        'BlinkMacSystemFont',
-        '"Segoe UI"',
-        'Roboto',
-        '"Helvetica Neue"',
-        'Arial',
-        'sans-serif',
-        '"Apple Color Emoji"',
-        '"Segoe UI Emoji"',
-        '"Segoe UI Symbol"',
-      ].join(','),
-      '&:focus': {
-        boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
-        borderColor: theme.palette.primary.main,
-      },
-    },
-  }));
-
-
 const ViewContract: React.FunctionComponent<any> = () => {
     const classes = useStyles()
+    const [isSubmittingProposal, setIsSubmittingProposal] = useState<boolean>(false)
+    const [proposalContainerHeight, setProposalContainerHeight] = useState<boolean>(false)
 
     return (
-        <Box sx={{ width: '100%', padding: '3% 3%', bgcolor: '#fbfbfd'}}>
-            <Box sx={{ padding: '2% 5%', bgcolor: '#fff', border: '1px solid #ddd', boxShadow:
-          '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)', }}>
+        <Box sx={{ width: '100%', padding: '3% 3%', bgcolor: '#fff'}}>
+            <Box sx={{ padding: '2% 5%', bgcolor: '#fff'}}>
                 <Box sx={{ width: '100% '}}>
                 <Typography fontWeight='bold' color='rgba(33, 33, 33, .85)'>
                   Status: Unclaimed
@@ -166,17 +55,13 @@ const ViewContract: React.FunctionComponent<any> = () => {
 <Typography fontWeight='bold' fontSize={25}>
                         Web Development
                     </Typography>
-                    <Link href=''>
-                         <Typography className={classes.link} fontSize={12} component='span'  variant='button' color='secondary'> 
-                             /ipfs/QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4 
-                         </Typography>
-                     </Link>
+
+                    <Typography paragraph width={600} fontSize={15} fontWeight='medium' color='#5e5e5e'>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit sem. Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque pellentesque tortor tortor, at convallis metus ornare ac. Aenean quis pellentesque nisl. Ut suscipit a nisi sed porttitor. Donec cursus velit diam, non accumsan urna aliquet hendrerit.
+                    </Typography>
 </Box>
 
 
-                    <Typography paragraph py={2} width={600} fontSize={15} fontWeight='medium' color='#5e5e5e'>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit sem. Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque pellentesque tortor tortor, at convallis metus ornare ac. Aenean quis pellentesque nisl. Ut suscipit a nisi sed porttitor. Donec cursus velit diam, non accumsan urna aliquet hendrerit.
-                    </Typography>
                     </>
 
                     <Grid container direction='row' justifyContent='space-between' alignItems='center'>
@@ -236,7 +121,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
                 */}
                 
                 <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Work fontSize='small' sx={{color: '#42c976', mr: 1}} />
+                <Work fontSize='small' sx={{color: '#65d386', mr: 1}} />
                 <Typography fontSize={13} color='#5e5e5e' py={2}>
                     <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  0x88463F785e256C04eC584559627806d909BaC0FE began working this contract 10 hours ago.
                 </Typography>
@@ -257,21 +142,21 @@ const ViewContract: React.FunctionComponent<any> = () => {
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <EmojiEvents fontSize='small' sx={{color: '#42c976', mr: 1}} />
+                <EmojiEvents fontSize='small' sx={{color: '#65d386', mr: 1}} />
                 <Typography fontSize={13} color='#5e5e5e' py={2}>
                 <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  You have been ruled the winner of this dispute.
                 </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Work fontSize='small' sx={{color: '#42c976', mr: 1}} />
+                <Work fontSize='small' sx={{color: '#65d386', mr: 1}} />
                 <Typography fontSize={13} color='#5e5e5e' py={2}>
                 <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  0x88463F785e256C04eC584559627806d909BaC0FE began working this contract 10 hours ago.
                 </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Check fontSize='small' sx={{color: '#42c976', mr: 1}} />
+                <Check fontSize='small' sx={{color: '#65d386', mr: 1}} />
                 <Typography fontSize={13} color='#5e5e5e' py={2}>
                 <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  You resolved this contract 2 hours ago.
                 </Typography>

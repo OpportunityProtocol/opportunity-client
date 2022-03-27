@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => {
       flexDirection: 'column',
       overflow: 'auto',
       padding: '1% 4%',
-      backgroundColor: '#fbfbfd',
+      backgroundColor: '#fff',
     },
     heading: {
       color: 'rgba(33, 33, 33, .85)',
@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme) => {
       width: 600,
       padding: 10,
       borderRadius: 20,
-      border: '1px solid #ddd',
+      border: '1px solid #eee',
       elevation: 0,
       display: 'flex',
       alignItems: 'center',

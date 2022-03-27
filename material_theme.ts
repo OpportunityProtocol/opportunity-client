@@ -3,10 +3,10 @@ import { createTheme } from '@mui/material/styles';
 
   const theme = createTheme({  
     palette: {
-      divider: '#ddd',
+      divider: '#eee',
       secondary: {
         light: 'rgb(147, 228, 178)',
-        main: '#42c976',
+        main: '#65d386',
         dark: 'rgb(54, 119, 74)'
       },
       primary: {
@@ -23,7 +23,7 @@ import { createTheme } from '@mui/material/styles';
       MuiChip: {
         styleOverrides: {
           root: {
-            border: '1px solid #ddd'
+            border: '1px solid #eee'
           }
         }
       },

@@ -12,9 +12,12 @@ import {
   InputBase
 } from '@mui/material'
 
-import { Search } from '@mui/icons-material'
+import { Archive, Folder, Search } from '@mui/icons-material'
 import MarketDisplay from '../../modules/market/components/MarketDisplay'
 import MarketToolbar from '../../modules/market/components/MarketToolbar'
+
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 
 const dummyMarkets = new Array()
 dummyMarkets.push('Writing and Translation')
@@ -26,10 +29,17 @@ dummyMarkets.push('Sales and Marketing')
 
 const Markets : React.FunctionComponent = () => {
   const classes = useStyles()
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
 
   return (
     <Box className={classes.root}>
-      <Box sx={{ width: '100%', margin: '30px 0px' }}>
+    
+
+      <Box sx={{ width: '100%', margin: '0px 0px' }}>
         <Grid
         pb={5}
         container
@@ -41,25 +51,12 @@ const Markets : React.FunctionComponent = () => {
             <Typography fontWeight='bold' fontSize={25} className={classes.heading}>
               Explore markets
             </Typography>
-            <Typography variant='caption' color='rgba(33, 33, 33, .85)'>
-              Showing 23 markets
+            <Typography fontSize={20} variant='caption' color='#aaa'>
+              Select a market to get started
             </Typography>
           </Grid>
 
-          <Grid item>
-            <Paper
-            elevation={0}
-            component="form"
-            className={classes.searchContainer}
-            >
-              <InputBase
-              startAdornment={<Search fontSize='small' sx={{ color: '#aaa' }} />}
-              sx={{ ml: 1, flex: 2, fontSize: 14, }}
-              placeholder="Search jobs"
-              inputProps={{ 'aria-label': 'search google maps' }}
-              />
-            </Paper>
-          </Grid>
+          <Grid item />
         </Grid>
         <Grid
         container
@@ -69,15 +66,11 @@ const Markets : React.FunctionComponent = () => {
         spacing={2}>
           {dummyMarkets.map((market) => (
             <Grid item sm={4}>
-              <MarketDisplay market={market} />
+              <MarketDisplay market={market} isShowingStats />
             </Grid>
           ))}
         </Grid>
        </Box>
-      
-      <Box className={classes.containerCentered}>
-        <Pagination count={0} variant="outlined" shape="rounded" />
-      </Box>
     </Box>
   )
 }

@@ -6,7 +6,7 @@ const useStyles = makeStyles((theme) =>
         marginTop: '4%',
     },
     boxContainer: {
-        padding: '1% 3%', height: 'calc(100vh - 120px)', backgroundColor: '#fbfbfd'
+        padding: '1% 3%', height: 'calc(100vh - 120px)', backgroundColor: '#fff'
     },
     selectedCard: {
         border: '5px solid #A5D6A7'

@@ -73,31 +73,16 @@ const Network: React.FunctionComponent = () => {
 
     return (
         <div className={classes.container}>
-            <Box sx={{ padding: '1% 1%' }}>
-                <Typography py={1} fontSize={22} fontWeight='bold'>
-                Portfolio
-            </Typography>
-              <Stack direction='row' alignItems='center'>
-              <Blockies
-                  seed={Math.random().toString()}
-                  size={8}
-                  scale={3}
-                  className={classes.blockie}
-                />
-                            <Typography px={1} fontSize={16}>
-                @happytowork12
-            </Typography>
-              </Stack>
-            </Box>
-            <Divider />
             <Box sx={{ width: '100%' }}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                     <Tabs value={value} textColor='secondary' indicatorColor="secondary" onChange={handleChange} aria-label="basic tabs example">
-                        <Tab label='Portfolio' icon={<Folder fontSize='small' />} iconPosition="start" sx={{ fontWeight: 'bold' }} {...a11yProps(0)} />
-                        <Tab label='Connections' icon={<Language fontSize='small' />} iconPosition="start" sx={{ fontWeight: 'bold' }} {...a11yProps(1)} />
+                    <Tab label='Connections' icon={<Language fontSize='small' />} iconPosition="start" sx={{ fontWeight: 'bold' }} {...a11yProps(0)} />
+                        <Tab label='Portfolio' icon={<Folder fontSize='small' />} iconPosition="start" sx={{ fontWeight: 'bold' }} {...a11yProps(1)} />
+                        <Tab label='Services' icon={<Language fontSize='small' />} iconPosition="start" sx={{ fontWeight: 'bold' }} {...a11yProps(2)} />
+                        
                     </Tabs>
                 </Box>
-                <TabPanel value={value} index={0}>
+                <TabPanel value={value} index={1}>
                   <Box sx={{ padding: '1% 3%'}}>
                   <Grid container direction='row' alignItems='center' spacing={3}>
                   {
@@ -134,7 +119,7 @@ const Network: React.FunctionComponent = () => {
                                   </Typography>
                                   <span>
                                   <AvatarGroup max={3} sx={{ display: 'flex', alignItems: 'center', margin: '0px !important', justifyContent: 'flex-start'}}>
-            <Avatar sx={{ width: 20, height: 20 }} alt="Remy Sharp" src="/assets/images/dai.png" />
+            {Math.random() > .5 ? <Avatar sx={{ width: 20, height: 20 }} alt="Remy Sharp" src="/assets/images/dai.png" /> : null}
             <Avatar sx={{ width: 15, height: 15 }} alt="Remy Sharp" src="/assets/images/terra.png" />
                     </AvatarGroup>
                                   </span>
@@ -149,7 +134,7 @@ const Network: React.FunctionComponent = () => {
                   </Grid>
                   </Box>
                 </TabPanel>
-                <TabPanel value={value} index={1}>
+                <TabPanel value={value} index={0}>
                 <Box sx={{ padding: '1% 3%'}}>
                   <Grid container direction='row' alignItems='center' spacing={3}>
                   {
@@ -159,14 +144,19 @@ const Network: React.FunctionComponent = () => {
                           <Card classes={{ root: classes.connectionCard }} variant='outlined' sx={{ height: 300}}>
                             <CardActionArea sx={{height: '100%'}} >
                               <CardContent sx={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',flexDirection: 'column'}}>
-                              <Avatar sx={{ width: 60, height: 60 }} alt="Remy Sharp" src="/assets/images/dai.png" />
-                              <Typography>
+                              <Blockies
+                      seed={Math.random().toString()}
+                      size={30}
+                      scale={3}
+                      className={classes.blockie}
+                    />
+                              <Typography fontWeight='bold'>
                                 @handletowork
                               </Typography>
-                              <Typography>
+                              <Typography fontSize={14} fontWeight='bold'>
                                 12 Mutual Connections
                               </Typography>
-                              <Button variant='outlined'>
+                              <Button classes={{ root: classes.button }} sx={{my: 2}} variant='outlined'>
                                 View Portfolio
                               </Button>
                               </CardContent>
@@ -179,6 +169,61 @@ const Network: React.FunctionComponent = () => {
                   </Grid>
                   </Box>
                 </TabPanel>
+
+                <TabPanel value={value} index={2}>
+                  <Box sx={{ padding: '1% 3%'}}>
+                  <Grid container direction='row' alignItems='center' spacing={3}>
+                  {
+                    products.map(product => {
+                      return (
+                        <Grid item xs={3}>
+                          <Card classes={{ root: classes.productCard }} variant='outlined' sx={{ height: 300}} onClick={() => router.push('/product/view')}>
+                            <CardActionArea>
+                              <CardMedia sx={{height: 200}} component='img' image='https://picsum.photos/seed/picsum/200/300' />
+                              <CardContent sx={{height: 100}}>
+                                <Stack direction='row'  justifyContent='space-between' alignItems='flex-start'>
+                                <Box>
+                                <Typography fontSize={13} fontWeight='bold'>
+                                  Website Mockup
+                                </Typography>
+                                <Typography fontWeight='bold' fontSize={13} color='rgb(54, 119, 74)'>
+                                  Saleable
+                                </Typography>
+                                </Box>
+
+
+                                <Box>
+                                <Typography fontSize={13}>
+                                  Price
+                                </Typography>
+                                <Typography fontSize={13} fontWeight='bold'>
+                                  $5.340
+                                </Typography>
+                                </Box>
+                                </Stack>
+                                <Stack pt={1} direction='row' alignItems='center'>
+                                  <Typography fontWeight='bold' fontSize={13}>
+                                  Accepted Currencies: 
+                                  </Typography>
+                                  <span>
+                                  <AvatarGroup max={3} sx={{ display: 'flex', alignItems: 'center', margin: '0px !important', justifyContent: 'flex-start'}}>
+            {Math.random() > .5 ? <Avatar sx={{ width: 20, height: 20 }} alt="Remy Sharp" src="/assets/images/dai.png" /> : null}
+            <Avatar sx={{ width: 15, height: 15 }} alt="Remy Sharp" src="/assets/images/terra.png" />
+                    </AvatarGroup>
+                                  </span>
+                                </Stack>
+                              </CardContent>
+                            </CardActionArea>
+                          </Card>
+                        </Grid>
+                      )
+                    })
+                  }
+                  </Grid>
+                  </Box>
+                </TabPanel>
+
+                
             </Box>
         </div>
     )

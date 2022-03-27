@@ -2,6 +2,14 @@ import { makeStyles } from "@mui/styles";
 import { alpha } from "@mui/system";
 
 const useStyles = makeStyles(theme => ({
+    card: { 
+        '&:hover': {
+        cursor: 'pointer',
+        boxShadow:
+          '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)',
+      },
+
+    },
     root: {
         width: 'auto',
         padding: 10,
@@ -41,6 +49,12 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         alignItems: 'center'
     },
+    viewButton: {
+        visibility: 'hidden',
+        '&:hover': {
+            visibility: 'visible'
+        },
+    }
 }))
 
 export { useStyles }

@@ -9,7 +9,7 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         alignItems: 'center',
         flexDirection: 'column',
-        backgroundColor: '#fbfbfd'
+        backgroundColor: '#fff'
     },
     summaryItem: {
         width: 300,

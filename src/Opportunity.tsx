@@ -39,7 +39,7 @@ import Blockies from 'react-blockies'
 import useStyles from './OpportunityStyles'
 import MarketToolbar from './modules/market/components/MarketToolbar'
 
-const drawerWidth = 280
+const drawerWidth = 300
 
 const MARKETS = [
   {
@@ -89,13 +89,6 @@ const USER_TYPE = [
   },
   {
     label: 'Worker',
-    type: 'default'
-  },
-]
-
-const MARKET_TYPES = [
-  {
-    label: 'Traditional',
     type: 'default'
   },
 ]
@@ -197,11 +190,13 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar
-        elevation={0}
         position="fixed"
+        variant='elevation'
         sx={{ 
-          bgcolor: '#fff', 
+          boxShadow: '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)',
+          bgcolor: "#fff", 
           height: '65px', 
+          border: 'none !important',
           zIndex: (theme) => theme.zIndex.drawer + 1 
         }}
       >
@@ -217,7 +212,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
             alignItems="center"
             justifyContent="space-between"
           >
-            <Grid item xs={4} style={{ display: 'flex' }}>
+            <Grid item style={{ display: 'flex' }}>
             <Link href='/markets'>
               <img className={classes.clickableBrand} src='/assets/logo.svg' style={{  width: 35, height: 35}} />
               </Link>
@@ -229,28 +224,43 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
               </Link>
             </Grid>
 
-            <Grid item xs={4}>
+            <Grid item >
+            <Paper 
+            elevation={0} 
+              component="form"
+              sx={{ display: 'flex', my: 3, width: 500, p: 1, border: '1px solid #eee', borderRadius: 2}}>
+<InputBase
+            startAdornment={<Search sx={{color: '#aaa'}} />}
+        sx={{  ml: 1, flex: 1, flexGrow: 1, height: 30, fontSize: 14 }}
+        placeholder="Search"
+        inputProps={{ 'aria-label': 'search google maps', style: { padding: '0px 10px'} }}
+      />
+ 
+    </Paper>
+            </Grid>
+
+            <Grid item >
               <div className={classes.flexRow}>
               <Link href='/dashboard'>
-              <Typography onClick={() => setView('Dashboard')} component={Button} mx={2} variant="button" color={view === 'Dashboard' ? 'secondary' : '#212121'} fontWeight={view === 'Dashboard' ? 'bold' : 'medium'}>
+              <Typography onClick={() => setView('Dashboard')} component={Button} mx={2} fontSize={14} variant="button" color={view === 'Dashboard' ? 'secondary' : "#212121"} fontWeight='bold'>
                   Dashboard
                 </Typography>
                 </Link>
 
                 <Link href='/markets'>
-                <Typography onClick={() => setView('Markets')} component={Button} mx={2} variant="button" color={view === 'Markets' ? 'secondary' : '#212121'} fontWeight={view === 'Markets' ? 'bold' : 'medium'}>
+                <Typography onClick={() => setView('Markets')} component={Button} mx={2} fontSize={14} variant="button" color={view === 'Markets' || router.pathname === '/' ? 'secondary' : "#212121"} fontWeight='bold'>
                   Markets
                 </Typography>
                 </Link>
 
                 <Link href='/contract'>
-                <Typography onClick={() => setView('Messenger')} component={Button} mx={2} variant="button" color={view === 'Messenger' ? 'secondary' : '#212121'} fontWeight={view === 'Messenger' ? 'bold' : 'medium'}>
+                <Typography onClick={() => setView('Messenger')} component={Button} mx={2} fontSize={14} variant="button" color={view === 'Messenger' ? 'secondary' :"#212121"} fontWeight='bold'>
                   Messenger
                 </Typography>
                 </Link>
 
                 <Link href='/network'>
-                <Typography onClick={() => setView('Portfolio')} component={Button} mx={2} variant="button" color={view === 'Portfolio' ? 'secondary' : '#212121'} fontWeight={view === 'Portfolio' ? 'bold' : 'medium'}>
+                <Typography onClick={() => setView('Portfolio')} component={Button} mx={2} fontSize={14} variant="button" color={view === 'Portfolio' ? 'secondary' : "#212121"} fontWeight='bold'>
                   Network
                 </Typography>
                 </Link>
@@ -259,23 +269,24 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
 
             <Grid
               item
-              xs={4}
+         
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'flex-end'
               }}
             >
-              <Divider orientation='vertical' sx={{height: 65}} />
+            {/*  <Divider orientation='vertical' sx={{height: 65}} />
               <Stack width='auto' flexDirection='column' alignItems='center' p={2} component={CardActionArea}>
-                <Typography color='#212121' fontWeight='medium' fontSize={15}>
+                <Typography color="#212121" fontWeight='medium' fontSize={15}>
                   Network
                 </Typography>
                 <Typography color='secondary' fontSize={12}>
                 {Math.floor(Math.random() * 80)} Connections
                 </Typography>
                </Stack>
-              <Divider orientation='vertical' sx={{height: 65}} />
+            */}
+             <Divider orientation='vertical' sx={{height: 65}} />
               <CardActionArea className={classes.identityBox}>
                 <Blockies
                   seed="Max"
@@ -290,7 +301,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                       <Box sx={{
                         fontSize: 12,
                         fontWeight: 'medium',
-                        color: 'black'
+                        color: "#212121"
                       }}>
                         @happytowork
                       </Box>
@@ -299,7 +310,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                         className={classes.address}
                         sx={{
                           fontSize: 10,
-                          color: 'black'
+                          color: "#212121"
                         }}>
                         0x4E3b49aDEf1487A08c73d47536f41Fe1c7c62137
                       </Box>
@@ -307,7 +318,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
 
                   </div>
                   <IconButton fontSize='small'>
-                    <ArrowDropDown sx={{ color: 'black' }} />
+                    <ArrowDropDown sx={{ color: "#212121" }} />
                   </IconButton>
                 </div>
               </CardActionArea>
@@ -332,7 +343,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                 display: 'flex',
                 alignItems: 'center',
                 bgcolor: '#fbfbfd',
-                borderRight: '1px solid #ddd',
+                borderRight: '1px solid #eee',
                 p: 2,
                 width: drawerWidth,
                 boxSizing: 'border-box',
@@ -341,8 +352,8 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
             variant="permanent"
           >
             <Toolbar />
-            <Toolbar />
-            <Paper elevation={0} 
+            <Paper 
+            elevation={0} 
               component="form"
               sx={{ width: '100%', p: 1, border: '1px solid #eee', borderRadius: 2}}>
             <InputBase
@@ -357,9 +368,9 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
             {
               renderDrawerContent()
             }
-            <Divider sx={{ width: '100%' }} />
-            <Box sx={{ width: '100%' }} p={2}>
-              <FormControl sx={{ my: 1 }}>
+
+            <Box sx={{ width: '100%' }} py={1}>
+              <FormControl >
                 <FormLabel
                   id="region-form-label"
                   sx={{ py: 1, fontSize: 13, fontWeight: 'bold' }}
@@ -374,8 +385,8 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
             </Box>
 
 
-            <Box sx={{ width: '100%' }} p={2}>
-              <FormControl sx={{ my: 1 }}>
+            <Box sx={{ width: '100%' }}>
+              <FormControl sx={{py: 2}}>
                 <FormLabel
                   id="region-form-label"
                   sx={{ py: 1, fontSize: 13, fontWeight: 'bold' }}
@@ -408,7 +419,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
         component="main"
         sx={{
           flexGrow: 1,
-          paddingTop: '120px',
+          paddingTop: '60px',
         }}
       >
         {children}
@@ -418,63 +429,25 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
 }
 
 const MarketDrawerContent = ({ classes }: IMarketDrawerContentProps) => (
-    <Box p={2} className={classes.marketContentContainer}>
+    <Box py={2} className={classes.marketContentContainer}>
               
               <div className={classes.row}>
                 <FilterListIcon fontSize='small' />
-                <Typography px={1} fontWeight='bold' fontSize={13}>
+                <Typography py={1} fontWeight='bold' fontSize={13}>
                   Filters
                 </Typography>
               </div>
-
-              <FormControl sx={{ my: 1 }}>
-                <FormLabel
-                  id="market-type-form-label"
-                  sx={{ fontSize: 13, fontWeight: 'bold' }}
-                >
-                  Market Type
-                </FormLabel>
-                <RadioGroup
-                  aria-labelledby="market-type-form-label"
-                  defaultValue="female"
-                  name="market-type-radio-button-group"
-                >
-                  {
-                    MARKET_TYPES.map(marketType => {
-                      return (
-                        <FormControlLabel
-                          componentsProps={{
-                            typography: {
-                              fontSize: 12,
-                            },
-                          }}
-                          className={classes.formControlLabel}
-                          value={String(marketType.type).toLowerCase()}
-                          control={
-                            <Radio
-                              color='secondary'
-                              className={classes.radio}
-                              size="small"
-                            />
-                          }
-                          label={marketType.label}
-                        />
-                      )
-                    })
-                  }
-                </RadioGroup>
-              </FormControl>
             </Box>
   )
 
 const ContractChatsContent = ({ classes, currentContracts }: IContractChatsContentProps ) =>  (
-  <Box sx={{ width: '100%', height: 500, overflow: 'scroll', }} >
+  <Box sx={{ my: 2, width: '100%', height: 500, overflow: 'scroll', }} >
       <List>
         {
           new Array(100).fill(100).map(chat => {
             return (
               <Link href='/contract'>
-              <ListItemButton component={ListItem} divider>
+              <ListItemButton component={ListItem}>
               <ListItemAvatar>
               <Blockies
                       seed={Math.random().toString()}
@@ -515,16 +488,16 @@ const ContractChatsContent = ({ classes, currentContracts }: IContractChatsConte
 )
 
 const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
-  <Box p={2} className={classes.marketContentContainer}>
+  <Box className={classes.marketContentContainer}>
               
   <div className={classes.row}>
     <FilterListIcon fontSize='small' />
-    <Typography px={1} fontWeight='bold' fontSize={13}>
+    <Typography py={1} fontWeight='bold' fontSize={13}>
       Filters
     </Typography>
   </div>
 <Box>
-<FormControl sx={{ my: 1 }}>
+<FormControl sx={{ my: 2 }}>
     <FormLabel
       id="content-type-form-label"
       sx={{ fontSize: 13, fontWeight: 'bold' }}
@@ -561,13 +534,14 @@ const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
       }
     </RadioGroup>
   </FormControl>
-  <FormControl sx={{ my: 1, width: '100%' }}>
+  <FormControl sx={{ my: 2, width: '100%' }}>
     <FormLabel
       id="content-type-form-label"
       sx={{ fontSize: 13, fontWeight: 'bold' }}
     >
       Number of times sold
     </FormLabel>
+    <Box sx={{width: '90%'}}>
     <Slider
         aria-label="Always visible"
         defaultValue={80}
@@ -576,11 +550,12 @@ const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
         marks={TIMES_SOLD_MARKS}
         valueLabelDisplay="off"
       />
+          </Box>
   </FormControl>
 </Box>
-<Divider />
+
 <Box sx={{display: 'flex', flexDirection: 'column'}}>
-<FormControl sx={{ my: 1 }}>
+<FormControl sx={{ my: 2 }}>
     <FormLabel
       id="content-type-form-label"
       sx={{ fontSize: 13, fontWeight: 'bold' }}
@@ -618,13 +593,14 @@ const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
     </RadioGroup>
   </FormControl>
 
-<FormControl sx={{ my: 1 }}>
+<FormControl sx={{ my: 2 }}>
     <FormLabel
       id="content-type-form-label"
       sx={{ fontSize: 13, fontWeight: 'bold' }}
     >
-      Connected since
+      Connected sin
     </FormLabel>
+    <Box sx={{width: '90%'}}>
     <Slider
         aria-label="Always visible"
         defaultValue={80}
@@ -633,14 +609,16 @@ const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
         marks={CONNECTED_SINCE_MARKS}
         valueLabelDisplay="off"
       />
+      </Box>
   </FormControl>
-  <FormControl sx={{ my: 1 }}>
+  <FormControl sx={{ my: 2 }}>
     <FormLabel
       id="content-type-form-label"
       sx={{ fontSize: 13, fontWeight: 'bold' }}
     >
       Number of mutual followers
     </FormLabel>
+    <Box sx={{width: '90%'}}>
     <Slider
         aria-label="Always visible"
         defaultValue={80}
@@ -649,6 +627,7 @@ const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
         marks={MUTUAL_CONNECTIONS_MARKS}
         valueLabelDisplay="off"
       />
+      </Box>
   </FormControl>
 
 </Box>

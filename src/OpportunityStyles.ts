@@ -8,7 +8,8 @@ const useStyles = makeStyles((theme) =>
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',
-     padding: '1% 1%'
+     padding: '1% 1%',
+     border: 'none !important',
     },
     radio: {
       paddingBottom: '0px !important',
@@ -40,7 +41,7 @@ const useStyles = makeStyles((theme) =>
       borderRadius: 999
     },
     address: {
-      width: 60, 
+      width: 120, 
       overflowX: 'hidden', 
       textOverflow: 'ellipsis'
     },
@@ -52,7 +53,7 @@ const useStyles = makeStyles((theme) =>
     },
     defaultMarketLink: {
       '&:hover': {
-        color: '#42c976'
+        color: '#65d386'
       }
     }
   }),

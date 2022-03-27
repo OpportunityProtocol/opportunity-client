@@ -35,13 +35,19 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowDropUp, Article, AttachMoney, PriceCheck } from '@mui/icons-material';
+import { ArrowDropUp, Article, AttachMoney, Info, PriceCheck } from '@mui/icons-material';
 import MarketDisplay from '../../modules/market/components/MarketDisplay';
 import UiTableView from '../../common/components/UITableView/UITableView';
   import { HeadCell, Data } from '../../common/interface'
 
 
   const myContractsHeadCells: HeadCell[] = [
+    {
+      id: 'type',
+      numeric: false,
+      disablePadding: true,
+      label: 'Type',
+    },
     {
       id: 'title',
       numeric: false,
@@ -80,54 +86,15 @@ import UiTableView from '../../common/components/UITableView/UITableView';
       },
   ];
   
-  const myJobsHeadCells: HeadCell[] = [
-    {
-      id: 'title',
-      numeric: false,
-      disablePadding: true,
-      label: 'Title',
-    },
-    {
-      id: 'description',
-      numeric: false,
-      disablePadding: false,
-      label: 'Description',
-    },
-    {
-      id: 'link',
-      numeric: false,
-      disablePadding: false,
-      label: 'Metadata Link',
-    },
-    {
-      id: 'employer',
-      numeric: false,
-      disablePadding: false,
-      label: 'Employer',
-    },
-    {
-        id: 'deadline',
-        numeric: true,
-        disablePadding: false,
-        label: 'Deadline',
-      },
-    {
-        id: 'status',
-        numeric: false,
-        disablePadding: false,
-        label: 'Status',
-      },
-  ];
 
-  const myContractsRows: Array<object> = [{
+  const myContractsRows: Array<object> = [] /*[{
     title: 'hi',
     description: 'dfsdfs',
     link: 'sdfsdf',
     employer: 'dsfsdfsd',
     deadline: 'sdfsdfsdf',
     status: 'COMPLETE'
-  }]
-  const myJobsRows: Array<object>  = []
+  }]*/
 
 const Dashboard: React.FunctionComponent = () => {
   const [contractPage, setContractPage] = useState<number>(0)
@@ -168,30 +135,41 @@ const Dashboard: React.FunctionComponent = () => {
     return (
         <Box className={classes.root}>
           
-    <Box component={Paper} square elevation={0} variant='outlined' sx={{ bgcolor: '#fff', width: '100%',  height: 'auto', padding: 2}}>
-    <Typography fontWeight='bold' pb={1}>
-                            Frequently Visited Markets
-                        </Typography>
-        {/*<Grid container>
-            <Grid item xs={3}>
-                <MarketDisplay market={'Writing & Translation'} isShowingStats={false} />
-            </Grid>
-</Grid>*/}
-<Typography variant='caption' color='rgb(54, 119, 74)'>
-    You haven't participated in any markets lately
-</Typography>
+
+<Box sx={{padding: '1% 15%', bgcolor: '#fbfbfd'}}>
+
+
+  <Box sx={{my: 2, p: 3, border: '1px solid #eee', width: '100%', bgcolor: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+
+    <Box sx={{ width: 800, display: 'flex', justifyContent: 'center', alignItems: 'center', }}>
+    <img src='assets/images/vector.svg' style={{width: 350, height: 250}} />
+    <Typography fontSize={25} fontWeight='bold' width='70%'>
+      Permissionless labor markets powered by unstoppable networks
+    </Typography>
     </Box>
 
-<Box sx={{padding: '1% 1%'}}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 5 }}>
+      <Stack spacing={1} direction='row' alignItems='center' justifyContent='center' flexDirection='row'>
+    <Info sx={{color: '#ccc'}} fontSize='small' />
+    <Box component={Typography} variant='button' color='#65d386' sx={{   borderRadius: 20}}>
+       Learn more about markets on GigEarth and the mission to provide work to the world
+    </Box>
+    </Stack>
+      </Box>
 
-    <Box component={Typography} fontWeight='bold' variant='h6'>
+
+  </Box>
+
+
+    <Box component={Typography} fontSize={25} fontWeight='bold' color='rgba(33, 33, 33, .85)' variant='h6'>
       Dashboard Overview
     </Box>
-    <Box component={Grid} container spacing={2} direction='row' alignItems='flex-start' flexWrap='nowrap' sx={{width: '100%', height: '100%'}}>
 
-                        <Grid container item xs={6} direction='column' flexDirection='column'>
-                            <Grid container item  direction='row' alignItems='center' sx={{ width: '100%',  my: 2 }}>
-                            <Card xs={3} component={Grid} variant='outlined' item  sx={{ bgcolor: 'rgb(147, 228, 178)', mr: 2, p: 2, display: 'flex', flexDirection: 'column', height: 135,  }}>
+    <Box component={Grid} container direction='row' alignItems='flex-start' flexWrap='nowrap' sx={{width: '100%', height: '100%'}}>
+
+                        <Grid container item xs={12} direction='column' flexDirection='column'>
+                            <Grid container item direction='row' alignItems='center' justifyContent='space-between' sx={{ width: '100%',   my: 2 }}>
+                            <Card component={Grid} xs={2.5} variant='outlined' item  sx={{ bgcolor: '#65d386',p: 2, display: 'flex', flexDirection: 'column', height: 135 }}>
                       <Box>
                         <Stack direction='row' alignItems='center'>
                         <AttachMoney fontSize='small' sx={{ color: '#fff' }} />
@@ -219,12 +197,32 @@ const Dashboard: React.FunctionComponent = () => {
                             </Typography>
                         </Card>
 
-                        <Card xs={3}  component={Grid} variant='outlined' item  sx={{ p: 2,mr: 2, display: 'flex', flexDirection: 'column', height: 'auto', height: 135,  }}>
+                        <Card component={Grid} xs={3} variant='outlined' item  sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 'auto', height: 135 }}>
+                      <Box>
+                          <Stack direction='row' alignItems='center' justifyContent='space-between'>
+                          <Typography fontWeight='bold' color='#65d386' fontSize={14}>
+                            Highest Grossing Market
+                        </Typography>
+
+                          <Button variant='text' size='small' color='secondary' sx={{ width: 150}} endIcon={<KeyboardArrowRight />}>
+                            Open Market
+                        </Button>
+                          </Stack>
+
+
+                        </Box>
+
+                        <Typography py={1} fontWeight='bold' color='#212121' fontSize={30}>
+                            Accounting
+                        </Typography>
+                        </Card>
+
+                        <Card xs={2.5} component={Grid} variant='outlined' item  sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 'auto', height: 135 }}>
                       <Box>
                    
                         <Stack direction='row' alignItems='center'>
-                        <PriceCheck fontSize='small' sx={{ color: alpha('#42c976', 0.65) }} />
-                        <Typography fontWeight='bold' color={alpha('#42c976', 0.65)} fontSize={12}>
+                        <PriceCheck fontSize='small' sx={{ color: '#65d386' }} />
+                        <Typography fontWeight='bold' color='#65d386' fontSize={12}>
                         Total Value Settled
                         </Typography>
                         </Stack>
@@ -247,11 +245,11 @@ const Dashboard: React.FunctionComponent = () => {
                             </Typography>
                         </Card>
 
-                        <Card xs={3} component={Grid} variant='outlined' item  sx={{  p: 2,mr: 2, display: 'flex', flexDirection: 'column', height: 135, }}>
+                        <Card xs={2.5} component={Grid} variant='outlined' item  sx={{  p: 2,display: 'flex', flexDirection: 'column', height: 135}}>
                       <Box>
                         <Stack direction='row' alignItems='center'>
-                        <Article fontSize='small' sx={{ color: alpha('#42c976', 0.65) }} />
-                        <Typography fontWeight='bold' color={alpha('#42c976', 0.65)} fontSize={12}>
+                        <Article fontSize='small' sx={{ color: '#65d386' }} />
+                        <Typography fontWeight='bold' color='#65d386' fontSize={12}>
                         Total Contracts Available
                         </Typography>
                         </Stack>
@@ -267,7 +265,7 @@ const Dashboard: React.FunctionComponent = () => {
                         
                     <UiTableView 
                          hasHead={true}
-                    title='My Contracts' 
+                    title='Contracts, Services and Jobs' 
                     page={0} 
                     rows={myContractsRows} 
                     rowsPerPage={contractRowsPerPage} 
@@ -281,12 +279,12 @@ const Dashboard: React.FunctionComponent = () => {
 
 
 
-                        <Grid container item xs={6}  direction='column' flexDirection='column'>
+                      {/*  <Grid container item xs={6}  direction='column' flexDirection='column'>
                                 <Grid item sx={{ my: 2}}>
                                 <Card component={Grid} variant='outlined' item  sx={{  p: 2, display: 'flex', flexDirection: 'column', height: 135, width: 350 }}>
                       <Box>
                           <Stack direction='row' alignItems='center' justifyContent='space-between'>
-                          <Typography fontWeight='bold' color={alpha('#42c976', 0.65)} fontSize={12}>
+                          <Typography fontWeight='bold' color={alpha('#65d386', 0.65)} fontSize={12}>
                             Highest Grossing Market
                         </Typography>
 
@@ -317,13 +315,15 @@ const Dashboard: React.FunctionComponent = () => {
         emptyTableCaption='You have not started any jobs.  Explore markets and start your first contract.'
          />
                     </Grid>
-                            </Grid>
+    </Grid>*/}
         
 
                 
 
                 </Box>
                 </Box>
+
+
         </Box>
     )
 }

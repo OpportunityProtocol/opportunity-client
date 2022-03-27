@@ -112,50 +112,12 @@ function CustomizedSteppers({ activeStep }) {
     );
   }
 
-  const BootstrapInput = styled(InputBase)(({ theme }) => ({
-    'label + &': {
-      marginTop: theme.spacing(3),
-    },
-    '& .MuiInputBase-input': {
-      borderRadius: 0,
-      position: 'relative',
-      backgroundColor: theme.palette.mode === 'light' ? '#fcfcfb' : '#2b2b2b',
-      border: '1px solid #ced4da',
-      fontSize: 16,
-      width: 400,
-      padding: '10px 12px',
-      transition: theme.transitions.create([
-        'border-color',
-        'background-color',
-        'box-shadow',
-      ]),
-      // Use the system font instead of the default Roboto font.
-      fontFamily: [
-        '-apple-system',
-        'BlinkMacSystemFont',
-        '"Segoe UI"',
-        'Roboto',
-        '"Helvetica Neue"',
-        'Arial',
-        'sans-serif',
-        '"Apple Color Emoji"',
-        '"Segoe UI Emoji"',
-        '"Segoe UI Symbol"',
-      ].join(','),
-      '&:focus': {
-        boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
-        borderColor: theme.palette.primary.main,
-      },
-    },
-  }));
-
-
 const ViewProduct: React.FunctionComponent<any> = () => {
     const classes = useStyles()
 
     return (
         <Box  sx={{ width: '100%', padding: '3% 3%', bgcolor: '#fbfbfd'}}>
-            <Box component={Paper} elevation={20} sx={{ padding: '2% 5%', bgcolor: '#fff', border: '1px solid #ddd',  boxShadow:
+            <Box component={Paper} elevation={20} sx={{ padding: '2% 5%', bgcolor: '#fff', border: '1px solid #eee',  boxShadow:
           '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)', }}>
                 <Box sx={{ width: '100% '}}>
 
