@@ -11,16 +11,6 @@ import Footer from '../common/components/Footer/Footer'
 const Home: NextPage = () => {
   return (
     <div className={styles.container}>
-      <Head>
-        <title>GigEarth</title>
-        <meta name="description" content="Permissionless labor markets" />
-        <link rel="icon" href="/favicon.ico" />
-        <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/icon?family=Material+Icons"
-        />
-        <link rel="stylesheet" href="https://use.typekit.net/bhd6hze.css" />
-      </Head>
       <Markets />
     </div>
   )

@@ -20,7 +20,7 @@ import {
     CardHeader
 } from "@mui/material"
 
-import { useStyles } from './ContractStyles';
+import { useStyles } from '../../modules/contract/ContractStyles'
 import { Attachment, ContentCopy, Send } from '@mui/icons-material'
 import JobDisplay from '../../modules/market/components/JobDisplay';
 import BountySubmission from '../../modules/market/components/BountySubmission/BountySubmission';

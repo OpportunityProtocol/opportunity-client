@@ -72,7 +72,31 @@ const useStyles = makeStyles((theme) =>
     link: {
         color: 'rgb(54, 119, 74)',
         cursor: 'pointer'
-    }
+    },
+    marginBottom: {
+        marginBottom: theme.spacing(2)
+    },
+    li: {
+        padding: '0px !important'
+      //  fontSize: 15
+    },
+    info: {
+        marginRight: 12,
+      },
+      avatar: {
+        borderRadius: 8,
+        backgroundColor: '#495869'
+      },
+      overline: {
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        color: '#8D9CAD',
+      },
+      name: {
+        //fontSize: 14,
+        fontWeight: 500,
+        color: '#495869',
+      }
   }),
 );
 

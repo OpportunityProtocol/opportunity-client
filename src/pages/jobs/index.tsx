@@ -114,6 +114,7 @@ const Jobs: React.FunctionComponent = () => {
     const b = await a.json();
     setRelationships(b.results);
     setNetworkSuggestions(b.results);
+    console.log(b.results)
   };
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -203,7 +204,7 @@ const Jobs: React.FunctionComponent = () => {
           </Grid>
 
           <Grid item xs={4}>
-            <Alert component={Card} className={classes.marginBottom}>
+            <Alert icon={false} variant='filled' component={Card} className={classes.marginBottom}>
               <Typography variant="subtitle1" fontWeight="600">
                 Writing and Translation
               </Typography>

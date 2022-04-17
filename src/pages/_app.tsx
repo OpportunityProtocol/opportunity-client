@@ -7,6 +7,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import MarketToolbar from '../modules/market/components/MarketToolbar';
 import Footer from '../common/components/Footer/Footer';
 import NavigationBreadcrumbs from '../common/components/Breadcrumbs/Breadcrumbs'
+import Head from 'next/head'
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [showChild, setShowChild] = useState(false);
@@ -20,12 +21,32 @@ function MyApp({ Component, pageProps }: AppProps) {
 
 
   return (
+    <React.Fragment>
+    <Head>
+    <title>GigEarth</title>
+    <meta name="description" content="Permissionless labor markets" />
+    <link rel="icon" href="/favicon.ico" />
+    <link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+/>
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/icon?family=Material+Icons"
+/>
+    <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+    <link rel="stylesheet" href="https://use.typekit.net/bhd6hze.css" />
+  </Head>
   <ThemeProvider theme={theme}>
   <Opportunity>
     <NavigationBreadcrumbs />
     <Component {...pageProps} />
   </Opportunity> 
 </ThemeProvider>
+</React.Fragment>
   )
 
 }
