@@ -29,9 +29,9 @@ const MarketDisplay: React.FunctionComponent<IMarketDisplayProps> = ({ market, i
         <CardContent className={classes.primaryContentContainer}>
           <Grid container direction='row' alignItems='center' justifyContent='space-between'>
             <Grid item>
-              <Typography className={classes.marketTitle}>
+              <Box component='div' sx={{ fontWeight: (theme) => theme.typography.fontWeightBold }}>
                 {market}
-              </Typography>
+              </Box>
             </Grid>
 
             <Grid item />
@@ -41,60 +41,11 @@ const MarketDisplay: React.FunctionComponent<IMarketDisplayProps> = ({ market, i
             Lizards are a widespread group of squamate reptiles, with over 6,000
             species, ranging across all continents except Antarctica
           </Typography>
+          <Typography color='secondary' pt={2} variant='body2'>
+          {Math.floor(Math.random() * 3200)} contracts and services available
+          </Typography>
         </CardContent>
-        {isShowingStats ? 
-        (<React.Fragment>
-                 <Divider />
-        <CardContent>
-        <Box component={Grid} container alignItems='center' justifyContent='space-between'>
-            <Grid item sx={{display: 'flex', alignItems: 'center'}}>
 
-              <Stack direction='column' pr={2} >
-              <Typography component='div'>
-                <Box sx={{ fontWeight: 'bold', fontSize: 12, color: 'rgb(54, 119, 74)' }}>
-                Contracts
-                </Box>
-                  </Typography>
-                  <Typography fontSize={12} fontWeight='medium'>
-                    {Math.floor(Math.random() * 2000).toFixed()}
-                  </Typography>
-              </Stack>
-
-              <Stack direction='column' pr={2} >
-              <Typography component='div'>
-                <Box sx={{ fontWeight: 'bold', fontSize: 12, color: 'rgb(54, 119, 74)' }}>
-                Services
-                </Box>
-                  </Typography>
-                  <Typography fontSize={12} fontWeight='medium'>
-                    {Math.floor(Math.random() * 2000).toFixed()}
-                  </Typography>
-              </Stack>
-
-              <Stack direction='column' pr={2}>
-              <Typography component='div'>
-                <Box sx={{ fontWeight: 'bold', fontSize: 12, color: 'rgb(54, 119, 74)' }}>
-                Value Settled
-                </Box>
-                  </Typography>
-                  <Typography fontSize={12} fontWeight='medium'>
-                  ${Math.floor(Math.random() * 2000).toFixed(2)}
-                  </Typography>
-              </Stack>
-            </Grid>
-
-           {/* <Grid item>
-            <AvatarGroup max={3} sx={{ display: 'flex', alignItems: 'center', margin: '0px !important', justifyContent: 'flex-start'}}>
-            <Avatar sx={{ width: 20, height: 20 }} alt="Remy Sharp" src="/assets/images/dai.png" />
-            <Avatar sx={{ width: 15, height: 15 }} alt="Remy Sharp" src="/assets/images/terra.png" />
-                    </AvatarGroup>
-        </Grid>*/}
-          <Grid item />
-          </Box>
-              </CardContent>
-        </React.Fragment>)
-        :
-        null}
       </ClickableCard>
   )
 }

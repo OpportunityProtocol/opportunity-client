@@ -1,12 +1,12 @@
 .container {
-
+  background-color: #fbfbfd;
 }
 
 .main {
   min-height: 100vh;
   flex: 1;
   display: flex;
-  background-color: yellow;
+  background-color: #fbfbfd;
 }
 
 .footer {

@@ -4,7 +4,7 @@ import {
     Container,
 } from "@mui/material"
 
-import { useStyles } from './JobStyles'
+import { useStyles } from '../../modules/market/MarketStyles'
 import JobDisplay from '../../modules/market/components/JobDisplay';
 
 const MyContracts: React.FunctionComponent = () => {

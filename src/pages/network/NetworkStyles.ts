@@ -8,23 +8,18 @@ const useStyles = makeStyles((theme) => {
       backgroundColor: '#fff',
     },
     blockie: {
-      width: 60,
-      height: 60,
-      borderRadius: 20,
-      margin: '20px 0px'
+      borderRadius: 999, left: '35%', position: 'absolute', top: 52
     },
     productCard: {
       '&:hover': {
         cursor: 'pointer',
-        boxShadow:
-          '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)',
+        boxShadow: '0px 6px 6px -3px #ccc, 0px 10px 14px 1px #ccc, 0px 4px 18px 3px #ccc',
       },
     },
     connectionCard: {
       '&:hover': {
         cursor: 'pointer',
-        boxShadow:
-          '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)',
+        boxShadow: '0px 6px 6px -3px #ccc, 0px 10px 14px 1px #ccc, 0px 4px 18px 3px #ccc',
       },
     },
     button: {

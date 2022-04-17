@@ -13,4 +13,10 @@ interface HeadCell {
     numeric: boolean;
   }
 
-  export type { Data, HeadCell }
+  interface TabPanelProps {
+    children?: React.ReactNode;
+    index: number;
+    value: number;
+  }
+
+  export type { Data, HeadCell, TabPanelProps }

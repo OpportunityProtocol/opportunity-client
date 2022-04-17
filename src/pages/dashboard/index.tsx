@@ -20,6 +20,8 @@ import {
     Tab,
     Stack,
     InputBase,
+    Avatar,
+    CardContent,
 } from '@mui/material'
 
 import Table from '@mui/material/Table';
@@ -35,235 +37,216 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowDropUp, Article, AttachMoney, Info, PriceCheck } from '@mui/icons-material';
+import { Add, ArrowDropUp, Article, AttachMoney, Info, PriceCheck, Search } from '@mui/icons-material';
 import MarketDisplay from '../../modules/market/components/MarketDisplay';
 import UiTableView from '../../common/components/UITableView/UITableView';
   import { HeadCell, Data } from '../../common/interface'
 
+  import Blockies from 'react-blockies'
+import JobDisplay from '../../modules/market/components/JobDisplay';
+import SmallConnectionCard from '../../modules/user/components/SmallConnectionCard/SmallConnectionCard';
 
-  const myContractsHeadCells: HeadCell[] = [
-    {
-      id: 'type',
-      numeric: false,
-      disablePadding: true,
-      label: 'Type',
-    },
-    {
-      id: 'title',
-      numeric: false,
-      disablePadding: true,
-      label: 'Title',
-    },
-    {
-      id: 'description',
-      numeric: false,
-      disablePadding: false,
-      label: 'Description',
-    },
-    {
-      id: 'link',
-      numeric: false,
-      disablePadding: false,
-      label: 'Metadata Link',
-    },
-    {
-      id: 'assignee',
-      numeric: false,
-      disablePadding: false,
-      label: 'Assignee',
-    },
-    {
-        id: 'deadline',
-        numeric: true,
-        disablePadding: false,
-        label: 'Deadline',
-      },
-    {
-        id: 'status',
-        numeric: false,
-        disablePadding: false,
-        label: 'Status',
-      },
-  ];
-  
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
 
-  const myContractsRows: Array<object> = [] /*[{
-    title: 'hi',
-    description: 'dfsdfs',
-    link: 'sdfsdf',
-    employer: 'dsfsdfsd',
-    deadline: 'sdfsdfsdf',
-    status: 'COMPLETE'
-  }]*/
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`vertical-tabpanel-${index}`}
+      aria-labelledby={`vertical-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ bgcolor: '#fbfbfd' }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+      value: index,
+    id: `vertical-tab-${index}`,
+    'aria-controls': `vertical-tabpanel-${index}`,
+  };
+}
+
+  const COLUMN_HEIGHT = 'calc(100vh - 70px)'
 
 const Dashboard: React.FunctionComponent = () => {
   const [contractPage, setContractPage] = useState<number>(0)
   const [contractRowsPerPage, setContractRowsPerPage] = useState<number>(5)
   const [jobsPage, setJobsPage] = useState<number>(0)
   const [jobsRowsPerPage, setJobsRowsPerPage] = useState<number>(5)
+  const [connections, setConnections] = useState([1,2,3])
+  const [value, setValue] = React.useState(0);
 
-  const handleContractsChangePage = (
-    event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number,
-  ) => {
-    setContractPage(newPage);
-  };
-
-  const handleContractsChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setContractRowsPerPage(parseInt(event.target.value, 10));
-    setContractPage(0);
-  };
-
-  const handleJobsChangePage = (
-    event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number,
-  ) => {
-    setJobsPage(newPage);
-  };
-
-  const handleJobsChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setJobsRowsPerPage(parseInt(event.target.value, 10));
-    setJobsPage(0);
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
   };
 
     const classes = useStyles()
 
     return (
         <Box className={classes.root}>
-          
+            <Grid container direction='row' alignItems='flex-start'>
 
-<Box sx={{padding: '1% 15%', bgcolor: '#fbfbfd'}}>
+            <Grid item xs={9} sx={{ overflowY: 'scroll', p: 5, height: COLUMN_HEIGHT, backgroundColor: '#fbfbfd'}}>
+              <Stack spacing={1} width='100%' direction='row' alignItems='center' justifyContent='flex-end'>
+                    <Button disableElevation variant='outlined' color='secondary'>
+                      Create Contract
+                    </Button>
 
+                    <Button disableElevation variant='outlined' color='secondary'>
+                      Add Service
+                    </Button>
+                    </Stack>
 
-  <Box sx={{my: 2, p: 3, border: '1px solid #eee', width: '100%', bgcolor: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                    <Tabs
+    variant='standard'
+        value={value}
+        indicatorColor='secondary'
+        textColor='secondary'
+        onChange={handleChange}
+        sx={{ bgcolor: '#fbfbfd', my: 2 }}
+      >
+        <Tab sx={{fontSize: 15 }} label={`Connections (${Math.floor(Math.random() * 30)})`} {...a11yProps(0)} />
+        <Tab sx={{fontSize: 15}} label={`My Contracts (${Math.floor(Math.random() * 30)})`} {...a11yProps(1)} />
+        <Tab sx={{fontSize: 15}} label={`My Jobs (${Math.floor(Math.random() * 30)})`} {...a11yProps(1)} />
+        <Tab sx={{fontSize: 15}} label={`My Services (${Math.floor(Math.random() * 30)})`} {...a11yProps(2)} />
+      </Tabs>
 
-    <Box sx={{ width: 800, display: 'flex', justifyContent: 'center', alignItems: 'center', }}>
-    <img src='assets/images/vector.svg' style={{width: 350, height: 250}} />
-    <Typography fontSize={25} fontWeight='bold' width='70%'>
-      Permissionless labor markets powered by unstoppable networks
-    </Typography>
-    </Box>
-
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 5 }}>
-      <Stack spacing={1} direction='row' alignItems='center' justifyContent='center' flexDirection='row'>
-    <Info sx={{color: '#ccc'}} fontSize='small' />
-    <Box component={Typography} variant='button' color='#65d386' sx={{   borderRadius: 20}}>
-       Learn more about markets on GigEarth and the mission to provide work to the world
-    </Box>
-    </Stack>
-      </Box>
-
-
-  </Box>
-
-
-    <Box component={Typography} fontSize={25} fontWeight='bold' color='rgba(33, 33, 33, .85)' variant='h6'>
-      Dashboard Overview
-    </Box>
-
-    <Box component={Grid} container direction='row' alignItems='flex-start' flexWrap='nowrap' sx={{width: '100%', height: '100%'}}>
-
-                        <Grid container item xs={12} direction='column' flexDirection='column'>
-                            <Grid container item direction='row' alignItems='center' justifyContent='space-between' sx={{ width: '100%',   my: 2 }}>
-                            <Card component={Grid} xs={2.5} variant='outlined' item  sx={{ bgcolor: '#65d386',p: 2, display: 'flex', flexDirection: 'column', height: 135 }}>
-                      <Box>
-                        <Stack direction='row' alignItems='center'>
-                        <AttachMoney fontSize='small' sx={{ color: '#fff' }} />
-                        <Typography fontWeight='bold' color='#fff' fontSize={12}>
-                            Your Total Profit
-                        </Typography>
-                        </Stack>
-
-                        </Box>
-
-                        <Typography py={1} fontWeight='bold' color='#fff' fontSize={30}>
-                        ${Math.floor(Math.random() * 10000).toFixed(2)}
-                        </Typography>
-
-                        <Typography fontSize={12} fontWeight='medium' color='#fff'>
-                                <Stack alignItems='center' spacing={2} direction='row'>
-                                    <>
-                                    12% (month)
-                                    </>
-                                    <>
-                                    <ArrowDropUp color='secondary' fontSize='small' />
-                                    </>
-                                </Stack>
-                              
-                            </Typography>
-                        </Card>
-
-                        <Card component={Grid} xs={3} variant='outlined' item  sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 'auto', height: 135 }}>
-                      <Box>
-                          <Stack direction='row' alignItems='center' justifyContent='space-between'>
-                          <Typography fontWeight='bold' color='#65d386' fontSize={14}>
-                            Highest Grossing Market
-                        </Typography>
-
-                          <Button variant='text' size='small' color='secondary' sx={{ width: 150}} endIcon={<KeyboardArrowRight />}>
-                            Open Market
-                        </Button>
+      <TabPanel value={0} index={0} sx={{ bgcolor: '#fff' }}>
+      <Box sx={{  }} component={Grid}  container direction='row' alignItems='center' spacing={3}>
+                    {
+                      new Array(10).fill(1).map(connection => {
+                        return (
+                          <Grid item xs={3}>
+                            <Card variant='outlined' classes={{ root: classes.card }}>
+                            <CardContent>
+                          <Stack direction='row' spacing={2} alignItems='flex-start'>
+                          <Avatar sx={{ width: 40, height: 40 }} src='/assets/stock/profile_main.jpeg' />
+                          <Box>
+                          <Box sx={{ fontSize: 15, fontWeight: 'bold'}} color='rgba(33, 33, 33, .85)'>
+                            Joe Ross
+                          </Box> 
+                          <Box>
+                          <Typography  
+                          sx={{
+                display: '-webkit-box',
+                overflow: 'hidden',
+                WebkitBoxOrient: 'vertical',
+                WebkitLineClamp: 2,
+            }} fontSize={12} color='#a1a1a1'>
+                          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer porta, nulla in tempor fringilla, ex ligula venenatis justo, eu consequat urna lacus facilisis justo. 
+                          </Typography>
+                          </Box>
+                          </Box>
                           </Stack>
+                          </CardContent>
+                          </Card>
+                        </Grid>
+                        )
+                      })
+                    }
+                </Box>
+      </TabPanel>
+
+      <TabPanel value={1} index={1}>
+        Item One
+      </TabPanel>
+
+      <TabPanel value={2} index={2}>
+        Item One
+      </TabPanel>
 
 
-                        </Box>
 
-                        <Typography py={1} fontWeight='bold' color='#212121' fontSize={30}>
-                            Accounting
-                        </Typography>
-                        </Card>
 
-                        <Card xs={2.5} component={Grid} variant='outlined' item  sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 'auto', height: 135 }}>
-                      <Box>
-                   
-                        <Stack direction='row' alignItems='center'>
-                        <PriceCheck fontSize='small' sx={{ color: '#65d386' }} />
-                        <Typography fontWeight='bold' color='#65d386' fontSize={12}>
-                        Total Value Settled
-                        </Typography>
-                        </Stack>
-                        </Box>
 
-                        <Typography py={1} fontWeight='bold' color='#212121' fontSize={30}>
-                        ${Math.floor(Math.random() * 200000).toFixed(2)}
-                        </Typography>
+    
+              </Grid>
 
-                        <Typography fontSize={12} fontWeight='medium'>
-                                <Stack alignItems='center' spacing={2} direction='row'>
-                                    <>
-                                    12% (month)
-                                    </>
-                                    <>
-                                    <ArrowDropUp color='secondary' fontSize='small' />
-                                    </>
-                                </Stack>
-                              
-                            </Typography>
-                        </Card>
 
-                        <Card xs={2.5} component={Grid} variant='outlined' item  sx={{  p: 2,display: 'flex', flexDirection: 'column', height: 135}}>
-                      <Box>
-                        <Stack direction='row' alignItems='center'>
-                        <Article fontSize='small' sx={{ color: '#65d386' }} />
-                        <Typography fontWeight='bold' color='#65d386' fontSize={12}>
-                        Total Contracts Available
-                        </Typography>
-                        </Stack>
-                        </Box>
+              <Grid item xs={3} sx={{ borderLeft: '1px solid #eee', backgroundColor: '#fff', height: COLUMN_HEIGHT, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start',}}>
+                <Box p={5}>
+                <Stack direction='column' alignItems='center'>
+                  {Math.random() > 0.5 ? <Avatar sx={{ width: 110, height: 110 }} src='/assets/stock/profile_main.jpeg' /> 
+                  :       
+                  <Blockies
+                      seed={Math.random().toString()}
+                      size={40}
+                      scale={3}
+                      className={classes.blockie}
+                    />}
+                  <Typography sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column'}} component='div' fontWeight='bold' py={2}>
+                  <Box sx={{ fontWeight: 'bold', fontSize: 25 }}>
+                      Joe Rossy
+                    </Box>
+                    <Box sx={{ fontWeight: 'medium', color: 'grey' }}>
+                    @happytowork
+                    </Box>
+                  </Typography>
 
-                        <Typography py={1} fontWeight='bold' color='#212121' fontSize={30}>
-                            {Math.floor(Math.random() * 4000)}
-                        </Typography>
-                        </Card>
-                            </Grid>
+                  <Stack direction='row' alignitems='center'>
+                    <Button variant='contained' disabled>
+                      Connect
+                    </Button>
+                  </Stack>
+                </Stack>
+                </Box>
+                <Divider className={classes.divider} />
+                <CardContent>
+                <Typography variant='subtitle2' fontWeight='bold' color='rgba(33, 33, 33, .85)'>
+                    About me
+                  </Typography>
+                  <Typography py={1}  sx={{ fontWeight: 'medium' }} paragraph fontSize={13}>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ultricies volutpat ex ut malesuada. Maecenas semper tempus commodo. Etiam aliquet, ligula ut dignissim luctus, felis dui viverra metus, a iaculis libero risus vitae mauris. Aliquam sed tristique est. Donec vitae maximus ligula. Nam aliquet metus sit amet odio posuere, nec congue diam viverra. Integer non tortor dui. Integer pulvinar maximus aliquam.
+                  </Typography>
+                </CardContent>
+                <Divider className={classes.divider} />
+                <Box component={CardContent}>
+                <Typography  variant='subtitle2' fontWeight='bold' color='rgba(33, 33, 33, .85)'>
+                    Languages
+                  </Typography>
+                  <Stack py={1} direction='row' alignItems='center' spacing={1}>
+                    <Chip variant='outlined' label='English' />
+                    <Chip variant='outlined' label='Spanish' />
+                  </Stack>
+                </Box>
+                <Divider className={classes.divider} />
+                <Box component={CardContent}>
+                <Typography variant='subtitle2' fontWeight='bold' color='rgba(33, 33, 33, .85)'>
+                    Skillset
+                  </Typography>
+                  <Stack py={1}  direction='row' alignItems='center' spacing={1}>
+                    <Chip variant='outlined' label='English' />
+                    <Chip variant='outlined' label='Spanish' />
+                  </Stack>
+                </Box>
+              </Grid>
 
-                            <Grid item sx={{flex: 1, height: 420}}>
-                        
-                    <UiTableView 
+
+            </Grid>
+        </Box>
+    )
+}
+
+export default Dashboard
+
+
+/*
+
+     <UiTableView 
                          hasHead={true}
                     title='Contracts, Services and Jobs' 
                     page={0} 
@@ -274,64 +257,7 @@ const Dashboard: React.FunctionComponent = () => {
                     headCells={myContractsHeadCells} 
                     emptyTableCaption='You have not posted any contracts.  Post your first now.'
                     />
-                    </Grid>
-                        </Grid>
 
-
-
-                      {/*  <Grid container item xs={6}  direction='column' flexDirection='column'>
-                                <Grid item sx={{ my: 2}}>
-                                <Card component={Grid} variant='outlined' item  sx={{  p: 2, display: 'flex', flexDirection: 'column', height: 135, width: 350 }}>
-                      <Box>
-                          <Stack direction='row' alignItems='center' justifyContent='space-between'>
-                          <Typography fontWeight='bold' color={alpha('#65d386', 0.65)} fontSize={12}>
-                            Highest Grossing Market
-                        </Typography>
-
-                          <Button variant='text' size='small' color='secondary' sx={{ width: 150}} endIcon={<KeyboardArrowRight />}>
-                            Open Market
-                        </Button>
-                          </Stack>
-
-
-                        </Box>
-
-                        <Typography py={1} fontWeight='bold' color='#212121' fontSize={30}>
-                            Accounting
-                        </Typography>
-                        </Card>
-                                </Grid>
-
-                                <Grid item>
-        <UiTableView 
-        hasHead={true}
-        title='My Jobs' 
-        page={0} 
-        rows={myJobsRows} 
-        rowsPerPage={jobsRowsPerPage} 
-        handleChangePage={handleJobsChangePage} 
-        handleChangeRowsPerPage={handleJobsChangeRowsPerPage}
-        headCells={myJobsHeadCells}
-        emptyTableCaption='You have not started any jobs.  Explore markets and start your first contract.'
-         />
-                    </Grid>
-    </Grid>*/}
-        
-
-                
-
-                </Box>
-                </Box>
-
-
-        </Box>
-    )
-}
-
-export default Dashboard
-
-
-/*
 const myWorkHeadCells: HeadCell[] = [
   {
     id: 'a',

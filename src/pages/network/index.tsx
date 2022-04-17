@@ -18,11 +18,12 @@ import {
 } from '@mui/material'
 
 import { useStyles } from './NetworkStyles'
-import { Folder, Language } from '@mui/icons-material';
+import { Folder, Language, PeopleOutline } from '@mui/icons-material';
 import Blockies from 'react-blockies'
 import { HeadCell, Data } from '../../common/interface'
 import UiTableView from '../../common/components/UITableView/UITableView';
 import { useRouter } from 'next/router';
+import { getRandomColor } from './helper';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -57,7 +58,7 @@ interface TabPanelProps {
     };
   }
 
-const products = new Array(30).fill(1)
+const products = new Array(1).fill(1)
 
 const Network: React.FunctionComponent = () => {
     const classes = useStyles()
@@ -141,24 +142,25 @@ const Network: React.FunctionComponent = () => {
                     products.map(product => {
                       return (
                         <Grid item xs={3}>
-                          <Card classes={{ root: classes.connectionCard }} variant='outlined' sx={{ height: 300}}>
-                            <CardActionArea sx={{height: '100%'}} >
-                              <CardContent sx={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',flexDirection: 'column'}}>
-                              <Blockies
-                      seed={Math.random().toString()}
-                      size={30}
-                      scale={3}
-                      className={classes.blockie}
-                    />
-                              <Typography fontWeight='bold'>
-                                @handletowork
+                          <Card classes={{ root: classes.connectionCard }} variant='outlined' sx={{ height: 350}}>
+                            <CardActionArea sx={{height: '100%', position: 'relative'}} >
+                              <Box sx={{ height: 100, width: '100%', bgcolor: getRandomColor(), position: 'relative', top: 0}}>
+                                <Avatar style={{width: 80, height: 80}} className={classes.blockie} src='/assets/stock/profile_three.jpeg' />
+                              </Box>
+                              <CardContent sx={{ height: 'calc(100% - 85px)', display: 'flex', alignItems: 'center', justifyContent: 'center',flexDirection: 'column'}}>
+                              <Typography pt={1} fontWeight='bold' fontSize={25} color='rgb(65, 65, 65)'>
+                                @webdev4hire
                               </Typography>
-                              <Typography fontSize={14} fontWeight='bold'>
+                              <Typography py={1} fontSize={14} fontWeight='light' textAlign='center' color='rgb(65, 65, 65)'>
+                                Well-crafted UI guy aimed to enlarge your pixel.  Hire me or die!
+                              </Typography>
+
+                              <Stack py={1} direction='row' alignItems='center' spacing={1}>
+                              <PeopleOutline fontSize='small' sx={{color: 'rgb(145, 145, 145)'}} />
+                              <Typography fontSize={14} fontWeight='light' color='rgb(145, 145, 145)'>
                                 12 Mutual Connections
                               </Typography>
-                              <Button classes={{ root: classes.button }} sx={{my: 2}} variant='outlined'>
-                                View Portfolio
-                              </Button>
+                              </Stack>
                               </CardContent>
                             </CardActionArea>
                           </Card>

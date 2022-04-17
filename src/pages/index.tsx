@@ -6,6 +6,7 @@ import styles from '../../styles/Home.module.css'
 import theme from '../../material_theme'
 import Opportunity from '../Opportunity'
 import Markets from './markets';
+import Footer from '../common/components/Footer/Footer'
 
 const Home: NextPage = () => {
   return (

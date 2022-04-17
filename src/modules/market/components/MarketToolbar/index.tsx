@@ -21,14 +21,7 @@ const MarketToolbar: React.FunctionComponent = () => {
   const router = useRouter()
   
     return (
-      null
-    )
-}
-
-export default MarketToolbar
-
-/*
-<Box component={Paper}  elevation={0} 
+      <Box component={Paper}  elevation={0} 
       classes={{
         root: classes.container
       }}
@@ -36,19 +29,8 @@ export default MarketToolbar
           <Grid
           flexWrap="nowrap"
           container
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between">
-            <Box
-            component={Grid}
-            item
-            container
-            xs={8}
-            direction="row"
-            alignItems="center"
-            spacing={5}
-            >
-              <Grid item >
+          direction="column">
+              <Grid item sx={{p: 1}}>
                 <Typography color='#212121' noWrap fontWeight='bold' fontSize={12}>
                   <IoWalletSharp size={10} />  Web3/Wallet Provider:{' '}
                 </Typography>
@@ -56,8 +38,8 @@ export default MarketToolbar
                   MetaMask
                 </Typography>
               </Grid>
-
-              <Grid item>
+<Divider />
+              <Grid item sx={{p: 1}}>
                 <Typography color='#212121' fontWeight='bold' fontSize={12}>
                   <FaEthereum size={10} /> DAI Balance:{' '}
                 </Typography>
@@ -65,8 +47,8 @@ export default MarketToolbar
                   $125.64
                 </Typography>
               </Grid>
-
-              <Grid item>
+              <Divider />
+              <Grid item sx={{p: 1}}>
                 <Typography color='#212121' fontWeight='bold' fontSize={12}>
                   <FaEthereum size={10} /> UST Balance:{' '}
                 </Typography>
@@ -74,47 +56,14 @@ export default MarketToolbar
                   $23.22
                 </Typography>
               </Grid>
-            </Box>
 
-            <Box
-            component={Grid}
-            container
-            item
-            xs={4}
-            direction="row"
-            alignItems="center"
-            height={60}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-           }}
-           >
-
-            <Grid item mx={1}>
-              <Link href='/contract/create'>
-                <Button
-                color="secondary"
-                variant="outlined"
-                size='small'
-                >
-                  Create Contract
-                </Button>
-              </Link>
-            </Grid>
-            <Grid item mx={1}>
-              <Link href='/contract/create'>
-                <Button
-                color="secondary"
-                variant="outlined"
-                size='small'
-                >
-                  Create Post
-                </Button>
-              </Link>
-            </Grid>
-          </Box>
         </Grid>
-        <Divider />
       </Box>
-      */
+    )
+}
+
+export default MarketToolbar
+
+
+
+      

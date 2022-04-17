@@ -6,10 +6,12 @@ import {
   Paper,
   Box,
   Drawer,
+  Popover,
   InputBase,
   Grid,
   CssBaseline,
   Stack,
+  Avatar,
   FormLabel,
   List,
   Button,
@@ -30,7 +32,8 @@ import {
   ListItemButton,
 } from '@mui/material'
 
-import { Search } from '@mui/icons-material'
+
+import { Search, Add } from '@mui/icons-material'
 
 import router, { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -39,7 +42,33 @@ import Blockies from 'react-blockies'
 import useStyles from './OpportunityStyles'
 import MarketToolbar from './modules/market/components/MarketToolbar'
 
+import { FaEthereum } from 'react-icons/fa'
+import { IoWalletSharp } from 'react-icons/io5'
+
 const drawerWidth = 300
+
+const marks = [
+  {
+    value: 0,
+    label: '0',
+  },
+  {
+    value: 100,
+    label: '100+',
+  },
+  {
+    value: 500,
+    label: '500+',
+  },
+  {
+    value: 1000,
+    label: '1000+',
+  },
+];
+
+function valuetext(value: number) {
+  return `${value}°C`;
+}
 
 const MARKETS = [
   {
@@ -165,13 +194,29 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { ArrowDropDown } from '@mui/icons-material'
 
 import { IOpportunityProps, IContractChatsContentProps, IMarketDrawerContentProps  } from './OpportunityInterfaces'
+import AccountPopover from './modules/user/components/AccountPopover/AccountPopover'
+import NavigationBreadcrumbs from './common/components/Breadcrumbs/Breadcrumbs'
 
 const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) => {
   const router = useRouter()
   const classes = useStyles()
   const [view, setView] = useState('Market')
 
-  const isDrawerShowing = router.pathname.includes('create') || router.pathname.includes('dashboard') || router.pathname.includes('portfolio') ? false : true
+  const isDrawerShowing = router.pathname.includes('create') || router.pathname.includes('dashboard') || router.pathname.includes('portfolio') || router.pathname == '/contract/view' ? false : true
+
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+      setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
+  const isPadded = router.pathname === '/jobs' || router.pathname === '/dashboard'
 
   const renderDrawerContent = () => {
     switch(router.pathname) {
@@ -192,12 +237,17 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
       <AppBar
         position="fixed"
         variant='elevation'
+        elevation={0}
+        
         sx={{ 
-          boxShadow: '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)',
+          width: { sm: `100%` },
+          ml: { sm: `100%` },
+          //boxShadow: '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)',
           bgcolor: "#fff", 
           height: '65px', 
           border: 'none !important',
-          zIndex: (theme) => theme.zIndex.drawer + 1 
+          borderBottom: '1px solid #eee !important',
+          //zIndex: (theme) => theme.zIndex.drawer 
         }}
       >
         <Toolbar className={classes.toolbar}
@@ -212,7 +262,8 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
             alignItems="center"
             justifyContent="space-between"
           >
-            <Grid item style={{ display: 'flex' }}>
+
+<Grid item display='flex'>
             <Link href='/markets'>
               <img className={classes.clickableBrand} src='/assets/logo.svg' style={{  width: 35, height: 35}} />
               </Link>
@@ -222,28 +273,30 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                 GigEarth
               </Typography>
               </Link>
-            </Grid>
-
+              </Grid> 
             <Grid item >
             <Paper 
             elevation={0} 
               component="form"
-              sx={{ display: 'flex', my: 3, width: 500, p: 1, border: '1px solid #eee', borderRadius: 2}}>
+              sx={{ display: 'flex', height: 40, alignItems: 'center', width: 500, border: '1px solid #eee', borderRadius: 0}}>
 <InputBase
+
             startAdornment={<Search sx={{color: '#aaa'}} />}
-        sx={{  ml: 1, flex: 1, flexGrow: 1, height: 30, fontSize: 14 }}
-        placeholder="Search"
+        sx={{  borderRadius: '0px !important', ml: 1, flex: 1, flexGrow: 1, height: 30, fontSize: 14 }}
+        placeholder="Find gigs, anytime"
         inputProps={{ 'aria-label': 'search google maps', style: { padding: '0px 10px'} }}
       />
- 
+       <Button sx={{ borderRadius: '0px !important', color: '#fff', height: 40 }} disableElevation color='secondary' variant='contained'>
+        Search
+      </Button>
     </Paper>
             </Grid>
 
             <Grid item >
-              <div className={classes.flexRow}>
+              <div>
               <Link href='/dashboard'>
               <Typography onClick={() => setView('Dashboard')} component={Button} mx={2} fontSize={14} variant="button" color={view === 'Dashboard' ? 'secondary' : "#212121"} fontWeight='bold'>
-                  Dashboard
+                  My Network
                 </Typography>
                 </Link>
 
@@ -256,12 +309,6 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                 <Link href='/contract'>
                 <Typography onClick={() => setView('Messenger')} component={Button} mx={2} fontSize={14} variant="button" color={view === 'Messenger' ? 'secondary' :"#212121"} fontWeight='bold'>
                   Messenger
-                </Typography>
-                </Link>
-
-                <Link href='/network'>
-                <Typography onClick={() => setView('Portfolio')} component={Button} mx={2} fontSize={14} variant="button" color={view === 'Portfolio' ? 'secondary' : "#212121"} fontWeight='bold'>
-                  Network
                 </Typography>
                 </Link>
               </div>
@@ -287,7 +334,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                </Stack>
             */}
              <Divider orientation='vertical' sx={{height: 65}} />
-              <CardActionArea className={classes.identityBox}>
+              <CardActionArea onClick={handleClick} className={classes.identityBox} aria-describedby='account-popover' aria-owns='account-popover'>
                 <Blockies
                   seed="Max"
                   size={10}
@@ -317,109 +364,104 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                     </Typography>
 
                   </div>
-                  <IconButton fontSize='small'>
+                  <IconButton size='small'>
                     <ArrowDropDown sx={{ color: "#212121" }} />
                   </IconButton>
                 </div>
               </CardActionArea>
+              <Popover 
+style={{ position: 'absolute', top: 55}}
+        id='account-popover'
+        open={open}
+      
+        onClose={handleClose}
+        anchorOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+        }}
+        > 
+          <Box sx={{ p: 1 }}>
+            <Typography component='div'>
+              <Box sx={{ fontWeight: 'bold' }}>
+                Welcome to GigEarth
+              </Box>
+              <Box sx={{ fontSize: 16, fontWeight: 'medium', color: 'rgb(94, 94, 94)' }}>
+                Permissionless labor markets powered by unstoppable networks
+              </Box>
+            </Typography>
+          </Box>
+          <Box sx={{ p: 1, display: 'flex', alignItems: 'center'}}>
+          <Avatar sx={{ width: 40, height: 40 }} src='/assets/stock/profile_main.jpeg' />
+          <Typography component='div' px={2}>
+                      <Box sx={{
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        color: "#212121"
+                      }}>
+                        @happytowork
+                      </Box>
+
+                      <Box
+                        sx={{
+                          fontSize: 10,
+                          color: 'rgb(94, 94, 94)'
+                        }}>
+                        0x4E3b49aDEf1487A08c73d47536f41Fe1c7c62137
+                      </Box>
+                    </Typography>
+          </Box>
+          <Divider />
+          <Grid
+          flexWrap="nowrap"
+          container
+          direction="column">
+              <Grid item sx={{p: 1, bgcolor: '#fbfbfd'}}>
+                <Typography color='#212121' noWrap fontWeight='bold' fontSize={12}>
+                  <IoWalletSharp size={10} />  Web3/Wallet Provider:{' '}
+                </Typography>
+                <Typography color='#212121' fontWeight="light" fontSize={12}>
+                  MetaMask
+                </Typography>
+              </Grid>
+<Divider />
+<Grid item sx={{p: 1, bgcolor: '#fbfbfd'}}>
+                <Typography color='#212121' fontWeight='bold' fontSize={12}>
+                  <FaEthereum size={10} /> DAI Balance:{' '}
+                </Typography>
+                <Typography color='#212121' fontWeight="light" fontSize={12}>
+                  $125.64
+                </Typography>
+              </Grid>
+              <Divider />
+              <Grid item sx={{p: 1, bgcolor: '#fbfbfd'}}>
+                <Typography color='#212121' fontWeight='bold' fontSize={12}>
+                  <FaEthereum size={10} /> UST Balance:{' '}
+                </Typography>
+                <Typography color='#212121' fontWeight="light" fontSize={12}>
+                  $23.22
+                </Typography>
+              </Grid>
+<Divider />
+        </Grid>
+           <Box m={2}>
+           <Button fullWidth variant='contained' color='secondary'>
+                      Add Funds
+                    </Button>
+           </Box>
+
+        </Popover>
 
             </Grid>
           </Grid>
         </Toolbar>
-        <Divider />
-        <MarketToolbar />
       </AppBar>
-      {
-        isDrawerShowing ?
-          <Drawer
-            component={Paper}
-            elevation={3}
-
-            sx={{
-              width: drawerWidth,
-              flexShrink: 0,
-            
-              [`& .MuiDrawer-paper`]: {
-                display: 'flex',
-                alignItems: 'center',
-                bgcolor: '#fbfbfd',
-                borderRight: '1px solid #eee',
-                p: 2,
-                width: drawerWidth,
-                boxSizing: 'border-box',
-              },
-            }}
-            variant="permanent"
-          >
-            <Toolbar />
-            <Paper 
-            elevation={0} 
-              component="form"
-              sx={{ width: '100%', p: 1, border: '1px solid #eee', borderRadius: 2}}>
-            <InputBase
-      startAdornment={<Search fontSize='small' sx={{ color: '#aaa' }} />}
-        sx={{ ml: 1, flex: 2, fontSize: 14 }}
-        placeholder="Search jobs"
-        inputProps={{ 'aria-label': 'search google maps' }}
-      />
-    </Paper>
-
-
-            {
-              renderDrawerContent()
-            }
-
-            <Box sx={{ width: '100%' }} py={1}>
-              <FormControl >
-                <FormLabel
-                  id="region-form-label"
-                  sx={{ py: 1, fontSize: 13, fontWeight: 'bold' }}
-                >
-                  Frequent Markets
-                </FormLabel>
-                <Typography variant="caption" color="#aaa">
-                  You have not participated in any markets on Opportunity
-                </Typography>
-              </FormControl>
-
-            </Box>
-
-
-            <Box sx={{ width: '100%' }}>
-              <FormControl sx={{py: 2}}>
-                <FormLabel
-                  id="region-form-label"
-                  sx={{ py: 1, fontSize: 13, fontWeight: 'bold' }}
-                >
-                  Default Markets
-                </FormLabel>
-                {MARKETS.map((market) => {
-                  return (
-                    <Link href='/jobs'>
-                    <Box
-                    className={classes.defaultMarketLink}
-                      component={Typography}
-                      sx={{ display: 'block', mt: 1, cursor: 'pointer' }}
-                      variant="button"
-                      color="rgba(33, 33, 33, .85)"
-                    >
-                      {market.market}
-                    </Box>
-                    </Link>
-                  )
-                })}
-              </FormControl>
-            </Box>
-          </Drawer>
-          :
-          null
-      }
 
       <Box
         component="main"
         sx={{
+          bgcolor: '#fbfbfd',
           flexGrow: 1,
-          paddingTop: '60px',
+          paddingTop: isPadded ? '60px' : '0px',
         }}
       >
         {children}
@@ -429,14 +471,73 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
 }
 
 const MarketDrawerContent = ({ classes }: IMarketDrawerContentProps) => (
-    <Box py={2} className={classes.marketContentContainer}>
+    <Box py={2}>
               
-              <div className={classes.row}>
+              <div>
                 <FilterListIcon fontSize='small' />
                 <Typography py={1} fontWeight='bold' fontSize={13}>
                   Filters
                 </Typography>
               </div>
+
+              <FormControl sx={{ my: 2 }}>
+    <FormLabel
+      id="content-type-form-label"
+      sx={{ fontSize: 13, fontWeight: 'bold' }}
+    >
+      Market Filters
+    </FormLabel>
+    <RadioGroup
+      aria-labelledby="content-type-form-label"
+      defaultValue="female"
+      name="content-type-radio-button-group"
+    >
+            <FormControlLabel
+              componentsProps={{
+                typography: {
+                  fontSize: 12,
+                },
+              }}
+              value={'Markets'}
+              control={
+                <Radio
+                  color='secondary'
+                  size="small"
+                />
+              }
+              label="Only show markets I've participatd in"
+            />
+    </RadioGroup>
+    <Box pt={1}>
+    <Typography id="input-slider" gutterBottom variant='caption'>
+        Contracts
+      </Typography>
+      <Slider
+        aria-label="Custom marks"
+        defaultValue={100}
+        step={100}
+        valueLabelDisplay="auto"
+        marks={marks}
+        sx={{ width: '90%' }}
+      />
+          </Box>
+
+          <Box pt={1}>
+          <Typography id="input-slider" gutterBottom variant='caption'>
+        Services
+      </Typography>
+      <Slider
+        aria-label="Custom marks"
+        defaultValue={20}
+        step={10}
+        valueLabelDisplay="auto"
+        marks={marks}
+        sx={{ width: '90%' }}
+      />
+                </Box>
+  </FormControl>
+
+  
             </Box>
   )
 
@@ -453,7 +554,6 @@ const ContractChatsContent = ({ classes, currentContracts }: IContractChatsConte
                       seed={Math.random().toString()}
                       size={10}
                       scale={3}
-                      className={classes.blockie}
                     />
     
               </ListItemAvatar>
@@ -488,9 +588,9 @@ const ContractChatsContent = ({ classes, currentContracts }: IContractChatsConte
 )
 
 const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
-  <Box className={classes.marketContentContainer}>
+  <Box>
               
-  <div className={classes.row}>
+  <div>
     <FilterListIcon fontSize='small' />
     <Typography py={1} fontWeight='bold' fontSize={13}>
       Filters
@@ -518,12 +618,10 @@ const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
                   fontSize: 12,
                 },
               }}
-              className={classes.formControlLabel}
               value={String(marketType.type).toLowerCase()}
               control={
                 <Radio
                   color='secondary'
-                  className={classes.radio}
                   size="small"
                 />
               }
@@ -576,12 +674,10 @@ const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
                   fontSize: 12,
                 },
               }}
-              className={classes.formControlLabel}
               value={String(marketType.type).toLowerCase()}
               control={
                 <Radio
                   color='secondary'
-                  className={classes.radio}
                   size="small"
                 />
               }
@@ -631,7 +727,6 @@ const NetworkFilterContent = ({ classes }: IContractChatsContentProps ) =>  (
   </FormControl>
 
 </Box>
-
 </Box>
 )
 

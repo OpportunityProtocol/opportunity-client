@@ -3,9 +3,7 @@ import { makeStyles } from '@mui/styles'
 const useStyles = makeStyles((theme) => {
   return {
     container: {
-      height: '200px',
-      padding: '0% 1%',
-      width: '100%',
+      width: 400,
     },
     heading: {
       fontWeight: '500',

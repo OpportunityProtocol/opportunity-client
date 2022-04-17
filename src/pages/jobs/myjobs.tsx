@@ -1,15 +1,14 @@
-import React from 'react'
+import React, { FunctionComponent } from 'react'
 
 import {
     Container,
 } from "@mui/material"
 
-import { useStyles } from './JobStyles'
+import { useStyles } from '../../modules/market/MarketStyles'
 import JobDisplay from '../../modules/market/components/JobDisplay';
 
-const MyJobs: React.FunctionComponent = () => {
+const MyJobs: FunctionComponent = () => {
     const classes = useStyles()
-    
     return (
         <Container maxWidth='lg' className={classes.container}>
            <JobDisplay />

@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) =>
     },
     defaultMarketLink: {
       '&:hover': {
-        color: '#65d386'
+        color: 'rgb(98, 202, 161)'
       }
     }
   }),
