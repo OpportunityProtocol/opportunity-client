@@ -1,13 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
     Container,
+    CardContent,
     Card,
     Typography,
     InputBase,
+    Alert,
+    AlertTitle,
     Grid,
     Tooltip,
+    CardHeader,
+    ListItemIcon,
+    IconButton,
     Divider,
     Box,
+    Stack,
+    List,
+    ListItem,
+    ListItemText,
     Stepper,
     Step,
     StepLabel,
@@ -37,262 +47,257 @@ import {
     ContentCopy
 } from '@mui/icons-material'
 
-const steps = ['Claimed', 'Reviewing Work', 'Resolved' /*'Disputed' */];
-
-const QontoConnector = styled(StepConnector)(({ theme }) => ({
-    [`&.${stepConnectorClasses.alternativeLabel}`]: {
-      top: 10,
-      left: 'calc(-50% + 16px)',
-      right: 'calc(50% + 16px)',
-    },
-    [`&.${stepConnectorClasses.active}`]: {
-      [`& .${stepConnectorClasses.line}`]: {
-        borderColor: '#eee',
-      },
-    },
-    [`&.${stepConnectorClasses.completed}`]: {
-      [`& .${stepConnectorClasses.line}`]: {
-        borderColor: '#43A047',
-      },
-    },
-    [`& .${stepConnectorClasses.line}`]: {
-      borderColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#eaeaf0',
-      borderTopWidth: 3,
-      borderRadius: 1,
-    },
-  }));
-  
-  const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean } }>(
-    ({ theme, ownerState }) => ({
-      color: '#eaeaf0',
-      display: 'flex',
-      height: 22,
-      alignItems: 'center',
-      ...(ownerState.active && {
-        color: '#784af4',
-      }),
-      '& .QontoStepIcon-completedIcon': {
-        color: '#43A047',
-        zIndex: 1,
-        fontSize: 18,
-      },
-      '& .QontoStepIcon-circle': {
-        width: 8,
-        height: 8,
-        borderRadius: '50%',
-        backgroundColor: '#eee',
-      },
-    }),
-  );
-
-  function QontoStepIcon(props: StepIconProps) {
-    const { active, completed, className } = props;
-  
-    return (
-      <QontoStepIconRoot ownerState={{ active }} className={className}>
-        {completed ? (
-          <Check className="QontoStepIcon-completedIcon" />
-        ) : (
-          <div className="QontoStepIcon-circle" />
-        )}
-      </QontoStepIconRoot>
-    );
-  }
-
-function CustomizedSteppers({ activeStep }) {
-    return (
-        <Stepper sx={{ my: 5 }} alternativeLabel activeStep={activeStep} connector={<QontoConnector />}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-    );
-  }
-
-  const BootstrapInput = styled(InputBase)(({ theme }) => ({
-    'label + &': {
-      marginTop: theme.spacing(3),
-    },
-    '& .MuiInputBase-input': {
-      borderRadius: 0,
-      position: 'relative',
-      backgroundColor: theme.palette.mode === 'light' ? '#fcfcfb' : '#2b2b2b',
-      border: '1px solid #ced4da',
-      fontSize: 16,
-      width: 400,
-      padding: '10px 12px',
-      transition: theme.transitions.create([
-        'border-color',
-        'background-color',
-        'box-shadow',
-      ]),
-      // Use the system font instead of the default Roboto font.
-      fontFamily: [
-        '-apple-system',
-        'BlinkMacSystemFont',
-        '"Segoe UI"',
-        'Roboto',
-        '"Helvetica Neue"',
-        'Arial',
-        'sans-serif',
-        '"Apple Color Emoji"',
-        '"Segoe UI Emoji"',
-        '"Segoe UI Symbol"',
-      ].join(','),
-      '&:focus': {
-        boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
-        borderColor: theme.palette.primary.main,
-      },
-    },
-  }));
-
-
 const ViewContract: React.FunctionComponent<any> = () => {
     const classes = useStyles()
+    const [isSubmittingProposal, setIsSubmittingProposal] = useState<boolean>(false)
+    const [proposalContainerHeight, setProposalContainerHeight] = useState<boolean>(false)
 
     return (
-        <Box sx={{ width: '100%', paddingTop: 2}}>
-            <Container maxWidth='md' sx={{ bgcolor: '#fff', border: '1px solid #eee' }}>
+        <>
+            <Container maxWidth='xl' sx={{ mt: 3}}>
+                <Alert severity="info">
+                <AlertTitle>Payout Info</AlertTitle>
+                    You are viewing this contract as a part of a referral.  Your referrer will receive <strong>5%</strong> of the total payout upon completion.
+                </Alert>
+            </Container>
+        <Container maxWidth='xl' sx={{   }}>
+            <Grid container direction='row' justifyContent='space-between' alignItems='flex-start' sx={{ padding: '3% 0%', }}>
+                <Grid item xs={8}>
+                <Box component={Card} variant='outlined'>
+                    <CardContent>
                 <Box sx={{ width: '100% '}}>
-                <CustomizedSteppers activeStep={3} />
+               {/* <Typography fontWeight='bold' color='rgba(33, 33, 33, .85)'>
+                  Status: Unclaimed
+    </Typography> */}
 
-<>
-                    <Typography fontWeight='bold'>
-                        Customer Service Representative
+<>  
+<Box>
+<Typography variant='subtitle1' fontWeight='bold' fontSize={20}>
+Looking for a web developer for long term contract
                     </Typography>
-                    <Link href=''>
-                         <Typography className={classes.link} fontSize={12} component='span'  variant='button' color='secondary'> 
-                             /ipfs/QmRAQB6YaCyidP37UdDnjFY5vQuiBrcqdyoW1CuDgwxkD4 
-                         </Typography>
-                     </Link>
 
-                    <Typography paragraph py={2} fontSize={14} color='#5e5e5e'>
+
+                    <Typography py={1} paragraph fontSize={15} fontWeight='medium' color='rgb(94, 94, 94)'>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit sem. Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque pellentesque tortor tortor, at convallis metus ornare ac. Aenean quis pellentesque nisl. Ut suscipit a nisi sed porttitor. Donec cursus velit diam, non accumsan urna aliquet hendrerit.
                     </Typography>
+</Box>
+
+
                     </>
 
-                    <Grid container direction='row' justifyContent='space-between' alignItems='center'>
-                        <Grid item>
-                            <Typography fontWeight='bold' fontSize={14}>
-                                Creator
-                            </Typography>
-                            <Tooltip title='0x88463F785e256C04eC584559627806d909BaC0FE'>
-                            <Typography fontSize={13} color='#5e5e5e'>
-                            0x88463F785e256C04eC584559627806d909BaC0FE <span><ContentCopy fontSize='small' /></span>
-                            </Typography>
-                            </Tooltip>
-                        </Grid>
-
-                        <Grid item>
-                            <Typography fontWeight='bold' fontSize={14}>
-                                Budget
-                            </Typography>
-                            <Tooltip title='0x88463F785e256C04eC584559627806d909BaC0FE'>
-                            <Typography fontSize={13} color='#5e5e5e'>
-                                500 DAI ($500)
-                            </Typography>
-                            </Tooltip>
-                        </Grid>
-
-                        <Grid item>
-                            <Typography fontWeight='bold' fontSize={14}>
-                                Deadline
-                            </Typography>
-                            <Typography fontSize={13} color='#5e5e5e'>
-                            No deadline
-                            </Typography>
-                        </Grid>
-
-                        <Grid item>
-                            <Typography fontWeight='bold' fontSize={14}>
-                                Skill Level
-                            </Typography>
-                            <Typography fontSize={13} color='#5e5e5e'>
-                                Intermmediate
-                            </Typography>
-                        </Grid>
-                    </Grid>
                 </Box>
-<Divider sx={{my: 5}} />
+                </CardContent>
+<Divider />
+<CardContent>
+
             <Typography fontSize={16} fontWeight='bold'>
                 History
             </Typography>
             <Box sx={{ py: 1}}>
-                {/* 
-                <Typography variant='caption'>
-                    This contract has no history.{" "}
-                    <Typography className={classes.link} fontSize={12} component='span'  variant='button' color='secondary'>
-                        Claim it now
-                    </Typography> 
-                </Typography>
-                */}
                 
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Work fontSize='small' sx={{color: '#42c976', mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                    <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  0x88463F785e256C04eC584559627806d909BaC0FE began working this contract 10 hours ago.
+                <Typography variant='caption' fontSize={15} color='rgb(94, 94, 94)'>
+                    This contract has not been claimed - claim it now.
                 </Typography>
-                </Box>
 
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Logout fontSize='small' sx={{mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  0x88463F785e256C04eC584559627806d909BaC0FE released this contract a few moments ago.
-                </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <LocalFireDepartment fontSize='small' sx={{color: 'red', mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  0x88463F785e256C04eC584559627806d909BaC0FE began a dispute.
-                </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <EmojiEvents fontSize='small' sx={{color: '#42c976', mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  You have been ruled the winner of this dispute.
-                </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Work fontSize='small' sx={{color: '#42c976', mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  0x88463F785e256C04eC584559627806d909BaC0FE began working this contract 10 hours ago.
-                </Typography>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center'}}>
-                <Check fontSize='small' sx={{color: '#42c976', mr: 1}} />
-                <Typography fontSize={13} color='#5e5e5e' py={2}>
-                <Typography component='span' fontWeight='bold' fontSize={13}>{moment(new Date().toDateString()).format('LL').toString()}</Typography> {" "}  You resolved this contract 2 hours ago.
-                </Typography>
-                </Box>
-            </Box>
-            <Divider />
-            <Box sx={{py: 2}}>
-                <Grid container spacing={2} direction='row' alignItems='center' justifyContent='space-between'>
+                <Grid sx={{my: 2}} container spacing={2} direction='row' alignItems='center' justifyContent='space-between'>
                 <Grid item>
-                <Button variant='contained' color='secondary' disableElevation>
+                <Button sx={{ color: '#fff' }} variant='contained' color='secondary' disableElevation>
                     Submit Proposal
                 </Button>
 </Grid>
 
-                    <Grid item>
-                    <Button sx={{mx: 1}} variant='outlined' color='secondary' disableElevation>
-                        Release Funds
-                </Button>
-
-                <Button sx={{mx: 1}} variant='outlined' color='secondary' disableElevation>
-                        Begin Dispute
-                </Button>
+                    <Grid item />
                     </Grid>
-                </Grid>
+
+
+            
+            </Box> 
+            </CardContent>
             </Box>
-            </Container>
-        </Box>
+
+            <Card variant='outlined' sx={{ my: 4}}>
+                <CardContent>
+                <Typography fontWeight='bold' fontSize={20} color='rgba(33, 33, 33, .85)'>
+                    Reviews for this user
+                    </Typography>
+                    <Typography variant='caption'>
+                        No reviews has been written for this employer
+                    </Typography>
+                </CardContent>
+            </Card>
+                </Grid>
+
+                <Grid item xs={3.7}>
+                <Card variant='outlined' sx={{ backgroundCcolor: '#fff',  width: '100%', height: 'auto'}}>
+              <CardContent>
+                  <Typography fontSize={20} fontWeight='bold'>
+                      Contract Details
+                  </Typography>
+              <Box sx={{py: 1}}>
+                   
+                            <ListItem>
+                                <ListItemText 
+                                primary='Creator'
+                                secondary='0x19bBa405Fd0e4Da0e23230d49eFC0CbFb3664A6c'
+                                primaryTypographyProps={{
+                                    fontSize: 14, 
+                                    fontWeight: 'bold',
+                                    color: 'rgb(33, 33, 33, .85'
+                                }}
+                                secondaryTypographyProps={{
+                                    color: '#808080',
+                                    fontSize: 12
+                                }}
+                                 />
+                            </ListItem>
+
+                            <ListItem>
+                                <ListItemText 
+                                primary='Payout Type'
+                                secondary='One Time Payment'
+                                primaryTypographyProps={{
+                                    fontSize: 14, 
+                                    fontWeight: 'bold',
+                                    color: 'rgb(33, 33, 33, .85'
+                                }}
+                                secondaryTypographyProps={{
+                                    color: '#808080',
+                                    fontSize: 12
+                                }}
+                                 />
+                            </ListItem>
+              
+
+                            <ListItem>
+                                <ListItemText 
+                                primary='Budgetr'
+                                secondary='No budget'
+                                primaryTypographyProps={{
+                                    fontSize: 14, 
+                                    fontWeight: 'bold',
+                                    color: 'rgb(33, 33, 33, .85'
+                                }}
+                                secondaryTypographyProps={{
+                                    color: '#808080',
+                                    fontSize: 12
+                                }}
+                                 />
+                            </ListItem>
+
+                            <ListItem>
+                                <ListItemText 
+                                primary='Deadline'
+                                secondary='May 27, 2022'
+                                primaryTypographyProps={{
+                                    fontSize: 14, 
+                                    fontWeight: 'bold',
+                                    color: 'rgb(33, 33, 33, .85'
+                                }}
+                                secondaryTypographyProps={{
+                                    color: '#808080',
+                                    fontSize: 12
+                                }}
+                                 />
+                            </ListItem>
+
+                            <ListItem>
+                                <ListItemText 
+                                primary='Currency'
+                                secondary='DAI'
+                                primaryTypographyProps={{
+                                    fontSize: 14, 
+                                    fontWeight: 'bold',
+                                    color: 'rgb(33, 33, 33, .85'
+                                }}
+                                secondaryTypographyProps={{
+                                    color: '#808080',
+                                    fontSize: 12
+                                }}
+                                 />
+                            </ListItem>
+
+                     
+                            <ListItem>
+                                <ListItemText 
+                                primary='Completion Terms'
+                                secondary={
+                                    <ul>
+                                    <li> Definition of done task number one </li>
+                                    <li>This is another example of a task that requires for the job to be complete</li>
+                                    <li>Finish doing task number three by that time</li>
+                                </ul>
+                                }
+                                primaryTypographyProps={{
+                                    fontSize: 14, 
+                                    fontWeight: 'bold',
+                                    color: 'rgb(33, 33, 33, .85'
+                                }}
+                                secondaryTypographyProps={{
+                                    color: '#808080',
+                                    fontSize: 12
+                                }}
+                                 />
+                            </ListItem>
+
+
+
+                    </Box>
+              </CardContent>
+            </Card>
+
+            <Card variant='outlined' sx={{ my: 4}}>
+                    <CardContent>
+                    <Typography fontSize={20} fontWeight='bold'>
+                      Metadata
+                  </Typography>
+                        <List>
+
+                            <ListItem>
+                                <ListItemText 
+                                primary='Market Name'
+                                secondary='Gitcoin Bounties'
+                                primaryTypographyProps={{
+                                    fontSize: 14, 
+                                    fontWeight: 'bold',
+                                    color: 'rgb(33, 33, 33, .85'
+                                }}
+                                secondaryTypographyProps={{
+                                    color: '#808080',
+                                    fontSize: 12
+                                }}
+                                 />
+                            </ListItem>
+
+
+                            <ListItem>
+                                <ListItemText 
+                                primary='Metadata' 
+                                secondary='QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKd'
+                                primaryTypographyProps={{
+                                    fontSize: 14, 
+                                    fontWeight: 'bold',
+                                    color: 'rgb(33, 33, 33, .85'
+                                }}
+                                secondaryTypographyProps={{
+                                    color: '#808080',
+                                    fontSize: 12,
+                                    textOverflow: 'ellipsis',
+                                    overflow: 'hidden'
+                                }}
+                                 />
+                                <ListItemIcon>
+                                    <IconButton>
+                                    <ContentCopy fontSize='small' />
+                                    </IconButton>
+                                </ListItemIcon>
+                            </ListItem>
+                        </List>
+                    </CardContent>
+                </Card>
+                </Grid>
+            </Grid>
+        </Container>
+        </>
     )
 }
 

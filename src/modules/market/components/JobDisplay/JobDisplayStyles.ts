@@ -2,6 +2,23 @@ import { makeStyles } from "@mui/styles";
 import { alpha } from "@mui/system";
 
 const useStyles = makeStyles(theme => ({
+    card: { 
+        height: 'auto',
+       // border: 'none !important',
+        '&:hover': {
+           // boxShadow: '0px 6px 6px -3px #ccc, 0px 10px 14px 1px #ccc, 0px 4px 18px 3px #ccc',
+            cursor: 'pointer',
+            backgroundColor: '#eee'
+        },
+        position: 'relative', 
+        marginTop: theme.spacing(1),
+        marginBottom: theme.spacing(1)
+    },
+    suggestedContainer: {
+        position: 'relative', 
+        top: 20, 
+        left: 15
+    },
     root: {
         width: 'auto',
         padding: 10,
@@ -41,6 +58,21 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         alignItems: 'center'
     },
+    viewButton: {
+        visibility: 'hidden',
+        '&:hover': {
+            visibility: 'visible'
+        },
+    },
+    tagChip: {
+        fontSize: 11,
+        backgroundColor: '#eee',
+        borderRadius: 1,
+        border: 'none',
+    },
+    divider: {
+        paddingTop: theme.spacing(5)
+    }
 }))
 
 export { useStyles }

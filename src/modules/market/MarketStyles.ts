@@ -3,13 +3,69 @@ import { makeStyles } from '@mui/styles'
 const useStyles = makeStyles((theme) => {
   return {
     root: {
-      display: 'flex',
       width: '100%',
+      height: '100%',
+      display: 'flex',
       alignItems: 'center',
       flexDirection: 'column',
-      overflow: 'auto',
-      padding: '1% 4%',
+      backgroundColor: '#fbfbfd'
+  },
+  marginBottom: {
+      marginBottom: theme.spacing(2)
+  },
+  graphButton: {
+      color: 'red'
+  },
+  avatar: {
+      backgroundColor: theme.palette.primary.main,
+    },
+    action: {
+      marginLeft: 8,
+    },
+  summaryItem: {
+      width: 300,
+      height: 150,
+      backgroundColor: theme.palette.primary.main,
+      color: 'white',
+      padding: 10
+  },
+  buttonPaper: {
+      color: 'white'
+  },
+  heading: {
+      padding: '10px 5px'
+  },
+  fab: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      marginRight: 16,
+      marginBottom: 16
+  },
+  containerCentered: {
+      padding: '8px 0px',
+      backgroundColor: '#fff',
+      width: '100%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    selectFilter: {
+      width: 400, height: 70
+    },
+    root: {
+      display: 'flex',
+      width: '100%',
+      height: '100vh',
+      alignItems: 'center',
+      flexDirection: 'column',
+      overflow: 'visible',
       backgroundColor: '#fbfbfd',
+    },
+    avatarBorder: {
+      border: '16px solid transparent',
+      borderImage: 'linear-gradient(45deg, red, yellow)',
+      borderImageSlice: 1,
     },
     heading: {
       color: 'rgba(33, 33, 33, .85)',
@@ -22,15 +78,6 @@ const useStyles = makeStyles((theme) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'flex-end',
-    },
-    containerCentered: {
-      width: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    container: {
-      marginTop: '4%',
     },
     selectedCard: {
       border: '5px solid #A5D6A7',
@@ -79,7 +126,7 @@ const useStyles = makeStyles((theme) => {
       elevation: 0,
       display: 'flex',
       alignItems: 'center',
-    },
+    }
   }
 })
 

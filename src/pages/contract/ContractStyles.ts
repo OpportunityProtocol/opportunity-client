@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) =>
         borderRadius: 20
     },
     chatArea: {
-        width: '100%', height: '100%', borderRadius: 10,
+        width: '100%', height: 400, borderRadius: 10,
     },
     inputContainer: {
         display: 'flex', bgcolor: '#fafafa'
@@ -70,6 +70,7 @@ const useStyles = makeStyles((theme) =>
         justifyContent: 'center'
     },
     link: {
+        color: 'rgb(54, 119, 74)',
         cursor: 'pointer'
     }
   }),

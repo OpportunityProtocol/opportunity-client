@@ -3,18 +3,24 @@ import { useStyles } from './MarketDisplayStyles'
 
 
 import {
-  Grid,
   Typography,
-  Icon,
-  Card,
-  Chip,
-  Divider,
   CardContent,
+  Divider,
+  Box,
+  Avatar,
+  Grid,
+  AvatarGroup,
+  Stack
 } from '@mui/material'
 import ClickableCard from '../../../../common/components/ClickableCard/ClickableCard'
 import { useRouter } from 'next/router'
 
-const MarketDisplay: React.FunctionComponent = ({ market }) => {
+interface IMarketDisplayProps {
+  market: string,
+  isShowingStats: boolean
+}
+
+const MarketDisplay: React.FunctionComponent<IMarketDisplayProps> = ({ market, isShowingStats }) => {
   const classes = useStyles()
   const router = useRouter()
 
@@ -23,9 +29,9 @@ const MarketDisplay: React.FunctionComponent = ({ market }) => {
         <CardContent className={classes.primaryContentContainer}>
           <Grid container direction='row' alignItems='center' justifyContent='space-between'>
             <Grid item>
-              <Typography className={classes.marketTitle}>
+              <Box component='div' sx={{ fontWeight: (theme) => theme.typography.fontWeightBold }}>
                 {market}
-              </Typography>
+              </Box>
             </Grid>
 
             <Grid item />
@@ -35,16 +41,11 @@ const MarketDisplay: React.FunctionComponent = ({ market }) => {
             Lizards are a widespread group of squamate reptiles, with over 6,000
             species, ranging across all continents except Antarctica
           </Typography>
+          <Typography color='secondary' pt={2} variant='body2'>
+          {Math.floor(Math.random() * 3200)} contracts and services available
+          </Typography>
         </CardContent>
-       {/*} <Divider />
-        <CardContent>
-          <Typography variant='caption'>
-                This market has an average trust score of: {" "}
-          </Typography>
-          <Typography color='rgb(54, 119, 74)' variant='caption' component='span'>
-          .78 (0 - 1)
-          </Typography>
-              </CardContent>*/}
+
       </ClickableCard>
   )
 }

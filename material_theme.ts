@@ -3,10 +3,10 @@ import { createTheme } from '@mui/material/styles';
 
   const theme = createTheme({  
     palette: {
-      divider: '#eee',
+      divider: '#ddd',
       secondary: {
         light: 'rgb(147, 228, 178)',
-        main: '#42c976',
+        main: 'rgb(98, 202, 161)',
         dark: 'rgb(54, 119, 74)'
       },
       primary: {
@@ -16,21 +16,36 @@ import { createTheme } from '@mui/material/styles';
     typography: {
       button: {
         textTransform: 'none',
-       // color: '#4caf50',
+       // color: 'rgb(98, 202, 161)',
       }
     },
     components: {
+      MuiContainer: {
+        styleOverrides: {
+          root: {
+            backgroundColor: '#fbfbfd'
+          }
+        }
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            fontSize: 13,
+            fontWeight: 'bold'
+          }
+        }
+      },
       MuiChip: {
         styleOverrides: {
           root: {
-            border: '1px solid #eee'
+            border: '1px solid #ddd'
           }
         }
       },
       MuiCard: {
         styleOverrides: {
           root: {
-            border: '1px solid #eee',
+            border: '1px solid #ddd',
           }
         }
       },
@@ -39,6 +54,9 @@ import { createTheme } from '@mui/material/styles';
           
         },
         styleOverrides: {
+          contained: {
+            color: '#fff',
+          },
           outlined: {
             fontSize: 12,
             backgroundColor: 'transparent',

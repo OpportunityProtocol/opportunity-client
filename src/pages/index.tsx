@@ -6,6 +6,7 @@ import styles from '../../styles/Home.module.css'
 import theme from '../../material_theme'
 import Opportunity from '../Opportunity'
 import Markets from './markets';
+import Footer from '../common/components/Footer/Footer'
 
 const Home: NextPage = () => {
   return (
@@ -18,10 +19,7 @@ const Home: NextPage = () => {
         rel="stylesheet"
         href="https://fonts.googleapis.com/icon?family=Material+Icons"
         />
-        <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
-        />
+        <link rel="stylesheet" href="https://use.typekit.net/bhd6hze.css" />
       </Head>
       <Markets />
     </div>
