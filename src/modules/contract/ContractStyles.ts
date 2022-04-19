@@ -76,9 +76,18 @@ const useStyles = makeStyles((theme) =>
     marginBottom: {
         marginBottom: theme.spacing(2)
     },
+    graphCard: {
+        backgroundColor: 'transparent !important', 
+        height: 'auto',
+    },    purchaseIconSmall: {
+        color: 'red'
+    },
     li: {
         padding: '0px !important'
       //  fontSize: 15
+    },
+    graphButton: {
+       color: 'red'
     },
     info: {
         marginRight: 12,

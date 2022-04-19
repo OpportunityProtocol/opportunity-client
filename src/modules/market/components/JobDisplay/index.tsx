@@ -11,6 +11,7 @@ import {
   Divider,
   Box,
   Avatar,
+  Button,
   Chip,
   Card,
   CardContent,
@@ -20,7 +21,9 @@ import {
   alpha,
 } from '@mui/material';
 
-import { Bolt } from '@mui/icons-material';
+import DoneIcon from '@mui/icons-material/Done';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Bolt, TrendingUp } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import { IJobDisplayProps } from '../../MarketInterface';
 
@@ -49,6 +52,14 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
   const classes = useStyles();
   const router = useRouter();
   const isService = Math.random() > 0.5; //temp
+
+  const handleClick = () => {
+    console.info('You clicked the Chip.');
+  };
+
+  const handleDelete = () => {
+    console.info('You clicked the delete icon.');
+  };
 
   return (
     <Card
@@ -101,7 +112,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
               across all continents except Antarctica roup of squamate reptiles, with over 6,000
               Lizards are a widespread
             </Typography>
-            <Box my={1}>
+            <Box my={1} display="flex" alignItems="center" justifyContent="flex-start">
               <Grid
                 container
                 direction="row"
@@ -138,6 +149,20 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
                   />
                 )}
               </Grid>
+              {true === false ? (
+                <Chip
+                  classes={{
+                    iconSmall: classes.purchaseIconSmall,
+                  }}
+                  sx={{ bgcolor: alpha('rgb(98, 202, 161)', 0.8) }}
+                  variant="filled"
+                  color="primary"
+                  label="Refer this service (+0.50)"
+                  onClick={handleClick}
+                  onDelete={handleDelete}
+                  deleteIcon={<TrendingUp fontSize="small" />}
+                />
+              ) : null}
             </Box>
           </Grid>
         </Grid>

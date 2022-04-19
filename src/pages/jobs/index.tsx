@@ -218,7 +218,7 @@ const Jobs: React.FunctionComponent = () => {
               </Box>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart width={300} height={200} data={data}>
-                  <Line type="monotone" dataKey="uv" stroke="#8884d8" strokeWidth={2} />
+                  <Line type="monotone" dataKey="uv" stroke='rgb(98, 202, 161)' strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
               <Stack direction="row" alignItems="center" justifyContent="space-evenly">

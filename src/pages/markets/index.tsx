@@ -22,12 +22,12 @@ import { useGradientAvatarStyles } from '@mui-treasury/styles/avatar/gradient';
 import Carousel from 'react-material-ui-carousel';
 import { GradientAvatarClassKey } from '@mui-treasury/styles/avatar/gradient/gradientAvatar.styles';
 import BootstrapInput from '../../common/components/BootstrapInput/BootstrapInput';
-import { ICarouselItemProps } from '../../modules/market/MarketInterface'
+import { ICarouselItemProps } from '../../modules/market/MarketInterface';
 import { loggedOutHeroCarouselItems } from '../../modules/market/MarketConstants';
 import JobDisplay from '../../modules/market/components/JobDisplay';
 import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
 
-function CarouselItem({ item, itemLength, index } : ICarouselItemProps) {
+function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
   return (
     <Box sx={{ position: 'relative', width: '100%', backgroundColor: '#fff' }}>
       <img src={item.source} style={{ width: '100%', height: '680px' }} />
@@ -53,22 +53,22 @@ function CarouselItem({ item, itemLength, index } : ICarouselItemProps) {
         p={5}
         sx={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%' }}
       >
-        <Container maxWidth='lg' sx={{ bgcolor: 'transparent' }}>
-        <Typography color="#fff" fontWeight="bold" fontSize={45} width="60%">
-          {item.title}
-        </Typography>
-        <Typography color="#fff" fontSize={25}>
-          {item.subtitle}
-        </Typography>
-        <Button
-          onClick={item.onClick}
-          size="large"
-          variant="contained"
-          color="secondary"
-          sx={{ my: 2, width: 150, color: 'white', borderColor: '#fff' }}
-        >
-          {item.buttonTitle}
-        </Button>
+        <Container maxWidth="lg" sx={{ bgcolor: 'transparent' }}>
+          <Typography color="#fff" fontWeight="bold" fontSize={45} width="60%">
+            {item.title}
+          </Typography>
+          <Typography color="#fff" fontSize={25}>
+            {item.subtitle}
+          </Typography>
+          <Button
+            onClick={item.onClick}
+            size="large"
+            variant="contained"
+            color="secondary"
+            sx={{ my: 2, width: 150, color: 'white', borderColor: '#fff' }}
+          >
+            {item.buttonTitle}
+          </Button>
         </Container>
       </Box>
     </Box>
@@ -81,7 +81,7 @@ const Markets: FunctionComponent = () => {
   const [markets, setMarkets] = useState<any[]>([]);
   const [desiredMarkets, setDesiredMarkets] = useState<string>('Filter desired markets');
   const [sortBy, setSortBy] = useState<string>('Sort by');
-  const [participatedChecked, setParticipatedChecked] = useState<any>('')
+  const [participatedChecked, setParticipatedChecked] = useState<any>('');
 
   const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
     size: 50,
@@ -98,7 +98,7 @@ const Markets: FunctionComponent = () => {
   };
 
   const handleOnChangeParticipatedChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setParticipatedChecked(event.target.checked)
+    setParticipatedChecked(event.target.checked);
   };
 
   const handleOnChangeDesiredMarkets = () => {};
@@ -118,7 +118,7 @@ const Markets: FunctionComponent = () => {
 
   const AVATAR_SIZE = 70;
   return (
-    <Box bgcolor='#fbfbfd'>
+    <Box bgcolor="#fbfbfd">
       <Carousel fullHeightHover={true} indicators={false} autoPlay interval={3000}>
         {loggedOutHeroCarouselItems.map((item, i, arr) => (
           <CarouselItem key={i} item={item} itemLength={arr.length} index={i} />
@@ -180,18 +180,12 @@ const Markets: FunctionComponent = () => {
 
           <Box my={6}>
             <Box>
-              <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
+              <Typography py={5} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                 Buy confidence in top rated services
               </Typography>
             </Box>
-            <Grid
-              container
-              alignItems='center'
-              direction="row"
-              flexWrap="nowrap"
-              spacing={1}
-            >
-              {suggestedConnections.slice(3,7).map((human) => {
+            <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
+              {suggestedConnections.slice(3, 7).map((human) => {
                 return (
                   <Grid item xs={3}>
                     <ServiceCard />
@@ -254,7 +248,7 @@ const Markets: FunctionComponent = () => {
                       color: '#a3a3a3',
                       fontWeight: (theme) => theme.typography.fontWeightMedium,
                     }}
-                    control={<Switch value='' size="small" color="secondary" />}
+                    control={<Switch value="" size="small" color="secondary" />}
                     label="Only markets I've participated in"
                   />
                 </Grid>
@@ -271,32 +265,27 @@ const Markets: FunctionComponent = () => {
           </Grid>
         </Box>
 
-          <Box my={6}>
-            <Box>
-              <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
-                Work within your network
-              </Typography>
-            </Box>
-            <Grid
-              container
-              direction="column"
-              overflow="scroll"
-              flexWrap="nowrap"
-            >
-              {suggestedConnections.slice(3,6).map((human) => {
-                return (
-                  <Grid item>
-                    <JobDisplay avatar={human.picture.large} suggestion={true} />
-                  </Grid>
-                );
-              })}
-            </Grid>
+        <Box my={6}>
+          <Box>
+            <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
+              Work within your network
+            </Typography>
           </Box>
+          <Grid container direction="column" overflow="scroll" flexWrap="nowrap">
+            {suggestedConnections.slice(3, 6).map((human) => {
+              return (
+                <Grid item>
+                  <JobDisplay avatar={human.picture.large} suggestion={true} />
+                </Grid>
+              );
+            })}
+          </Grid>
+        </Box>
       </Container>
     </Box>
   );
 };
 
-Markets.propTypes = {}
+Markets.propTypes = {};
 
 export default Markets;

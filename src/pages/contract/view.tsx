@@ -4,7 +4,6 @@ import {
   CardContent,
   Card,
   Typography,
-  InputBase,
   Alert,
   AlertTitle,
   Grid,
@@ -13,7 +12,6 @@ import {
   ListItemIcon,
   Toolbar,
   IconButton,
-  Divider,
   Box,
   List,
   ListItem,
@@ -21,9 +19,6 @@ import {
   Button,
 } from '@mui/material';
 import { useStyles } from '../../modules/contract/ContractStyles';
-import Link from 'next/link';
-import { alpha } from '@mui/material';
-import moment from 'moment';
 import { ContentCopy } from '@mui/icons-material';
 
 import Table from '@mui/material/Table';
@@ -33,6 +28,56 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+
+import clsx from 'clsx';
+
+import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import { timelineButtons } from '../../modules/market/MarketConstants';
+
+const data = [
+  {
+    name: 'Page A',
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: 'Page B',
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: 'Page C',
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: 'Page D',
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+  {
+    name: 'Page E',
+    uv: 1890,
+    pv: 4800,
+    amt: 2181,
+  },
+  {
+    name: 'Page F',
+    uv: 2390,
+    pv: 3800,
+    amt: 2500,
+  },
+  {
+    name: 'Page G',
+    uv: 3490,
+    pv: 4300,
+    amt: 2100,
+  },
+];
 
 function createData(action: string, user: string, timestamp: number) {
   return { action, user, timestamp };
@@ -65,6 +110,7 @@ const contractDetailsSecondaryTypographyProps = {
   fontSize: 12,
 };
 
+const isService = false;
 const ViewContract: React.FunctionComponent<any> = () => {
   const classes = useStyles();
   const [reviews, setReviews] = useState([]);
@@ -186,7 +232,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
                           <Typography fontSize={13} className={classes.overline}>
                             {review.name.first + ' ' + review.name.last}
                           </Typography>
-                          <Typography fontSize={14} className={classes.name}>
+                          <Typography fontSize={14} fontWeight="medium" className={classes.name}>
                             {review.login.username}
                           </Typography>
                           <Typography paragraph fontSize={14} className={classes.name}>
@@ -203,6 +249,48 @@ const ViewContract: React.FunctionComponent<any> = () => {
           </Grid>
 
           <Grid item xs={3.8}>
+            {isService ? (
+              <Card variant="outlined" className={clsx(classes.marginBottom, classes.graphCard)}>
+                <CardContent>
+                  <Typography fontSize={20} fontWeight="bold">
+                    Price over time{' '}
+                    <Typography component="span" color="green">
+                      + $0.50
+                    </Typography>
+                  </Typography>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <LineChart width={300} height={400} data={data}>
+                      <Line
+                        type="monotone"
+                        dataKey="pv"
+                        stroke="rgb(98, 202, 161)"
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  <Stack direction="row" alignItems="center" justifyContent="space-evenly">
+                    {timelineButtons.map((buttonTitle, idx) => {
+                      return (
+                        <Button
+                          disableElevation
+                          disableRipple
+                          disableFocusRipple
+                          disableTouchRipple
+                          variant="text"
+                          color="primary"
+                          size="small"
+                          classes={{ text: classes.graphButton }}
+                          key={idx}
+                        >
+                          {buttonTitle}
+                        </Button>
+                      );
+                    })}
+                  </Stack>
+                </CardContent>
+              </Card>
+            ) : null}
+
             <Alert
               variant="standard"
               icon={false}
