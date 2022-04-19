@@ -20,6 +20,9 @@ const useStyles = makeStyles(theme => ({
     },
     card: {
         boxShadow:  '0px 1px 3px 0px #eee, 0px 1px 1px 0px #eee, 0px 2px 1px -1px #eee'
+    },
+    marginBottom: {
+        marginBottom: theme.spacing(2)
     }
 }))
 

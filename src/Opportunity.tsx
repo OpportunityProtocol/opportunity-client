@@ -11,8 +11,10 @@ import {
   Grid,
   CssBaseline,
   Stack,
+  Badge,
   Avatar,
   FormLabel,
+  Container,
   List,
   Button,
   ListItem,
@@ -32,7 +34,7 @@ import {
   ListItemButton,
 } from '@mui/material'
 
-
+import { styled } from '@mui/material/styles'
 import { Search, Add } from '@mui/icons-material'
 
 import router, { useRouter } from 'next/router'
@@ -44,6 +46,53 @@ import MarketToolbar from './modules/market/components/MarketToolbar'
 
 import { FaEthereum } from 'react-icons/fa'
 import { IoWalletSharp } from 'react-icons/io5'
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  '& .MuiBadge-badge': {
+    backgroundColor: '#44b700',
+    color: '#44b700',
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    '&::after': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      borderRadius: '50%',
+      animation: 'ripple 1.2s infinite ease-in-out',
+      border: '1px solid currentColor',
+      content: '""',
+    },
+  },
+  '@keyframes ripple': {
+    '0%': {
+      transform: 'scale(.8)',
+      opacity: 1,
+    },
+    '100%': {
+      transform: 'scale(2.4)',
+      opacity: 0,
+    },
+  },
+}));
+
+const SmallAvatar = styled(Avatar)(({ theme }) => ({
+  width: 22,
+  height: 22,
+  border: `2px solid ${theme.palette.background.paper}`,
+}));
+
+const ConnectedAvatar = () => {
+  return (
+    <StyledBadge
+  overlap="circular"
+  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+  variant="dot"
+>
+  <Avatar alt="Remy Sharp" src='/assets/stock/profile_three.jpeg' />
+</StyledBadge>
+  )
+}
 
 const drawerWidth = 300
 
@@ -232,7 +281,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
   }
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', bgcolor: '#fbfbfd' }}>
       <CssBaseline />
       <AppBar
         position="fixed"
@@ -240,6 +289,8 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
         elevation={0}
         
         sx={{ 
+          paddingLeft: '15%',
+          paddingRight: '15%',
           width: { sm: `100%` },
           ml: { sm: `100%` },
           //boxShadow: '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)',
@@ -278,11 +329,11 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
             <Paper 
             elevation={0} 
               component="form"
-              sx={{ display: 'flex', height: 40, alignItems: 'center', width: 500, border: '1px solid #eee', borderRadius: 0}}>
+              sx={{ display: 'flex', height: 40, alignItems: 'center', width: 350, border: '1px solid #eee', borderRadius: 0}}>
 <InputBase
 
             startAdornment={<Search sx={{color: '#aaa'}} />}
-        sx={{  borderRadius: '0px !important', ml: 1, flex: 1, flexGrow: 1, height: 30, fontSize: 14 }}
+        sx={{ borderRadius: '0px !important', ml: 1, flex: 1, flexGrow: 1, height: 30, fontSize: 14 }}
         placeholder="Find gigs, anytime"
         inputProps={{ 'aria-label': 'search google maps', style: { padding: '0px 10px'} }}
       />
@@ -333,42 +384,9 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                 </Typography>
                </Stack>
             */}
-             <Divider orientation='vertical' sx={{height: 65}} />
-              <CardActionArea onClick={handleClick} className={classes.identityBox} aria-describedby='account-popover' aria-owns='account-popover'>
-                <Blockies
-                  seed="Max"
-                  size={10}
-                  scale={3}
-                  className={classes.blockie}
-                />
 
-                <div className={classes.row}>
-                  <div className={classes.column}>
-                    <Typography component='div'>
-                      <Box sx={{
-                        fontSize: 12,
-                        fontWeight: 'medium',
-                        color: "#212121"
-                      }}>
-                        @happytowork
-                      </Box>
+            <ConnectedAvatar />
 
-                      <Box
-                        className={classes.address}
-                        sx={{
-                          fontSize: 10,
-                          color: "#212121"
-                        }}>
-                        0x4E3b49aDEf1487A08c73d47536f41Fe1c7c62137
-                      </Box>
-                    </Typography>
-
-                  </div>
-                  <IconButton size='small'>
-                    <ArrowDropDown sx={{ color: "#212121" }} />
-                  </IconButton>
-                </div>
-              </CardActionArea>
               <Popover 
 style={{ position: 'absolute', top: 55}}
         id='account-popover'

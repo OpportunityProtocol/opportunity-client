@@ -20,7 +20,7 @@ import {
   ListItemText,
   Button,
 } from '@mui/material';
-import { useStyles } from '../../modules/contract/ContractStyles'
+import { useStyles } from '../../modules/contract/ContractStyles';
 import Link from 'next/link';
 import { alpha } from '@mui/material';
 import moment from 'moment';
@@ -46,8 +46,7 @@ const rows = [
 
 const TableToolbar = () => {
   return (
-    <Toolbar
-    >
+    <Toolbar>
       <Typography variant="h6" id="contract-history-table-title" component="div">
         Contract History
       </Typography>
@@ -56,20 +55,18 @@ const TableToolbar = () => {
 };
 
 const contractDetailsPrimaryTypographyProps = {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: 'rgb(33, 33, 33, .85',
-}
+  fontSize: 14,
+  fontWeight: 'bold',
+  color: 'rgb(33, 33, 33, .85',
+};
 
 const contractDetailsSecondaryTypographyProps = {
-    color: '#808080',
-    fontSize: 12,
-}
+  color: '#808080',
+  fontSize: 12,
+};
 
 const ViewContract: React.FunctionComponent<any> = () => {
   const classes = useStyles();
-  const [isSubmittingProposal, setIsSubmittingProposal] = useState<boolean>(false);
-  const [proposalContainerHeight, setProposalContainerHeight] = useState<boolean>(false);
   const [reviews, setReviews] = useState([]);
   const [contractOwnership, setContractOwnership] = useState<string>('Claimed');
   const isReferral = true;
@@ -101,7 +98,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
           direction="row"
           justifyContent="space-between"
           alignItems="flex-start"
-          paddingTop='2%'
+          paddingTop="2%"
         >
           <Grid item xs={8}>
             <Box component={Card} variant="outlined" className={classes.marginBottom}>
@@ -158,8 +155,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
                   </TableHead>
                   <TableBody>
                     {rows.map((row) => (
-                      <TableRow
-                        key={row.action}>
+                      <TableRow key={row.action}>
                         <TableCell component="th" scope="row">
                           {row.action}
                         </TableCell>

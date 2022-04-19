@@ -27,6 +27,7 @@ const useStyles = makeStyles((theme) =>
     },
     identityBox: {
       display: 'flex',
+      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'flex-end',
       width: 'auto',
@@ -37,7 +38,6 @@ const useStyles = makeStyles((theme) =>
       flexDirection: 'column',
     },
     blockie: {
-      marginRight: 8,
       borderRadius: 999
     },
     address: {

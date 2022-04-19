@@ -25,6 +25,7 @@ import BootstrapInput from '../../common/components/BootstrapInput/BootstrapInpu
 import { ICarouselItemProps } from '../../modules/market/MarketInterface'
 import { loggedOutHeroCarouselItems } from '../../modules/market/MarketConstants';
 import JobDisplay from '../../modules/market/components/JobDisplay';
+import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
 
 function CarouselItem({ item, itemLength, index } : ICarouselItemProps) {
   return (
@@ -52,7 +53,8 @@ function CarouselItem({ item, itemLength, index } : ICarouselItemProps) {
         p={5}
         sx={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%' }}
       >
-        <Typography color="#fff" fontWeight="bold" fontSize={45} width="45%">
+        <Container maxWidth='lg' sx={{ bgcolor: 'transparent' }}>
+        <Typography color="#fff" fontWeight="bold" fontSize={45} width="60%">
           {item.title}
         </Typography>
         <Typography color="#fff" fontSize={25}>
@@ -67,6 +69,7 @@ function CarouselItem({ item, itemLength, index } : ICarouselItemProps) {
         >
           {item.buttonTitle}
         </Button>
+        </Container>
       </Box>
     </Box>
   );
@@ -122,7 +125,7 @@ const Markets: FunctionComponent = () => {
         ))}
       </Carousel>
       <Container maxWidth="lg" className={classes.root}>
-        <Box sx={{ width: '100%', margin: '0px 0px' }}>
+        <Box sx={{ width: '100%', margin: '0px' }}>
           <Box mb={5}>
             <Box>
               <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
@@ -170,6 +173,29 @@ const Markets: FunctionComponent = () => {
                       </Typography>
                     </Box>
                   </Box>
+                );
+              })}
+            </Grid>
+          </Box>
+
+          <Box my={6}>
+            <Box>
+              <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
+                Buy confidence in top rated services
+              </Typography>
+            </Box>
+            <Grid
+              container
+              alignItems='center'
+              direction="row"
+              flexWrap="nowrap"
+              spacing={1}
+            >
+              {suggestedConnections.slice(3,7).map((human) => {
+                return (
+                  <Grid item xs={3}>
+                    <ServiceCard />
+                  </Grid>
                 );
               })}
             </Grid>
@@ -245,7 +271,7 @@ const Markets: FunctionComponent = () => {
           </Grid>
         </Box>
 
-          <Box mb={5}>
+          <Box my={6}>
             <Box>
               <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                 Work within your network

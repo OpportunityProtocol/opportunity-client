@@ -19,4 +19,11 @@ interface HeadCell {
     value: number;
   }
 
-  export type { Data, HeadCell, TabPanelProps }
+  interface IUserCardProps {
+    name: string,
+    email: string,
+    avatar: string,
+    address: string
+  }
+
+  export type { Data, HeadCell, TabPanelProps, IUserCardProps }
