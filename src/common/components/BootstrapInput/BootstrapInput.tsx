@@ -1,5 +1,6 @@
 import { InputBase } from "@material-ui/core";
-import { styled } from "@mui/system";
+import { makeStyles } from "@mui/styles";
+import { styled, alpha } from "@mui/system";
 
 const BootstrapInput = styled(InputBase)(({ theme }) => ({
     'label + &': {
@@ -11,6 +12,7 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
       backgroundColor: theme.palette.background.paper,
       border: '1px solid #ddd',
       fontSize: 15,
+      minWidth: '100%',
       fontWeight: theme.typography.fontWeightRegular,
       padding: '10px 26px 10px 12px',
       transition: theme.transitions.create(['border-color', 'box-shadow']),
@@ -29,11 +31,38 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
       ].join(','),
       '&:focus': {
         borderRadius: 4,
-        borderColor: '#ddd',
-        boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
+        border: `2px ${alpha('rgb(98, 202, 161)', .6)} solid`,
+       // boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
         cursor: 'pointer',
       },
     },
   }));
 
-  export default BootstrapInput
+  const useStyles = makeStyles(() => ({
+   focused: {
+     border: `${alpha('rgb(98, 202, 161)', .6)}`
+   },
+   notFocused: {
+
+   }
+  }));
+
+  interface ITextInputProps {
+    placeholder: string,
+    size: boolean,
+    onClick: Function,
+    selected: false,
+    value: string | number,
+    multiline: boolean,
+    rows: number,
+    width: string | number
+  }
+
+  const TextInput : React.FunctionComponent<ITextInputProps> = ({ width, value, placeholder, size, onClick, selected=false, multiline, rows }) => {
+    const classes = useStyles()
+  return (
+  <BootstrapInput sx={{ width }} onClick={onClick} placeholder={placeholder} size={size} multiline rows={rows} />
+  )
+  }
+
+  export default TextInput

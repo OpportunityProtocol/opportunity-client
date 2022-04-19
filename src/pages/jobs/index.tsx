@@ -36,6 +36,7 @@ import JobDisplay from '../../modules/market/components/JobDisplay';
 import BootstrapInput from '../../common/components/BootstrapInput/BootstrapInput';
 import { timelineButtons } from '../../modules/market/MarketConstants';
 import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
+import { useRouter } from 'next/router';
 
 const data = [
   {
@@ -96,7 +97,7 @@ const Jobs: React.FunctionComponent = () => {
   const [sortBy, setSortBy] = useState<string>('Sort by');
   const [relationships, setRelationships] = useState<any>([]);
   const [networkSugggestions, setNetworkSuggestions] = useState<any>([]);
-
+  const router = useRouter()
   const [marketSpotlightAnchor, setMarketSpotlightAnchor] = useState<null | HTMLElement>(null);
   const open = Boolean(marketSpotlightAnchor);
 
@@ -149,7 +150,7 @@ const Jobs: React.FunctionComponent = () => {
 
           <Grid item>
             <Stack direction="row" alignItems="center" spacing={3}>
-              <Button variant="contained" color="secondary" disableElevation disableRipple>
+              <Button onClick={() => router.push('contract/create')} variant="contained" color="secondary" disableElevation disableRipple>
                 Create Contract
               </Button>
               <FormControl variant="standard">

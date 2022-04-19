@@ -22,6 +22,7 @@ import UserCard from '../../common/components/UserCard/UserCard';
 import TabPanel from '../../common/components/TabPanel/TabPanel';
 import { timelineButtons } from '../../modules/market/MarketConstants';
 import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
+import { useRouter } from 'next/router';
 
 function a11yProps(index: number) {
   return {
@@ -82,6 +83,7 @@ const Dashboard: React.FunctionComponent = () => {
   const classes = useStyles();
   const [value, setValue] = useState<any>(0);
   const [connections, setConnections] = useState<Array<object>>([]);
+  const router = useRouter()
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -111,7 +113,7 @@ const Dashboard: React.FunctionComponent = () => {
           Dashboard
         </Typography>
 
-        <Button disableElevation disableRipple variant="contained" color="secondary">
+        <Button onClick={() => router.push('contract/create')} disableElevation disableRipple variant="contained" color="secondary">
           Create Contract
         </Button>
       </Stack>

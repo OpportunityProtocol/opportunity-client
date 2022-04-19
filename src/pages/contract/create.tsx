@@ -26,9 +26,6 @@ import Check from '@mui/icons-material/Check';
 import BoltIcon from '@mui/icons-material/Bolt';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import SettingsIcon from '@mui/icons-material/Settings';
-import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import VideoLabelIcon from '@mui/icons-material/VideoLabel';
 import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
 import { StepIconProps } from '@mui/material/StepIcon';
 
@@ -38,6 +35,8 @@ import { alpha } from '@mui/material';
 import Link from 'next/link'
 import ClickableCard from '../../common/components/ClickableCard/ClickableCard';
 import { useRouter } from 'next/router';
+import { Add } from '@mui/icons-material';
+import TextInput from '../../common/components/BootstrapInput/BootstrapInput';
 
 const steps = ['Complete the basic information', 'Pay fees'];
 
@@ -113,42 +112,6 @@ function CustomizedSteppers() {
     );
   }
 
-  const BootstrapInput = styled(InputBase)(({ theme }) => ({
-    'label + &': {
-      marginTop: theme.spacing(3),
-    },
-    '& .MuiInputBase-input': {
-      borderRadius: 0,
-      position: 'relative',
-      backgroundColor: theme.palette.mode === 'light' ? '#fcfcfb' : '#2b2b2b',
-      border: '1px solid #ced4da',
-      fontSize: 16,
-      width: 400,
-      padding: '10px 12px',
-      transition: theme.transitions.create([
-        'border-color',
-        'background-color',
-        'box-shadow',
-      ]),
-      // Use the system font instead of the default Roboto font.
-      fontFamily: [
-        '-apple-system',
-        'BlinkMacSystemFont',
-        '"Segoe UI"',
-        'Roboto',
-        '"Helvetica Neue"',
-        'Arial',
-        'sans-serif',
-        '"Apple Color Emoji"',
-        '"Segoe UI Emoji"',
-        '"Segoe UI Symbol"',
-      ].join(','),
-      '&:focus': {
-        boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
-        borderColor: theme.palette.primary.main,
-      },
-    },
-  }));
 
 const Create: React.FunctionComponent = () => {
     const classes = useStyles()
@@ -160,9 +123,9 @@ const Create: React.FunctionComponent = () => {
     }
     
     return (
-        <Container maxWidth='md' sx={{padding: '1% 4%',  width: '100%' }}>
+        <Container maxWidth='lg' sx={{padding: '1% 4%',  width: '100%' }}>
             <CustomizedSteppers />
-            <Box my={2} className={classes.columnCenter}>
+            <Box my={2}>
             <Typography fontWeight='bold' fontSize={25} py={1}>
                 Post a Contract
             </Typography>
@@ -215,12 +178,11 @@ const Create: React.FunctionComponent = () => {
 const CreateBasicInformation : React.FunctionComponent = () => {
     const classes = useStyles()
     const [contractDuration, setContractDuration] = useState('Quick Job')
-
     return (
         <Box sx={{ pb: 3 }}>
             <Box sx={{ width: '100%'}}>
                 <Box py={1}>
-                <Typography className={classes.sectionHeader}>
+                <Typography fontWeight='medium' fontSize={16}>
                 Contract Duration
             </Typography>
             <Typography variant='body2' className={classes.sectionSubheader}>
@@ -230,10 +192,10 @@ const CreateBasicInformation : React.FunctionComponent = () => {
 
             <Grid sx={{ width: '100%' }} container spacing={3} direction='row' alignItems='center'>
             <Grid item>
-                    <ClickableCard variant='outlined' className={clsx(classes.marketTypeCard, contractDuration === 'Quick Job' ? classes.selectedCard : null)}>
-                        <BoltIcon />
+                    <ClickableCard variant='outlined' sx={{ border: contractDuration === 'Quick Job' ? `4px solid ${alpha('rgb(98, 202, 161)', .6)}` : 'none' }} className={clsx(classes.marketTypeCard, contractDuration === 'Quick Job' ? classes.selectedCard : null)}>
+                        <BoltIcon sx={{ color: '#FFEB3B'}} />
                         <Box py={2} className={classes.columnCenter}>
-                        <Typography>
+                        <Typography >
                             Quick Job
                         </Typography>
                         <Typography variant='body2'>
@@ -245,7 +207,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
 
                 <Grid item>
                     <ClickableCard variant='outlined' className={clsx(classes.marketTypeCard, contractDuration === 'Short Term' ? classes.selectedCard : null)}>
-                        <DateRangeIcon />
+                        <DateRangeIcon sx={{ color: '#2196F3'}} />
                         <Box py={2} className={classes.columnCenter}>
                         <Typography>
                             Short Term Work
@@ -259,7 +221,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
 
                 <Grid item>
                 <ClickableCard variant='outlined' className={clsx(classes.marketTypeCard, contractDuration === 'Long Term' ? classes.selectedCard : null)}>
-                    <HourglassTopIcon />
+                    <HourglassTopIcon sx={{ color: '#4CAF50'}} />
                     <Box py={2} className={classes.columnCenter}>
                     <Typography>
                         Long Term Work
@@ -277,7 +239,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
 
             <Box>
                 <Box pb={1}>
-                    <Typography className={classes.sectionHeader}>
+                <Typography fontWeight='medium' fontSize={16}>
                         Basic Information
                     </Typography>
                     <Typography variant='body2' className={classes.sectionSubheader}>
@@ -296,7 +258,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
                     </Grid>
 
                     <Grid item>
-                        <BootstrapInput size='small' />
+                      <TextInput size='small' width={500} placeholder='I am hiring a...' />
                     </Grid>
                 </Grid>
 
@@ -311,17 +273,60 @@ const CreateBasicInformation : React.FunctionComponent = () => {
                     </Grid>
 
                     <Grid item>
-                    <BootstrapInput size='small' multiline rows={6} />
+                    <TextInput placeholder='Enter a description' width={500} multiline rows={6} />
                     </Grid>
                 </Grid>
+
+                <Grid sx={{ py: 2 }} container direction='row' alignItems='flex-start' spacing={10}>
+                    <Grid item>
+                        <Typography className={classes.subSectionHeader}>
+                            Budget
+                        </Typography>
+                        <Typography variant='caption'>
+                            This will be the display for your contract
+                        </Typography>
+                    </Grid>
+
+                    <Grid item>
+                    <TextInput placeholder='$550.00' width={200} />
+                    </Grid>
+                </Grid>
+
+                <Grid sx={{ py: 2 }} container direction='row' alignItems='flex-start' spacing={10}>
+                    <Grid item>
+                        <Typography className={classes.subSectionHeader}>
+                            Deadline
+                        </Typography>
+                        <Typography variant='caption'>
+                            This will be the display for your contract
+                        </Typography>
+                    </Grid>
+
+                    <Grid item>
+                    <TextInput placeholder='No deadline' width={200} />
+                    </Grid>
+                </Grid>
+
+                <Grid sx={{ py: 2 }} container direction='row' alignItems='flex-start' spacing={10}>
+                    <Grid item>
+                        <Button endIcon={<Add />} disableRipple disableFocusRipple disableElevation disableTouchRipple color='secondary' variant='text'>
+                            Add Tags
+                        </Button>
+                    </Grid>
+
+                    <Grid item />
+                </Grid>
+                
             </Box>
+
+            
 
             <Divider sx={{ my: 5}} />
 
 
 <Box>
     <Box pb={1}>
-        <Typography className={classes.sectionHeader}>
+    <Typography fontWeight='medium' fontSize={16}>
             Definition of Done
         </Typography>
         <Typography variant='body2' className={classes.sectionSubheader}>
@@ -329,15 +334,14 @@ const CreateBasicInformation : React.FunctionComponent = () => {
         </Typography>
     </Box>
 
-    <BootstrapInput size='small' multiline rows={6} />
-</Box>
 
-<Divider sx={{ my: 5}} />
+    <TextInput size='small' multiline rows={6} width={500} placeholder='To complete the job you must...' />
+</Box>
 
             <Box>
                 <Box pb={1}>
-                    <Typography className={classes.sectionHeader}>
-                        Contract Payout Type
+                    <Typography fontWeight='medium' fontSize={16}>
+                        Optional
                     </Typography>
                     <Typography variant='body2' className={classes.sectionSubheader}>
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt ipsum ut maximus malesuada.
@@ -348,6 +352,19 @@ const CreateBasicInformation : React.FunctionComponent = () => {
                     <FormControlLabel 
                     control={<Checkbox defaultChecked />} 
                     label="Do you want to payout your contract in milestones?"
+                    componentsProps={{
+                        typography: {
+                            fontSize: 15
+                        }
+                    }}
+                     />
+                </FormGroup>
+
+
+                <FormGroup>
+                    <FormControlLabel 
+                    control={<Checkbox defaultChecked />} 
+                    label="Only specific languages"
                     componentsProps={{
                         typography: {
                             fontSize: 15

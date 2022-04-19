@@ -12,7 +12,7 @@ import { createTheme } from '@mui/material/styles';
       primary: {
         main: '#212121',
       },
-      turquoise: 'rgb(98, 202, 161)'
+    //  turquoise: 'rgb(98, 202, 161)'
     },   
     typography: {
       button: {
