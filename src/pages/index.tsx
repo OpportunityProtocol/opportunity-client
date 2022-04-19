@@ -5,13 +5,14 @@ import styles from '../../styles/Home.module.css'
 
 import theme from '../../material_theme'
 import Opportunity from '../Opportunity'
-import Markets from './markets';
+import Markets from './explore';
 import Footer from '../common/components/Footer/Footer'
+import Explore from './explore';
 
 const Home: NextPage = () => {
   return (
     <div className={styles.container}>
-      <Markets />
+      <Explore />
     </div>
   )
 }

@@ -126,6 +126,10 @@ const useStyles = makeStyles((theme) => {
       elevation: 0,
       display: 'flex',
       alignItems: 'center',
+    },
+    switchFormControlLabel: {
+      color: '#a3a3a3',
+      fontWeight: theme.typography.fontWeightMedium
     }
   }
 })

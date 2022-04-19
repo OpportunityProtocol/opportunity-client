@@ -12,11 +12,12 @@ import { createTheme } from '@mui/material/styles';
       primary: {
         main: '#212121',
       },
+      turquoise: 'rgb(98, 202, 161)'
     },   
     typography: {
       button: {
         textTransform: 'none',
-       // color: 'rgb(98, 202, 161)',
+       // color: '#4CAF50',
       }
     },
     components: {

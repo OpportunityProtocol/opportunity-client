@@ -144,7 +144,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
                     variant="filled"
                     className={classes.tagChip}
                     sx={{
-                      bgcolor: alpha('rgb(98, 202, 161)', 0.3),
+                      bgcolor: alpha('#4CAF50', 0.3),
                     }}
                   />
                 )}
@@ -154,7 +154,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
                   classes={{
                     iconSmall: classes.purchaseIconSmall,
                   }}
-                  sx={{ bgcolor: alpha('rgb(98, 202, 161)', 0.8) }}
+                  sx={{ bgcolor: alpha('#4CAF50', 0.8) }}
                   variant="filled"
                   color="primary"
                   label="Refer this service (+0.50)"
@@ -181,3 +181,61 @@ JobDisplay.propTypes = {
 };
 
 export default JobDisplay;
+
+
+
+{/*
+
+<Grid
+                width="100%"
+                container
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Grid item>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <FormControl variant="standard">
+                      <NativeSelect
+                        id="desired-markets-selet"
+                        value={desiredMarkets}
+                        className={classes.selectFilter}
+                        onChange={handleOnChangeDesiredMarkets}
+                        input={<BootstrapInput />}
+                      >
+                        <option aria-label="None" value="Filter desired markets">
+                          Filter desired markets
+                        </option>
+                      </NativeSelect>
+                    </FormControl>
+                    <FormControl variant="standard">
+                      <NativeSelect
+                        id="sort-by-select"
+                        value={sortBy}
+                        className={classes.selectFilter}
+                        onChange={handleOnChangeSortBy}
+                        input={<BootstrapInput />}
+                      >
+                        <option aria-label="None" value="Filter desired markets">
+                          Sort by
+                        </option>
+                        <option value={0}>Value Settled</option>
+                        <option value={1}>Number of Contracts</option>
+                        <option value={2}>Number of Services</option>
+                      </NativeSelect>
+                    </FormControl>
+                  </Stack>
+                </Grid>
+                <Grid item>
+                  <FormControlLabel
+                    sx={{
+                      color: '#a3a3a3',
+                      fontWeight: (theme) => theme.typography.fontWeightMedium,
+                    }}
+                    control={<Switch value="" size="small" color="secondary" />}
+                    label="Only markets I've participated in"
+                  />
+                </Grid>
+              </Grid>
+            
+                  */}

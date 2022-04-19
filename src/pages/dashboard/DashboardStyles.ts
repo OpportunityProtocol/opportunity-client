@@ -26,6 +26,14 @@ const useStyles = makeStyles(theme => ({
     },
     graphButton: {
         color: '#fff !important'
+    },
+    graphContainer: {
+        height: 'auto', 
+        backgroundColor: 'rgb(52, 62, 60) !important', 
+        color: 'white'
+    },
+    tabs: {
+        backgroundColor: '#fbfbfd', my: 2 
     }
 }))
 

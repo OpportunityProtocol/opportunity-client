@@ -13,9 +13,11 @@ import {
     CardActions 
 } from '@mui/material'
 import { useStyles } from './UserCardStyles'
+import { useRouter } from 'next/router'
 
 const UserCard : React.FunctionComponent<IUserCardProps> = ({ name, email, avatar, address }) => {
     const classes = useStyles()
+    const router = useRouter()
 
     return (
         <Card variant='outlined'>
@@ -38,7 +40,7 @@ const UserCard : React.FunctionComponent<IUserCardProps> = ({ name, email, avata
             </CardContent>
             <Divider />
             <CardActions>
-                <Button variant='text' color='secondary'>
+                <Button variant='text' color='secondary' onClick={() => router.push('/dashboard')}>
                     See profile
                 </Button>
             </CardActions>

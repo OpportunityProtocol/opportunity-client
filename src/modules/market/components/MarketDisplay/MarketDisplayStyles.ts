@@ -7,7 +7,7 @@ const useStyles = makeStyles((theme) => {
     },
     primaryContentContainer: {
       '&:hover': {
-        color: 'rgb(98, 202, 161)'
+        color: '#4CAF50'
       }
     }
   }
