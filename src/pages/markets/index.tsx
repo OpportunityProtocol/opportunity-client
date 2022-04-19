@@ -27,10 +27,11 @@ import { loggedOutHeroCarouselItems } from '../../modules/market/MarketConstants
 import JobDisplay from '../../modules/market/components/JobDisplay';
 import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
 
+const HEIGHT = '500px'
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
   return (
     <Box sx={{ position: 'relative', width: '100%', backgroundColor: '#fff' }}>
-      <img src={item.source} style={{ width: '100%', height: '680px' }} />
+      <img src={item.source} style={{ width: '100%', height: HEIGHT }} />
       <div
         style={{
           position: 'absolute',
@@ -39,7 +40,7 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
           left: 0,
           right: 0,
           width: '100%',
-          height: '680px',
+          height: HEIGHT,
           backgroundColor: 'rgba(0,0,0,0.7)',
         }}
       />
@@ -119,14 +120,14 @@ const Markets: FunctionComponent = () => {
   const AVATAR_SIZE = 70;
   return (
     <Box bgcolor="#fbfbfd">
+      <Container maxWidth="lg" className={classes.root}>
       <Carousel fullHeightHover={true} indicators={false} autoPlay interval={3000}>
         {loggedOutHeroCarouselItems.map((item, i, arr) => (
           <CarouselItem key={i} item={item} itemLength={arr.length} index={i} />
         ))}
       </Carousel>
-      <Container maxWidth="lg" className={classes.root}>
         <Box sx={{ width: '100%', margin: '0px' }}>
-          <Box mb={5}>
+          <Box my={2}>
             <Box>
               <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                 Expand your network
@@ -138,7 +139,6 @@ const Markets: FunctionComponent = () => {
               direction="row"
               overflow="scroll"
               flexWrap="nowrap"
-              height={AVATAR_SIZE * 2}
             >
               {suggestedConnections.map((human) => {
                 return (
@@ -168,8 +168,8 @@ const Markets: FunctionComponent = () => {
                       <Typography variant="body2" color="#757575" width="auto" noWrap>
                         {human.name.first + ' ' + human.name.last}
                       </Typography>
-                      <Typography variant="caption" color="#757575" width="auto" noWrap>
-                        50 Connections
+                      <Typography variant="caption" color='rgb(98, 202, 161)' width="auto" noWrap>
+                      ${Math.floor(Math.random() * 101).toFixed(2)} Skill Value
                       </Typography>
                     </Box>
                   </Box>
@@ -178,7 +178,7 @@ const Markets: FunctionComponent = () => {
             </Grid>
           </Box>
 
-          <Box my={6}>
+          <Box mb={2}>
             <Box>
               <Typography py={5} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                 Buy confidence in top rated services
@@ -188,7 +188,7 @@ const Markets: FunctionComponent = () => {
               {suggestedConnections.slice(3, 7).map((human) => {
                 return (
                   <Grid item xs={3}>
-                    <ServiceCard />
+                    <ServiceCard name={human.name.first + " " + human.name.last} avatarSrc={human.picture.large} headerSrc='https://picsum.photos/200' />
                   </Grid>
                 );
               })}

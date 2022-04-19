@@ -265,7 +265,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
 
   const open = Boolean(anchorEl);
 
-  const isPadded = router.pathname === '/jobs' || router.pathname === '/dashboard' || router.pathname === '/contract/view'
+  const isPadded = router.pathname === '/jobs' || router.pathname === '/dashboard' || router.pathname === '/contract/view' || router.pathname === '/' || router.pathname === '/markets'
 
   const renderDrawerContent = () => {
     switch(router.pathname) {

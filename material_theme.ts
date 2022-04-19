@@ -6,7 +6,7 @@ import { createTheme } from '@mui/material/styles';
       divider: '#ddd',
       secondary: {
         light: 'rgb(147, 228, 178)',
-        main: 'rgb(98, 202, 161)',
+        main: '#4CAF50',
         dark: 'rgb(54, 119, 74)'
       },
       primary: {

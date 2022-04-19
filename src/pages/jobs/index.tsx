@@ -35,6 +35,7 @@ import { FilterList } from '@mui/icons-material/';
 import JobDisplay from '../../modules/market/components/JobDisplay';
 import BootstrapInput from '../../common/components/BootstrapInput/BootstrapInput';
 import { timelineButtons } from '../../modules/market/MarketConstants';
+import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
 
 const data = [
   {
@@ -141,7 +142,7 @@ const Jobs: React.FunctionComponent = () => {
         <Grid my={1} container direction="row" alignItems="center" justifyContent="space-between">
           <Grid item>
             <Typography fontSize={25} fontWeight="bold" color="black">
-              Contracts and Services
+              Gigs and Services
             </Typography>
             <Typography variant="subtitle1">Showing 69 total contracts</Typography>
           </Grid>
@@ -172,35 +173,31 @@ const Jobs: React.FunctionComponent = () => {
 
         <Grid container direction="row" alignItems="flex-start" spacing={5}>
           <Grid item xs={8}>
+          <Box my={1}>
+            <Typography py={1} variant='subtitle2' fontSize={20}>
+              Most Valued Work
+            </Typography>
+            <Grid container justifyContent='space-between' direction='row' alignItems='center'>
+                  {
+                    relationships.slice(10, 13).map((relationship, idx) => (
+                      <Grid item xs={3.8}>
+                      <ServiceCard name={relationship.name.first + " " + relationship.name.last} avatarSrc={relationship.picture.large} headerSrc='https://picsum.photos/200' />
+                      </Grid>
+                    ))
+                  }
+                </Grid>
+          </Box>
+
             <Box>
-              <Tabs
-                variant="standard"
-                value={value}
-                indicatorColor="secondary"
-                textColor="secondary"
-                onChange={handleChange}
-              >
-                <Tab label="All Contracts" {...a11yProps(0)} />
-                <Tab label="Jobs" {...a11yProps(1)} />
-                <Tab label="Services" {...a11yProps(2)} />
-                <Tab label="Suggestions" {...a11yProps(2)} />
-              </Tabs>
-            </Box>
-            <TabPanel value={0} index={0}>
+            <Typography py={1} variant='subtitle2' fontSize={20}>
+              Gigs
+            </Typography>
               <Grid container direction="column" spacing={0}>
                 {getRelationships()}
               </Grid>
-            </TabPanel>
 
-            <TabPanel value={1} index={1}>
-              Item One
-            </TabPanel>
-
-            {relationships?.length === 0 ? (
-              <Box>
-                <Typography>No listings exist in this market. Be the first to post one.</Typography>
-              </Box>
-            ) : null}
+              
+            </Box>
           </Grid>
 
           <Grid item xs={4}>

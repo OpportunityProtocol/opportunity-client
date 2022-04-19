@@ -23,6 +23,9 @@ const useStyles = makeStyles(theme => ({
     },
     marginBottom: {
         marginBottom: theme.spacing(2)
+    },
+    graphButton: {
+        color: '#fff !important'
     }
 }))
 
