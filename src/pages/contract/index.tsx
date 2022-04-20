@@ -66,7 +66,7 @@ const Contract : React.FunctionComponent<any> = () => {
                             <Paper variant='outlined' sx={{flex: 1, p: 1}}>
                                 <InputBase placeholder='Send a message ' className={classes.inputBase} />
                             </Paper>
-                            <Button sx={{ color: '#fff' }} endIcon={<Send sx={{color: 'white'}} />} color='secondary' sx={{ mx: 1, width: 100}} size='small' variant='contained'>
+                            <Button endIcon={<Send sx={{color: 'white'}} />} color='secondary' sx={{ bgcolor: '#fff', mx: 1, width: 100}} variant='contained'>
                                 Send
                             </Button>
                         </CardContent>

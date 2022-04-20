@@ -1,6 +1,8 @@
+import { Theme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
+import { FunctionComponent } from 'react'
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme : Theme) => ({
     root: {
         width: '100%',
         height: 'calc(100vh - 70px)',

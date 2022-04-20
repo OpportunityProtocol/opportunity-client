@@ -79,14 +79,14 @@ const data = [
   },
 ];
 
-function createData(action: string, user: string, timestamp: number) {
+function createData(action: string, user: string, timestamp: string) {
   return { action, user, timestamp };
 }
 
 const rows = [
-  createData('Contract Created', 'bella.hughes@example.com', new Date().toDateString()),
-  createData('Worker Assigned', 'bella.hughes@example.com', new Date().toDateString()),
-  createData('Work Accepted', 'simon.rasmussen@example.com', new Date().toDateString()),
+  createData('Contract Created', 'bella.hughes@example.com', new Date().toDateString().toString()),
+  createData('Worker Assigned', 'bella.hughes@example.com', new Date().toDateString().toString()),
+  createData('Work Accepted', 'simon.rasmussen@example.com', new Date().toDateString().toString()),
 ];
 
 const TableToolbar = () => {
@@ -111,9 +111,11 @@ const contractDetailsSecondaryTypographyProps = {
 };
 
 const isService = false;
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 const ViewContract: React.FunctionComponent<any> = () => {
   const classes = useStyles();
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<any>([]);
   const [contractOwnership, setContractOwnership] = useState<string>('Claimed');
   const isReferral = true;
   const renderUsers = async () => {
@@ -224,16 +226,16 @@ const ViewContract: React.FunctionComponent<any> = () => {
                     No reviews has been written for this employer
                   </Typography>
                 ) : (
-                  reviews.slice(4, 9).map((review, idx) => {
+                  reviews.slice(4, 9).map((review: { picture: { large: string | undefined; }; name: { first: string; last: string; }; login: { username: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined; }; }, idx: React.Key | null | undefined) => { 
                     return (
-                      <Box component={Stack} spacing={2} direction="row" my={1}>
-                        <Avatar src={review.picture.large} className={classes.avatar} />
+                      <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
+                        <Avatar src={review?.picture.large} className={classes.avatar} />
                         <Stack>
                           <Typography fontSize={13} className={classes.overline}>
-                            {review.name.first + ' ' + review.name.last}
+                            {review?.name.first + ' ' + review.name.last}
                           </Typography>
                           <Typography fontSize={14} fontWeight="medium" className={classes.name}>
-                            {review.login.username}
+                            {review?.login.username}
                           </Typography>
                           <Typography paragraph fontSize={14} className={classes.name}>
                             No hassle and no extra work apart from the contract description. I will
@@ -294,7 +296,6 @@ const ViewContract: React.FunctionComponent<any> = () => {
             <Alert
               variant="standard"
               icon={false}
-              component={Card}
               className={classes.marginBottom}
             >
               <Typography fontSize={20} fontWeight="bold">

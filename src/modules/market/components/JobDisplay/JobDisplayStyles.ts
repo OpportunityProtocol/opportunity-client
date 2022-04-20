@@ -1,7 +1,8 @@
 import { makeStyles } from "@mui/styles";
 import { alpha } from "@mui/system";
+import { Theme } from '@mui/material'
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme : Theme) => ({
     card: { 
         height: 'auto',
        // border: 'none !important',

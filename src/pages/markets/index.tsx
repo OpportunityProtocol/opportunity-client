@@ -1,6 +1,5 @@
 import React, { useEffect, useState, FunctionComponent } from 'react';
 import { useStyles } from '../../modules/market/MarketStyles';
-import Dots from 'material-ui-dots';
 import {
   Grid,
   Container,

@@ -4,8 +4,6 @@ import type { AppProps } from 'next/app'
 import Opportunity from '../Opportunity'
 import theme from '../../material_theme'
 import { ThemeProvider } from '@mui/material/styles';
-import MarketToolbar from '../modules/market/components/MarketToolbar';
-import Footer from '../common/components/Footer/Footer';
 import NavigationBreadcrumbs from '../common/components/Breadcrumbs/Breadcrumbs'
 import Head from 'next/head'
 

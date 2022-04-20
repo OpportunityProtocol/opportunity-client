@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useStyles } from './DashboardStyles';
+import { useStyles } from '../../common/DashboardStyles';
 
 import {
   Box,
@@ -82,7 +82,7 @@ const COLUMN_HEIGHT = 'calc(100vh - 70px)';
 const Dashboard: React.FunctionComponent = () => {
   const classes = useStyles();
   const [value, setValue] = useState<any>(0);
-  const [connections, setConnections] = useState<Array<object>>([]);
+  const [connections, setConnections] = useState<any>([]);
   const router = useRouter()
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -135,13 +135,13 @@ const Dashboard: React.FunctionComponent = () => {
             <CardContent>
               <Typography color='#fff' fontWeight="medium" fontSize={20}>
                 Total Skill Value{' '}
-                <Typography px={1} color="#fff" component="span" color="#4CAF50" fontSize={13}>
+                <Typography px={1} color="#fff" component="span" fontSize={13}>
                   {' '}
                   +0.38
                 </Typography>
               </Typography>
               <ResponsiveContainer width="100%" height={350}>
-                <LineChart width="100%" height="100%" data={data}>
+                <LineChart width={350} height={350} data={data}>
                   <Line type="monotone" dataKey="pv" stroke="rgb(98, 202, 161)" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
@@ -187,7 +187,7 @@ const Dashboard: React.FunctionComponent = () => {
             </Tabs>
             <TabPanel value={value} index={0}>
               <Box component={Grid} container direction="row" alignItems="center" spacing={3}>
-                {connections.slice(3, 8).map((connection) => {
+                {connections.slice(3, 8).map((connection: { name: { first: string; last: string; }; picture: { large: string; }; email: string; }) => {
                   return (
                     <Grid item xs={12}>
                       <UserCard
@@ -216,7 +216,7 @@ const Dashboard: React.FunctionComponent = () => {
                     [0,1,2].map(element => {
                       return (
                         <Grid item>
-                        <ServiceCard  />
+                        <ServiceCard name='' headerSrc='' avatarSrc=''  />
                         </Grid>
                       )
                     })

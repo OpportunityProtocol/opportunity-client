@@ -1,8 +1,10 @@
+import { MouseEventHandler } from "react";
+
 interface ICarouselItemProp {
     source: string,
     title: string,
     subtitle: string,
-    onClick: () => {},
+    onClick: MouseEventHandler<HTMLDivElement>,
     buttonTitle: string
   }
 
@@ -13,8 +15,9 @@ interface ICarouselItemProp {
   }
 
   interface IJobDisplayProps {
+    hasButton?: boolean,
     avatar?: string;
-    suggestion: boolean;
+    suggestion?: boolean;
   }
 
   export type { ICarouselItemProp, ICarouselItemProps, IJobDisplayProps }

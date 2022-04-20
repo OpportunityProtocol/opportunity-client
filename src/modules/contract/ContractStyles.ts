@@ -1,7 +1,8 @@
-import { createStyles, makeStyles } from '@mui/styles';
+import { Theme } from '@mui/material';
+import { createStyles, DefaultTheme, makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles((theme) =>
-  createStyles({
+const useStyles = makeStyles((theme : Theme) => {
+return {
     container: {
         marginTop: '4%',
     },
@@ -106,7 +107,7 @@ const useStyles = makeStyles((theme) =>
         fontWeight: 500,
         color: '#495869',
       }
-  }),
-);
+    }
+});
 
 export { useStyles }

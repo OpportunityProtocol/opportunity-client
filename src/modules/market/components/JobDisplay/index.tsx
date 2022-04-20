@@ -149,7 +149,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
                   />
                 )}
               </Grid>
-              {true === false ? (
+              {(3 > 5) === false ? (
                 <Chip
                   classes={{
                     iconSmall: classes.purchaseIconSmall,

@@ -5,8 +5,6 @@ import {
     Tab,
     Tabs,
     Grid,
-    Divider,
-    Button,
     Typography,
     Card,
     CardActionArea,
@@ -17,16 +15,21 @@ import {
     Stack,
 } from '@mui/material'
 
-import { useStyles } from './NetworkStyles'
+import { useStyles } from '../../common/NetworkStyles'
 import { Folder, Language, PeopleOutline } from '@mui/icons-material';
-import Blockies from 'react-blockies'
-import { HeadCell, Data } from '../../common/interface'
-import UiTableView from '../../common/components/UITableView/UITableView';
 import { useRouter } from 'next/router';
-import { getRandomColor } from './helper';
+import { getRandomColor } from '../../common/helper';
 import TabPanel from '../../common/components/TabPanel/TabPanel';
 
 const products = new Array(1).fill(1)
+
+function a11yProps(index: number) {
+  return {
+    value: index,
+    id: `vertical-tab-${index}`,
+    'aria-controls': `vertical-tabpanel-${index}`,
+  };
+}
 
 const Network: React.FunctionComponent = () => {
     const classes = useStyles()

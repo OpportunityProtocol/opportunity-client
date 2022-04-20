@@ -37,6 +37,7 @@ import BootstrapInput from '../../common/components/BootstrapInput/BootstrapInpu
 import { timelineButtons } from '../../modules/market/MarketConstants';
 import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
+import TextInput from '../../common/components/BootstrapInput/BootstrapInput';
 
 const data = [
   {
@@ -128,7 +129,7 @@ const Jobs: React.FunctionComponent = () => {
   }, []);
 
   const getRelationships = () => {
-    return relationships.slice(10, 15).map((relationship, idx) => (
+    return relationships.slice(10, 15).map((relationship: { picture: { large: string | undefined; }; }, idx: React.Key | null | undefined) => (
       <Grid item xs={12} key={idx}>
         <React.Fragment>
           <JobDisplay avatar={relationship.picture.large} suggestion={idx === 0 ? true : false} />
@@ -158,7 +159,7 @@ const Jobs: React.FunctionComponent = () => {
                   id="sort-by-select"
                   value={sortBy}
                   onChange={handleOnChangeSortBy}
-                  input={<BootstrapInput />}
+                  input={<TextInput />}
                 >
                   <option aria-label="None" value="Filter desired markets">
                     Sort by
@@ -180,7 +181,7 @@ const Jobs: React.FunctionComponent = () => {
             </Typography>
             <Grid container justifyContent='space-between' direction='row' alignItems='center'>
                   {
-                    relationships.slice(10, 13).map((relationship, idx) => (
+                    relationships.slice(10, 13).map((relationship: { name: { first: string; last: string; }; picture: { large: string; }; }, idx: any) => (
                       <Grid item xs={3.8}>
                       <ServiceCard name={relationship.name.first + " " + relationship.name.last} avatarSrc={relationship.picture.large} headerSrc='https://picsum.photos/200' />
                       </Grid>
@@ -202,7 +203,7 @@ const Jobs: React.FunctionComponent = () => {
           </Grid>
 
           <Grid item xs={4}>
-            <Alert icon={false} variant='filled' component={Card} className={classes.marginBottom}>
+            <Alert icon={false} variant='filled' className={classes.marginBottom}>
               <Typography variant="subtitle1" fontWeight="600">
                 Writing and Translation
               </Typography>
@@ -272,7 +273,7 @@ const Jobs: React.FunctionComponent = () => {
               </CardContent>
               <Divider />
               <CardContent>
-                {networkSugggestions.slice(15, 18).map((human, idx) => {
+                {networkSugggestions.slice(15, 18).map((human: { picture: { large: string | undefined; }; name: { first: string; last: string; }; }, idx: any) => {
                   return (
                     <CardHeader
                       key={idx}

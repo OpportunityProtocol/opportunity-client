@@ -258,7 +258,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
                     </Grid>
 
                     <Grid item>
-                      <TextInput size='small' width={500} placeholder='I am hiring a...' />
+                      <TextInput value='' width={500} placeholder='I am hiring a...' />
                     </Grid>
                 </Grid>
 
@@ -273,7 +273,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
                     </Grid>
 
                     <Grid item>
-                    <TextInput placeholder='Enter a description' width={500} multiline rows={6} />
+                    <TextInput value={''} placeholder='Enter a description' width={500} multiline rows={6} />
                     </Grid>
                 </Grid>
 
@@ -288,7 +288,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
                     </Grid>
 
                     <Grid item>
-                    <TextInput placeholder='$550.00' width={200} />
+                    <TextInput value={0} placeholder='$550.00' width={200} />
                     </Grid>
                 </Grid>
 
@@ -303,7 +303,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
                     </Grid>
 
                     <Grid item>
-                    <TextInput placeholder='No deadline' width={200} />
+                    <TextInput value={0} placeholder='No deadline' width={200} />
                     </Grid>
                 </Grid>
 
@@ -335,7 +335,7 @@ const CreateBasicInformation : React.FunctionComponent = () => {
     </Box>
 
 
-    <TextInput size='small' multiline rows={6} width={500} placeholder='To complete the job you must...' />
+    <TextInput value={0} multiline rows={6} width={500} placeholder='To complete the job you must...' />
 </Box>
 
             <Box>

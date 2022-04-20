@@ -1,6 +1,5 @@
 import React, { useEffect, useState, FunctionComponent } from 'react';
 import { useStyles } from '../modules/market/MarketStyles';
-import Dots from 'material-ui-dots';
 import {
   Grid,
   Container,
@@ -48,9 +47,6 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
           backgroundColor: 'rgba(0,0,0,0.7)',
         }}
       />
-      <Box sx={{ position: 'absolute', bottom: 20, right: 20 }}>
-        <Dots index={index} count={itemLength} onDotClick={(index) => {}} />
-      </Box>
       <Box
         display="flex"
         flexDirection="column"
@@ -66,7 +62,7 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
             {item.subtitle}
           </Typography>
           <Button
-            onClick={item.onClick}
+            //onClick={item.onClick}
             size="large"
             variant="contained"
             color="secondary"
@@ -87,7 +83,7 @@ const  Explore: FunctionComponent = () => {
   const [desiredMarkets, setDesiredMarkets] = useState<string>('Filter desired markets');
   const [sortBy, setSortBy] = useState<string>('Sort by');
   const [participatedChecked, setParticipatedChecked] = useState<any>('');
-const router = useRouter()
+  const router = useRouter()
   const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
     size: 50,
     gap: 3,
@@ -183,7 +179,7 @@ const router = useRouter()
             </Grid>
           </Box>
 
-          <Paper variant='outlined' px={5} elevation={0} sx={{ my: 6, px: 6, pb: 6,backgroundColor: 'rgb(250, 250, 250)'}}>
+          <Paper variant='outlined' elevation={0} sx={{ my: 6, px: 6, pb: 6, backgroundColor: 'rgb(250, 250, 250)'}}>
             <Box>
             <Typography py={5} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                 Buy <Typography color='#4CAF50' fontSize={30} fontWeight='bold' component='span'>confidence</Typography> in top rated services
@@ -227,7 +223,7 @@ const router = useRouter()
             </Typography>
           </Box>
           <Grid container direction="column" overflow="scroll" flexWrap="nowrap">
-            {suggestedConnections.slice(3, 6).map((human) => {
+            {suggestedConnections.slice(3, 6).map((human: any) => {
               return (
                 <Grid item>
                   <JobDisplay avatar={human.picture.large} suggestion={true} />

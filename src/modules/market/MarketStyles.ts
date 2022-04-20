@@ -1,6 +1,7 @@
+import { Theme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles((theme : Theme) => {
   return {
     root: {
       width: '100%',
@@ -53,22 +54,10 @@ const useStyles = makeStyles((theme) => {
     selectFilter: {
       width: 400, height: 70
     },
-    root: {
-      display: 'flex',
-      width: '100%',
-      height: '100vh',
-      alignItems: 'center',
-      flexDirection: 'column',
-      overflow: 'visible',
-      backgroundColor: '#fbfbfd',
-    },
     avatarBorder: {
       border: '16px solid transparent',
       borderImage: 'linear-gradient(45deg, red, yellow)',
       borderImageSlice: 1,
-    },
-    heading: {
-      color: 'rgba(33, 33, 33, .85)',
     },
     container: {
       backgroundColor: '#fafafa',

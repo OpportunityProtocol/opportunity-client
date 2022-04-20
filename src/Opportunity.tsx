@@ -282,7 +282,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
       case '/contract':
         return <ContractChatsContent classes={classes} currentContracts={[]} />;
       case '/network':
-        return <NetworkFilterContent classes={classes} />;
+        return <NetworkFilterContent classes={classes} currentContracts={[]} />;
       case '/market':
       default:
         return <MarketDrawerContent classes={classes} />;

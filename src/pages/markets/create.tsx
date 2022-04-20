@@ -32,7 +32,7 @@ import VideoLabelIcon from '@mui/icons-material/VideoLabel';
 import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
 import { StepIconProps } from '@mui/material/StepIcon';
 
-import { useStyles } from './MarketStyles'
+import { useStyles } from '../../modules/market/MarketStyles'
 import { alpha } from '@mui/material';
 
 import Link from 'next/link'

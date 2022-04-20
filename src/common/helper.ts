@@ -13,3 +13,5 @@ export const getRandomColor = () => {
         return '#FFF3E0'
     }
 }
+
+export default ''

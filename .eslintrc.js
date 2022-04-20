@@ -1,3 +1,38 @@
 module.exports = {
-    extends: "airbnb-typescript-prettier"
+    extends: "airbnb-typescript-prettier",
+    rules: {
+      'prettier/prettier': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'import/no-duplicates': 'off',
+      'import/prefer-default-export': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      'import/no-extraneous-dependencies': 'off',
+      'import/order': 'off',
+      'typescript-eslint/no-use-before-define': 'off',
+      'react/function-component-definition': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-use-before-define': 'off',
+      'no-else-return': 'off',
+      'react/jsx-props-no-spreading': 'off',
+      'no-unneeded-ternary': 'off',
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-boolean-value': 'off',
+      'prefer-template': 'off',
+      'react/jsx-fragments': 'off',
+      'react/jsx-curly-brace-presence': 'off',
+      'import/newline-after-import': 'off',
+      'react/jsx-no-useless-fragment': 'off',
+      'no-unsafe-optional-chaining': 'off',
+      'react/no-array-index-key': 'off',
+      'no-unsafe-optional-chaining': 'off',
+      'react/no-array-index-key': 'off',
+      'react/no-array-index-key': 'off',
+      'no-console': 'off',
+      'react/jsx-no-useless-fragment': 'off',
+      'jsx-a11y/alt-text': 'off',
+      'spaced-comment': 'off',
+      'prefer-const': 'off',
+      'jsx-a11y/anchor-is-valid': 'off'
+
+    }
   };
