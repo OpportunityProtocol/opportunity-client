@@ -1,83 +1,168 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react';
 
 import {
-    Box,
-    Card,
-    Divider,
-    Container,
-    ListItemText,
-    Grid,
-    ListItem,
-    List,
-    Pagination,
-    Button,
-    ListItemIcon,
-    Typography,
-    IconButton,
-    InputBase,
-    Paper,
-    CardContent,
-    CardHeader
-} from "@mui/material"
+  Box,
+  Card,
+  Divider,
+  Container,
+  ListItemText,
+  Grid,
+  ListItem,
+  List,
+  Tabs,
+  Tab,
+  Pagination,
+  Button,
+  ListItemIcon,
+  Typography,
+  Table,
+  TableContainer,
+  TableRow,
+  TableBody,
+  TableCell,
+  IconButton,
+  InputBase,
+  Paper,
+  CardContent,
+  CardHeader,
+} from '@mui/material';
 
-import { useStyles } from '../../modules/contract/ContractStyles'
-import { Attachment, ContentCopy, Send } from '@mui/icons-material'
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import DirectionsIcon from '@mui/icons-material/Directions';
+
+import { useStyles } from '../../modules/contract/ContractStyles';
+import { Attachment, ContentCopy, FilterList, MoreVert, Send } from '@mui/icons-material';
 import JobDisplay from '../../modules/market/components/JobDisplay';
 import BountySubmission from '../../modules/market/components/BountySubmission/BountySubmission';
-import { FileUploader } from "react-drag-drop-files";
-const fileTypes = ["PDF", "PNG", "DOC"];
+import { FileUploader } from 'react-drag-drop-files';
+import TabPanel from '../../common/components/TabPanel/TabPanel';
+import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
+import SearchBarV2 from '../../common/components/SearchBarV2/SearchBarV2';
+const fileTypes = ['PDF', 'PNG', 'DOC'];
+
+const resources = [1, 2, 3, 4, 5, 6, 4];
 
 /**
  * For now this is the all out page for viewing contracts
  * All users who message anyone or submit a proposal will happen here.  The only way you won't be able to access is if the job i claimed.. because you won't be able to click job card anywat
- * @returns 
+ * @returns
  */
-const Contract : React.FunctionComponent<any> = () => {
-    const classes = useStyles()
-    const [conversationSelected, setConversationSelected] = useState<boolean>(true)
-    
-    return (
-        <Container maxWidth='lg' component={Grid} direction='row' spacing={2} alignItems='flex-start' container className={classes.boxContainer}>
-            <Grid  direction='column' container item xs={12}>
-            <Grid mb={2} item flex={1}>
-                <Box sx={{ border: '1px solid #ddd' }}>
-                <JobDisplay hasButton={false} />   
-                </Box>          
-            </Grid>
-            <Grid item flex={3} sx={{   }}>
-           {/* Traditional Markets Display */}
-            <Card variant='outlined' sx={{ my: 1, height: '100%', flexGrow: 1, flex: 1}}>
-                <Grid container direction='column' justifyContent='space-between' sx={{  height: '100%'}}>
-                    <Grid item xs={9} flexGrow={1} flex={1} >
-                        <CardContent sx={{ height: '100%',  }}>
-                        <div className={classes.chatArea}>
-                            <Typography variant='caption' color='rgb(94, 94, 94)'>
-                                No messages have been sent between you and @happytowork
-                            </Typography>
-                        </div>
-                        </CardContent>
-                    </Grid>
-                
-                    <Grid item xs={3} sx={{ borderTop: '1px solid #eee',  }}>
-                        <CardContent className={classes.inputContainer}>
-                          <IconButton>
-                                <Attachment />
-                            </IconButton>
-                            <Paper variant='outlined' sx={{flex: 1, p: 1}}>
-                                <InputBase placeholder='Send a message ' className={classes.inputBase} />
-                            </Paper>
-                            <Button endIcon={<Send sx={{color: 'white'}} />} color='secondary' sx={{ bgcolor: '#fff', mx: 1, width: 100}} variant='contained'>
-                                Send
-                            </Button>
-                        </CardContent>
-                    </Grid>
-                </Grid>
-            </Card>
-            </Grid>
-            </Grid>
-        </Container>
-    )
-}
+const Contracts: React.FunctionComponent<any> = () => {
+  const classes = useStyles();
+  const [conversationSelected, setConversationSelected] = useState<boolean>(true);
+  const [relationships, setRelationships] = useState<any>([]);
 
+  const [tabValue, setTabValue] = React.useState<number>(0);
 
-export default Contract
+  const handleOnChangeTab = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  const renderUsers = async () => {
+    const a = await fetch('https://randomuser.me/api/?results=20');
+    const b = await a.json();
+    setRelationships(b.results);
+  };
+
+  useEffect(() => {
+    renderUsers();
+  }, []);
+
+  return (
+    <Container maxWidth="lg" sx={{ padding: '1% 3%', bgcolor: '#fff', height: '100vh' }}>
+      <Typography pl={1} fontSize={25} fontWeight="medium">
+        Contracts
+      </Typography>
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ width: '100%', mt: 1, mb: 3 }}>
+          <Tabs
+            value={tabValue}
+            onChange={handleOnChangeTab}
+            textColor="secondary"
+            indicatorColor="secondary"
+            aria-label="secondary tabs example"
+          >
+            <Tab value={0} label="My Services" />
+            <Tab value={1} label="My Gigs" />
+            <Tab value={2} label="My Posted Gigs" />
+          </Tabs>
+          <Divider />
+        </Box>
+        <SearchBarV2 />
+        <TabPanel index={0} value={tabValue}>
+          <Box>
+            <Grid container direction="row" alignItems="center" spacing={2}>
+              {relationships.slice(10, 15).map(
+                (
+                  relationship: {
+                    name: { first: string; last: string };
+                    picture: { large: string };
+                  },
+                  idx: any
+                ) => (
+                  <Grid item xs={3}>
+                    <ServiceCard
+                      name={relationship.name.first + ' ' + relationship.name.last}
+                      avatarSrc={relationship.picture.large}
+                      headerSrc="https://picsum.photos/200"
+                    />
+                  </Grid>
+                )
+              )}
+            </Grid>
+          </Box>
+        </TabPanel>
+        <TabPanel index={1} value={tabValue}>
+          <Box>
+            <Grid container direction="row" alignItems="center" justifyContent="space-between">
+              {relationships
+                .slice(10, 15)
+                .map(
+                  (
+                    relationship: { picture: { large: string | undefined } },
+                    idx: React.Key | null | undefined
+                  ) => (
+                    <Grid item xs={5.9}>
+                      <React.Fragment>
+                        <JobDisplay
+                          avatar={relationship.picture.large}
+                          suggestion={idx === 0 ? true : false}
+                        />
+                      </React.Fragment>
+                    </Grid>
+                  )
+                )}
+            </Grid>
+          </Box>
+        </TabPanel>
+        <TabPanel index={2} value={tabValue}>
+          <Box>
+            <Grid container direction="row" alignItems="center" justifyContent="space-between">
+              {relationships
+                .slice(10, 15)
+                .map(
+                  (
+                    relationship: { picture: { large: string | undefined } },
+                    idx: React.Key | null | undefined
+                  ) => (
+                    <Grid item xs={12} key={idx} xs={5.9}>
+                      <React.Fragment>
+                        <JobDisplay
+                          avatar={relationship.picture.large}
+                          suggestion={idx === 0 ? true : false}
+                        />
+                      </React.Fragment>
+                    </Grid>
+                  )
+                )}
+            </Grid>
+          </Box>
+        </TabPanel>
+        <Divider />
+      </Box>
+    </Container>
+  );
+};
+
+export default Contracts;

@@ -74,6 +74,7 @@ const Dashboard: React.FunctionComponent = () => {
   const [featuredServices, setFeaturedServices] = useState<any>([]);
   const [reviews, setReviews] = useState<any>([]);
   const router = useRouter();
+  
 
   const renderUsers = async () => {
     const a = await fetch('https://randomuser.me/api/?results=20', {});
@@ -95,27 +96,10 @@ const Dashboard: React.FunctionComponent = () => {
 
   return (
     <Container maxWidth="lg" sx={{ height: COLUMN_HEIGHT }}>
-      <Stack
-        spacing={1}
-        width="100%"
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-      >
+
         <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
           Dashboard
         </Typography>
-
-        <Button
-          onClick={() => router.push('contract/create')}
-          disableElevation
-          disableRipple
-          variant="contained"
-          color="secondary"
-        >
-          Create Contract
-        </Button>
-      </Stack>
 
       <Grid
         mt={2}

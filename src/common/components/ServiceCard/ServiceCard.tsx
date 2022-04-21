@@ -15,6 +15,7 @@ import Box from '@material-ui/core/Box';
 import { useStyles } from './ServiceCardStyle';
 import DAIIcon from '../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg';
 import { CardActions } from '@material-ui/core';
+import { useRouter } from 'next/router';
 
 interface IServiceCardProps {
   name: string;
@@ -24,6 +25,8 @@ interface IServiceCardProps {
 
 const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps) => {
   const cardStyles = useStyles();
+  const router = useRouter()
+  
   return (
     <Card variant="outlined" className={cx(cardStyles.root)}>
       <CardMedia sx={{ height: 200 }} image={headerSrc} />
@@ -53,7 +56,7 @@ const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps
           paragraph
           fontWeight='medium'
           fontSize={14}
-          color="rgb(94, 94, 94)"
+          color="#616161"
           style={{
             paddingTop: '10px',
             overflow: 'hidden',
@@ -69,7 +72,7 @@ const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps
         <Typography variant="caption">Collected by 20 people in your network</Typography>
       </CardContent>
       <CardActions>
-        <Button fullWidth color="secondary" variant="outlined">
+        <Button fullWidth color="secondary" variant="outlined" onClick={() => router.push('/contract')}>
           See service
         </Button>
       </CardActions>

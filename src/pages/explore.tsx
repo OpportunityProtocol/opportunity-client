@@ -156,11 +156,11 @@ const Explore: FunctionComponent = () => {
                     >
                       <Avatar
                         style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
-                        src={human.picture.thumbnail}
+                        src={human.picture.large}
                       />
                     </div>
                     <Box textAlign="center">
-                      <Typography variant="body2" color="#757575" width="auto" noWrap>
+                      <Typography variant="body2" color="#616161" width="auto" noWrap>
                         {human.name.first + ' ' + human.name.last}
                       </Typography>
                       <Typography variant="caption" color="#4CAF50" width="auto" noWrap>

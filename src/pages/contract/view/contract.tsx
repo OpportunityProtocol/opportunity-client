@@ -18,7 +18,7 @@ import {
   ListItemText,
   Button,
 } from '@mui/material';
-import { useStyles } from '../../modules/contract/ContractStyles';
+import { useStyles } from '../../../modules/contract/ContractStyles';
 import { ContentCopy } from '@mui/icons-material';
 
 import Table from '@mui/material/Table';
@@ -32,7 +32,7 @@ import Paper from '@mui/material/Paper';
 import clsx from 'clsx';
 
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
-import { timelineButtons } from '../../modules/market/MarketConstants';
+import { timelineButtons } from '../../../modules/market/MarketConstants';
 
 const data = [
   {
