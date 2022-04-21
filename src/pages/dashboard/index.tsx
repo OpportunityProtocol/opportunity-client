@@ -68,27 +68,29 @@ const data = [
 const COLUMN_HEIGHT = 'calc(100vh - 70px)';
 
 const Dashboard: React.FunctionComponent = () => {
-  const classes = useStyles()
-  const [value, setValue] = useState<any>(0)
-  const [connections, setConnections] = useState<any>([])
-  const [featuredServices, setFeaturedServices] = useState<any>([])
+  const classes = useStyles();
+  const [value, setValue] = useState<any>(0);
+  const [connections, setConnections] = useState<any>([]);
+  const [featuredServices, setFeaturedServices] = useState<any>([]);
+  const [reviews, setReviews] = useState<any>([]);
   const router = useRouter();
 
   const renderUsers = async () => {
-    const a = await fetch('https://randomuser.me/api/?results=20', {})
+    const a = await fetch('https://randomuser.me/api/?results=20', {});
     const users = await a.json();
     setConnections(users.results);
+    setReviews(users.results);
   };
 
   const renderServices = async () => {
-      const a = await fetch('https://randomuser.me/api/?results=4', {});
-      const users = await a.json()
-      setFeaturedServices(users.results);
-  }
+    const a = await fetch('https://randomuser.me/api/?results=4', {});
+    const users = await a.json();
+    setFeaturedServices(users.results);
+  };
 
   useEffect(() => {
     renderUsers();
-    renderServices()
+    renderServices();
   }, []);
 
   return (
@@ -289,11 +291,69 @@ const Dashboard: React.FunctionComponent = () => {
           {featuredServices.map((element, idx, arr) => {
             return (
               <Grid item xs={3} key={idx}>
-                <ServiceCard name={element.name.first + " " + arr[0].name.last} headerSrc="https://picsum.photos/200" avatarSrc={element.picture.large} />
+                <ServiceCard
+                  name={element.name.first + ' ' + arr[0].name.last}
+                  headerSrc="https://picsum.photos/200"
+                  avatarSrc={element.picture.large}
+                />
               </Grid>
             );
           })}
         </Grid>
+      </Box>
+
+      <Box my={3}>
+        <Typography py={2} fontSize={20} fontWeight="medium">
+          Reviews
+        </Typography>
+        <Card variant="outlined">
+          <CardContent>
+            {reviews.length === 0 ? (
+              <Typography variant="caption">
+                No reviews has been written for this employer
+              </Typography>
+            ) : (
+              reviews
+                .slice(4, 9)
+                .map(
+                  (
+                    review: {
+                      picture: { large: string | undefined };
+                      name: { first: string; last: string };
+                      login: {
+                        username:
+                          | boolean
+                          | React.ReactChild
+                          | React.ReactFragment
+                          | React.ReactPortal
+                          | null
+                          | undefined;
+                      };
+                    },
+                    idx: React.Key | null | undefined
+                  ) => {
+                    return (
+                      <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
+                        <Avatar src={review?.picture.large} />
+                        <Stack>
+                          <Typography fontSize={13}>
+                            {review?.name.first + ' ' + review.name.last}
+                          </Typography>
+                          <Typography fontSize={14} fontWeight="medium">
+                            {review?.login.username}
+                          </Typography>
+                          <Typography paragraph fontSize={14}>
+                            No hassle and no extra work apart from the contract description. I will
+                            definitiely be looking to work with him again!
+                          </Typography>
+                        </Stack>
+                      </Box>
+                    );
+                  }
+                )
+            )}
+          </CardContent>
+        </Card>
       </Box>
     </Container>
   );

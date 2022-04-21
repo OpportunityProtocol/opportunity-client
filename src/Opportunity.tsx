@@ -297,8 +297,8 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
         variant="elevation"
         elevation={0}
         sx={{
-          paddingLeft: '15%',
-          paddingRight: '15%',
+          paddingLeft: '16%',
+          paddingRight: '16%',
           width: { sm: `100%` },
           ml: { sm: `100%` },
           //boxShadow: '0px 5px 5px -3px rgba(240, 239, 241, 0.8), 0px 8px 10px 1px rgba(240, 239, 241, 0.5),0px 3px 14px 2px rgba(240, 239, 241, 0.2)',
@@ -422,6 +422,20 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
                     fontWeight="medium"
                   >
                     Messenger
+                  </Typography>
+                </Link>
+
+                <Link href="/">
+                  <Typography
+                    onClick={() => setView('Contracts')}
+                    component={Button}
+                    mx={2}
+                    fontSize={14}
+                    variant="button"
+                    color={view === 'Contracts' ? 'secondary' : '#212121'}
+                    fontWeight="medium"
+                  >
+                    Contracts
                   </Typography>
                 </Link>
               </div>
