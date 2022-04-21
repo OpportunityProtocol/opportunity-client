@@ -119,6 +119,9 @@ const useStyles = makeStyles((theme : Theme) => {
     switchFormControlLabel: {
       color: '#a3a3a3',
       fontWeight: theme.typography.fontWeightMedium
+    },
+    carouselButton: {
+      marginTop: 2, width: 150, color: 'white', borderColor: '#fff' 
     }
   }
 })

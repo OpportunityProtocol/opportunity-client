@@ -1,21 +1,6 @@
 import React, { useEffect, useState, FunctionComponent } from 'react';
 import { useStyles } from '../modules/market/MarketStyles';
-import {
-  Grid,
-  Container,
-  Typography,
-  Stack,
-  Switch,
-  FormControlLabel,
-  FormControl,
-  Card,
-  CardContent,
-  NativeSelect,
-  Button,
-  Box,
-  Avatar,
-  Paper,
-} from '@mui/material';
+import { Grid, Container, Typography, Button, Box, Stack, Avatar, Paper } from '@mui/material';
 
 import { ClassNameMap } from '@material-ui/styles';
 import MarketDisplay from '../modules/market/components/MarketDisplay';
@@ -23,17 +8,18 @@ import MarketDisplay from '../modules/market/components/MarketDisplay';
 import { useGradientAvatarStyles } from '@mui-treasury/styles/avatar/gradient';
 import Carousel from 'react-material-ui-carousel';
 import { GradientAvatarClassKey } from '@mui-treasury/styles/avatar/gradient/gradientAvatar.styles';
-import BootstrapInput from '../common/components/BootstrapInput/BootstrapInput';
 import { ICarouselItemProps } from '../modules/market/MarketInterface';
 import { loggedOutHeroCarouselItems } from '../modules/market/MarketConstants';
 import JobDisplay from '../modules/market/components/JobDisplay';
 import ServiceCard from '../common/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
+import { KeyboardArrowRight } from '@mui/icons-material';
 
-const HEIGHT = '500px'
+const HEIGHT = '500px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
+  const classes = useStyles();
   return (
-    <Box sx={{ position: 'relative', width: '100%', backgroundColor: '#fff' }}>
+    <Box position="relative" width="100%" bgcolor="#fbfbfd">
       <img src={item.source} style={{ width: '100%', height: HEIGHT }} />
       <div
         style={{
@@ -52,7 +38,11 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
         flexDirection="column"
         justifyContent="center"
         p={5}
-        sx={{ position: 'absolute', top: 0, left: 0, height: '100%', width: '100%' }}
+        position="absolute"
+        top={0}
+        left={0}
+        height="100%"
+        width="100%"
       >
         <Container maxWidth="lg" sx={{ bgcolor: 'transparent' }}>
           <Typography color="#fff" fontWeight="bold" fontSize={45} width="60%">
@@ -66,7 +56,7 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
             size="large"
             variant="contained"
             color="secondary"
-            sx={{ my: 2, width: 150, color: 'white', borderColor: '#fff' }}
+            className={classes.carouselButton}
           >
             {item.buttonTitle}
           </Button>
@@ -76,14 +66,14 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
   );
 }
 
-const  Explore: FunctionComponent = () => {
+const Explore: FunctionComponent = () => {
   const classes = useStyles();
   const [suggestedConnections, setSuggestedConnections] = useState<any[]>([]);
   const [markets, setMarkets] = useState<any[]>([]);
   const [desiredMarkets, setDesiredMarkets] = useState<string>('Filter desired markets');
   const [sortBy, setSortBy] = useState<string>('Sort by');
   const [participatedChecked, setParticipatedChecked] = useState<any>('');
-  const router = useRouter()
+  const router = useRouter();
   const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
     size: 50,
     gap: 3,
@@ -121,25 +111,29 @@ const  Explore: FunctionComponent = () => {
   return (
     <Box bgcolor="#fbfbfd">
       <Container maxWidth="lg" className={classes.root}>
-      <Carousel fullHeightHover={true} indicators={false} autoPlay interval={3000}>
-        {loggedOutHeroCarouselItems.map((item, i, arr) => (
-          <CarouselItem key={i} item={item} itemLength={arr.length} index={i} />
-        ))}
-      </Carousel>
+        <Carousel fullHeightHover={true} indicators={false} autoPlay interval={3000}>
+          {loggedOutHeroCarouselItems.map((item, i, arr) => (
+            <CarouselItem key={i} item={item} itemLength={arr.length} index={i} />
+          ))}
+        </Carousel>
         <Box sx={{ width: '100%', margin: '0px' }}>
           <Box my={2}>
-            <Box>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                 Expand your network
               </Typography>
-            </Box>
-            <Grid
-              container
-              alignItems="center"
-              direction="row"
-              overflow="scroll"
-              flexWrap="nowrap"
-            >
+
+              <Button
+                endIcon={<KeyboardArrowRight />}
+                variant="text"
+                size="large"
+                color="secondary"
+                sx={{ fontWeight: 'light' }}
+              >
+                Explore freelancers
+              </Button>
+            </Stack>
+            <Grid container alignItems="center" direction="row" overflow="scroll" flexWrap="nowrap">
               {suggestedConnections.map((human) => {
                 return (
                   <Box
@@ -169,8 +163,8 @@ const  Explore: FunctionComponent = () => {
                       <Typography variant="body2" color="#757575" width="auto" noWrap>
                         {human.name.first + ' ' + human.name.last}
                       </Typography>
-                      <Typography variant="caption" color='#4CAF50' width="auto" noWrap>
-                      ${Math.floor(Math.random() * 101).toFixed(2)} Skill Value
+                      <Typography variant="caption" color="#4CAF50" width="auto" noWrap>
+                        ${Math.floor(Math.random() * 101).toFixed(2)} Skill Value
                       </Typography>
                     </Box>
                   </Box>
@@ -179,17 +173,29 @@ const  Explore: FunctionComponent = () => {
             </Grid>
           </Box>
 
-          <Paper variant='outlined' elevation={0} sx={{ my: 6, px: 6, pb: 6, backgroundColor: 'rgb(250, 250, 250)'}}>
+          <Paper
+            variant="outlined"
+            elevation={0}
+            sx={{ my: 6, px: 6, pb: 6, backgroundColor: 'rgb(250, 250, 250)' }}
+          >
             <Box>
-            <Typography py={5} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
-                Buy <Typography color='#4CAF50' fontSize={30} fontWeight='bold' component='span'>confidence</Typography> in top rated services
+              <Typography py={5} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
+                Buy{' '}
+                <Typography color="#4CAF50" fontSize={30} fontWeight="bold" component="span">
+                  confidence
+                </Typography>{' '}
+                in top rated services
               </Typography>
             </Box>
             <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
               {suggestedConnections.slice(3, 7).map((human) => {
                 return (
                   <Grid item xs={3}>
-                    <ServiceCard name={human.name.first + " " + human.name.last} avatarSrc={human.picture.large} headerSrc='https://picsum.photos/200' />
+                    <ServiceCard
+                      name={human.name.first + ' ' + human.name.last}
+                      avatarSrc={human.picture.large}
+                      headerSrc="https://picsum.photos/200"
+                    />
                   </Grid>
                 );
               })}
@@ -197,13 +203,22 @@ const  Explore: FunctionComponent = () => {
           </Paper>
 
           <Grid container direction="column" alignItems="center" justifyContent="space-between">
-            <Grid item sx={{ py: 2 }} width="100%">
-              <Box>
+            <Grid item py={2} width="100%">
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
                 <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                   Participate in markets
                 </Typography>
-              </Box>
-              
+
+                <Button
+                  endIcon={<KeyboardArrowRight />}
+                  variant="text"
+                  size="large"
+                  color="secondary"
+                  sx={{ fontWeight: 'light' }}
+                >
+                  See all
+                </Button>
+              </Stack>
             </Grid>
             <Grid item />
           </Grid>
@@ -218,9 +233,21 @@ const  Explore: FunctionComponent = () => {
 
         <Box my={6}>
           <Box>
-            <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
-              Work within your network
-            </Typography>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
+                See gigs in your network
+              </Typography>
+
+              <Button
+                endIcon={<KeyboardArrowRight />}
+                variant="text"
+                size="large"
+                color="secondary"
+                sx={{ fontWeight: 'light' }}
+              >
+                See all
+              </Button>
+            </Stack>
           </Box>
           <Grid container direction="column" overflow="scroll" flexWrap="nowrap">
             {suggestedConnections.slice(3, 6).map((human: any) => {

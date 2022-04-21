@@ -6,8 +6,6 @@ import {
   Typography,
   Container,
   Button,
-  Tabs,
-  Tab,
   Grid,
   Card,
   Stack,
@@ -17,20 +15,10 @@ import {
 
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 
-import { TabContext } from '@mui/lab';
 import UserCard from '../../common/components/UserCard/UserCard';
-import TabPanel from '../../common/components/TabPanel/TabPanel';
 import { timelineButtons } from '../../modules/market/MarketConstants';
 import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
-
-function a11yProps(index: number) {
-  return {
-    value: index,
-    id: `vertical-tab-${index}`,
-    'aria-controls': `vertical-tabpanel-${index}`,
-  };
-}
 
 const data = [
   {
@@ -80,24 +68,27 @@ const data = [
 const COLUMN_HEIGHT = 'calc(100vh - 70px)';
 
 const Dashboard: React.FunctionComponent = () => {
-  const classes = useStyles();
-  const [value, setValue] = useState<any>(0);
-  const [connections, setConnections] = useState<any>([]);
-  const router = useRouter()
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
+  const classes = useStyles()
+  const [value, setValue] = useState<any>(0)
+  const [connections, setConnections] = useState<any>([])
+  const [featuredServices, setFeaturedServices] = useState<any>([])
+  const router = useRouter();
 
   const renderUsers = async () => {
-    const a = await fetch('https://randomuser.me/api/?results=20', {});
+    const a = await fetch('https://randomuser.me/api/?results=20', {})
     const users = await a.json();
     setConnections(users.results);
-    console.log(users);
   };
+
+  const renderServices = async () => {
+      const a = await fetch('https://randomuser.me/api/?results=4', {});
+      const users = await a.json()
+      setFeaturedServices(users.results);
+  }
 
   useEffect(() => {
     renderUsers();
+    renderServices()
   }, []);
 
   return (
@@ -113,7 +104,13 @@ const Dashboard: React.FunctionComponent = () => {
           Dashboard
         </Typography>
 
-        <Button onClick={() => router.push('contract/create')} disableElevation disableRipple variant="contained" color="secondary">
+        <Button
+          onClick={() => router.push('contract/create')}
+          disableElevation
+          disableRipple
+          variant="contained"
+          color="secondary"
+        >
           Create Contract
         </Button>
       </Stack>
@@ -130,10 +127,11 @@ const Dashboard: React.FunctionComponent = () => {
           <Card
             variant="outlined"
             classes={{
-              root: classes.graphContainer
-            }}>
+              root: classes.graphContainer,
+            }}
+          >
             <CardContent>
-              <Typography color='#fff' fontWeight="medium" fontSize={20}>
+              <Typography color="#fff" fontWeight="medium" fontSize={20}>
                 Total Skill Value{' '}
                 <Typography px={1} color="#fff" component="span" fontSize={13}>
                   {' '}
@@ -146,7 +144,7 @@ const Dashboard: React.FunctionComponent = () => {
                 </LineChart>
               </ResponsiveContainer>
               <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography color='#fff'>Price</Typography>
+                <Typography color="#fff">Price</Typography>
                 <Box display="flex" alignItems="center">
                   {timelineButtons.map((buttonTitle, idx) => (
                     <Button
@@ -171,62 +169,41 @@ const Dashboard: React.FunctionComponent = () => {
 
       <Grid container direction="row" alignItems="flex-start" justifyContent="space-between">
         <Grid item xs={7.5}>
-          <TabContext value={value}>
-            <Tabs
-              variant="standard"
-              value={value}
-              indicatorColor="secondary"
-              textColor="secondary"
-              onChange={handleChange}
-              className={classes.tabs}
-            >
-              <Tab label={`Connections (${Math.floor(Math.random() * 30)})`} {...a11yProps(0)} />
-              <Tab label={`My Contracts (${Math.floor(Math.random() * 30)})`} {...a11yProps(1)} />
-              <Tab label={`My Jobs (${Math.floor(Math.random() * 30)})`} {...a11yProps(2)} />
-              <Tab label={`My Services (${Math.floor(Math.random() * 30)})`} {...a11yProps(3)} />
-            </Tabs>
-            <TabPanel value={value} index={0}>
+          <Stack direction="column">
+            <Box>
+              <Typography py={2} fontSize={20} fontWeight="medium">
+                Endorsements
+              </Typography>
               <Box component={Grid} container direction="row" alignItems="center" spacing={3}>
-                {connections.slice(3, 8).map((connection: { name: { first: string; last: string; }; picture: { large: string; }; email: string; }) => {
-                  return (
-                    <Grid item xs={12}>
-                      <UserCard
-                        name={connection.name.first + ' ' + connection.name.last}
-                        avatar={connection.picture.large}
-                        address="0x"
-                        email={connection.email}
-                      />
-                    </Grid>
-                  );
-                })}
-              </Box>
-            </TabPanel>
-
-            <TabPanel value={value} index={1}>
-              Item One
-            </TabPanel>
-
-            <TabPanel value={value} index={2}>
-              Item One
-            </TabPanel>
-
-            <TabPanel value={value} index={3}>
-              <Grid container direction='row' spacing={6} alignItems='center'>
-                  {
-                    [0,1,2].map(element => {
+                {connections
+                  .slice(1, 4)
+                  .map(
+                    (connection: {
+                      name: { first: string; last: string };
+                      picture: { large: string };
+                      email: string;
+                    }) => {
                       return (
-                        <Grid item>
-                        <ServiceCard name='' headerSrc='' avatarSrc=''  />
+                        <Grid item xs={12}>
+                          <UserCard
+                            name={connection.name.first + ' ' + connection.name.last}
+                            avatar={connection.picture.large}
+                            address="0x"
+                            email={connection.email}
+                          />
                         </Grid>
-                      )
-                    })
-                  }
-              </Grid>
-            </TabPanel>
-          </TabContext>
+                      );
+                    }
+                  )}
+              </Box>
+            </Box>
+          </Stack>
         </Grid>
 
         <Grid item xs={4}>
+          <Typography py={2} fontSize={20} fontWeight="medium">
+            About
+          </Typography>
           <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
               <Stack alignItems="center">
@@ -251,7 +228,9 @@ const Dashboard: React.FunctionComponent = () => {
                   Edit
                 </Button>
               </Stack>
-              <Typography variant="caption">No description</Typography>
+              <Typography variant="caption" color="#9E9E9E">
+                No description
+              </Typography>
             </CardContent>
           </Card>
 
@@ -264,7 +243,9 @@ const Dashboard: React.FunctionComponent = () => {
                   Edit
                 </Button>
               </Stack>
-              <Typography variant="caption">No certifications</Typography>
+              <Typography variant="caption" color="#9E9E9E">
+                No certifications
+              </Typography>
             </CardContent>
           </Card>
 
@@ -277,7 +258,9 @@ const Dashboard: React.FunctionComponent = () => {
                   Edit
                 </Button>
               </Stack>
-              <Typography variant="caption">No skills</Typography>
+              <Typography variant="caption" color="#9E9E9E">
+                No skills
+              </Typography>
             </CardContent>
           </Card>
 
@@ -290,11 +273,28 @@ const Dashboard: React.FunctionComponent = () => {
                   Edit
                 </Button>
               </Stack>
-              <Typography variant="caption">No languages</Typography>
+              <Typography variant="caption" color="#9E9E9E">
+                No languages
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
+
+      <Box my={3}>
+        <Typography py={2} fontSize={20} fontWeight="medium">
+          Services
+        </Typography>
+        <Grid container direction="row" spacing={2} alignItems="center">
+          {featuredServices.map((element, idx, arr) => {
+            return (
+              <Grid item xs={3} key={idx}>
+                <ServiceCard name={element.name.first + " " + arr[0].name.last} headerSrc="https://picsum.photos/200" avatarSrc={element.picture.large} />
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Box>
     </Container>
   );
 };

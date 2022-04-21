@@ -4,57 +4,38 @@ import {
   Grid,
   Container,
   Typography,
+  Card,
   Stack,
   Switch,
   FormControlLabel,
-  FormControl,
-  Card,
-  CardContent,
-  NativeSelect,
-  Button,
-  Box,
-  Avatar,
   Paper,
+  Chip
 } from '@mui/material';
 
-import { ClassNameMap } from '@material-ui/styles';
 import MarketDisplay from '../../modules/market/components/MarketDisplay';
+import MinimalSelect from '../../common/components/Select/Select';
+import { FilterList } from '@mui/icons-material';
+import FilterDesiredMarketsButton from '../../common/components/FilterDesiredMarketsButton/FilterDesiredMarketsButton';
 
-import { useGradientAvatarStyles } from '@mui-treasury/styles/avatar/gradient';
-import Carousel from 'react-material-ui-carousel';
-import { GradientAvatarClassKey } from '@mui-treasury/styles/avatar/gradient/gradientAvatar.styles';
-import BootstrapInput from '../../common/components/BootstrapInput/BootstrapInput';
-import { ICarouselItemProps } from '../../modules/market/MarketInterface';
-import { loggedOutHeroCarouselItems } from '../../modules/market/MarketConstants';
-import JobDisplay from '../../modules/market/components/JobDisplay';
-import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
-import { useRouter } from 'next/router';
+const sortByOptions = [
+  <option value={0}>Highest Total Skill Value</option>
+]
 
-const HEIGHT = '500px';
+const DesiredMarketsContent = ({ visible }) => {
+  return (
+    <Paper sx={{ position: 'absolute', top: 5, display: visible }}>
+      Hello World
+    </Paper>
+  )
+}
 
 const Markets: FunctionComponent = () => {
   const classes = useStyles();
-  const [suggestedConnections, setSuggestedConnections] = useState<any[]>([]);
   const [markets, setMarkets] = useState<any[]>([]);
-  const [desiredMarkets, setDesiredMarkets] = useState<string>('Filter desired markets');
-  const [sortBy, setSortBy] = useState<string>('Sort by');
-  const [participatedChecked, setParticipatedChecked] = useState<any>('');
 
-  const fetchNetworkSuggestions = async () => {
-    const a = await fetch('https://randomuser.me/api/?results=20');
-    const b = await a.json();
-    setSuggestedConnections(b.results);
-  };
-
-  const handleOnChangeParticipatedChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setParticipatedChecked(event.target.checked);
-  };
-
-  const handleOnChangeDesiredMarkets = () => {};
-  const handleOnChangeSortBy = () => {};
+  const [desiredMarketsShowing, setDesiredMarketsShowing] = useState<any>('flex')
 
   useEffect(() => {
-    fetchNetworkSuggestions();
     let updatedMarkets = [];
     updatedMarkets.push('Writing and Translation');
     updatedMarkets.push('Development & IT');
@@ -80,36 +61,9 @@ const Markets: FunctionComponent = () => {
         justifyContent="space-between"
       >
         <Grid item>
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <FormControl variant="standard">
-              <NativeSelect
-                id="desired-markets-selet"
-                value={desiredMarkets}
-                className={classes.selectFilter}
-                onChange={handleOnChangeDesiredMarkets}
-                input={<BootstrapInput />}
-              >
-                <option aria-label="None" value="Filter desired markets">
-                  Filter desired markets
-                </option>
-              </NativeSelect>
-            </FormControl>
-            <FormControl variant="standard">
-              <NativeSelect
-                id="sort-by-select"
-                value={sortBy}
-                className={classes.selectFilter}
-                onChange={handleOnChangeSortBy}
-                input={<BootstrapInput />}
-              >
-                <option aria-label="None" value="Filter desired markets">
-                  Sort by
-                </option>
-                <option value={0}>Value Settled</option>
-                <option value={1}>Number of Contracts</option>
-                <option value={2}>Number of Services</option>
-              </NativeSelect>
-            </FormControl>
+          <Stack my={2} direction="row" alignItems="center" spacing={2}>
+            <MinimalSelect placeholder="Sort by" width={200} options={sortByOptions} />
+            <FilterDesiredMarketsButton />
           </Stack>
         </Grid>
         <Grid item>

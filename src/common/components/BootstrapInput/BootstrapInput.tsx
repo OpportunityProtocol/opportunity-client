@@ -62,7 +62,7 @@ const BootstrapInput = styled(InputBase)(({ theme }: { theme?: Theme }) => ({
   const TextInput : React.FunctionComponent<ITextInputProps> = ({ width, value, placeholder, size,  selected=false, multiline, rows }) => {
     const classes = useStyles()
   return (
-  <BootstrapInput sx={{ width }}  placeholder={placeholder}  multiline rows={rows} />
+  <BootstrapInput sx={{ width }} placeholder={placeholder}  multiline rows={rows} />
   )
   }
 
