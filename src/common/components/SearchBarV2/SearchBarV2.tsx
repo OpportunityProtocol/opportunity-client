@@ -17,7 +17,7 @@ const SearchBarV2 : FunctionComponent = () => {
         sx={{ mb: 2, p: '2px 4px', display: 'flex', alignItems: 'center', width: '100%' }}
       >
         <InputBase
-          startAdornment={<Search />}
+          startAdornment={<Search sx={{ color: '#9E9E9E'}} />}
           sx={{ ml: 1, flex: 1 }}
           placeholder="Search Google Maps"
           inputProps={{ 'aria-label': 'search google maps' }}

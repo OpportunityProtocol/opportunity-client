@@ -23,7 +23,7 @@ import {
 
 import DoneIcon from '@mui/icons-material/Done';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Bolt, TrendingUp } from '@mui/icons-material';
+import { AccessTime, AttachMoney, Bolt, Paid, TrendingUp } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import { IJobDisplayProps } from '../../MarketInterface';
 
@@ -48,6 +48,7 @@ const renderPlaceholderTitle = () => {
 const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
   avatar = '',
   suggestion = false,
+  showReferralButton=false
 }) => {
   const classes = useStyles();
   const router = useRouter();
@@ -93,12 +94,46 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
         >
           <Grid item>
             <Typography component="div" pb={1}>
-              <Box fontWeight="600" fontSize={16} color="black">
+              <Box fontWeight="600" fontSize={22} color="black" pb={2}>
                 {renderPlaceholderTitle()}
               </Box>
-              <Typography color="rgb(94, 94, 94)" fontSize={12} fontWeight="regular">
-                Fixed Rate Payment - Budget: $23.39 - Short Term
-              </Typography>
+
+              <Grid container direction='row' alignItems='center' spacing={3}>
+                        <Grid item>
+                          <Stack direction='row' alignItems='center' spacing={0.5}>
+                            <AttachMoney fontSize='small' sx={{ color:'rgb(30, 71, 98)'  }} />
+                          <Typography fontSize={13} fontWeight='medium' color='#424242'>
+                              Budget: $23.29 
+                            </Typography>
+                          </Stack>
+                        </Grid>
+
+                        <Grid item>
+                        <Stack direction='row' alignItems='center' spacing={0.5}>
+                          <AccessTime fontSize='small' sx={{ color:'rgb(30, 71, 98)'  }} />
+                        <Typography fontSize={13} fontWeight='medium' color='#424242'>
+                              Average Term (3 months - 6 months)
+                            </Typography>
+                          </Stack>
+                        </Grid>
+
+                        <Grid item>
+                        <Stack direction='row' alignItems='center' spacing={0.5}>
+                            <Paid fontSize='small' sx={{ color:'rgb(30, 71, 98)'  }} />
+                            <Typography fontSize={13} fontWeight='medium' color='#424242'>
+                              Fixed Rate Payout
+                            </Typography>
+                          </Stack>
+                        </Grid>
+
+                        <Grid item>
+                        <Stack direction='row' alignItems='center'>
+                            <Typography>
+                              
+                            </Typography>
+                          </Stack>
+                        </Grid>
+                      </Grid>
             </Typography>
 
             <Typography
@@ -149,7 +184,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
                   />
                 )}
               </Grid>
-              {(3 > 5) === false ? (
+              {showReferralButton === true ? (
                 <Chip
                   classes={{
                     iconSmall: classes.purchaseIconSmall,

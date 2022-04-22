@@ -26,7 +26,7 @@ interface IServiceCardProps {
 const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps) => {
   const cardStyles = useStyles();
   const router = useRouter()
-  
+
   return (
     <Card variant="outlined" className={cx(cardStyles.root)}>
       <CardMedia sx={{ height: 200 }} image={headerSrc} />
@@ -72,7 +72,7 @@ const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps
         <Typography variant="caption">Collected by 20 people in your network</Typography>
       </CardContent>
       <CardActions>
-        <Button fullWidth color="secondary" variant="outlined" onClick={() => router.push('/contract')}>
+        <Button fullWidth color="secondary" variant="outlined" onClick={() => router.push('/contract/view/service')}>
           See service
         </Button>
       </CardActions>

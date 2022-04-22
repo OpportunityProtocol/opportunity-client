@@ -146,7 +146,7 @@ const Contracts: React.FunctionComponent<any> = () => {
                     relationship: { picture: { large: string | undefined } },
                     idx: React.Key | null | undefined
                   ) => (
-                    <Grid item xs={12} key={idx} xs={5.9}>
+                    <Grid item key={idx} xs={5.9}>
                       <React.Fragment>
                         <JobDisplay
                           avatar={relationship.picture.large}

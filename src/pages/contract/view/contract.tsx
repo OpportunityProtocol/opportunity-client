@@ -19,7 +19,13 @@ import {
   Button,
 } from '@mui/material';
 import { useStyles } from '../../../modules/contract/ContractStyles';
-import { ContentCopy } from '@mui/icons-material';
+import {
+  ContentCopy,
+  Email,
+  EmailOutlined,
+  Favorite,
+  FavoriteBorderOutlined,
+} from '@mui/icons-material';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -33,6 +39,7 @@ import clsx from 'clsx';
 
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { timelineButtons } from '../../../modules/market/MarketConstants';
+import JobDisplay from '../../../modules/market/components/JobDisplay';
 
 const data = [
   {
@@ -101,7 +108,7 @@ const TableToolbar = () => {
 
 const contractDetailsPrimaryTypographyProps = {
   fontSize: 14,
-  fontWeight: 'bold',
+  fontWeight: 'medium',
   color: 'rgb(33, 33, 33, .85',
 };
 
@@ -140,7 +147,13 @@ const ViewContract: React.FunctionComponent<any> = () => {
           </Alert>
         ) : null}
       </Container>
-      <Container maxWidth="lg">
+      <Container
+        maxWidth="lg"
+        component={Paper}
+        elevation={0}
+        variant="outlined"
+        className={classes.mainContainer}
+      >
         <Grid
           container
           direction="row"
@@ -149,45 +162,8 @@ const ViewContract: React.FunctionComponent<any> = () => {
           paddingTop="2%"
         >
           <Grid item xs={8}>
-            <Box component={Card} variant="outlined" className={classes.marginBottom}>
-              <CardContent>
-                <Box>
-                  <>
-                    <Box>
-                      {contractOwnership === 'Claimed' ? null : (
-                        <Typography variant="button" color="secondary">
-                          This contract has never been claimed - be the first
-                        </Typography>
-                      )}
-
-                      <Stack direction="row" alignItems="center" justifyContent="space-between">
-                        <Typography variant="subtitle2" fontSize={20}>
-                          Looking for a web developer for long term contract
-                        </Typography>
-
-                        <Avatar src="https://randomuser.me/api/portraits/women/66.jpg" />
-                      </Stack>
-
-                      <Typography py={1} paragraph fontSize={15} color="rgb(94, 94, 94)">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit
-                        sem. Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque
-                        pellentesque tortor tortor, at convallis metus ornare ac. Aenean quis
-                        pellentesque nisl. Ut suscipit a nisi sed porttitor. Donec cursus velit
-                        diam, non accumsan urna aliquet hendrerit.
-                      </Typography>
-                      <Button
-                        disabled={contractOwnership === 'Claimed'}
-                        color="secondary"
-                        variant="contained"
-                        disableElevation
-                        disableRipple
-                      >
-                        Submit Proposal
-                      </Button>
-                    </Box>
-                  </>
-                </Box>
-              </CardContent>
+            <Box className={classes.marginBottom}>
+              <JobDisplay />
             </Box>
 
             <Paper variant="outlined" className={classes.marginBottom}>
@@ -226,25 +202,48 @@ const ViewContract: React.FunctionComponent<any> = () => {
                     No reviews has been written for this employer
                   </Typography>
                 ) : (
-                  reviews.slice(4, 9).map((review: { picture: { large: string | undefined; }; name: { first: string; last: string; }; login: { username: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined; }; }, idx: React.Key | null | undefined) => { 
-                    return (
-                      <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
-                        <Avatar src={review?.picture.large} className={classes.avatar} />
-                        <Stack>
-                          <Typography fontSize={13} className={classes.overline}>
-                            {review?.name.first + ' ' + review.name.last}
-                          </Typography>
-                          <Typography fontSize={14} fontWeight="medium" className={classes.name}>
-                            {review?.login.username}
-                          </Typography>
-                          <Typography paragraph fontSize={14} className={classes.name}>
-                            No hassle and no extra work apart from the contract description. I will
-                            definitiely be looking to work with him again!
-                          </Typography>
-                        </Stack>
-                      </Box>
-                    );
-                  })
+                  reviews
+                    .slice(4, 9)
+                    .map(
+                      (
+                        review: {
+                          picture: { large: string | undefined };
+                          name: { first: string; last: string };
+                          login: {
+                            username:
+                              | boolean
+                              | React.ReactChild
+                              | React.ReactFragment
+                              | React.ReactPortal
+                              | null
+                              | undefined;
+                          };
+                        },
+                        idx: React.Key | null | undefined
+                      ) => {
+                        return (
+                          <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
+                            <Avatar src={review?.picture.large} className={classes.avatar} />
+                            <Stack>
+                              <Typography fontSize={13} className={classes.overline}>
+                                {review?.name.first + ' ' + review.name.last}
+                              </Typography>
+                              <Typography
+                                fontSize={14}
+                                fontWeight="medium"
+                                className={classes.name}
+                              >
+                                {review?.login.username}
+                              </Typography>
+                              <Typography paragraph fontSize={14} className={classes.name}>
+                                No hassle and no extra work apart from the contract description. I
+                                will definitiely be looking to work with him again!
+                              </Typography>
+                            </Stack>
+                          </Box>
+                        );
+                      }
+                    )
                 )}
               </CardContent>
             </Card>
@@ -293,79 +292,62 @@ const ViewContract: React.FunctionComponent<any> = () => {
               </Card>
             ) : null}
 
-            <Alert
-              variant="standard"
-              icon={false}
-              className={classes.marginBottom}
+            <Button
+              variant="contained"
+              size="large"
+              className={classes.submitButton}
+              fullWidth
+              color="secondary"
+              disableElevation
+              disableRipple
             >
+              Submit a proposal
+            </Button>
+            <Stack direction="row" alignItems="center" spacing={1} className={classes.marginBottom}>
+              <Button
+                variant="outlined"
+                size="large"
+                fullWidth
+                endIcon={<FavoriteBorderOutlined fontSize="small" />}
+                sx={{ borderRadius: 0 }}
+              >
+                Save Contract
+              </Button>
+
+              <Button
+                variant="outlined"
+                size="large"
+                fullWidth
+                endIcon={<EmailOutlined />}
+                sx={{ borderRadius: 0 }}
+              >
+                Refer a friend
+              </Button>
+            </Stack>
+
+            <Alert variant="standard" icon={false} className={classes.marginBottom}>
               <Typography fontSize={20} fontWeight="bold">
-                Contract Details
+                Completion Details
               </Typography>
               <Box>
                 <ListItem>
                   <ListItemText
-                    primary="Creator"
-                    secondary="0x19bBa405Fd0e4Da0e23230d49eFC0CbFb3664A6c"
+                    primary="Definition of done task number one"
                     primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
                   />
                 </ListItem>
 
                 <ListItem>
                   <ListItemText
-                    primary="Payout Type"
-                    secondary="One Time Payment"
+                    primary="This is another example of a task that requires for the job to be complete"
                     primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
                   />
                 </ListItem>
 
                 <ListItem>
                   <ListItemText
-                    primary="Budget"
-                    secondary="No budget"
+                    primary="Finish doing task number three by that time"
                     primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
-                  />
-                </ListItem>
-
-                <ListItem>
-                  <ListItemText
-                    primary="Deadline"
-                    secondary="May 27, 2022"
-                    primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
-                  />
-                </ListItem>
-
-                <ListItem>
-                  <ListItemText
-                    primary="Currency"
-                    secondary="DAI"
-                    primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
-                  />
-                </ListItem>
-
-                <ListItem>
-                  <ListItemText
-                    primary="Completion Terms"
-                    secondary={
-                      <ul>
-                        <Typography className={classes.li}>
-                          {' '}
-                          Definition of done task number one{' '}
-                        </Typography>
-                        <Typography className={classes.li}>
-                          This is another example of a task that requires for the job to be complete
-                        </Typography>
-                        <Typography className={classes.li}>
-                          Finish doing task number three by that time
-                        </Typography>
-                      </ul>
-                    }
-                    primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
                   />
                 </ListItem>
               </Box>

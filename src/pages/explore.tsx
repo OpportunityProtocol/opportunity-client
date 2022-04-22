@@ -111,7 +111,7 @@ const Explore: FunctionComponent = () => {
   return (
     <Box bgcolor="#fbfbfd">
       <Container maxWidth="lg" className={classes.root}>
-        <Carousel fullHeightHover={true} indicators={false} autoPlay interval={3000}>
+        <Carousel fullHeightHover={true} indicators={false} autoPlay interval={5000}>
           {loggedOutHeroCarouselItems.map((item, i, arr) => (
             <CarouselItem key={i} item={item} itemLength={arr.length} index={i} />
           ))}

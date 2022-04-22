@@ -21,7 +21,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
     router.pathname === '/jobs' ||
     router.pathname === '/dashboard' ||
     router.pathname === '/contract/view/contract' ||
-    router.pathname === '/contract/view/contract' ||
+    router.pathname === '/contract/view/service' ||
     router.pathname === '/' ||
     router.pathname === '/markets';
 

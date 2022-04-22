@@ -2,24 +2,19 @@ import React, { useEffect, useState } from 'react';
 import {
   Container,
   CardContent,
-  Card,
   Typography,
   Alert,
   AlertTitle,
-  Grid,
   Stack,
-  Avatar,
-  ListItemIcon,
   Toolbar,
-  IconButton,
   Box,
   List,
   ListItem,
   ListItemText,
   Button,
+  Divider,
 } from '@mui/material';
 import { useStyles } from '../../../modules/contract/ContractStyles';
-import { ContentCopy } from '@mui/icons-material';
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -28,11 +23,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-
-import clsx from 'clsx';
-
-import { LineChart, Line, ResponsiveContainer } from 'recharts';
-import { timelineButtons } from '../../../modules/market/MarketConstants';
 
 const data = [
   {
@@ -101,7 +91,7 @@ const TableToolbar = () => {
 
 const contractDetailsPrimaryTypographyProps = {
   fontSize: 14,
-  fontWeight: 'bold',
+  fontWeight: 'medium',
   color: 'rgb(33, 33, 33, .85',
 };
 
@@ -112,11 +102,62 @@ const contractDetailsSecondaryTypographyProps = {
 
 const isService = false;
 
+interface IDeliverable {
+  type: string;
+  brief: string;
+  deliverables: Array<string>;
+  price: number;
+  estimatedTimeCompletion: string;
+}
+
+const temp_deliverables: Array<IDeliverable> = [
+  {
+    type: 'Standard',
+    brief: 'Up to 5 pages, color branding, contact form, social media integration, stock images',
+    deliverables: [
+      'Functional Website',
+      '5 Pages',
+      'Design Customization',
+      'Content Upload',
+      'Responsive Design',
+    ],
+    price: 59.99,
+    estimatedTimeCompletion: '20 days',
+  },
+  {
+    type: 'Premium',
+    brief: 'Basic + 3 more pages, SEO, SPEED and 2 weeks support after completion of project',
+    deliverables: [
+      'Functional Website',
+      '5 Pages',
+      'Design Customization',
+      'Content Upload',
+      'Responsive Design',
+    ],
+    price: 89.99,
+    estimatedTimeCompletion: '40 days',
+  },
+  {
+    type: 'Business',
+    brief:
+      '10 pages + e-commerce with 10 products and you can add unlimited more + 1 month free support',
+    deliverables: [
+      'Functional Website',
+      '5 Pages',
+      'Design Customization',
+      'Content Upload',
+      'Responsive Design',
+    ],
+    price: 119.99,
+    estimatedTimeCompletion: '60 days',
+  },
+];
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 const ViewContract: React.FunctionComponent<any> = () => {
   const classes = useStyles();
   const [reviews, setReviews] = useState<any>([]);
   const [contractOwnership, setContractOwnership] = useState<string>('Claimed');
+  const [deliverables, setDeliverables] = useState<Array<IDeliverable>>(temp_deliverables);
   const isReferral = true;
   const renderUsers = async () => {
     const a = await fetch('https://randomuser.me/api/?results=20', {});
@@ -140,275 +181,213 @@ const ViewContract: React.FunctionComponent<any> = () => {
           </Alert>
         ) : null}
       </Container>
-      <Container maxWidth="lg">
-        <Grid
-          container
-          direction="row"
-          justifyContent="space-between"
-          alignItems="flex-start"
-          paddingTop="2%"
-        >
-          <Grid item xs={8}>
-            <Box component={Card} variant="outlined" className={classes.marginBottom}>
-              <CardContent>
-                <Box>
-                  <>
-                    <Box>
-                      {contractOwnership === 'Claimed' ? null : (
-                        <Typography variant="button" color="secondary">
-                          This contract has never been claimed - be the first
-                        </Typography>
-                      )}
+      <Container
+        maxWidth="lg"
+        component={Paper}
+        elevation={0}
+        variant="outlined"
+        className={classes.mainContainer}
+      >
+        <CardContent component={Stack} spacing={3}>
+          <Typography fontSize={25} fontWeight="bold">
+            I will create a professional website for you
+          </Typography>
 
-                      <Stack direction="row" alignItems="center" justifyContent="space-between">
-                        <Typography variant="subtitle2" fontSize={20}>
-                          Looking for a web developer for long term contract
-                        </Typography>
+          <Divider />
 
-                        <Avatar src="https://randomuser.me/api/portraits/women/66.jpg" />
-                      </Stack>
-
-                      <Typography py={1} paragraph fontSize={15} color="rgb(94, 94, 94)">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit
-                        sem. Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque
-                        pellentesque tortor tortor, at convallis metus ornare ac. Aenean quis
-                        pellentesque nisl. Ut suscipit a nisi sed porttitor. Donec cursus velit
-                        diam, non accumsan urna aliquet hendrerit.
-                      </Typography>
-                      <Button
-                        disabled={contractOwnership === 'Claimed'}
-                        color="secondary"
-                        variant="contained"
-                        disableElevation
-                        disableRipple
-                      >
-                        Submit Proposal
-                      </Button>
-                    </Box>
-                  </>
-                </Box>
-              </CardContent>
+          <Box>
+            <Box>
+              <Typography variant="h6">Description</Typography>
+              <Typography paragraph fontSize={14}>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin nec urna ut sem
+                tempus sollicitudin vitae quis odio. Morbi ut velit rhoncus, mattis tellus sed,
+                faucibus urna. Donec condimentum posuere massa, quis consequat sem laoreet sit amet.
+                In fermentum turpis in hendrerit auctor. Phasellus vitae aliquet urna. Nunc congue
+                placerat arcu in iaculis. Praesent pulvinar odio quis mauris tristique pellentesque.
+                In ac lacinia purus. Donec eget nisl mollis, convallis nulla id, pulvinar dui. Fusce
+                rutrum enim vitae dolor commodo cursus. Vestibulum blandit cursus felis sed
+                malesuada. Donec nec felis eget magna molestie laoreet ac eu magna. Etiam blandit
+                placerat sapien, ut efficitur tellus convallis id. Lorem ipsum dolor sit amet,
+                consectetur adipiscing elit. Phasellus posuere enim tristique, faucibus ipsum eget,
+                interdum nisi.
+              </Typography>
+            </Box>
+          </Box>
+          <Divider />
+          <Box>
+            <Typography variant="h6">Process and Timeline</Typography>
+            <Typography paragraph fontSize={14}>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin nec urna ut sem tempus
+              sollicitudin vitae quis odio. Morbi ut velit rhoncus, mattis tellus sed, faucibus
+              urna. Donec condimentum posuere massa, quis consequat sem laoreet sit amet. In
+              fermentum turpis in hendrerit auctor. Phasellus vitae aliquet urna. Nunc congue
+              placerat arcu in iaculis. Praesent pulvinar odio quis mauris tristique pellentesque.
+              In ac lacinia purus. Donec eget nisl mollis, convallis nulla id, pulvinar dui. Fusce
+              rutrum enim vitae dolor commodo cursus. Vestibulum blandit cursus felis sed malesuada.
+              Donec nec felis eget magna molestie laoreet ac eu magna. Etiam blandit placerat
+              sapien, ut efficitur tellus convallis id. Lorem ipsum dolor sit amet, consectetur
+              adipiscing elit. Phasellus posuere enim tristique, faucibus ipsum eget, interdum nisi.
+            </Typography>
+          </Box>
+          <Divider />
+          <Box>
+            <Box>
+              <Typography variant="h6">Deliverables and Pricing</Typography>
+              <Typography color="#424242">
+                Blank has specified the client must pay 50% up front
+              </Typography>
             </Box>
 
-            <Paper variant="outlined" className={classes.marginBottom}>
-              <TableToolbar />
-              <TableContainer>
-                <Table aria-label="simple table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Action</TableCell>
-                      <TableCell>User</TableCell>
-                      <TableCell>Timestamp</TableCell>
+            <Box>
+              <TableContainer style={{ width: '100%' }}>
+                <Table
+                  component="table"
+                  style={{ borderCollapse: 'separate', borderSpacing: '0px 10px' }}
+                  width="100%"
+                >
+                  <TableBody style={{ width: '100%' }}>
+                    <TableRow component="tr">
+                      <TableCell
+                        style={{ borderBottomWidth: 0, borderBottom: 'none' }}
+                        component="th"
+                        scope="row"
+                        align="left"
+                      >
+                        Name
+                      </TableCell>
+                      <TableCell
+                        style={{ borderBottomWidth: 0, borderBottom: 'none' }}
+                        component="th"
+                        scope="row"
+                        align="left"
+                      >
+                        Group/Kind
+                      </TableCell>
+                      <TableCell
+                        style={{ borderBottomWidth: 0, borderBottom: 'none' }}
+                        component="th"
+                        scope="row"
+                        align="left"
+                      >
+                        Namespace
+                      </TableCell>
+                      <TableCell
+                        style={{ borderBottomWidth: 0, borderBottom: 'none' }}
+                        component="th"
+                        scope="row"
+                        align="left"
+                      >
+                        Status
+                      </TableCell>
+                      <TableCell
+                        style={{ borderBottomWidth: 0, borderBottom: 'none' }}
+                        component="th"
+                        scope="row"
+                        align="right"
+                      >
+                        {' '}
+                      </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {rows.map((row) => (
-                      <TableRow key={row.action}>
-                        <TableCell component="th" scope="row">
-                          {row.action}
+
+                    {deliverables.map((deliverable, idx, arr) => (
+                      <TableRow component="tr" key={idx} className={classes.tableRow}>
+                        <TableCell
+                          style={{
+                            borderTopLeftRadius: 4,
+                            borderBottomLeftRadius: 4,
+                            borderBottomWidth: 0,
+                            borderBottom: 'none',
+                          }}
+                          component="th"
+                          scope="row"
+                          align="left"
+                        >
+                          <Typography fontWeight="medium">{deliverable.type}</Typography>
                         </TableCell>
-                        <TableCell>{row.user}</TableCell>
-                        <TableCell>{row.timestamp}</TableCell>
+
+                        <TableCell
+                          style={{ width: 480, borderBottomWidth: 0, borderBottom: 'none' }}
+                          component="th"
+                          scope="row"
+                          align="left"
+                        >
+                          <Typography color="#757575">{deliverable.brief}</Typography>
+                        </TableCell>
+
+                        <TableCell
+                          style={{ borderBottomWidth: 0, borderBottom: 'none' }}
+                          component="th"
+                          scope="row"
+                          align="left"
+                        >
+                          <List>
+                            {deliverable.deliverables.map((item) => {
+                              return (
+                                <ListItem className={classes.deliverableItem}>
+                                  <ListItemText primary={item} />
+                                </ListItem>
+                              );
+                            })}
+                          </List>
+                        </TableCell>
+
+                        <TableCell
+                          style={{ borderBottomWidth: 0, borderBottom: 'none' }}
+                          component="th"
+                          scope="row"
+                          align="left"
+                        >
+                          <Stack direction="row" alignItems="center" spacing={0.3}>
+                            <img src="/assets/images/dai.svg" style={{ width: 15, height: 20 }} />
+                            <Typography>{deliverable.price}</Typography>
+                          </Stack>
+                        </TableCell>
+
+                        <TableCell
+                          style={{
+                            borderTopRightRadius: 4,
+                            borderBottomRightRadius: 4,
+                            borderBottomWidth: 0,
+                            borderBottom: 'none',
+                          }}
+                          component="th"
+                          scope="row"
+                          align="right"
+                        >
+                          <Button
+                            disableElevation
+                            disableRipple
+                            size="small"
+                            color="secondary"
+                            variant="contained"
+                          >
+                            Purchase
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </TableContainer>
-            </Paper>
-
-            <Card variant="outlined" className={classes.marginBottom}>
-              <CardContent>
-                <Typography fontWeight="bold" fontSize={20} color="rgba(33, 33, 33, .85)">
-                  Reviews for this user
-                </Typography>
-                {reviews.length === 0 ? (
-                  <Typography variant="caption">
-                    No reviews has been written for this employer
-                  </Typography>
-                ) : (
-                  reviews.slice(4, 9).map((review: { picture: { large: string | undefined; }; name: { first: string; last: string; }; login: { username: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined; }; }, idx: React.Key | null | undefined) => { 
-                    return (
-                      <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
-                        <Avatar src={review?.picture.large} className={classes.avatar} />
-                        <Stack>
-                          <Typography fontSize={13} className={classes.overline}>
-                            {review?.name.first + ' ' + review.name.last}
-                          </Typography>
-                          <Typography fontSize={14} fontWeight="medium" className={classes.name}>
-                            {review?.login.username}
-                          </Typography>
-                          <Typography paragraph fontSize={14} className={classes.name}>
-                            No hassle and no extra work apart from the contract description. I will
-                            definitiely be looking to work with him again!
-                          </Typography>
-                        </Stack>
-                      </Box>
-                    );
-                  })
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={3.8}>
-            {isService ? (
-              <Card variant="outlined" className={clsx(classes.marginBottom, classes.graphCard)}>
-                <CardContent>
-                  <Typography fontSize={20} fontWeight="bold">
-                    Price over time{' '}
-                    <Typography component="span" color="green">
-                      + $0.50
-                    </Typography>
-                  </Typography>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <LineChart width={300} height={400} data={data}>
-                      <Line
-                        type="monotone"
-                        dataKey="pv"
-                        stroke="rgb(98, 202, 161)"
-                        strokeWidth={2}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                  <Stack direction="row" alignItems="center" justifyContent="space-evenly">
-                    {timelineButtons.map((buttonTitle, idx) => {
-                      return (
-                        <Button
-                          disableElevation
-                          disableRipple
-                          disableFocusRipple
-                          disableTouchRipple
-                          variant="text"
-                          color="primary"
-                          size="small"
-                          classes={{ text: classes.graphButton }}
-                          key={idx}
-                        >
-                          {buttonTitle}
-                        </Button>
-                      );
-                    })}
-                  </Stack>
-                </CardContent>
-              </Card>
-            ) : null}
-
-            <Alert
-              variant="standard"
-              icon={false}
-              className={classes.marginBottom}
-            >
-              <Typography fontSize={20} fontWeight="bold">
-                Contract Details
-              </Typography>
-              <Box>
-                <ListItem>
-                  <ListItemText
-                    primary="Creator"
-                    secondary="0x19bBa405Fd0e4Da0e23230d49eFC0CbFb3664A6c"
-                    primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
-                  />
-                </ListItem>
-
-                <ListItem>
-                  <ListItemText
-                    primary="Payout Type"
-                    secondary="One Time Payment"
-                    primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
-                  />
-                </ListItem>
-
-                <ListItem>
-                  <ListItemText
-                    primary="Budget"
-                    secondary="No budget"
-                    primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
-                  />
-                </ListItem>
-
-                <ListItem>
-                  <ListItemText
-                    primary="Deadline"
-                    secondary="May 27, 2022"
-                    primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
-                  />
-                </ListItem>
-
-                <ListItem>
-                  <ListItemText
-                    primary="Currency"
-                    secondary="DAI"
-                    primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
-                  />
-                </ListItem>
-
-                <ListItem>
-                  <ListItemText
-                    primary="Completion Terms"
-                    secondary={
-                      <ul>
-                        <Typography className={classes.li}>
-                          {' '}
-                          Definition of done task number one{' '}
-                        </Typography>
-                        <Typography className={classes.li}>
-                          This is another example of a task that requires for the job to be complete
-                        </Typography>
-                        <Typography className={classes.li}>
-                          Finish doing task number three by that time
-                        </Typography>
-                      </ul>
-                    }
-                    primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                    secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
-                  />
-                </ListItem>
-              </Box>
-            </Alert>
-
-            <Card variant="outlined" className={classes.marginBottom}>
-              <CardContent>
-                <Typography fontSize={20} fontWeight="bold">
-                  Metadata
-                </Typography>
-                <List>
-                  <ListItem>
-                    <ListItemText
-                      primary="Market Name"
-                      secondary="Gitcoin Bounties"
-                      primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                      secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
-                    />
-                  </ListItem>
-
-                  <ListItem>
-                    <ListItemText
-                      primary="Metadata"
-                      secondary="QmTtDqWzo179ujTXU7pf2PodLNjpcpQQCXhkiQXi6wZvKd"
-                      primaryTypographyProps={contractDetailsPrimaryTypographyProps}
-                      secondaryTypographyProps={{
-                        color: '#808080',
-                        fontSize: 12,
-                        textOverflow: 'ellipsis',
-                        overflow: 'hidden',
-                      }}
-                    />
-                    <ListItemIcon>
-                      <IconButton>
-                        <ContentCopy fontSize="small" />
-                      </IconButton>
-                    </ListItemIcon>
-                  </ListItem>
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+            </Box>
+          </Box>
+          <Divider />
+          <Box>
+            <Typography variant="h6">Termination Clause</Typography>
+            <Typography paragraph fontSize={14}>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin nec urna ut sem tempus
+              sollicitudin vitae quis odio. Morbi ut velit rhoncus, mattis tellus sed, faucibus
+              urna. Donec condimentum posuere massa, quis consequat sem laoreet sit amet. In
+              fermentum turpis in hendrerit auctor. Phasellus vitae aliquet urna. Nunc congue
+              placerat arcu in iaculis. Praesent pulvinar odio quis mauris tristique pellentesque.
+              In ac lacinia purus. Donec eget nisl mollis, convallis nulla id, pulvinar dui. Fusce
+              rutrum enim vitae dolor commodo cursus. Vestibulum blandit cursus felis sed malesuada.
+              Donec nec felis eget magna molestie laoreet ac eu magna. Etiam blandit placerat
+              sapien, ut efficitur tellus convallis id. Lorem ipsum dolor sit amet, consectetur
+              adipiscing elit. Phasellus posuere enim tristique, faucibus ipsum eget, interdum nisi.
+            </Typography>
+          </Box>
+        </CardContent>
       </Container>
     </>
   );

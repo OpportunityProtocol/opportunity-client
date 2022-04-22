@@ -15,6 +15,10 @@ import { createTheme } from '@mui/material/styles';
     //  turquoise: 'rgb(98, 202, 161)'
     },   
     typography: {
+      fontFamily: [
+        'Manrope',
+        'sans-serif'
+      ].join(','),
       button: {
         textTransform: 'none',
        // color: '#4CAF50',

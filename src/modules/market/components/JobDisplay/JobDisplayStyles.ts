@@ -12,8 +12,8 @@ const useStyles = makeStyles((theme : Theme) => ({
             backgroundColor: '#eee'
         },
         position: 'relative', 
-        marginTop: theme.spacing(1),
-        marginBottom: theme.spacing(1)
+       // marginTop: theme.spacing(1),
+       // marginBottom: theme.spacing(1)
     },
     purchaseIconSmall: {
         color: 'red'

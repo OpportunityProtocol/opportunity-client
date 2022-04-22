@@ -121,7 +121,7 @@ const useStyles = makeStyles((theme : Theme) => {
       fontWeight: theme.typography.fontWeightMedium
     },
     carouselButton: {
-      marginTop: 2, width: 150, color: 'white', borderColor: '#fff' 
+      marginTop: 20, width: 150, color: 'white', borderColor: '#fff' 
     }
   }
 })
