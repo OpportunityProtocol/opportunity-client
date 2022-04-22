@@ -1,5 +1,4 @@
 import React from 'react'
-import { IUserCardProps } from '../../interface'
 
 import { 
     Card, 
@@ -14,6 +13,13 @@ import {
 } from '@mui/material'
 import { useStyles } from './UserCardStyles'
 import { useRouter } from 'next/router'
+
+interface IUserCardProps {
+    name: string,
+    email: string,
+    avatar: string,
+    address: string
+  }
 
 const UserCard : React.FunctionComponent<IUserCardProps> = ({ name, email, avatar, address }) => {
     const classes = useStyles()

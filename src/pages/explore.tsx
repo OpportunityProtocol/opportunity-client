@@ -15,7 +15,7 @@ import ServiceCard from '../common/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
 import { KeyboardArrowRight } from '@mui/icons-material';
 
-const HEIGHT = '500px';
+const HEIGHT = '600px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
   const classes = useStyles();
   return (
@@ -48,7 +48,7 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
           <Typography color="#fff" fontWeight="bold" fontSize={45} width="60%">
             {item.title}
           </Typography>
-          <Typography color="#fff" fontSize={25}>
+          <Typography color="#fff" fontSize={25} width='60%'>
             {item.subtitle}
           </Typography>
           <Button
@@ -111,7 +111,7 @@ const Explore: FunctionComponent = () => {
   return (
     <Box bgcolor="#fbfbfd">
       <Container maxWidth="lg" className={classes.root}>
-        <Carousel fullHeightHover={true} indicators={false} autoPlay interval={5000}>
+        <Carousel animation='slide' fullHeightHover={true} indicators={false} autoPlay interval={8000}>
           {loggedOutHeroCarouselItems.map((item, i, arr) => (
             <CarouselItem key={i} item={item} itemLength={arr.length} index={i} />
           ))}

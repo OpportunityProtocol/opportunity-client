@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react'
+import React, { FunctionComponent, MouseEventHandler } from 'react'
 
 import {
     Paper,
@@ -46,8 +46,14 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
     },
   }));
 
+  interface IConnectedAvatar {
+    onClick: MouseEventHandler<HTMLDivElement>,
+    onMouseOver: MouseEventHandler<HTMLDivElement>,
+    onMouseLeave: MouseEventHandler<HTMLDivElement>
+  }
+
   
-  const ConnectedAvatar : FunctionComponent = ({onClick}) => {
+  const ConnectedAvatar : FunctionComponent<IConnectedAvatar> = ({ onClick, onMouseOver, onMouseLeave }) => {
     return (
       <StyledBadge
         onClick={onClick}
@@ -55,7 +61,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         variant="dot"
       >
-        <Avatar sx={{ cursor: 'pointer' }} alt="Remy Sharp" src="/assets/stock/profile_three.jpeg" />
+        <Avatar onMouseOver={onMouseOver} onMouseOut={onMouseLeave} sx={{ cursor: 'pointer' }} alt="Remy Sharp" src="/assets/stock/profile_three.jpeg" />
       </StyledBadge>
     );
   };

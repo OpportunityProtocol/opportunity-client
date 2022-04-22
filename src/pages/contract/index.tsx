@@ -89,7 +89,7 @@ const Contracts: React.FunctionComponent<any> = () => {
           </Tabs>
           <Divider />
         </Box>
-        <SearchBarV2 />
+        <SearchBarV2 placeholder='Search Gigs and Services' />
         <TabPanel index={0} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
@@ -123,13 +123,11 @@ const Contracts: React.FunctionComponent<any> = () => {
                     relationship: { picture: { large: string | undefined } },
                     idx: React.Key | null | undefined
                   ) => (
-                    <Grid item xs={5.9}>
-                      <React.Fragment>
+                    <Grid item xs={5.9} sx={{ m: 0.5}}>
                         <JobDisplay
                           avatar={relationship.picture.large}
                           suggestion={idx === 0 ? true : false}
                         />
-                      </React.Fragment>
                     </Grid>
                   )
                 )}

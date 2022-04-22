@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build-logs": "vercel logs opportunity-client-jg0hwghxc-opportunity.vercel.app",
+    "deploy-dev": "vercel",
+    "deploy-prod": "vercel --prod",
+    "deploy-ipfs": ""
   },
   "dependencies": {
     "@emotion/react": "^11.8.1",

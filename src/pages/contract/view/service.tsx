@@ -110,7 +110,7 @@ interface IDeliverable {
   estimatedTimeCompletion: string;
 }
 
-const temp_deliverables: Array<IDeliverable> = [
+const tempDeliverables: Array<IDeliverable> = [
   {
     type: 'Standard',
     brief: 'Up to 5 pages, color branding, contact form, social media integration, stock images',
@@ -157,7 +157,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
   const classes = useStyles();
   const [reviews, setReviews] = useState<any>([]);
   const [contractOwnership, setContractOwnership] = useState<string>('Claimed');
-  const [deliverables, setDeliverables] = useState<Array<IDeliverable>>(temp_deliverables);
+  const [deliverables, setDeliverables] = useState<Array<IDeliverable>>(tempDeliverables);
   const isReferral = true;
   const renderUsers = async () => {
     const a = await fetch('https://randomuser.me/api/?results=20', {});

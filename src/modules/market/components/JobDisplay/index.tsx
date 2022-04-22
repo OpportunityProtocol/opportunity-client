@@ -94,7 +94,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
         >
           <Grid item>
             <Typography component="div" pb={1}>
-              <Box fontWeight="600" fontSize={22} color="black" pb={2}>
+              <Box fontWeight="600" fontSize={22} color="black" pb={2} width='70%'>
                 {renderPlaceholderTitle()}
               </Box>
 

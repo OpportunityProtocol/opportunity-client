@@ -37,18 +37,6 @@ const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps
 
           <Typography variant="subtitle2">{name}</Typography>
         </Stack>
-
-        <Stack direction="column" alignItems="flex-start">
-          <Typography fontWeight="regular" fontSize={13} color="rgb(94, 94, 94)">
-            Price
-          </Typography>
-          
-          <Stack direction='row' alignItems='center' spacing={0.5}>
-          <img src='/assets/images/dai.svg' style={{ width: 15, height: 20 }} />
-          <Typography fontSize={15}>{Math.random().toPrecision(2)} </Typography>
-         
-          </Stack>
-          </Stack>
         </Box>
 
 
@@ -70,6 +58,18 @@ const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps
         </Typography>
 
         <Typography variant="caption">Collected by 20 people in your network</Typography>
+
+        <Stack direction="row" alignItems="flex-start">
+          <Typography fontWeight="regular" fontSize={13} color="rgb(94, 94, 94)">
+            Price: 
+          </Typography>
+          
+          <Stack direction='row' alignItems='center' spacing={0.5}>
+          <img src='/assets/images/dai.svg' style={{ width: 15, height: 20 }} />
+          <Typography fontSize={15}>{Math.random().toPrecision(2)} </Typography>
+         
+          </Stack>
+          </Stack>
       </CardContent>
       <CardActions>
         <Button fullWidth color="secondary" variant="outlined" onClick={() => router.push('/contract/view/service')}>

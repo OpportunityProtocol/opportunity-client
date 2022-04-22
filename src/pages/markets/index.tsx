@@ -16,6 +16,7 @@ import MarketDisplay from '../../modules/market/components/MarketDisplay';
 import MinimalSelect from '../../common/components/Select/Select';
 import { FilterList } from '@mui/icons-material';
 import FilterDesiredMarketsButton from '../../common/components/FilterDesiredMarketsButton/FilterDesiredMarketsButton';
+import SearchBarV2 from '../../common/components/SearchBarV2/SearchBarV2';
 
 const sortByOptions = [
   <option value={0}>Highest Total Skill Value</option>
@@ -46,13 +47,14 @@ const Markets: FunctionComponent = () => {
     setMarkets(updatedMarkets);
   }, []);
 
-  const AVATAR_SIZE = 70;
   return (
     <Container maxWidth="lg" sx={{ height: '100vh' }}>
       <Typography fontSize={25} fontWeight="bold" color="black">
         Markets
       </Typography>
 
+      <Stack my={2}>
+      <SearchBarV2 placeholder='Search markets' />
       <Grid
         width="100%"
         container
@@ -61,7 +63,7 @@ const Markets: FunctionComponent = () => {
         justifyContent="space-between"
       >
         <Grid item>
-          <Stack my={2} direction="row" alignItems="center" spacing={2}>
+          <Stack direction="row" alignItems="center" spacing={2}>
             <MinimalSelect placeholder="Sort by" width={200} options={sortByOptions} />
             <FilterDesiredMarketsButton />
           </Stack>
@@ -74,6 +76,8 @@ const Markets: FunctionComponent = () => {
           />
         </Grid>
       </Grid>
+      </Stack>
+
 
       <Grid container direction="row" flexDirection="row" alignItems="center" spacing={2}>
         {markets.map((market) => (
