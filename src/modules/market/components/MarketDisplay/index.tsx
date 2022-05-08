@@ -29,9 +29,9 @@ const MarketDisplay: React.FunctionComponent<IMarketDisplayProps> = ({ market, i
         <CardContent className={classes.primaryContentContainer}>
           <Grid container direction='row' alignItems='center' justifyContent='space-between'>
             <Grid item>
-              <Box component='div' sx={{ fontWeight: (theme) => theme.typography.fontWeightBold }}>
+              <Typography sx={{ fontWeight: (theme) => theme.typography.fontWeightBold }}>
                 {market}
-              </Box>
+              </Typography>
             </Grid>
 
             <Grid item />

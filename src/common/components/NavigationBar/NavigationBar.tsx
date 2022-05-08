@@ -198,7 +198,7 @@ const NavigationBar: FunctionComponent = () => {
                 </Box>
                 <Divider />
                 <Grid flexWrap="nowrap" container direction="column">
-                  <Grid item sx={{ p: 1, bgcolor: '#fbfbfd' }}>
+                  <Grid item sx={{ p: 1, bgcolor: '#fff' }}>
                     <Typography color="#212121" noWrap fontWeight="bold" fontSize={12}>
                       <IoWalletSharp size={10} /> Web3/Wallet Provider:{' '}
                     </Typography>
@@ -207,7 +207,7 @@ const NavigationBar: FunctionComponent = () => {
                     </Typography>
                   </Grid>
                   <Divider />
-                  <Grid item sx={{ p: 1, bgcolor: '#fbfbfd' }}>
+                  <Grid item sx={{ p: 1, bgcolor: '#fff' }}>
                     <Typography color="#212121" fontWeight="bold" fontSize={12}>
                       <FaEthereum size={10} /> DAI Balance:{' '}
                     </Typography>
@@ -216,7 +216,7 @@ const NavigationBar: FunctionComponent = () => {
                     </Typography>
                   </Grid>
                   <Divider />
-                  <Grid item sx={{ p: 1, bgcolor: '#fbfbfd' }}>
+                  <Grid item sx={{ p: 1, bgcolor: '#fff' }}>
                     <Typography color="#212121" fontWeight="bold" fontSize={12}>
                       <FaEthereum size={10} /> UST Balance:{' '}
                     </Typography>

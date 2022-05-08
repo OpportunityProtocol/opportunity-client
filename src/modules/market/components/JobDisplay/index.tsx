@@ -70,18 +70,9 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
       className={classes.card}
       variant="outlined"
     >
-      {suggestion ? (
-        <Stack direction="row" alignItems="center" className={classes.suggestedContainer}>
-          <Bolt fontSize="small" sx={{ color: '#FDD835' }} />
-          <Typography variant="body2" color="rgb(98, 202, 161)">
-            Suggested through your network
-          </Typography>
-        </Stack>
-      ) : null}
-
       <Avatar
         src={avatar}
-        sx={{ width: 60, height: 60, position: 'absolute', top: suggestion ? 30 : 13, right: 100 }}
+        sx={{ width: 60, height: 60, position: 'absolute', top: 13, right: 100 }}
       />
       <Divider className={classes.divider} />
       <CardContent>
@@ -94,7 +85,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
         >
           <Grid item>
             <Typography component="div" pb={1}>
-              <Box fontWeight="600" fontSize={22} color="black" pb={2} width='70%'>
+              <Box sx={{ height: 60 }} fontWeight="600" fontSize={18} color="black" pb={2} width='70%'>
                 {renderPlaceholderTitle()}
               </Box>
 

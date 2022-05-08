@@ -6,6 +6,7 @@ import theme from '../../material_theme'
 import { ThemeProvider } from '@mui/material/styles';
 import NavigationBreadcrumbs from '../common/components/Breadcrumbs/Breadcrumbs'
 import Head from 'next/head'
+import { CssBaseline } from '@mui/material'
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [showChild, setShowChild] = useState(false);
@@ -25,7 +26,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <meta name="description" content="Permissionless labor markets" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Chilanka&family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
 <link
   rel="stylesheet"
@@ -38,6 +39,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <link rel="stylesheet" href="https://use.typekit.net/bhd6hze.css" />
   </Head>
   <ThemeProvider theme={theme}>
+    <CssBaseline />
   <Opportunity>
     <NavigationBreadcrumbs />
     <Component {...pageProps} />

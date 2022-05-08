@@ -70,7 +70,7 @@ const Contracts: React.FunctionComponent<any> = () => {
   }, []);
 
   return (
-    <Container maxWidth="lg" sx={{ padding: '1% 3%', bgcolor: '#fff', height: '100vh' }}>
+    <Container maxWidth="lg" sx={{  height: '100vh' }}>
       <Typography pl={1} fontSize={25} fontWeight="medium">
         Contracts
       </Typography>

@@ -3,7 +3,7 @@ import { makeStyles } from '@mui/styles'
 const useStyles = makeStyles((theme) => {
     return {
         paper: {
-            marginBottom: theme.spacing(2),
+           // marginBottom: theme.spacing(2),
             padding: '2px 4px',
             display: 'flex',
             alignItems: 'center',

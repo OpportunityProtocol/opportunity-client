@@ -1,7 +1,6 @@
-import { InputBase } from "@material-ui/core";
 import { makeStyles } from "@mui/styles";
 import { styled, alpha, ThemeProvider, ThemeOptions } from "@mui/system";
-import { Theme } from '@mui/material'
+import { Theme, InputBase } from '@mui/material'
 import { MouseEventHandler } from "react";
 const BootstrapInput = styled(InputBase)(({ theme }: { theme?: Theme }) => ({
     'label + &': {

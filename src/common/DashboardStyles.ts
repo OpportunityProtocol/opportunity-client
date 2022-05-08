@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme : Theme) => ({
         color: 'white'
     },
     tabs: {
-        backgroundColor: '#fbfbfd', my: 2 
+        backgroundColor: '#fff', my: 2 
     }
 }))
 

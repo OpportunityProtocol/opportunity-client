@@ -6,9 +6,7 @@ const useStyles = makeStyles((theme) => {
       fontWeight: 'bold',
     },
     primaryContentContainer: {
-      '&:hover': {
-        color: '#4CAF50'
-      }
+
     }
   }
 })

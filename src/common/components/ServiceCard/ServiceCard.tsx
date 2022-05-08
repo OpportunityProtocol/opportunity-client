@@ -6,15 +6,14 @@ import {
   CardContent,
   CardMedia,
   Button,
+  Box,
+  CardActions,
   Divider,
   Stack,
   Typography,
 } from '@mui/material';
-import { makeStyles } from '@material-ui/core/styles';
-import Box from '@material-ui/core/Box';
 import { useStyles } from './ServiceCardStyle';
 import DAIIcon from '../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg';
-import { CardActions } from '@material-ui/core';
 import { useRouter } from 'next/router';
 
 interface IServiceCardProps {
@@ -39,7 +38,6 @@ const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps
         </Stack>
         </Box>
 
-
         <Typography
           paragraph
           fontWeight='medium'
@@ -59,14 +57,14 @@ const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps
 
         <Typography variant="caption">Collected by 20 people in your network</Typography>
 
-        <Stack direction="row" alignItems="flex-start">
-          <Typography fontWeight="regular" fontSize={13} color="rgb(94, 94, 94)">
+        <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Typography fontWeight="medium" fontSize={13} color="rgb(94, 94, 94)">
             Price: 
           </Typography>
           
           <Stack direction='row' alignItems='center' spacing={0.5}>
           <img src='/assets/images/dai.svg' style={{ width: 15, height: 20 }} />
-          <Typography fontSize={15}>{Math.random().toPrecision(2)} </Typography>
+          <Typography fontSize={13}>{Math.random().toPrecision(2)} </Typography>
          
           </Stack>
           </Stack>

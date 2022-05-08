@@ -38,6 +38,7 @@ import { timelineButtons } from '../../modules/market/MarketConstants';
 import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
 import TextInput from '../../common/components/BootstrapInput/BootstrapInput';
+import SearchBarV2 from '../../common/components/SearchBarV2/SearchBarV2';
 
 const data = [
   {
@@ -138,64 +139,73 @@ const Jobs: React.FunctionComponent = () => {
     ));
   };
 
+  const getServices = () => {
+    return relationships.slice(10, 15).map((relationship: { picture: { large: string | undefined; }; }, idx: React.Key | null | undefined) => (
+      <Grid item xs={4} key={idx}>
+        <React.Fragment>
+          <ServiceCard />
+        </React.Fragment>
+      </Grid>
+    ));
+  };
+
   return (
     <Container maxWidth="lg">
-      <Grid container xs={12} direction="column" alignItems="center" bgcolor="#fbfbfd">
+      <Grid container xs={12} direction="column" alignItems="center">
         <Grid my={1} container direction="row" alignItems="center" justifyContent="space-between">
           <Grid item>
             <Typography fontSize={25} fontWeight="bold" color="black">
-              Gigs and Services
+              Writing and Translation
             </Typography>
             <Typography variant="subtitle1">Showing 69 total contracts</Typography>
           </Grid>
 
           <Grid item>
             <Stack direction="row" alignItems="center" spacing={3}>
+            <SearchBarV2 placeholder='Search contracts' />
+
               <Button onClick={() => router.push('contract/create')} variant="contained" color="secondary" disableElevation disableRipple>
-                Create Contract
+                Create
               </Button>
-              <FormControl variant="standard">
-                <NativeSelect
-                  id="sort-by-select"
-                  value={sortBy}
-                  onChange={handleOnChangeSortBy}
-                  input={<TextInput />}
-                >
-                  <option aria-label="None" value="Filter desired markets">
-                    Sort by
-                  </option>
-                  <option value={0}>Value Settled</option>
-                  <option value={1}>Number of Contracts</option>
-                  <option value={2}>Number of Services</option>
-                </NativeSelect>
-              </FormControl>
             </Stack>
           </Grid>
         </Grid>
 
-        <Grid container direction="row" alignItems="flex-start" spacing={5}>
+        <Box sx={{ width: '100%' }}>
+      <Box>
+        <Tabs indicatorColor={""} value={value} onChange={handleChange} aria-label="basic tabs example">
+          <Tab label="Contracts" {...a11yProps(0)} />
+          <Tab label="Services" {...a11yProps(1)} />
+        </Tabs>
+      </Box>
+      <TabPanel value={value} index={0}>
+      <Grid container direction="row" alignItems="flex-start" spacing={5}>
           <Grid item xs={8}>
-          <Box my={1}>
-            <Typography py={1} variant='subtitle2' fontSize={20}>
-              Most Valued Work
-            </Typography>
-            <Grid container justifyContent='space-between' direction='row' alignItems='center'>
-                  {
-                    relationships.slice(10, 13).map((relationship: { name: { first: string; last: string; }; picture: { large: string; }; }, idx: any) => (
-                      <Grid item xs={3.8}>
-                      <ServiceCard name={relationship.name.first + " " + relationship.name.last} avatarSrc={relationship.picture.large} headerSrc='https://picsum.photos/200' />
-                      </Grid>
-                    ))
-                  }
-                </Grid>
-          </Box>
-
             <Box>
-            <Typography py={1} variant='subtitle2' fontSize={20}>
-              Gigs
-            </Typography>
-              <Grid container direction="column" spacing={0}>
+              <Grid container direction="column" spacing={2}>
                 {getRelationships()}
+              </Grid>
+
+              
+            </Box>
+          </Grid>
+
+          <Grid item xs={4}>
+            <Alert icon={false} variant='filled' className={classes.marginBottom}>
+              <Typography variant="subtitle2">Jobs Available: 2234</Typography>
+              <Typography variant="subtitle2">Services Available: 323</Typography>
+            </Alert>
+
+       
+          </Grid>
+        </Grid>
+      </TabPanel>
+      <TabPanel value={value} index={1}>
+      <Grid container direction="row" alignItems="flex-start" spacing={5}>
+          <Grid item xs={8}>
+            <Box>
+              <Grid container direction="row" spacing={2}>
+                {getServices()}
               </Grid>
 
               
@@ -211,100 +221,15 @@ const Jobs: React.FunctionComponent = () => {
               <Typography variant="body2">Services Available: 323</Typography>
             </Alert>
 
-            <Card variant="outlined" className={classes.marginBottom}>
-              <Box p={2} fontWeight="bold">
-                Market Payouts
-              </Box>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart width={300} height={200} data={data}>
-                  <Line type="monotone" dataKey="uv" stroke='#4CAF50' strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-              <Stack direction="row" alignItems="center" justifyContent="space-evenly">
-                {timelineButtons.map((buttonTitle, idx) => (
-                  <Button
-                    disableElevation
-                    disableRipple
-                    disableFocusRipple
-                    disableTouchRipple
-                    variant="text"
-                    color="primary"
-                    size="small"
-                    classes={{ text: classes.graphButton }}
-                    key={idx}
-                  >
-                    {buttonTitle}
-                  </Button>
-                ))}
-              </Stack>
-            </Card>
-
-            <Card variant="outlined" className={classes.marginBottom}>
-              <CardContent>
-                <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
-                  <Stack>
-                    <Typography fontWeight="bold">Market Spotlight</Typography>
-                    <Typography variant="caption" color="#aaa">
-                      Filtered by payouts
-                    </Typography>
-                  </Stack>
-                  <IconButton
-                    id="basic-button"
-                    aria-controls={open ? 'market-spotlight-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
-                    onClick={handleOnClickMarketSpotlightMenu}
-                  >
-                    <FilterList fontSize="small" />
-                  </IconButton>
-                  <Menu
-                    id="market-spotlight-menu"
-                    anchorEl={marketSpotlightAnchor}
-                    open={open}
-                    onClose={handleOnCloseMarketSpotlightMenu}
-                    MenuListProps={{
-                      'aria-labelledby': 'basic-button',
-                    }}
-                  >
-                    <MenuItem onClick={handleOnCloseMarketSpotlightMenu}>Payouts</MenuItem>
-                    <MenuItem onClick={handleOnCloseMarketSpotlightMenu}>Connections</MenuItem>
-                  </Menu>
-                </Stack>
-              </CardContent>
-              <Divider />
-              <CardContent>
-                {networkSugggestions.slice(15, 18).map((human: { picture: { large: string | undefined; }; name: { first: string; last: string; }; }, idx: any) => {
-                  return (
-                    <CardHeader
-                      key={idx}
-                      classes={{
-                        action: classes.action,
-                      }}
-                      avatar={
-                        <Avatar
-                          aria-label="recipe"
-                          src={human.picture.large}
-                          className={classes.avatar}
-                        />
-                      }
-                      action={
-                        <Button variant="outlined" color="secondary" disableElevation disableRipple>
-                          Connect
-                        </Button>
-                      }
-                      subheaderTypographyProps={{
-                        variant: 'body2',
-                        color: '#4CAF50',
-                      }}
-                      title={human.name.first + ' ' + human.name.last}
-                      subheader={`$${Math.floor(Math.random() * 10000)} earned`}
-                    />
-                  );
-                })}
-              </CardContent>
-            </Card>
+       
           </Grid>
         </Grid>
+      </TabPanel>
+    </Box>
+
+        
+
+
       </Grid>
     </Container>
   );

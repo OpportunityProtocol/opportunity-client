@@ -40,7 +40,6 @@ const SearchBarV1: FunctionComponent = () => {
               <Button
                 sx={{ borderRadius: '0px !important', color: '#fff', height: 40 }}
                 disableElevation
-                color="secondary"
                 variant="contained"
               >
                 Search
