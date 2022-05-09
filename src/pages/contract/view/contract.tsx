@@ -295,13 +295,13 @@ const ViewContract: React.FunctionComponent<any> = () => {
             <Button
               variant="contained"
               size="large"
-              className={classes.submitButton}
+              sx={{ mb: 2 }}
               fullWidth
               color="secondary"
               disableElevation
               disableRipple
             >
-              Submit a proposal
+              Submit proposal
             </Button>
             <Stack direction="row" alignItems="center" spacing={1} className={classes.marginBottom}>
               <Button
@@ -309,7 +309,6 @@ const ViewContract: React.FunctionComponent<any> = () => {
                 size="large"
                 fullWidth
                 endIcon={<FavoriteBorderOutlined fontSize="small" />}
-                sx={{ borderRadius: 0 }}
               >
                 Save Contract
               </Button>
@@ -319,7 +318,6 @@ const ViewContract: React.FunctionComponent<any> = () => {
                 size="large"
                 fullWidth
                 endIcon={<EmailOutlined />}
-                sx={{ borderRadius: 0 }}
               >
                 Refer a friend
               </Button>

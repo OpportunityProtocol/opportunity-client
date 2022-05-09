@@ -179,7 +179,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
   return (
       <Container
         maxWidth="xl"
-          sx={{  bgcolor: '#fff' }}
+          sx={{  bgcolor: '#fafafa' }}
       >
             {isReferral ? (
           <Alert sx={{ mb: 2}} severity="info">

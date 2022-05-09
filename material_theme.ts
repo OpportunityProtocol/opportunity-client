@@ -4,15 +4,14 @@ import { createTheme } from '@mui/material/styles';
   const theme = createTheme({  
     palette: {
       primary: {
-        light: '#9EEBCF',
-        main: '#285C3F',
-        dark: '#20373A'
-      },
-      text: {
-        primary: '#285C3F',
+        light: '#b8e0d0',
+        main: '#49A882',
+        dark: '#1b4f31'
       },
       secondary: {
-        main: '#212121',
+        light: '#edc2d7',
+        main: '#d46290',
+        dark: '#6a3c55'
       },
     //  turquoise: 'rgb(98, 202, 161)'
     },   
@@ -30,7 +29,7 @@ import { createTheme } from '@mui/material/styles';
       MuiContainer: {
         styleOverrides: {
           root: {
-            backgroundColor: '#fff'
+            backgroundColor: '#FAFAFA'
           }
         }
       },
@@ -108,11 +107,16 @@ import { createTheme } from '@mui/material/styles';
           contained: {
             color: '#fff',
           },
-          text: {
-            fontWeight: 'bold'
+          text: {    
+            ':hover': {
+              color: '#285C3F', 
+            },
+            fontWeight: 'bold',
+            backgroundColor: 'transparent',
           },
           outlined: {
             fontSize: 12,
+            fontWeight: 'bold',
             backgroundColor: 'transparent',
            // border: '1px solid #d1d1d1',
             borderRadius: 0

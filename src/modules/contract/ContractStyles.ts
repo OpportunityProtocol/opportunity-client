@@ -120,6 +120,10 @@ return {
     tableCellText: {
         color: 'black'
     },
+    mainContainer: {
+        marginTop: 20,
+        backgroundColor: '#fff !important'
+    },
     }
 });
 

@@ -39,17 +39,18 @@ const NavigationBar: FunctionComponent = () => {
     <AppBar
       position="fixed"
       variant="elevation"
-      elevation={0}
+     // elevation={0}
       sx={{
         width: { sm: `100%` },
         ml: { sm: `100%` },
         bgcolor: '#fff',
         height: '65px',
         border: 'none !important',
+        boxShadow: '0px 3px 5px -1px #eee, 0px 5px 8px 0px #eee, 0px 1px 14px 0px #eee',
         borderBottom: '1px solid #eee !important',
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ bgcolor: '#fff' }}>
         <Toolbar className={classes.toolbar}>
           <Grid
             width="100%"
@@ -198,7 +199,7 @@ const NavigationBar: FunctionComponent = () => {
                 </Box>
                 <Divider />
                 <Grid flexWrap="nowrap" container direction="column">
-                  <Grid item sx={{ p: 1, bgcolor: '#fff' }}>
+                  <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
                     <Typography color="#212121" noWrap fontWeight="bold" fontSize={12}>
                       <IoWalletSharp size={10} /> Web3/Wallet Provider:{' '}
                     </Typography>
@@ -207,7 +208,7 @@ const NavigationBar: FunctionComponent = () => {
                     </Typography>
                   </Grid>
                   <Divider />
-                  <Grid item sx={{ p: 1, bgcolor: '#fff' }}>
+                  <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
                     <Typography color="#212121" fontWeight="bold" fontSize={12}>
                       <FaEthereum size={10} /> DAI Balance:{' '}
                     </Typography>
@@ -216,7 +217,7 @@ const NavigationBar: FunctionComponent = () => {
                     </Typography>
                   </Grid>
                   <Divider />
-                  <Grid item sx={{ p: 1, bgcolor: '#fff' }}>
+                  <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
                     <Typography color="#212121" fontWeight="bold" fontSize={12}>
                       <FaEthereum size={10} /> UST Balance:{' '}
                     </Typography>

@@ -9,6 +9,7 @@ const useStyles = makeStyles((theme : Theme) => {
       display: 'flex',
       alignItems: 'center',
       flexDirection: 'column',
+      backgroundColor: '#FAFAFA'
   },
   marginBottom: {
       marginBottom: theme.spacing(2)
@@ -44,7 +45,7 @@ const useStyles = makeStyles((theme : Theme) => {
   },
   containerCentered: {
       padding: '8px 0px',
-      backgroundColor: '#fff',
+      backgroundColor: '#fafafa',
       width: '100%',
       display: 'flex',
       justifyContent: 'center',

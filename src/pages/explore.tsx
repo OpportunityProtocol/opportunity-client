@@ -19,7 +19,7 @@ const HEIGHT = '600px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
   const classes = useStyles();
   return (
-    <Box position="relative" width="100%" bgcolor="#fff">
+    <Box position="relative" width="100%" bgcolor="#fafafa">
       <img src={item.source} style={{ width: '100%', height: HEIGHT }} />
       <div
         style={{
@@ -45,10 +45,10 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
         width="100%"
       >
         <Container maxWidth="lg" sx={{ bgcolor: 'transparent' }}>
-          <Typography color="#fff" fontWeight="bold" fontSize={45} width="60%">
+          <Typography color="#fff" fontWeight="bold" py={1} fontSize={45} width="60%">
             {item.title}
           </Typography>
-          <Typography color="#fff" fontSize={25} width='60%'>
+          <Typography color="#fff" fontSize={20} py={1} width='60%'>
             {item.subtitle}
           </Typography>
           <Button
@@ -109,7 +109,7 @@ const Explore: FunctionComponent = () => {
   const AVATAR_SIZE = 70;
   return (
     <Box>
-      <Container maxWidth="lg" className={classes.root}>
+      <Container maxWidth="lg" sx={{ bgcolor: '#FAFAFA' }} className={classes.root}>
         <Carousel animation='slide' fullHeightHover={true} indicators={false} autoPlay interval={8000}>
           {loggedOutHeroCarouselItems.map((item, i, arr) => (
             <CarouselItem key={i} item={item} itemLength={arr.length} index={i} />
@@ -173,12 +173,12 @@ const Explore: FunctionComponent = () => {
           <Paper
           //  variant="outlined"
             elevation={0}
-            sx={{ my: 6, px: 6, pb: 6, backgroundColor: 'rgb(250, 250, 250)' }}
+            sx={{ my: 6, px: 6, pb: 6, backgroundColor: '#fff' }}
           >
             <Box>
               <Typography py={3} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                 Buy{' '}
-                <Typography sx={{ color: (theme) => theme.palette.primary.light }} fontSize={30} fontWeight="bold" component="span">
+                <Typography sx={{ color: (theme) => theme.palette.primary.main }} fontSize={30} fontWeight="bold" component="span">
                   confidence
                 </Typography>{' '}
                 in top rated services

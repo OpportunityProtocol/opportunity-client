@@ -32,7 +32,7 @@ const StyledBreadcrumb = styled(Chip)(({ theme }: { theme?: Theme }) => {
 const NavigationBreadcrumbs: FunctionComponent = () => {
   const handleClick = () => { }
   return (
-    <Container maxWidth='lg' sx={{ bgcolor: '#fff', padding: '1% 3%' }}>
+    <Container maxWidth='lg' sx={{ bgcolor: '#FAFAFA', padding: '1% 3%' }}>
 
       <Breadcrumbs aria-label="breadcrumb">
         <StyledBreadcrumb

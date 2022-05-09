@@ -6,7 +6,7 @@ const useStyles = makeStyles((theme : Theme) => ({
     root: {
         width: '100%',
         height: 'calc(100vh - 70px)',
-        backgroundColor: '#fff',
+        backgroundColor: '#fafafa',
     },
     divider: {
  
@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme : Theme) => ({
         color: 'white'
     },
     tabs: {
-        backgroundColor: '#fff', my: 2 
+        backgroundColor: '#fafafa', my: 2 
     }
 }))
 

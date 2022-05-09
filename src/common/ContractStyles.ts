@@ -6,7 +6,7 @@ const useStyles = makeStyles((theme) =>
             marginTop: '4%',
         },
         boxContainer: {
-            padding: '1% 3%', height: 'calc(100vh - 120px)', backgroundColor: '#fff'
+            padding: '1% 3%', height: 'calc(100vh - 120px)', backgroundColor: '#fafafa'
         },
         selectedCard: {
             border: '5px solid #A5D6A7'
@@ -90,7 +90,7 @@ const useStyles = makeStyles((theme) =>
         },
         mainContainer: {
             mt: 5,
-            bgcolor: '#fff'
+            bgcolor: '#fafafa'
         },
         deliverableItem: {
             padding: '0px !important',

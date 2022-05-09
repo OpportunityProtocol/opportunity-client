@@ -15,7 +15,7 @@ import NavigationBar from './common/components/NavigationBar/NavigationBar';
 const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) => {
   const router = useRouter();
 
-  const APP_BACKGROUND = router.pathname === '/contract' ? '#fff' : '#fff'
+  const APP_BACKGROUND = router.pathname === '/contract' ? '#fff' : '#FAFAFA'
 
   const isPadded =
     router.pathname === '/jobs' ||
@@ -28,7 +28,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
 
 
   return (
-    <Box sx={{ display: 'flex', bgcolor: '#fff' }}>
+    <Box sx={{ display: 'flex', bgcolor: APP_BACKGROUND }}>
       <NavigationBar />
       <Box
         component="main"

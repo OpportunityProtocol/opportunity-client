@@ -11,6 +11,7 @@ import {
   Divider,
   Stack,
   Typography,
+  Chip,
 } from '@mui/material';
 import { useStyles } from './ServiceCardStyle';
 import DAIIcon from '../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg';
@@ -25,6 +26,7 @@ interface IServiceCardProps {
 const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps) => {
   const cardStyles = useStyles();
   const router = useRouter()
+  const classes = useStyles()
 
   return (
     <Card variant="outlined" className={cx(cardStyles.root)}>
@@ -70,7 +72,7 @@ const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps
           </Stack>
       </CardContent>
       <CardActions>
-        <Button fullWidth color="secondary" variant="outlined" onClick={() => router.push('/contract/view/service')}>
+        <Button fullWidth variant="outlined" onClick={() => router.push('/contract/view/service')}>
           See service
         </Button>
       </CardActions>

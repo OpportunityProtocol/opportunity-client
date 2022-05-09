@@ -7,9 +7,12 @@ const useStyles = makeStyles(() => ({
 
     width: '100%'
   },
-  content: {
-
-  },
+  content: {},
+  priceChip: {
+    marginTop: 1,
+    fontWeight: 'medium',
+    padding: 0.8
+  }
 }));
 
 export { useStyles }
