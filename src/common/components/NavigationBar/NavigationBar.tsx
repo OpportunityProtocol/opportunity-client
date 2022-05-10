@@ -39,14 +39,13 @@ const NavigationBar: FunctionComponent = () => {
     <AppBar
       position="fixed"
       variant="elevation"
-     // elevation={0}
+      elevation={0}
       sx={{
         width: { sm: `100%` },
         ml: { sm: `100%` },
         bgcolor: '#fff',
         height: '65px',
         border: 'none !important',
-        boxShadow: '0px 3px 5px -1px #eee, 0px 5px 8px 0px #eee, 0px 1px 14px 0px #eee',
         borderBottom: '1px solid #eee !important',
       }}
     >
@@ -94,7 +93,7 @@ const NavigationBar: FunctionComponent = () => {
                     mx={2}
                     fontSize={14}
                     variant="button"
-                    color={view === 'Dashboard' ? 'secondary' : '#212121'}
+                    color={view === 'Dashboard' ? 'primary' : '#212121'}
                     fontWeight="medium"
                   >
                     Explore
@@ -109,7 +108,7 @@ const NavigationBar: FunctionComponent = () => {
                     fontSize={14}
                     variant="button"
                     color={
-                      view === 'Markets' || router.pathname === '/markets' ? 'secondary' : '#212121'
+                      view === 'Markets' || router.pathname === '/markets' ? 'primary' : '#212121'
                     }
                     fontWeight="medium"
                   >
@@ -124,7 +123,7 @@ const NavigationBar: FunctionComponent = () => {
                     mx={2}
                     fontSize={14}
                     variant="button"
-                    color={view === 'Messenger' ? 'secondary' : '#212121'}
+                    color={view === 'Messenger' ? 'primary' : '#212121'}
                     fontWeight="medium"
                   >
                     Messenger
@@ -138,7 +137,7 @@ const NavigationBar: FunctionComponent = () => {
                     mx={2}
                     fontSize={14}
                     variant="button"
-                    color={view === 'Contracts' ? 'secondary' : '#212121'}
+                    color={view === 'Contracts' ? 'primary' : '#212121'}
                     fontWeight="medium"
                   >
                     Contracts
