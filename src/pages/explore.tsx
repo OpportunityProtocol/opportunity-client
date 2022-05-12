@@ -130,8 +130,8 @@ const Explore: FunctionComponent = () => {
                 Explore freelancers
               </Button>
             </Stack>
-            <Grid container alignItems="center" direction="row" overflow="scroll" flexWrap="nowrap">
-              {suggestedConnections.map((human) => {
+            <Grid container alignItems="center" direction="row" flexWrap="nowrap">
+              {suggestedConnections.splice(0, 7).map((human) => {
                 return (
                   <Box
                     display="flex"
@@ -173,7 +173,7 @@ const Explore: FunctionComponent = () => {
           <Paper
           //  variant="outlined"
             elevation={0}
-            sx={{ my: 6, px: 6, pb: 6, backgroundColor: '#fff' }}
+            sx={{ my: 6, px: 3, pb: 6, backgroundColor: '#fff' }}
           >
             <Box>
               <Typography py={3} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
@@ -184,7 +184,7 @@ const Explore: FunctionComponent = () => {
                 in top rated services
               </Typography>
             </Box>
-            <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={1}>
+            <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={3} >
               {suggestedConnections.slice(3, 7).map((human) => {
                 return (
                   <Grid item xs={3}>

@@ -41,7 +41,7 @@ const MarketDisplay: React.FunctionComponent<IMarketDisplayProps> = ({ market, i
             Lizards are a widespread group of squamate reptiles, with over 6,000
             species, ranging across all continents except Antarctica
           </Typography>
-          <Typography color='secondary' pt={2} variant='body2'>
+          <Typography color='#49A882' pt={2} variant='body2'>
           {Math.floor(Math.random() * 3200)} contracts and services available
           </Typography>
         </CardContent>

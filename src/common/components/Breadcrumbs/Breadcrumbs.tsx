@@ -34,13 +34,17 @@ const NavigationBreadcrumbs: FunctionComponent = () => {
   return (
     <Container maxWidth='lg' sx={{ bgcolor: '#FAFAFA', padding: '1% 3%' }}>
 
-      <Breadcrumbs aria-label="breadcrumb">
+      <Breadcrumbs aria-label="breadcrumb" separator="›">
         <StyledBreadcrumb
           component="a"
           href="#"
           label="Home"
         />
-        <StyledBreadcrumb component="a" href="#" label="Catalog" />
+        <StyledBreadcrumb 
+          component="a" 
+          href="#" 
+          label="Catalog" 
+        />
         <StyledBreadcrumb
           label="Accessories"
         />

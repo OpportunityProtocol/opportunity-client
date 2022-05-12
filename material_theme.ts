@@ -48,7 +48,6 @@ import { createTheme } from '@mui/material/styles';
           button: {
             ':hover': {
               cursor: 'pointer',
-              color: 'rgba(255, 255, 255, 0.8)'
             }
           }
         }
@@ -109,7 +108,7 @@ import { createTheme } from '@mui/material/styles';
           },
           text: {    
             ':hover': {
-              color: '#285C3F', 
+              color: '#49A882', 
             },
             fontWeight: 'bold',
             backgroundColor: 'transparent',
