@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
 import { useStyles } from './JobDisplayStyles';
 
 import {
-  Divider,
   Box,
   Avatar,
   Button,
@@ -22,9 +21,7 @@ import {
   CardActions,
 } from '@mui/material';
 
-import DoneIcon from '@mui/icons-material/Done';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { AccessTime, AttachMoney, Bolt, Paid, TrendingUp } from '@mui/icons-material';
+import { AccessTime, AttachMoney, Paid, TrendingUp } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import { IJobDisplayProps } from '../../MarketInterface';
 
@@ -49,7 +46,7 @@ const renderPlaceholderTitle = () => {
 const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
   avatar = '',
   suggestion = false,
-  showReferralButton=false
+  showReferralButton = false,
 }) => {
   const classes = useStyles();
   const router = useRouter();
@@ -71,7 +68,6 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
       className={classes.card}
       variant="outlined"
     >
-      
       <CardContent>
         <Grid
           container
@@ -80,74 +76,41 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
           alignItems="flex-start"
           justifyContent="space-between"
         >
-             
-             <Grid container item direction='row'  alignItems="center" >
-
-                <Grid item>
-                  <Avatar src={avatar} sx={{ width: 60, height: 60, }}
-                  />
-                </Grid>
-                
-                <Grid item direction="column"  >
-                        <Grid mx={3}>
-                        {renderPlaceholderTitle()}
-                        </Grid>
-                      
-                        <Grid  container direction="row" m={.5}>
-                       
-                        <Stack direction='row' alignItems='center' spacing={.5} mr={1} ml={2}>
-                            <AttachMoney fontSize='small' sx={{ color:'rgb(30, 71, 98)'  }} />
-                          <Typography fontSize={12} fontWeight='medium' color='#424242'>
-                              $23.29 
-                            </Typography>
-                          </Stack>
-
-                          <Stack direction='row' alignItems='center' spacing={.5} mx={1}>
-                          <AccessTime fontSize='small' sx={{ color:'rgb(30, 71, 98)'  }} />
-                        <Typography fontSize={12} fontWeight='medium' color='#424242'>
-                            3- 6 months
-                            </Typography>
-                          </Stack>
-                          
-                          <Stack direction='row' alignItems='center' spacing={.5} mx={1}>
-                            <Paid fontSize='small' sx={{ color:'rgb(30, 71, 98)'  }} />
-                            <Typography fontSize={12} fontWeight='medium' color='#424242'>
-                              Fixed Rate Payout
-                            </Typography>
-                          </Stack>
-                         
-                          
-
-                        
-                        
-                        
-                        
-                        
-                        </Grid>
-                    
-           
-           
+          <Grid container item direction="row" alignItems="center">
+            <Grid item>
+              <Avatar src={avatar} sx={{ width: 60, height: 60 }} />
             </Grid>
-            
-            
 
-           
-           
-            </Grid>             
-             
-             
-             
-             
-             <Grid container direction='row'>
+            <Grid item direction="column">
+              <Grid mx={3}>{renderPlaceholderTitle()}</Grid>
 
-                 
-                   <Typography component="div" pb={1}>
-           
-                  
-              
-            
+              <Grid container direction="row" m={0.5}>
+                <Stack direction="row" alignItems="center" spacing={0.5} mr={1} ml={2}>
+                  <AttachMoney fontSize="small" sx={{ color: 'rgb(30, 71, 98)' }} />
+                  <Typography fontSize={12} fontWeight="medium" color="#424242">
+                    $23.29
+                  </Typography>
+                </Stack>
 
-            </Typography>
+                <Stack direction="row" alignItems="center" spacing={0.5} mx={1}>
+                  <AccessTime fontSize="small" sx={{ color: 'rgb(30, 71, 98)' }} />
+                  <Typography fontSize={12} fontWeight="medium" color="#424242">
+                    3- 6 months
+                  </Typography>
+                </Stack>
+
+                <Stack direction="row" alignItems="center" spacing={0.5} mx={1}>
+                  <Paid fontSize="small" sx={{ color: 'rgb(30, 71, 98)' }} />
+                  <Typography fontSize={12} fontWeight="medium" color="#424242">
+                    Fixed Rate Payout
+                  </Typography>
+                </Stack>
+              </Grid>
+            </Grid>
+          </Grid>
+
+          <Grid container direction="row">
+            <Typography component="div" pb={1}></Typography>
 
             <Typography
               paragraph
@@ -215,13 +178,12 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
             </Box>
           </Grid>
         </Grid>
-        
-    </CardContent>
+      </CardContent>
 
-    <CardActions>
+      <CardActions>
         <Button variant="text">View More</Button>
-        </CardActions>
-      {/*
+      </CardActions>
+          {/*
             TODO: If claimed the display will show general contract 
             information here and button will change to open contract details
          */}
@@ -235,61 +197,3 @@ JobDisplay.propTypes = {
 };
 
 export default JobDisplay;
-
-
-
-{/*
-
-<Grid
-                width="100%"
-                container
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Grid item>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <FormControl variant="standard">
-                      <NativeSelect
-                        id="desired-markets-selet"
-                        value={desiredMarkets}
-                        className={classes.selectFilter}
-                        onChange={handleOnChangeDesiredMarkets}
-                        input={<BootstrapInput />}
-                      >
-                        <option aria-label="None" value="Filter desired markets">
-                          Filter desired markets
-                        </option>
-                      </NativeSelect>
-                    </FormControl>
-                    <FormControl variant="standard">
-                      <NativeSelect
-                        id="sort-by-select"
-                        value={sortBy}
-                        className={classes.selectFilter}
-                        onChange={handleOnChangeSortBy}
-                        input={<BootstrapInput />}
-                      >
-                        <option aria-label="None" value="Filter desired markets">
-                          Sort by
-                        </option>
-                        <option value={0}>Value Settled</option>
-                        <option value={1}>Number of Contracts</option>
-                        <option value={2}>Number of Services</option>
-                      </NativeSelect>
-                    </FormControl>
-                  </Stack>
-                </Grid>
-                <Grid item>
-                  <FormControlLabel
-                    sx={{
-                      color: '#a3a3a3',
-                      fontWeight: (theme) => theme.typography.fontWeightMedium,
-                    }}
-                    control={<Switch value="" size="small" color="secondary" />}
-                    label="Only markets I've participated in"
-                  />
-                </Grid>
-              </Grid>
-            
-                  */}
