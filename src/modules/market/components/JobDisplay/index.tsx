@@ -19,6 +19,7 @@ import {
   Grid,
   Stack,
   alpha,
+  CardActions,
 } from '@mui/material';
 
 import DoneIcon from '@mui/icons-material/Done';
@@ -70,69 +71,91 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
       className={classes.card}
       variant="outlined"
     >
-      <Avatar
-        src={avatar}
-        sx={{ width: 60, height: 60, position: 'absolute', top: 13, right: 100 }}
-      />
-      <Divider className={classes.divider} />
+      
       <CardContent>
         <Grid
           container
-          direction="row"
+          direction="column"
           flexWrap="nowrap"
           alignItems="flex-start"
           justifyContent="space-between"
         >
-          <Grid item>
-            <Typography component="div" pb={1}>
-              <Box sx={{ height: 60 }} fontWeight="600" fontSize={18} color="black" pb={2} width='70%'>
-                {renderPlaceholderTitle()}
-              </Box>
+             
+             <Grid container item direction='row'  alignItems="center" >
 
-              <Grid container direction='row' alignItems='center' spacing={3}>
-                        <Grid item>
-                          <Stack direction='row' alignItems='center' spacing={0.5}>
+                <Grid item>
+                  <Avatar src={avatar} sx={{ width: 60, height: 60, }}
+                  />
+                </Grid>
+                
+                <Grid item direction="column"  >
+                        <Grid mx={3}>
+                        {renderPlaceholderTitle()}
+                        </Grid>
+                      
+                        <Grid  container direction="row" m={.5}>
+                       
+                        <Stack direction='row' alignItems='center' spacing={.5} mr={1} ml={2}>
                             <AttachMoney fontSize='small' sx={{ color:'rgb(30, 71, 98)'  }} />
-                          <Typography fontSize={13} fontWeight='medium' color='#424242'>
-                              Budget: $23.29 
+                          <Typography fontSize={12} fontWeight='medium' color='#424242'>
+                              $23.29 
                             </Typography>
                           </Stack>
-                        </Grid>
 
-                        <Grid item>
-                        <Stack direction='row' alignItems='center' spacing={0.5}>
+                          <Stack direction='row' alignItems='center' spacing={.5} mx={1}>
                           <AccessTime fontSize='small' sx={{ color:'rgb(30, 71, 98)'  }} />
-                        <Typography fontSize={13} fontWeight='medium' color='#424242'>
-                              Average Term (3 months - 6 months)
+                        <Typography fontSize={12} fontWeight='medium' color='#424242'>
+                            3- 6 months
                             </Typography>
                           </Stack>
-                        </Grid>
-
-                        <Grid item>
-                        <Stack direction='row' alignItems='center' spacing={0.5}>
+                          
+                          <Stack direction='row' alignItems='center' spacing={.5} mx={1}>
                             <Paid fontSize='small' sx={{ color:'rgb(30, 71, 98)'  }} />
-                            <Typography fontSize={13} fontWeight='medium' color='#424242'>
+                            <Typography fontSize={12} fontWeight='medium' color='#424242'>
                               Fixed Rate Payout
                             </Typography>
                           </Stack>
-                        </Grid>
+                         
+                          
 
-                        <Grid item>
-                        <Stack direction='row' alignItems='center'>
-                            <Typography>
-                              
-                            </Typography>
-                          </Stack>
+                        
+                        
+                        
+                        
+                        
                         </Grid>
-                      </Grid>
+                    
+           
+           
+            </Grid>
+            
+            
+
+           
+           
+            </Grid>             
+             
+             
+             
+             
+             <Grid container direction='row'>
+
+                 
+                   <Typography component="div" pb={1}>
+           
+                  
+              
+            
+
             </Typography>
 
             <Typography
               paragraph
               color="rgb(94, 94, 94)"
               py={1}
+              mt={2}
               fontSize={15}
-              fontWeight="semibold"
+              fontWeight="medium"
             >
               Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging
               across all continents except Antarctica roup of squamate reptiles, with over 6,000
@@ -192,7 +215,12 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
             </Box>
           </Grid>
         </Grid>
-      </CardContent>
+        
+    </CardContent>
+
+    <CardActions>
+        <Button variant="text">View More</Button>
+        </CardActions>
       {/*
             TODO: If claimed the display will show general contract 
             information here and button will change to open contract details
