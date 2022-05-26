@@ -13,7 +13,6 @@ import { createTheme } from '@mui/material/styles';
         main: '#d46290',
         dark: '#6a3c55'
       },
-    //  turquoise: 'rgb(98, 202, 161)'
     },   
     typography: {
       fontFamily: [
@@ -22,7 +21,6 @@ import { createTheme } from '@mui/material/styles';
       ].join(','),
       button: {
         textTransform: 'none',
-       // color: '#4CAF50',
       }
     },
     components: {
