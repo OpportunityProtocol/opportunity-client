@@ -19,7 +19,7 @@ const SearchBarV2: FunctionComponent<ISearchBarV2Props> = ({ placeholder }) => {
         startAdornment={<Search sx={{ mr: 2, color: '#9E9E9E' }} />}
         className={classes.inputBase}
         placeholder={placeholder}
-        inputProps={{ 'aria-label': 'Search content' }}
+        inputProps={{ 'aria-label': 'search gigs' }}
       />
       <IconButton type="submit" className={classes.iconButton} aria-label="search">
         <FilterList />

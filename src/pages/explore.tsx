@@ -11,7 +11,7 @@ import { GradientAvatarClassKey } from '@mui-treasury/styles/avatar/gradient/gra
 import { ICarouselItemProps } from '../modules/market/MarketInterface';
 import { loggedOutHeroCarouselItems } from '../modules/market/MarketConstants';
 import JobDisplay from '../modules/market/components/JobDisplay';
-import ServiceCard from '../common/components/ServiceCard/ServiceCard';
+import ServiceCard from '../modules/contract/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
 import { KeyboardArrowRight } from '@mui/icons-material';
 
@@ -109,7 +109,7 @@ const Explore: FunctionComponent = () => {
   const AVATAR_SIZE = 70;
   return (
     <Box>
-      <Container maxWidth="lg" sx={{ bgcolor: '#FAFAFA' }} className={classes.root}>
+      <Container maxWidth="lg" className={classes.root}>
         <Carousel animation='slide' fullHeightHover={true} indicators={false} autoPlay interval={8000}>
           {loggedOutHeroCarouselItems.map((item, i, arr) => (
             <CarouselItem key={i} item={item} itemLength={arr.length} index={i} />
@@ -140,7 +140,7 @@ const Explore: FunctionComponent = () => {
                     alignItems="center"
                     component={Button}
                     mx={4}
-                    onClick={() => router.push('/dashboard')}
+                    onClick={() => router.push('/profile')}
                   >
                     <div
                       style={{

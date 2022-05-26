@@ -20,21 +20,13 @@ import {
 } from "@mui/material"
 
 import { styled } from '@mui/material/styles';
-
 import Check from '@mui/icons-material/Check';
-
 import BoltIcon from '@mui/icons-material/Bolt';
 import DateRangeIcon from '@mui/icons-material/DateRange';
-import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import SettingsIcon from '@mui/icons-material/Settings';
-import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import VideoLabelIcon from '@mui/icons-material/VideoLabel';
 import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
 import { StepIconProps } from '@mui/material/StepIcon';
-
 import { useStyles } from '../../modules/market/MarketStyles'
 import { alpha } from '@mui/material';
-
 import Link from 'next/link'
 import ClickableCard from '../../common/components/ClickableCard/ClickableCard';
 import { useRouter } from 'next/router';

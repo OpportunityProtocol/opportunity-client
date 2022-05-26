@@ -15,11 +15,11 @@ import NavigationBar from './common/components/NavigationBar/NavigationBar';
 const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) => {
   const router = useRouter();
 
-  const APP_BACKGROUND = router.pathname === '/contract' ? '#fff' : '#FAFAFA'
+  const APP_BACKGROUND = '#f8f8f8'
 
   const isPadded =
     router.pathname === '/jobs' ||
-    router.pathname === '/dashboard' ||
+    router.pathname === '/profile' ||
     router.pathname === '/contract/view/contract' ||
     router.pathname === '/contract/view/service' ||
     router.pathname === '/' ||

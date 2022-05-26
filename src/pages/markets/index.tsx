@@ -22,19 +22,9 @@ const sortByOptions = [
   <option value={0}>Highest Total Skill Value</option>
 ]
 
-const DesiredMarketsContent = ({ visible }) => {
-  return (
-    <Paper sx={{ position: 'absolute', top: 5, display: visible }}>
-      Hello World
-    </Paper>
-  )
-}
-
 const Markets: FunctionComponent = () => {
   const classes = useStyles();
   const [markets, setMarkets] = useState<any[]>([]);
-
-  const [desiredMarketsShowing, setDesiredMarketsShowing] = useState<any>('flex')
 
   useEffect(() => {
     let updatedMarkets = [];

@@ -46,7 +46,7 @@ const UserCard : React.FunctionComponent<IUserCardProps> = ({ name, email, avata
             </CardContent>
             <Divider />
             <CardActions>
-                <Button variant='text' color='secondary' onClick={() => router.push('/dashboard')}>
+                <Button variant='text' color='secondary' onClick={() => router.push('/profile')}>
                     See profile
                 </Button>
             </CardActions>

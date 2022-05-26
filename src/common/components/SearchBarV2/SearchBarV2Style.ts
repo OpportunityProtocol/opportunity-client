@@ -1,6 +1,7 @@
+import { Theme } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles((theme: Theme) => {
     return {
         paper: {
            // marginBottom: theme.spacing(2),

@@ -70,7 +70,7 @@ const Contracts: React.FunctionComponent<any> = () => {
   }, []);
 
   return (
-    <Container maxWidth="lg" sx={{  height: '100vh' }}>
+    <Container maxWidth="lg">
       <Typography pl={1} fontSize={25} fontWeight="medium">
         Contracts
       </Typography>
@@ -89,7 +89,7 @@ const Contracts: React.FunctionComponent<any> = () => {
           </Tabs>
           <Divider />
         </Box>
-        <SearchBarV2 placeholder='Search Gigs and Services' />
+        <SearchBarV2 placeholder="Search Gigs and Services" />
         <TabPanel index={0} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
@@ -123,11 +123,11 @@ const Contracts: React.FunctionComponent<any> = () => {
                     relationship: { picture: { large: string | undefined } },
                     idx: React.Key | null | undefined
                   ) => (
-                    <Grid item xs={5.9} sx={{ m: 0.5}}>
-                        <JobDisplay
-                          avatar={relationship.picture.large}
-                          suggestion={idx === 0 ? true : false}
-                        />
+                    <Grid item xs={5.9} sx={{ m: 0.5 }}>
+                      <JobDisplay
+                        avatar={relationship.picture.large}
+                        suggestion={idx === 0 ? true : false}
+                      />
                     </Grid>
                   )
                 )}
@@ -144,7 +144,7 @@ const Contracts: React.FunctionComponent<any> = () => {
                     relationship: { picture: { large: string | undefined } },
                     idx: React.Key | null | undefined
                   ) => (
-                    <Grid item key={idx} xs={5.9}>
+                    <Grid item key={idx} xs={5.9} sx={{ m: 0.5 }}>
                       <React.Fragment>
                         <JobDisplay
                           avatar={relationship.picture.large}

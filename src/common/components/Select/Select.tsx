@@ -1,14 +1,19 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
-import {
-    InputLabel,
-    MenuItem,
-    FormControl,
-    NativeSelect,
-    InputBase
-} from '@mui/material'
+import { InputLabel, MenuItem, FormControl, NativeSelect, InputBase } from '@mui/material';
 
 import { FunctionComponent } from 'react';
+
+interface ISelectProps {
+  id: string;
+  label?: string;
+  placeholder: string;
+  width?: number;
+  options?: Array<JSX.Element>;
+  onShowCustomContent?: React.MouseEventHandler;
+  isCustomContent?: boolean;
+  CustomContentComponent?: React.ReactElement;
+}
 
 const SelectInput = styled(InputBase)(({ theme }) => ({
   'label + &': {
@@ -31,49 +36,37 @@ const SelectInput = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-
-interface ISelectProps {
-    label?: string,
-    placeholder: string,
-    width?: number,
-    options?: Array<JSX.Element>,
-    onShowCustomContent?: React.MouseEventHandler,
-    isCustomContent?: boolean,
-    CustomContentComponent?: React.ReactElement
-}
-
-const Select : FunctionComponent<ISelectProps> = ({ 
-    label, 
-    placeholder, 
-    width , 
-    options=[], 
+const Select: FunctionComponent<ISelectProps> = ({
+  id,
+  label,
+  placeholder,
+  width,
+  options = [],
 }) => {
-  const [age, setAge] = React.useState('');
+  const [value, setValue] = React.useState('');
+
   const handleChange = (event: { target: { value: string } }) => {
-    setAge(event.target.value);
+    setValue(event.target.value);
   };
-  
+
   return (
     <div>
       <FormControl variant="standard">
-       
-        <NativeSelect 
-          id="demo-customized-select-native"
-          value={age}
+        <NativeSelect
+          id={id}
+          value={value}
           onChange={handleChange}
           input={<SelectInput />}
           sx={{ width }}
         >
-            <option aria-label="None" value="">
-              {placeholder}
-            </option>
-            {
-                options.map(option => option)
-            }
+          <option aria-label="None" value="">
+            {placeholder}
+          </option>
+          {options.map((option) => option)}
         </NativeSelect>
       </FormControl>
     </div>
   );
-}
+};
 
-export default Select
+export default Select;

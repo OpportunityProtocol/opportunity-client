@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useStyles } from '../../common/DashboardStyles';
+import { useStyles } from '../common/styles/DashboardStyles';
 
 import {
   Box,
@@ -15,9 +15,9 @@ import {
 
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 
-import UserCard from '../../common/components/UserCard/UserCard';
-import { timelineButtons } from '../../modules/market/MarketConstants';
-import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
+import UserCard from '../common/components/UserCard/UserCard';
+import { timelineButtons } from '../modules/market/MarketConstants';
+import ServiceCard from '../common/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
 
 const data = [
@@ -74,7 +74,6 @@ const Dashboard: React.FunctionComponent = () => {
   const [featuredServices, setFeaturedServices] = useState<any>([]);
   const [reviews, setReviews] = useState<any>([]);
   const router = useRouter();
-  
 
   const renderUsers = async () => {
     const a = await fetch('https://randomuser.me/api/?results=20', {});
@@ -96,10 +95,9 @@ const Dashboard: React.FunctionComponent = () => {
 
   return (
     <Container maxWidth="lg" sx={{ height: COLUMN_HEIGHT }}>
-
-        <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
-          Dashboard
-        </Typography>
+      <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
+        Dashboard
+      </Typography>
 
       <Grid
         mt={2}
@@ -297,44 +295,42 @@ const Dashboard: React.FunctionComponent = () => {
                 No reviews has been written for this employer
               </Typography>
             ) : (
-              reviews
-                .slice(4, 9)
-                .map(
-                  (
-                    review: {
-                      picture: { large: string | undefined };
-                      name: { first: string; last: string };
-                      login: {
-                        username:
-                          | boolean
-                          | React.ReactChild
-                          | React.ReactFragment
-                          | React.ReactPortal
-                          | null
-                          | undefined;
-                      };
-                    },
-                    idx: React.Key | null | undefined
-                  ) => {
-                    return (
-                      <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
-                        <Avatar src={review?.picture.large} />
-                        <Stack>
-                          <Typography fontSize={13}>
-                            {review?.name.first + ' ' + review.name.last}
-                          </Typography>
-                          <Typography fontSize={14} fontWeight="medium">
-                            {review?.login.username}
-                          </Typography>
-                          <Typography paragraph fontSize={14}>
-                            No hassle and no extra work apart from the contract description. I will
-                            definitiely be looking to work with him again!
-                          </Typography>
-                        </Stack>
-                      </Box>
-                    );
-                  }
-                )
+              reviews.slice(4, 9).map(
+                (
+                  review: {
+                    picture: { large: string | undefined };
+                    name: { first: string; last: string };
+                    login: {
+                      username:
+                        | boolean
+                        | React.ReactChild
+                        | React.ReactFragment
+                        | React.ReactPortal
+                        | null
+                        | undefined;
+                    };
+                  },
+                  idx: React.Key | null | undefined
+                ) => {
+                  return (
+                    <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
+                      <Avatar src={review?.picture.large} />
+                      <Stack>
+                        <Typography fontSize={13}>
+                          {review?.name.first + ' ' + review.name.last}
+                        </Typography>
+                        <Typography fontSize={14} fontWeight="medium">
+                          {review?.login.username}
+                        </Typography>
+                        <Typography paragraph fontSize={14}>
+                          No hassle and no extra work apart from the contract description. I will
+                          definitiely be looking to work with him again!
+                        </Typography>
+                      </Stack>
+                    </Box>
+                  );
+                }
+              )
             )}
           </CardContent>
         </Card>

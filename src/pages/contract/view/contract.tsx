@@ -123,13 +123,11 @@ const isService = false;
 const ViewContract: React.FunctionComponent<any> = () => {
   const classes = useStyles();
   const [reviews, setReviews] = useState<any>([]);
-  const [contractOwnership, setContractOwnership] = useState<string>('Claimed');
   const isReferral = true;
   const renderUsers = async () => {
     const a = await fetch('https://randomuser.me/api/?results=20', {});
     const users = await a.json();
     setReviews(users.results);
-    console.log(users);
   };
 
   useEffect(() => {
@@ -202,48 +200,42 @@ const ViewContract: React.FunctionComponent<any> = () => {
                     No reviews has been written for this employer
                   </Typography>
                 ) : (
-                  reviews
-                    .slice(4, 9)
-                    .map(
-                      (
-                        review: {
-                          picture: { large: string | undefined };
-                          name: { first: string; last: string };
-                          login: {
-                            username:
-                              | boolean
-                              | React.ReactChild
-                              | React.ReactFragment
-                              | React.ReactPortal
-                              | null
-                              | undefined;
-                          };
-                        },
-                        idx: React.Key | null | undefined
-                      ) => {
-                        return (
-                          <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
-                            <Avatar src={review?.picture.large} className={classes.avatar} />
-                            <Stack>
-                              <Typography fontSize={13} className={classes.overline}>
-                                {review?.name.first + ' ' + review.name.last}
-                              </Typography>
-                              <Typography
-                                fontSize={14}
-                                fontWeight="medium"
-                                className={classes.name}
-                              >
-                                {review?.login.username}
-                              </Typography>
-                              <Typography paragraph fontSize={14} className={classes.name}>
-                                No hassle and no extra work apart from the contract description. I
-                                will definitiely be looking to work with him again!
-                              </Typography>
-                            </Stack>
-                          </Box>
-                        );
-                      }
-                    )
+                  reviews.slice(4, 9).map(
+                    (
+                      review: {
+                        picture: { large: string | undefined };
+                        name: { first: string; last: string };
+                        login: {
+                          username:
+                            | boolean
+                            | React.ReactChild
+                            | React.ReactFragment
+                            | React.ReactPortal
+                            | null
+                            | undefined;
+                        };
+                      },
+                      idx: React.Key | null | undefined
+                    ) => {
+                      return (
+                        <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
+                          <Avatar src={review?.picture.large} className={classes.avatar} />
+                          <Stack>
+                            <Typography fontSize={13} className={classes.overline}>
+                              {review?.name.first + ' ' + review.name.last}
+                            </Typography>
+                            <Typography fontSize={14} fontWeight="medium" className={classes.name}>
+                              {review?.login.username}
+                            </Typography>
+                            <Typography paragraph fontSize={14} className={classes.name}>
+                              No hassle and no extra work apart from the contract description. I
+                              will definitiely be looking to work with him again!
+                            </Typography>
+                          </Stack>
+                        </Box>
+                      );
+                    }
+                  )
                 )}
               </CardContent>
             </Card>
@@ -313,12 +305,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
                 Save Contract
               </Button>
 
-              <Button
-                variant="outlined"
-                size="large"
-                fullWidth
-                endIcon={<EmailOutlined />}
-              >
+              <Button variant="outlined" size="large" fullWidth endIcon={<EmailOutlined />}>
                 Refer a friend
               </Button>
             </Stack>

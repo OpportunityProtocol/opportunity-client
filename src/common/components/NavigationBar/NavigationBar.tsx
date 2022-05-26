@@ -100,23 +100,23 @@ const NavigationBar: FunctionComponent = () => {
                   </Typography>
                 </Link>
 
-                <Link href="/markets">
+                <Link href="/work">
                   <Typography
-                    onClick={() => setView('Markets')}
+                    onClick={() => setView('Work')}
                     component={Button}
                     mx={2}
                     fontSize={14}
                     variant="button"
                     color={
-                      view === 'Markets' || router.pathname === '/markets' ? 'primary' : '#212121'
+                      view === 'Work' || router.pathname === '/work' ? 'primary' : '#212121'
                     }
                     fontWeight="medium"
                   >
-                    Markets
+                    Work
                   </Typography>
                 </Link>
 
-                <Link href="/contract">
+                <Link href="/messenger">
                   <Typography
                     onClick={() => setView('Messenger')}
                     component={Button}
@@ -154,7 +154,7 @@ const NavigationBar: FunctionComponent = () => {
                 justifyContent: 'flex-end',
               }}
             >
-              <ConnectedAvatar onClick={() => router.push('/dashboard')} onMouseOver={onMouseOverConnectedAvatar} onMouseLeave={onMouseLeaveConnectedAvatar} />
+              <ConnectedAvatar onClick={() => router.push('/profile')} onMouseOver={onMouseOverConnectedAvatar} onMouseLeave={onMouseLeaveConnectedAvatar} />
               <Popover
                 style={{ position: 'absolute', top: 55 }}
                 id="account-popover"
