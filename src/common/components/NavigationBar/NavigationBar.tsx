@@ -223,15 +223,6 @@ const NavigationBar: FunctionComponent = () => {
                       $125.64
                     </Typography>
                   </Grid>
-
-                  <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
-                    <Typography color="#212121" fontWeight="bold" fontSize={12}>
-                      <FaEthereum size={10} /> UST Balance:{' '}
-                    </Typography>
-                    <Typography color="#212121" fontWeight="light" fontSize={12}>
-                      $23.22
-                    </Typography>
-                  </Grid>
     
                 </Grid>
                 <Stack spacing={2} m={2}>

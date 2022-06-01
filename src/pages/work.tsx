@@ -10,12 +10,14 @@ import {
   List,
   ListItemButton,
   ListItemText,
+  Stack,
   Tabs,
   Tab,
   Typography,
   Box,
 } from '@mui/material';
 import TabPanel from '../common/components/TabPanel/TabPanel';
+import SearchBarV2 from '../common/components/SearchBarV2/SearchBarV2';
 
 /**** Temporary Placeholders *****/
 const marketName = [
@@ -90,7 +92,7 @@ function Work() {
     >
       <Grid item>
         <Box sx={{ width: '100%' }}>
-          <Box mt={3} sx={{ borderBottom: 1, borderColor: 'divider',  }}>
+          <Box mt={3} sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} centered>
               <Tab sx={{ borderBottom: '1px solid #212121' }} label="Contracts" />
               <Tab sx={{ fontSize: '14px' }} label="Services" />
@@ -99,15 +101,13 @@ function Work() {
           <TabPanel value={value} index={0}>
             <Grid container justifyContent="space-between">
               <Grid item xs={3} sx={{}}>
-                <Typography pt={2} fontWeight="bold">Filter Markets</Typography>
-                <List
-                  component="nav"
-                >
+                <Typography pt={2} fontWeight="bold">
+                  Filter Markets
+                </Typography>
+                <List component="nav">
                   {marketName.map((item) => (
                     <Fragment key={item.id}>
-                      <ListItemButton
-                        onClick={() => handleClick(item.id)}
-                      >
+                      <ListItemButton onClick={() => handleClick(item.id)}>
                         <ListItemText
                           primary={item.name}
                           primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }}
@@ -118,13 +118,13 @@ function Work() {
                           <AddIcon fontSize="small" />
                         )}
                       </ListItemButton>
-                       <Collapse in={open[item.id]} timeout="auto" unmountOnExit>
+                      <Collapse in={open[item.id]} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
                           <ListItemButton sx={{ pl: 4 }} style={{ backgroundColor: 'transparent' }}>
                             <ListItemText primary="Starred" sx={{ fontSize: 1 }} />
                           </ListItemButton>
                         </List>
-                  </Collapse>
+                      </Collapse>
                     </Fragment>
                   ))}
                 </List>
@@ -138,9 +138,18 @@ function Work() {
                 sx={{ pt: 0, bgcolor: 'inherit', maxHeight: 840, overflow: 'auto' }}
               >
                 <Grid item xs={12} pb={0.5} pl={2}>
-                  <Typography py={2} fontSize={13} color={(theme) => theme.palette.primary.dark} fontWeight="bold">
-                    123,233,000 contracts
-                  </Typography>
+                  <Stack display="flex" direction="row" alignItems="center">
+                    <Typography
+                      width="100%"
+                      py={2}
+                      fontSize={13}
+                      color={(theme) => theme.palette.primary.dark}
+                      fontWeight="bold"
+                    >
+                      123,233,000 contracts
+                    </Typography>
+                    <SearchBarV2 placeholder="Search for your next gig" />
+                  </Stack>
                 </Grid>
 
                 <Grid item xs={5.7} pb={1}>
@@ -196,23 +205,33 @@ function Work() {
           <TabPanel value={value} index={1}>
             <Grid container justifyContent="space-between" sx={{ bgcolor: 'background.paper' }}>
               <Grid item xs={3} sx={{}}>
-              <Typography pt={2} fontWeight="bold">Filter Markets</Typography>
-                <List
-                  component="nav"
-                >
+                <Typography pt={2} fontWeight="bold">
+                  Filter Markets
+                </Typography>
+                <List component="nav">
                   {serviceName.map((item) => (
                     <Fragment key={item.id}>
                       <ListItemButton
                         style={{ backgroundColor: 'transparent' }}
                         onClick={() => handleClick(item.id)}
                       >
-                        <ListItemText primary={item.name}   primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }} />
-                        {open[item.id] ? <RemoveIcon fontSize='small' /> : <AddIcon fontSize='small' />}
+                        <ListItemText
+                          primary={item.name}
+                          primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }}
+                        />
+                        {open[item.id] ? (
+                          <RemoveIcon fontSize="small" />
+                        ) : (
+                          <AddIcon fontSize="small" />
+                        )}
                       </ListItemButton>
                       <Collapse in={open[item.id]} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
                           <ListItemButton sx={{ pl: 4 }} style={{ backgroundColor: 'transparent' }}>
-                            <ListItemText primary="Starred"   primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }} />
+                            <ListItemText
+                              primary="Starred"
+                              primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }}
+                            />
                           </ListItemButton>
                         </List>
                       </Collapse>

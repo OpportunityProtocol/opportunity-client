@@ -11,10 +11,6 @@ const useStyles = makeStyles((theme: Theme) => {
             width: '100%',
             backgroundColor: 'transparent !important'
         },
-        inputBase: {
-            marginLeft: theme.spacing(1),
-            flex: 1
-        },
         iconButton: {
             padding: '10px'
         }
