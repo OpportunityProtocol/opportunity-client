@@ -60,35 +60,14 @@ import { createTheme } from '@mui/material/styles';
         }
       },
       MuiTab: {
-        defaultProps: {
-          
-        },
         styleOverrides: {
           root: {
             border: 'none !important',
-            fontSize: 13,
             fontWeight: 'bold'
           }
         }
       },
       MuiChip: {
-        styleOverrides: {
-          root: {
-           
-          },
-          outlined: {
-            border: '1px solid #ddd'
-          }
-        }
-      },
-      MuiCard: {
-        styleOverrides: {
-          root: {
-
-          },
-        }
-      },
-      MuiPaper: {
         styleOverrides: {
           outlined: {
             border: '1px solid #ddd'

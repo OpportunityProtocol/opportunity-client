@@ -11,10 +11,12 @@ import {
   Badge,
   Avatar,
   Button,
+  Stack,
   AppBar,
   Toolbar,
   Typography,
   Divider,
+  CardContent,
 } from '@mui/material';
 
 import router, { useRouter } from 'next/router';
@@ -32,6 +34,7 @@ const NavigationBar: FunctionComponent = () => {
   const [popoverTimerSet, setPopOverTimerSet] = useState<boolean>(false)
 
   const router = useRouter();
+  console.log(router.pathname)
 
   const onMouseOverConnectedAvatar = () => setPopoverIsOpen(true)
 
@@ -103,7 +106,7 @@ const NavigationBar: FunctionComponent = () => {
                     fontSize={14}
                     variant='button'
                     color={router.pathname == '/' ? 'primary' : '#212121'}
-                    fontWeight={router.pathname === '/' ? "bold" : 'regular'}
+                    fontWeight={router.pathname === '/' ? "bold" : '500'}
                   >
                     Explore
                   </Typography>
@@ -116,7 +119,7 @@ const NavigationBar: FunctionComponent = () => {
                     fontSize={14}
                     variant="button"
                     color={router.pathname == '/work' ? 'primary' : '#212121'}
-                    fontWeight={router.pathname === '/work' ? "bold" : 'regular'}
+                    fontWeight={router.pathname === '/work' ? "bold" : '500'}
                   >
                     Work
                   </Typography>
@@ -129,7 +132,7 @@ const NavigationBar: FunctionComponent = () => {
                     fontSize={14}
                     variant="button"
                     color={router.pathname == '/messenger' ? 'primary' : '#212121'}
-                    fontWeight={router.pathname === '/messenger' ? "bold" : 'regular'}
+                    fontWeight={router.pathname === '/messenger' ? "bold" : '500'}
                   >
                     Messenger
                   </Typography>
@@ -141,8 +144,8 @@ const NavigationBar: FunctionComponent = () => {
                     mx={2}
                     fontSize={14}
                     variant="button"
-                    color={router.pathname == '/contract' ? 'primary' : '#212121'}
-                    fontWeight={router.pathname === '/contract' ? "bold" : 'regular'}
+                    color={router.pathname.includes('/contract') ? 'primary' : '#212121'}
+                    fontWeight={router.pathname.includes('/contract') ? "bold" : '500'}
                   >
                     Contracts
                   </Typography>
@@ -169,6 +172,7 @@ const NavigationBar: FunctionComponent = () => {
                   horizontal: 'right',
                 }}
               >
+                <CardContent>
                 <Box sx={{ p: 1 }}>
                   <Typography component="div">
                     <Box sx={{ fontWeight: 'bold' }}>Welcome to GigEarth</Box>
@@ -200,8 +204,8 @@ const NavigationBar: FunctionComponent = () => {
                     </Box>
                   </Typography>
                 </Box>
-                <Divider />
-                <Grid flexWrap="nowrap" container direction="column">
+          
+                <Grid my={3} sx={{ border: '1px solid #ddd' }} flexWrap="nowrap" container direction="column">
                   <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
                     <Typography color="#212121" noWrap fontWeight="bold" fontSize={12}>
                       <IoWalletSharp size={10} /> Web3/Wallet Provider:{' '}
@@ -210,7 +214,7 @@ const NavigationBar: FunctionComponent = () => {
                       MetaMask
                     </Typography>
                   </Grid>
-                  <Divider />
+        
                   <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
                     <Typography color="#212121" fontWeight="bold" fontSize={12}>
                       <FaEthereum size={10} /> DAI Balance:{' '}
@@ -219,7 +223,7 @@ const NavigationBar: FunctionComponent = () => {
                       $125.64
                     </Typography>
                   </Grid>
-                  <Divider />
+
                   <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
                     <Typography color="#212121" fontWeight="bold" fontSize={12}>
                       <FaEthereum size={10} /> UST Balance:{' '}
@@ -228,13 +232,17 @@ const NavigationBar: FunctionComponent = () => {
                       $23.22
                     </Typography>
                   </Grid>
-                  <Divider />
+    
                 </Grid>
-                <Box m={2}>
-                  <Button fullWidth variant="contained" color="secondary">
+                <Stack spacing={2} m={2}>
+                  <Button fullWidth variant="outlined" color="primary">
                     Add Funds
                   </Button>
-                </Box>
+                  <Button fullWidth variant="contained" color="primary" onClick={() => router.push('/profile')}>
+                    View Profile
+                  </Button>
+                </Stack>
+                </CardContent>
               </Popover>
             </Grid>
           </Grid>

@@ -18,7 +18,6 @@ interface ICarouselItemProp {
     hasButton?: boolean,
     avatar?: string;
     suggestion?: boolean;
-    showReferralButton: boolean;
   }
 
   export type { ICarouselItemProp, ICarouselItemProps, IJobDisplayProps }

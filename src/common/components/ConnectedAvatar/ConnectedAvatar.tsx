@@ -52,7 +52,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   }
 
   
-  const ConnectedAvatar : FunctionComponent<IConnectedAvatar> = ({ onClick, onMouseOver, onMouseLeave }) => {
+  const ConnectedAvatar : FunctionComponent<IConnectedAvatar> = ({ onClick, onMouseOver }) => {
     return (
       <StyledBadge
         onClick={onClick}
@@ -60,7 +60,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         variant="dot"
       >
-        <Avatar onMouseOver={onMouseOver} onMouseOut={onMouseLeave} sx={{ cursor: 'pointer' }} alt="Remy Sharp" src="/assets/stock/profile_three.jpeg" />
+        <Avatar onMouseOver={onMouseOver} sx={{ cursor: 'pointer' }} alt="Remy Sharp" src="/assets/stock/profile_three.jpeg" />
       </StyledBadge>
     );
   };

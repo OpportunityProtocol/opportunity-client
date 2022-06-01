@@ -10,6 +10,7 @@ import { styled, emphasize } from '@mui/system';
 
 import HomeIcon from '@mui/icons-material/Home';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useRouter } from 'next/router';
 
 
 const StyledBreadcrumb = styled(Chip)(({ theme }: { theme?: Theme }) => {
@@ -30,9 +31,10 @@ const StyledBreadcrumb = styled(Chip)(({ theme }: { theme?: Theme }) => {
 }) as typeof Chip; // TypeScript only: need a type cast here because https://github.com/Microsoft/TypeScript/issues/26591
 
 const NavigationBreadcrumbs: FunctionComponent = () => {
-  const handleClick = () => { }
+  const router = useRouter()
+  const isXl = router.pathname == '/contract/view/service'
   return (
-    <Container maxWidth='lg' sx={{ bgcolor: 'inherit', padding: '1% 0%' }}>
+    <Container maxWidth={isXl ? 'xl' : 'lg'} sx={{  padding: '1% 0%' }}>
 
       <Breadcrumbs aria-label="breadcrumb" separator="›">
         <StyledBreadcrumb

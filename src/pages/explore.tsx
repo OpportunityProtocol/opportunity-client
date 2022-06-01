@@ -157,11 +157,11 @@ const Explore: FunctionComponent = () => {
                       />
                     </div>
                     <Box textAlign="center">
-                      <Typography variant="body2" color="#616161" width="auto" noWrap>
+                      <Typography fontWeight='medium' variant="body2" color="#616161" width="auto" noWrap>
                         {human.name.first + ' ' + human.name.last}
                       </Typography>
                       <Typography variant="caption" color='text.primary' width="auto" noWrap>
-                        ${Math.floor(Math.random() * 101).toFixed(2)} Skill Value
+                        ${Math.floor(Math.random() * 101).toFixed(2)} Value
                       </Typography>
                     </Box>
                   </Box>

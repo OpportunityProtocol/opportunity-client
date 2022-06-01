@@ -147,9 +147,6 @@ const ViewContract: React.FunctionComponent<any> = () => {
       </Container>
       <Container
         maxWidth="lg"
-        component={Paper}
-        elevation={0}
-        variant="outlined"
         className={classes.mainContainer}
       >
         <Grid
@@ -221,7 +218,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
                         <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
                           <Avatar src={review?.picture.large} className={classes.avatar} />
                           <Stack>
-                            <Typography fontSize={13} className={classes.overline}>
+                            <Typography fontWeight='bold' fontSize={13} className={classes.overline}>
                               {review?.name.first + ' ' + review.name.last}
                             </Typography>
                             <Typography fontSize={14} fontWeight="medium" className={classes.name}>
@@ -289,7 +286,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
               size="large"
               sx={{ mb: 2 }}
               fullWidth
-              color="secondary"
+              color="primary"
               disableElevation
               disableRipple
             >
@@ -342,6 +339,9 @@ const ViewContract: React.FunctionComponent<any> = () => {
               <CardContent>
                 <Typography fontSize={20} fontWeight="bold">
                   Metadata
+                </Typography>
+                <Typography variant='button' color='#2196F3'>
+                  View on IPFS
                 </Typography>
                 <List>
                   <ListItem>

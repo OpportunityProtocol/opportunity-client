@@ -46,11 +46,9 @@ const renderPlaceholderTitle = () => {
 const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
   avatar = '',
   suggestion = false,
-  showReferralButton = false,
 }) => {
   const classes = useStyles();
   const router = useRouter();
-  const isService = Math.random() > 0.5; //temp
 
   const handleClick = () => {
     console.info('You clicked the Chip.');
@@ -63,7 +61,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
   return (
     <Card
       square
-      onClick={() => router.push('/contract/view')}
+      onClick={() => router.push('/contract/view/contract')}
       key={Math.random()}
       className={classes.card}
       variant="outlined"
@@ -74,37 +72,46 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
           direction="column"
           flexWrap="nowrap"
           alignItems="flex-start"
-          justifyContent="space-between"
-        >
-          <Grid container item direction="row" alignItems="center">
+          justifyContent="space-between">
+          <Grid container item direction='row' flexWrap='nowrap' alignItems="center">
             <Grid item>
-              <Avatar src={avatar} sx={{ width: 60, height: 60 }} />
+              <Avatar src={avatar} sx={{ width: 40, height: 40 }} />
             </Grid>
 
-            <Grid item direction="column">
-              <Grid mx={3}>{renderPlaceholderTitle()}</Grid>
+            <Grid container item direction="column" alignItems='flex-start'>
+              <Grid item px={2}>
+                <Typography>
+                {renderPlaceholderTitle()}
+                </Typography>
+                </Grid>
 
-              <Grid container direction="row" m={0.5}>
-                <Stack direction="row" alignItems="center" spacing={0.5} mr={1} ml={2}>
+              <Grid sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }} ml={0.5} spacing={1} container item>
+                <Grid item>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
                   <AttachMoney fontSize="small" sx={{ color: 'rgb(30, 71, 98)' }} />
                   <Typography fontSize={12} fontWeight="medium" color="#424242">
                     $23.29
                   </Typography>
                 </Stack>
+                </Grid>
 
-                <Stack direction="row" alignItems="center" spacing={0.5} mx={1}>
+                <Grid item>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
                   <AccessTime fontSize="small" sx={{ color: 'rgb(30, 71, 98)' }} />
                   <Typography fontSize={12} fontWeight="medium" color="#424242">
                     3- 6 months
                   </Typography>
                 </Stack>
+                </Grid>
 
-                <Stack direction="row" alignItems="center" spacing={0.5} mx={1}>
+                <Grid item>
+                <Stack direction="row" alignItems="center" spacing={0.5}>
                   <Paid fontSize="small" sx={{ color: 'rgb(30, 71, 98)' }} />
                   <Typography fontSize={12} fontWeight="medium" color="#424242">
                     Fixed Rate Payout
                   </Typography>
                 </Stack>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
@@ -139,42 +146,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
                     </Grid>
                   );
                 })}
-                {isService ? (
-                  <Chip
-                    label="Contract"
-                    size="small"
-                    variant="filled"
-                    className={classes.tagChip}
-                    sx={{
-                      bgcolor: alpha('#2196F3', 0.3),
-                    }}
-                  />
-                ) : (
-                  <Chip
-                    label="Service"
-                    size="small"
-                    variant="filled"
-                    className={classes.tagChip}
-                    sx={{
-                      bgcolor: alpha('#4CAF50', 0.3),
-                    }}
-                  />
-                )}
               </Grid>
-              {showReferralButton === true ? (
-                <Chip
-                  classes={{
-                    iconSmall: classes.purchaseIconSmall,
-                  }}
-                  sx={{ bgcolor: alpha('#4CAF50', 0.8) }}
-                  variant="filled"
-                  color="primary"
-                  label="Refer this service (+0.50)"
-                  onClick={handleClick}
-                  onDelete={handleDelete}
-                  deleteIcon={<TrendingUp fontSize="small" />}
-                />
-              ) : null}
             </Box>
           </Grid>
         </Grid>

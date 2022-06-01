@@ -35,7 +35,7 @@ import { FilterList } from '@mui/icons-material/';
 import JobDisplay from '../../modules/market/components/JobDisplay';
 import BootstrapInput from '../../common/components/BootstrapInput/BootstrapInput';
 import { timelineButtons } from '../../modules/market/MarketConstants';
-import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
+import ServiceCard from '../../modules/contract/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
 import TextInput from '../../common/components/BootstrapInput/BootstrapInput';
 import SearchBarV2 from '../../common/components/SearchBarV2/SearchBarV2';

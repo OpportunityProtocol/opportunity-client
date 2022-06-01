@@ -94,7 +94,6 @@ const ViewContract: React.FunctionComponent<any> = () => {
   return (
       <Container
         maxWidth="xl"
-          sx={{  bgcolor: '#fafafa' }}
       >
             {isReferral ? (
           <Alert sx={{ mb: 2}} severity="info">
@@ -135,7 +134,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
                         $19.99
                       </Typography>
 
-                      <Chip component={Paper} elevation={2} label='Basic' variant='filled' sx={{ backgroundColor: (theme) => theme.palette.secondary.main, color: 'white' }} />
+                      <Chip component={Paper} elevation={2} label='Basic' variant='filled' sx={{ backgroundColor: (theme) => theme.palette.primary.main, color: 'white' }} />
 
                       <Box component={Stack} spacing={1} sx={{ height: 150 }}>
                         <Typography textAlign='center' color='rgb(33, 33, 33)' fontSize={13} fontWeight='medium'>
@@ -175,7 +174,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
                         $29.99
                       </Typography>
 
-                      <Chip component={Paper} elevation={2} label='Premium' variant='filled' sx={{ backgroundColor: (theme) => theme.palette.secondary.main, color: 'white' }} />
+                      <Chip component={Paper} elevation={2} label='Premium' variant='filled' sx={{ backgroundColor: (theme) => theme.palette.primary.main, color: 'white' }} />
 
                       <Box component={Stack} spacing={1} sx={{ height: 150 }}>
                         <Typography textAlign='center' color='rgb(33, 33, 33)' fontSize={13} fontWeight='medium'>
@@ -215,7 +214,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
                         $39.99
                       </Typography>
 
-                      <Chip component={Paper} elevation={2} label='Enterprise' variant='filled' sx={{ backgroundColor: (theme) => theme.palette.secondary.main, color: 'white' }} />
+                      <Chip component={Paper} elevation={2} label='Enterprise' variant='filled' sx={{ backgroundColor: (theme) => theme.palette.primary.main, color: 'white' }} />
 
                       <Box component={Stack} spacing={1} sx={{ height: 150 }}>
                         <Typography textAlign='center' color='rgb(33, 33, 33)' fontSize={13} fontWeight='medium'>
@@ -254,9 +253,15 @@ const ViewContract: React.FunctionComponent<any> = () => {
             </Box>
 
             <Box my={5}>
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
               <Typography fontWeight='bold'>
                 0 Comments
               </Typography>
+
+              <Button variant='contained'>
+                Leave a comment
+              </Button>
+              </Stack>
             </Box>
           </Grid>
           {/* ENd of first grid */}
@@ -289,7 +294,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
                 </Stack>
             </Box>
 
-            <Card square variant='elevation' elevation={0} sx={{ my: 3,  bgcolor: '#eee !important', border: 'none !important' }}>
+            <Card square variant='outlined' elevation={0} sx={{ my: 3  }}>
               <CardContent sx={{ display: 'flex', flexDirection: 'column',  alignItems: 'center' }}>
                 <Typography fontWeight='bold' py={1.5}>
                   Contact this seller
@@ -301,13 +306,13 @@ const ViewContract: React.FunctionComponent<any> = () => {
             </Card>
             <Grid container item direction='row' sx={{ width: '100%' }}>
               <Grid item xs={3}>
-                <Button size='large' sx={{height: 50, borderRadius: 0 }} disableElevation disableRipple variant='outlined' color='secondary'>
+                <Button size='large' sx={{height: 50, borderRadius: 0 }} disableElevation disableRipple variant='outlined' color='primary'>
                   IC
                 </Button>
               </Grid>
 
               <Grid item xs={9}>
-                <Button sx={{ height: 50, width: '100%', borderRadius: 0}}  size='large' disableElevation disableRipple variant='contained' color='secondary'>
+                <Button sx={{ height: 50, width: '100%', borderRadius: 0}}  size='large' disableElevation disableRipple variant='contained' color='primary'>
                     Invest
                 </Button>
               </Grid>

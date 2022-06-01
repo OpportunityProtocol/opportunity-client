@@ -98,7 +98,6 @@ return {
         backgroundColor: '#495869'
       },
       overline: {
-        textTransform: 'uppercase',
         letterSpacing: 1,
         color: '#8D9CAD',
       },

@@ -129,7 +129,7 @@ const Dashboard: React.FunctionComponent = () => {
                 </LineChart>
               </ResponsiveContainer>
               <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Typography color="#fff">Price</Typography>
+                <Typography color="#fff" fontWeight='medium'>Price</Typography>
                 <Box display="flex" alignItems="center">
                   {timelineButtons.map((buttonTitle, idx) => (
                     <Button
@@ -193,12 +193,14 @@ const Dashboard: React.FunctionComponent = () => {
             <CardContent>
               <Stack alignItems="center">
                 <Avatar src={connections[2]?.picture.large} style={{ width: 80, height: 80 }} />
+                <Box py={0.5}>
                 <Typography fontWeight="medium">
                   {connections[2]?.name.first + ' ' + connections[2]?.name.last}
                 </Typography>
                 <Typography variant="body2" color="rgb(94, 94, 94)" fontSize={14}>
-                  {connections[2]?.email}
+                  @lensterWorker
                 </Typography>
+                </Box>
                 <Typography pt={2}>32 connections</Typography>
               </Stack>
             </CardContent>

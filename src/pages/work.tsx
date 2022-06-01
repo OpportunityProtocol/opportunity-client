@@ -89,41 +89,42 @@ function Work() {
       sx={{ bgcolor: 'background.paper' }}
     >
       <Grid item>
-        <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
-          <Box m={3} sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
-            <Tabs value={value} onChange={handleChange} aria-label="basic tabs example" centered>
-              <Tab
-                sx={{ fontSize: '14px', borderBottom: '1px solid #212121' }}
-                label="Contract"
-      
-              />
-              <Tab sx={{ fontSize: '14px' }} label="Service" />
+        <Box sx={{ width: '100%' }}>
+          <Box mt={3} sx={{ borderBottom: 1, borderColor: 'divider',  }}>
+            <Tabs value={value} onChange={handleChange} centered>
+              <Tab sx={{ borderBottom: '1px solid #212121' }} label="Contracts" />
+              <Tab sx={{ fontSize: '14px' }} label="Services" />
             </Tabs>
           </Box>
           <TabPanel value={value} index={0}>
-            <Grid container justifyContent="space-between" sx={{ bgcolor: 'background.paper' }}>
+            <Grid container justifyContent="space-between">
               <Grid item xs={3} sx={{}}>
+                <Typography pt={2} fontWeight="bold">Filter Markets</Typography>
                 <List
-                  sx={{ bgcolor: 'background.paper' }}
                   component="nav"
-                  aria-labelledby="nested-list-subheader"
                 >
                   {marketName.map((item) => (
                     <Fragment key={item.id}>
                       <ListItemButton
-                        style={{ backgroundColor: 'transparent' }}
                         onClick={() => handleClick(item.id)}
                       >
-                        <ListItemText primary={item.name} sx={{ fontSize: '14px' }} />
-                        {open[item.id] ? <RemoveIcon /> : <AddIcon />}
+                        <ListItemText
+                          primary={item.name}
+                          primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }}
+                        />
+                        {open[item.id] ? (
+                          <RemoveIcon fontSize="small" />
+                        ) : (
+                          <AddIcon fontSize="small" />
+                        )}
                       </ListItemButton>
-                      <Collapse in={open[item.id]} timeout="auto" unmountOnExit>
+                       <Collapse in={open[item.id]} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
                           <ListItemButton sx={{ pl: 4 }} style={{ backgroundColor: 'transparent' }}>
-                            <ListItemText primary="Starred" sx={{ fontSize: '14px' }} />
+                            <ListItemText primary="Starred" sx={{ fontSize: 1 }} />
                           </ListItemButton>
                         </List>
-                      </Collapse>
+                  </Collapse>
                     </Fragment>
                   ))}
                 </List>
@@ -134,23 +135,14 @@ function Work() {
                 alignItems="center"
                 item
                 xs={9}
-                sx={{ pt: 0, bgcolor: '#f8f8f8', maxHeight: 840, overflow: 'auto' }}
+                sx={{ pt: 0, bgcolor: 'inherit', maxHeight: 840, overflow: 'auto' }}
               >
-                <Grid
-                  item
-                  xs={12}
-                  pb={0.5}
-                  pl={2}
-                  sx={{ bgcolor: 'background.paper' }}
-                  justifyContent="flex-start"
-                  alignItems="flex start"
-                  justifySelf="flex-start"
-                >
-                  <Typography sx={{ bgcolor: 'background.paper' }} fontSize={13} fontWeight="bold">
+                <Grid item xs={12} pb={0.5} pl={2}>
+                  <Typography py={2} fontSize={13} color={(theme) => theme.palette.primary.dark} fontWeight="bold">
                     123,233,000 contracts
                   </Typography>
                 </Grid>
-                <Grid item xs={12} p={1} sx={{ bgcolor: '#f8f8f8' }}></Grid>
+
                 <Grid item xs={5.7} pb={1}>
                   <JobDisplay />
                 </Grid>
@@ -204,10 +196,9 @@ function Work() {
           <TabPanel value={value} index={1}>
             <Grid container justifyContent="space-between" sx={{ bgcolor: 'background.paper' }}>
               <Grid item xs={3} sx={{}}>
+              <Typography pt={2} fontWeight="bold">Filter Markets</Typography>
                 <List
-                  sx={{ bgcolor: 'background.paper' }}
                   component="nav"
-                  aria-labelledby="nested-list-subheader"
                 >
                   {serviceName.map((item) => (
                     <Fragment key={item.id}>
@@ -215,13 +206,13 @@ function Work() {
                         style={{ backgroundColor: 'transparent' }}
                         onClick={() => handleClick(item.id)}
                       >
-                        <ListItemText primary={item.name} sx={{ fontSize: '14px' }} />
-                        {open[item.id] ? <RemoveIcon /> : <AddIcon />}
+                        <ListItemText primary={item.name}   primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }} />
+                        {open[item.id] ? <RemoveIcon fontSize='small' /> : <AddIcon fontSize='small' />}
                       </ListItemButton>
                       <Collapse in={open[item.id]} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding>
                           <ListItemButton sx={{ pl: 4 }} style={{ backgroundColor: 'transparent' }}>
-                            <ListItemText primary="Starred" sx={{ fontSize: '14px' }} />
+                            <ListItemText primary="Starred"   primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }} />
                           </ListItemButton>
                         </List>
                       </Collapse>
