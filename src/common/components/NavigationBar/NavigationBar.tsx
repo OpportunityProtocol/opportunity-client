@@ -28,12 +28,22 @@ import SearchBarV1 from '../SearchBarV1/SearchBarV1';
 
 const NavigationBar: FunctionComponent = () => {
   const classes = useStyles();
-  const [view, setView] = useState<string>('Market');
   const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false)
+  const [popoverTimerSet, setPopOverTimerSet] = useState<boolean>(false)
+
   const router = useRouter();
 
   const onMouseOverConnectedAvatar = () => setPopoverIsOpen(true)
-  const onMouseLeaveConnectedAvatar = () => setPopoverIsOpen(false)
+
+  useEffect(() => {
+    if (popoverIsOpen && !popoverTimerSet) {
+      setPopOverTimerSet(true)
+      setTimeout(() => {
+          setPopoverIsOpen(false)
+          setPopOverTimerSet(false)
+      }, 5000)
+    }
+  }, [popoverIsOpen])
 
   return (
     <AppBar
@@ -46,7 +56,7 @@ const NavigationBar: FunctionComponent = () => {
         bgcolor: '#fff',
         height: '65px',
         border: 'none !important',
-        borderBottom: '1px solid #eee !important',
+        borderBottom: '1px solid #ddd !important',
       }}
     >
       <Container maxWidth="lg" sx={{ bgcolor: '#fff' }}>
@@ -88,13 +98,12 @@ const NavigationBar: FunctionComponent = () => {
               <div>
                 <Link href="/">
                   <Typography
-                    onClick={() => setView('Dashboard')}
                     component={Button}
                     mx={2}
                     fontSize={14}
-                    variant="button"
-                    color={view === 'Dashboard' ? 'primary' : '#212121'}
-                    fontWeight="medium"
+                    variant='button'
+                    color={router.pathname == '/' ? 'primary' : '#212121'}
+                    fontWeight={router.pathname === '/' ? "bold" : 'regular'}
                   >
                     Explore
                   </Typography>
@@ -102,15 +111,12 @@ const NavigationBar: FunctionComponent = () => {
 
                 <Link href="/work">
                   <Typography
-                    onClick={() => setView('Work')}
                     component={Button}
                     mx={2}
                     fontSize={14}
                     variant="button"
-                    color={
-                      view === 'Work' || router.pathname === '/work' ? 'primary' : '#212121'
-                    }
-                    fontWeight="medium"
+                    color={router.pathname == '/work' ? 'primary' : '#212121'}
+                    fontWeight={router.pathname === '/work' ? "bold" : 'regular'}
                   >
                     Work
                   </Typography>
@@ -118,13 +124,12 @@ const NavigationBar: FunctionComponent = () => {
 
                 <Link href="/messenger">
                   <Typography
-                    onClick={() => setView('Messenger')}
                     component={Button}
                     mx={2}
                     fontSize={14}
                     variant="button"
-                    color={view === 'Messenger' ? 'primary' : '#212121'}
-                    fontWeight="medium"
+                    color={router.pathname == '/messenger' ? 'primary' : '#212121'}
+                    fontWeight={router.pathname === '/messenger' ? "bold" : 'regular'}
                   >
                     Messenger
                   </Typography>
@@ -132,13 +137,12 @@ const NavigationBar: FunctionComponent = () => {
 
                 <Link href="/contract">
                   <Typography
-                    onClick={() => setView('Contracts')}
                     component={Button}
                     mx={2}
                     fontSize={14}
                     variant="button"
-                    color={view === 'Contracts' ? 'primary' : '#212121'}
-                    fontWeight="medium"
+                    color={router.pathname == '/contract' ? 'primary' : '#212121'}
+                    fontWeight={router.pathname === '/contract' ? "bold" : 'regular'}
                   >
                     Contracts
                   </Typography>
@@ -154,7 +158,7 @@ const NavigationBar: FunctionComponent = () => {
                 justifyContent: 'flex-end',
               }}
             >
-              <ConnectedAvatar onClick={() => router.push('/profile')} onMouseOver={onMouseOverConnectedAvatar} onMouseLeave={onMouseLeaveConnectedAvatar} />
+              <ConnectedAvatar onClick={() => router.push('/profile')} onMouseOver={onMouseOverConnectedAvatar} />
               <Popover
                 style={{ position: 'absolute', top: 55 }}
                 id="account-popover"

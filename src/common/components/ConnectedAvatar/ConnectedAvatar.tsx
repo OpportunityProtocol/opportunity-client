@@ -48,8 +48,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
   interface IConnectedAvatar {
     onClick: MouseEventHandler<HTMLDivElement>,
-    onMouseOver: MouseEventHandler<HTMLDivElement>,
-    onMouseLeave: MouseEventHandler<HTMLDivElement>
+    onMouseOver: MouseEventHandler<HTMLDivElement>
   }
 
   

@@ -15,10 +15,11 @@ import {
 
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 
-import UserCard from '../common/components/UserCard/UserCard';
+
 import { timelineButtons } from '../modules/market/MarketConstants';
-import ServiceCard from '../common/components/ServiceCard/ServiceCard';
+import ServiceCard from '../modules/contract/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
+import UserCard from '../modules/user/components/UserCard/UserCard';
 
 const data = [
   {

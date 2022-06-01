@@ -1,46 +1,38 @@
 import React, { FunctionComponent } from 'react';
 
-import { Paper, InputBase, Button } from '@mui/material';
+import { Paper, InputBase, Button, styled } from '@mui/material';
 import { Search } from '@mui/icons-material';
+
+const SearchBarV1StyledInputBase = styled(InputBase)(({ theme }) => ({
+  '& .MuiInputBase-input': {
+    borderRadius: 10,
+    width: '100%',
+    position: 'relative',
+    backgroundColor: 'inherit',
+    border: '1px solid #ddd',
+    fontSize: 14,
+    height: 40,
+    padding: '10px 12px',
+    marginLeft: 1,
+    display: 'flex',
+    flex: 1,
+    color: '#212121',
+    flexGrow: 1
+  },
+  '&.Mui-focused': {
+    borderColor: theme.palette.primary.main,
+  },
+}));
 
 const SearchBarV1: FunctionComponent = () => {
   return (
-    <Paper
-      elevation={0}
-      component="form"
-      sx={{
-        display: 'flex',
-        height: 40,
-        alignItems: 'center',
-        width: 350,
-        border: '1px solid #eee',
-        borderRadius: 0,
+      <SearchBarV1StyledInputBase
+       placeholder="Find gigs, anytime"
+       inputProps={{
+        'aria-label': 'search gigs',
+        style: { padding: '0px 10px' },
       }}
-    >
-      <InputBase
-        startAdornment={<Search sx={{ color: '#aaa' }} />}
-        sx={{
-          borderRadius: '0px !important',
-          ml: 1,
-          flex: 1,
-          flexGrow: 1,
-          height: 30,
-          fontSize: 14,
-        }}
-        placeholder="Find gigs, anytime"
-        inputProps={{
-          'aria-label': 'search gigs',
-          style: { padding: '0px 10px' },
-        }}
       />
-      <Button
-        sx={{ borderRadius: '0px !important', color: '#fff', height: 40 }}
-        disableElevation
-        variant="contained"
-      >
-        Search
-      </Button>
-    </Paper>
   );
 };
 

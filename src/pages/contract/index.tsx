@@ -37,8 +37,9 @@ import JobDisplay from '../../modules/market/components/JobDisplay';
 import BountySubmission from '../../modules/market/components/BountySubmission/BountySubmission';
 import { FileUploader } from 'react-drag-drop-files';
 import TabPanel from '../../common/components/TabPanel/TabPanel';
-import ServiceCard from '../../common/components/ServiceCard/ServiceCard';
+
 import SearchBarV2 from '../../common/components/SearchBarV2/SearchBarV2';
+import ServiceCard from '../../modules/contract/components/ServiceCard/ServiceCard';
 const fileTypes = ['PDF', 'PNG', 'DOC'];
 
 const resources = [1, 2, 3, 4, 5, 6, 4];
@@ -102,6 +103,7 @@ const Contracts: React.FunctionComponent<any> = () => {
                   idx: any
                 ) => (
                   <Grid item xs={3}>
+                  
                     <ServiceCard
                       name={relationship.name.first + ' ' + relationship.name.last}
                       avatarSrc={relationship.picture.large}

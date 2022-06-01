@@ -19,7 +19,7 @@ const HEIGHT = '600px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
   const classes = useStyles();
   return (
-    <Box position="relative" width="100%" bgcolor="#fafafa">
+    <Box position="relative" width="100%" bgcolor="inherit">
       <img src={item.source} style={{ width: '100%', height: HEIGHT }} />
       <div
         style={{
@@ -171,7 +171,7 @@ const Explore: FunctionComponent = () => {
           </Box>
 
           <Paper
-          //  variant="outlined"
+            variant="outlined"
             elevation={0}
             sx={{ my: 6, px: 3, pb: 6, backgroundColor: '#fff' }}
           >

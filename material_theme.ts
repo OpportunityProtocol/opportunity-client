@@ -27,7 +27,7 @@ import { createTheme } from '@mui/material/styles';
       MuiContainer: {
         styleOverrides: {
           root: {
-            backgroundColor: '#FAFAFA'
+            backgroundColor: 'inherit'
           }
         }
       },
@@ -77,7 +77,7 @@ import { createTheme } from '@mui/material/styles';
            
           },
           outlined: {
-            border: '1px solid #eee'
+            border: '1px solid #ddd'
           }
         }
       },
@@ -91,7 +91,7 @@ import { createTheme } from '@mui/material/styles';
       MuiPaper: {
         styleOverrides: {
           outlined: {
-            border: '1px solid #eee'
+            border: '1px solid #ddd'
           }
         }
       },
