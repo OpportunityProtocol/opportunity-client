@@ -1,6 +1,7 @@
 import React, { Fragment, useState, FunctionComponent, useEffect } from 'react';
 import clsx from 'clsx';
 
+
 import {
   Paper,
   Box,
@@ -27,11 +28,23 @@ import { FaEthereum } from 'react-icons/fa';
 import { IoWalletSharp } from 'react-icons/io5';
 import ConnectedAvatar from '../ConnectedAvatar/ConnectedAvatar';
 import SearchBarV1 from '../SearchBarV1/SearchBarV1';
+import Web3Modal from "web3modal";
+import { ethers } from "ethers";
+import CoinbaseWalletSDK from '@coinbase/wallet-sdk';
+import Torus from "@toruslabs/torus-embed";
+import WalletConnectProvider from "@walletconnect/web3-provider";
+import Fortmatic from "fortmatic";
+import { SingleBedRounded } from '@mui/icons-material';
+
+
+
+
 
 const NavigationBar: FunctionComponent = () => {
   const classes = useStyles();
   const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false)
   const [popoverTimerSet, setPopOverTimerSet] = useState<boolean>(false)
+  const [ show, setShow] = useState(false);
 
   const router = useRouter();
   console.log(router.pathname)
@@ -48,7 +61,87 @@ const NavigationBar: FunctionComponent = () => {
     }
   }, [popoverIsOpen])
 
+  const providerOptions = {
+    /* See Provider Options Section */
+    coinbasewallet: {
+      package: CoinbaseWalletSDK, // Required
+      options: {
+        appName: "My Awesome App", // Required
+        infuraId: "INFURA_ID", // Required
+        rpc: "", // Optional if `infuraId` is provided; otherwise it's required
+        chainId: 1, // Optional. It defaults to 1 if not provided
+        darkMode: false // Optional. Use dark theme, defaults to false
+      }
+    },
+    torus: {
+      package: Torus, // required
+      config: {
+        buildEnv: "development" // optional
+      }
+     /* options: {
+        networkParams: {
+          host: "https://localhost:8545", // optional
+          chainId: 1337, // optional
+          networkId: 1337 // optional
+        }
+      }*/
+    },
+    walletconnect: {
+      package: WalletConnectProvider, // required
+      options: {
+        infuraId: "INFURA_ID" // required
+      }
+    },
+    fortmatic: {
+      package: Fortmatic, // required
+      options: {
+        key: process.env.FORMATIC_DEV_KEY, // required
+         // if we don't pass it, it will default to localhost:8454
+      }
+    }
+
+   
+  
+  };
+
+  const web3Modal = new Web3Modal({
+    network: "mainnet", // optional
+    cacheProvider: true, // optional
+    providerOptions // required
+  });
+  
+  
+  async function connectWallet(){
+  
+    
+const instance = await web3Modal.connect();
+  
+  const provider: ethers.providers.Web3Provider = new ethers.providers.Web3Provider(instance);
+  
+
+  const signer: ethers.providers.JsonRpcSigner = provider.getSigner();
+
+
+
+  if (provider._network === null ) {
+
+    
+
+    setShow(false)
+
+  } else {
+     setShow(true)
+
+  }
+
+
+  
+}
+
+
   return (
+
+
     <AppBar
       position="fixed"
       variant="elevation"
@@ -161,7 +254,11 @@ const NavigationBar: FunctionComponent = () => {
                 justifyContent: 'flex-end',
               }}
             >
-              <ConnectedAvatar onClick={() => router.push('/profile')} onMouseOver={onMouseOverConnectedAvatar} />
+            
+              { show === true ?
+                <ConnectedAvatar onClick={() => router.push('/profile')} onMouseOver={onMouseOverConnectedAvatar} /> : <Button variant="contained" onClick={connectWallet}>Connect Wallet</Button> 
+              }
+              
               <Popover
                 style={{ position: 'absolute', top: 55 }}
                 id="account-popover"
