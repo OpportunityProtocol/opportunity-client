@@ -243,7 +243,7 @@ const Explore: FunctionComponent = () => {
             </Stack>
           </Box>
           <Grid container direction="row" overflow="scroll" flexWrap="wrap" spacing={2}>
-            {suggestedConnections.slice(3, 6).map((human: any) => {
+            {suggestedConnections.slice(3, 7).map((human: any) => {
               return (
                 <Grid item xs={6}>
                   <JobDisplay avatar={human.picture.large} suggestion={true} />

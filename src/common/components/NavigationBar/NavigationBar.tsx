@@ -1,7 +1,6 @@
 import React, { Fragment, useState, FunctionComponent, useEffect } from 'react';
 import clsx from 'clsx';
 
-
 import {
   Paper,
   Box,
@@ -28,120 +27,70 @@ import { FaEthereum } from 'react-icons/fa';
 import { IoWalletSharp } from 'react-icons/io5';
 import ConnectedAvatar from '../ConnectedAvatar/ConnectedAvatar';
 import SearchBarV1 from '../SearchBarV1/SearchBarV1';
-import Web3Modal from "web3modal";
-import { ethers } from "ethers";
-import CoinbaseWalletSDK from '@coinbase/wallet-sdk';
-import Torus from "@toruslabs/torus-embed";
-import WalletConnectProvider from "@walletconnect/web3-provider";
-import Fortmatic from "fortmatic";
+import Web3Modal from 'web3modal';
+import { ethers } from 'ethers';
 import { SingleBedRounded } from '@mui/icons-material';
-
-
-
-
+import { providerOptions } from '../../../constant/provider';
+import { LensTalentLocalStorageKeys } from '../../../constant/types';
 
 const NavigationBar: FunctionComponent = () => {
   const classes = useStyles();
-  const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false)
-  const [popoverTimerSet, setPopOverTimerSet] = useState<boolean>(false)
-  const [ show, setShow] = useState(false);
+  const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false);
+  const [popoverTimerSet, setPopOverTimerSet] = useState<boolean>(false);
+  const [providerData, setProviderData] = useState<ethers.providers.Web3Provider>({});
+  const [signerData, setSignerData] = useState<ethers.providers.JsonRpcSigner>({});
+  const [show, setShow] = useState(false);
 
   const router = useRouter();
-  console.log(router.pathname)
-
-  const onMouseOverConnectedAvatar = () => setPopoverIsOpen(true)
+  const onMouseOverConnectedAvatar = () => setPopoverIsOpen(true);
 
   useEffect(() => {
     if (popoverIsOpen && !popoverTimerSet) {
-      setPopOverTimerSet(true)
+      setPopOverTimerSet(true);
       setTimeout(() => {
-          setPopoverIsOpen(false)
-          setPopOverTimerSet(false)
-      }, 5000)
+        setPopoverIsOpen(false);
+        setPopOverTimerSet(false);
+      }, 5000);
     }
-  }, [popoverIsOpen])
+  }, [popoverIsOpen]);
 
-  const providerOptions = {
-    /* See Provider Options Section */
-    coinbasewallet: {
-      package: CoinbaseWalletSDK, // Required
-      options: {
-        appName: "My Awesome App", // Required
-        infuraId: "INFURA_ID", // Required
-        rpc: "", // Optional if `infuraId` is provided; otherwise it's required
-        chainId: 1, // Optional. It defaults to 1 if not provided
-        darkMode: false // Optional. Use dark theme, defaults to false
-      }
-    },
-    torus: {
-      package: Torus, // required
-      config: {
-        buildEnv: "development" // optional
-      }
-     /* options: {
-        networkParams: {
-          host: "https://localhost:8545", // optional
-          chainId: 1337, // optional
-          networkId: 1337 // optional
-        }
-      }*/
-    },
-    walletconnect: {
-      package: WalletConnectProvider, // required
-      options: {
-        infuraId: "INFURA_ID" // required
-      }
-    },
-    fortmatic: {
-      package: Fortmatic, // required
-      options: {
-        key: process.env.FORMATIC_DEV_KEY, // required
-         // if we don't pass it, it will default to localhost:8454
-      }
+  useEffect(() => {
+    async function connect() {
+      const instance = await web3Modal.connect();
+      const provider: ethers.providers.Web3Provider = new ethers.providers.Web3Provider(instance);
+      setProviderData(provider);
+      const signer: ethers.providers.JsonRpcSigner = provider.getSigner();
+      setSignerData(signer);
     }
 
-   
-  
-  };
+    if (localStorage.getItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1) === 'connected') {
+      connect();
+      setShow(true);
+    }
+  }, []);
 
   const web3Modal = new Web3Modal({
-    network: "mainnet", // optional
-    cacheProvider: true, // optional
-    providerOptions // required
+    network: process.env.NODE_ENV === 'development' ? 'rinkeby' : 'mainnet',
+    cacheProvider: true,
+    providerOptions,
   });
-  
-  
-  async function connectWallet(){
-  
-    
-const instance = await web3Modal.connect();
-  
-  const provider: ethers.providers.Web3Provider = new ethers.providers.Web3Provider(instance);
-  
 
-  const signer: ethers.providers.JsonRpcSigner = provider.getSigner();
+  async function connectWallet() {
+    const instance = await web3Modal.connect();
 
-
-
-  if (provider._network === null ) {
-
-    
-
-    setShow(false)
-
-  } else {
-     setShow(true)
-
+    const provider: ethers.providers.Web3Provider = new ethers.providers.Web3Provider(instance);
+    const signer: ethers.providers.JsonRpcSigner = provider.getSigner();
+    if (provider._network === null) {
+      alert('bye');
+      setShow(false);
+      localStorage.setItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1, null);
+    } else {
+      setShow(true);
+      localStorage.setItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1, 'connected');
+    }
   }
 
-
-  
-}
-
-
   return (
-
-
     <AppBar
       position="fixed"
       variant="elevation"
@@ -197,9 +146,9 @@ const instance = await web3Modal.connect();
                     component={Button}
                     mx={2}
                     fontSize={14}
-                    variant='button'
+                    variant="button"
                     color={router.pathname == '/' ? 'primary' : '#212121'}
-                    fontWeight={router.pathname === '/' ? "bold" : '500'}
+                    fontWeight={router.pathname === '/' ? 'bold' : '500'}
                   >
                     Explore
                   </Typography>
@@ -212,7 +161,7 @@ const instance = await web3Modal.connect();
                     fontSize={14}
                     variant="button"
                     color={router.pathname == '/work' ? 'primary' : '#212121'}
-                    fontWeight={router.pathname === '/work' ? "bold" : '500'}
+                    fontWeight={router.pathname === '/work' ? 'bold' : '500'}
                   >
                     Work
                   </Typography>
@@ -225,7 +174,7 @@ const instance = await web3Modal.connect();
                     fontSize={14}
                     variant="button"
                     color={router.pathname == '/messenger' ? 'primary' : '#212121'}
-                    fontWeight={router.pathname === '/messenger' ? "bold" : '500'}
+                    fontWeight={router.pathname === '/messenger' ? 'bold' : '500'}
                   >
                     Messenger
                   </Typography>
@@ -238,7 +187,7 @@ const instance = await web3Modal.connect();
                     fontSize={14}
                     variant="button"
                     color={router.pathname.includes('/contract') ? 'primary' : '#212121'}
-                    fontWeight={router.pathname.includes('/contract') ? "bold" : '500'}
+                    fontWeight={router.pathname.includes('/contract') ? 'bold' : '500'}
                   >
                     Contracts
                   </Typography>
@@ -254,11 +203,19 @@ const instance = await web3Modal.connect();
                 justifyContent: 'flex-end',
               }}
             >
-            
-              { show === true ?
-                <ConnectedAvatar onClick={() => router.push('/profile')} onMouseOver={onMouseOverConnectedAvatar} /> : <Button variant="contained" onClick={connectWallet}>Connect Wallet</Button> 
-              }
-              
+              {show === true &&
+              localStorage.getItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1) ==
+                'connected' ? (
+                <ConnectedAvatar
+                  onClick={() => router.push('/profile')}
+                  onMouseOver={onMouseOverConnectedAvatar}
+                />
+              ) : (
+                <Button variant="contained" onClick={connectWallet}>
+                  Connect Wallet
+                </Button>
+              )}
+
               <Popover
                 style={{ position: 'absolute', top: 55 }}
                 id="account-popover"
@@ -270,66 +227,76 @@ const instance = await web3Modal.connect();
                 }}
               >
                 <CardContent>
-                <Box sx={{ p: 1 }}>
-                  <Typography component="div">
-                    <Box sx={{ fontWeight: 'bold' }}>Welcome to GigEarth</Box>
-                    <Box sx={{ fontSize: 16, fontWeight: 'medium', color: 'rgb(94, 94, 94)' }}>
-                      Permissionless labor markets powered by unstoppable networks
-                    </Box>
-                  </Typography>
-                </Box>
-                <Box sx={{ p: 1, display: 'flex', alignItems: 'center' }}>
-                  <Avatar sx={{ width: 40, height: 40 }} src="/assets/stock/profile_main.jpeg" />
-                  <Typography component="div" px={2}>
-                    <Box
-                      sx={{
-                        fontSize: 12,
-                        fontWeight: 'bold',
-                        color: '#212121',
-                      }}
-                    >
-                      @happytowork
-                    </Box>
+                  <Box sx={{ p: 1 }}>
+                    <Typography component="div">
+                      <Box sx={{ fontWeight: 'bold' }}>Welcome to GigEarth</Box>
+                      <Box sx={{ fontSize: 16, fontWeight: 'medium', color: 'rgb(94, 94, 94)' }}>
+                        Permissionless labor markets powered by unstoppable networks
+                      </Box>
+                    </Typography>
+                  </Box>
+                  <Box sx={{ p: 1, display: 'flex', alignItems: 'center' }}>
+                    <Avatar sx={{ width: 40, height: 40 }} src="/assets/stock/profile_main.jpeg" />
+                    <Typography component="div" px={2}>
+                      <Box
+                        sx={{
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                          color: '#212121',
+                        }}
+                      >
+                        @happytowork
+                      </Box>
 
-                    <Box
-                      sx={{
-                        fontSize: 10,
-                        color: 'rgb(94, 94, 94)',
-                      }}
+                      <Box
+                        sx={{
+                          fontSize: 10,
+                          color: 'rgb(94, 94, 94)',
+                        }}
+                      >
+                        0x4E3b49aDEf1487A08c73d47536f41Fe1c7c62137
+                      </Box>
+                    </Typography>
+                  </Box>
+
+                  <Grid
+                    my={3}
+                    sx={{ border: '1px solid #ddd' }}
+                    flexWrap="nowrap"
+                    container
+                    direction="column"
+                  >
+                    <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
+                      <Typography color="#212121" noWrap fontWeight="bold" fontSize={12}>
+                        <IoWalletSharp size={10} /> Web3/Wallet Provider:{' '}
+                      </Typography>
+                      <Typography color="#212121" fontWeight="light" fontSize={12}>
+                        MetaMask
+                      </Typography>
+                    </Grid>
+
+                    <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
+                      <Typography color="#212121" fontWeight="bold" fontSize={12}>
+                        <FaEthereum size={10} /> DAI Balance:{' '}
+                      </Typography>
+                      <Typography color="#212121" fontWeight="light" fontSize={12}>
+                        $125.64
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                  <Stack spacing={2} m={2}>
+                    <Button fullWidth variant="outlined" color="primary">
+                      Add Funds
+                    </Button>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="primary"
+                      onClick={() => router.push('/profile')}
                     >
-                      0x4E3b49aDEf1487A08c73d47536f41Fe1c7c62137
-                    </Box>
-                  </Typography>
-                </Box>
-          
-                <Grid my={3} sx={{ border: '1px solid #ddd' }} flexWrap="nowrap" container direction="column">
-                  <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
-                    <Typography color="#212121" noWrap fontWeight="bold" fontSize={12}>
-                      <IoWalletSharp size={10} /> Web3/Wallet Provider:{' '}
-                    </Typography>
-                    <Typography color="#212121" fontWeight="light" fontSize={12}>
-                      MetaMask
-                    </Typography>
-                  </Grid>
-        
-                  <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
-                    <Typography color="#212121" fontWeight="bold" fontSize={12}>
-                      <FaEthereum size={10} /> DAI Balance:{' '}
-                    </Typography>
-                    <Typography color="#212121" fontWeight="light" fontSize={12}>
-                      $125.64
-                    </Typography>
-                  </Grid>
-    
-                </Grid>
-                <Stack spacing={2} m={2}>
-                  <Button fullWidth variant="outlined" color="primary">
-                    Add Funds
-                  </Button>
-                  <Button fullWidth variant="contained" color="primary" onClick={() => router.push('/profile')}>
-                    View Profile
-                  </Button>
-                </Stack>
+                      View Profile
+                    </Button>
+                  </Stack>
                 </CardContent>
               </Popover>
             </Grid>
