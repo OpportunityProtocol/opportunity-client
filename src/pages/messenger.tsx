@@ -138,7 +138,7 @@ function a11yProps(index: number) {
 function Messenger() {
   const [value, setValue] = React.useState(0);
 
-  const handleChange = (evant, newValue) => {
+  const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
@@ -437,7 +437,8 @@ function Messenger() {
                 </Grid>
               </Grid>
             </TabPanel>
-            <TabPanel value={value} index={1}></TabPanel>
+            <TabPanel value={value} index={1}>              
+            </TabPanel>
             <TabPanel value={value} index={2}>
               Item Three
             </TabPanel>
