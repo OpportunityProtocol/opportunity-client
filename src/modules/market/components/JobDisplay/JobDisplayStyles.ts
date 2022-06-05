@@ -2,25 +2,22 @@ import { makeStyles } from "@mui/styles";
 import { alpha } from "@mui/system";
 import { Theme } from '@mui/material'
 
-const useStyles = makeStyles((theme : Theme) => ({
-    card: { 
+const useStyles = makeStyles((theme: Theme) => ({
+    card: {
         height: 'auto',
-       // border: 'none !important',
         '&:hover': {
-           // boxShadow: '0px 6px 6px -3px #ccc, 0px 10px 14px 1px #ccc, 0px 4px 18px 3px #ccc',
+            boxShadow: '0px 6px 6px -3px #ccc, 0px 10px 14px 1px #ccc, 0px 4px 18px 3px #ccc',
             cursor: 'pointer',
-            backgroundColor: '#eee'
+            //  backgroundColor: '#eee'
         },
-        position: 'relative', 
-       // marginTop: theme.spacing(1),
-       // marginBottom: theme.spacing(1)
+        position: 'relative',
     },
     purchaseIconSmall: {
         color: 'red'
     },
     suggestedContainer: {
-        position: 'relative', 
-        top: 20, 
+        position: 'relative',
+        top: 20,
         left: 15
     },
     root: {

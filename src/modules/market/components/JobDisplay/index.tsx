@@ -50,14 +50,6 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
   const classes = useStyles();
   const router = useRouter();
 
-  const handleClick = () => {
-    console.info('You clicked the Chip.');
-  };
-
-  const handleDelete = () => {
-    console.info('You clicked the delete icon.');
-  };
-
   return (
     <Card
       square
@@ -67,98 +59,90 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
       variant="outlined"
     >
       <CardContent>
-        <Grid
-          container
-          direction="column"
-          flexWrap="nowrap"
-          alignItems="flex-start"
-          justifyContent="space-between">
-          <Grid container item direction='row' flexWrap='nowrap' alignItems="center">
-            <Grid item>
-              <Avatar src={avatar} sx={{ width: 40, height: 40 }} />
+        <Grid pb={2} container alignItems="center" flexWrap="nowrap" direction="row">
+          <Grid item pr={2}>
+            <Avatar src={avatar} sx={{ width: 55, height: 55 }} />
+          </Grid>
+
+          <Grid container item flexGrow={1}>
+            <Grid container item alignItems="center" justifyContent="space-between">
+              <Grid item>
+                <Typography fontWeight="bold">Business Manager</Typography>
+              </Grid>
+
+              <Grid item fontWeight="bold">
+                5,000 DAI
+              </Grid>
             </Grid>
 
-            <Grid container item direction="column" alignItems='flex-start'>
-              <Grid item px={2}>
-                <Typography>
-                {renderPlaceholderTitle()}
+            <Grid container item alignItems="center" justifyContent="space-between">
+              <Grid item>
+                <Typography fontWeight="bold" color={(theme) => theme.palette.primary.main}>
+                  @lensterWorker
                 </Typography>
-                </Grid>
+              </Grid>
 
-              <Grid sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }} ml={0.5} spacing={1} container item>
-                <Grid item>
+              <Grid item>
                 <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <AttachMoney fontSize="small" sx={{ color: 'rgb(30, 71, 98)' }} />
-                  <Typography fontSize={12} fontWeight="medium" color="#424242">
-                    $23.29
+                  <AccessTime fontSize="small" />
+                  <Typography fontWeight="light" color="text.secondary">
+                    Short Term
                   </Typography>
                 </Stack>
-                </Grid>
-
-                <Grid item>
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <AccessTime fontSize="small" sx={{ color: 'rgb(30, 71, 98)' }} />
-                  <Typography fontSize={12} fontWeight="medium" color="#424242">
-                    3- 6 months
-                  </Typography>
-                </Stack>
-                </Grid>
-
-                <Grid item>
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <Paid fontSize="small" sx={{ color: 'rgb(30, 71, 98)' }} />
-                  <Typography fontSize={12} fontWeight="medium" color="#424242">
-                    Fixed Rate Payout
-                  </Typography>
-                </Stack>
-                </Grid>
               </Grid>
             </Grid>
           </Grid>
+        </Grid>
 
-          <Grid container direction="row">
-            <Typography component="div" pb={1}></Typography>
-
-            <Typography
-              paragraph
-              color="rgb(94, 94, 94)"
-              py={1}
-              mt={2}
-              fontSize={15}
-              fontWeight="medium"
-            >
-              Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging
-              across all continents except Antarctica roup of squamate reptiles, with over 6,000
-              Lizards are a widespread
-            </Typography>
-            <Box my={1} display="flex" alignItems="center" justifyContent="flex-start">
-              <Grid
-                container
-                direction="row"
-                flexDirection="row"
-                alignItems="center"
-                justifyContent="flex-start"
-              >
-                {TAGS.map((tag) => {
-                  return (
-                    <Grid item mr={1} my={1}>
-                      <Chip variant="filled" className={classes.tagChip} label={tag} size="small" />
-                    </Grid>
-                  );
-                })}
+        <Grid
+          container
+          direction="row"
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="flex-start"
+        >
+          {TAGS.map((tag) => {
+            return (
+              <Grid item mr={1} my={1}>
+                <Chip variant="filled" className={classes.tagChip} label={tag} size="small" />
               </Grid>
-            </Box>
+            );
+          })}
+        </Grid>
+
+        <Typography
+          paragraph
+          color="rgb(94, 94, 94)"
+          py={1}
+          fontSize={15}
+          fontWeight="medium"
+          sx={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            '-webkit-line-clamp': 2,
+            '-webkit-box-orient': 'vertical',
+          }}
+        >
+          Lizards are a widespread group of squamate reptiles, with over 6,000 species, ranging
+          across all continents except Antarctica roup of squamate reptiles, with over 6,000 Lizards
+          are a widespread
+        </Typography>
+
+        <Grid container item direction="row" alignItems="center" justifyContent="space-between">
+          <Grid item>
+            <Typography color="text.secondary" fontSize={14}>
+              August 1, 2022 - 1:59 PM
+            </Typography>
+          </Grid>
+
+          <Grid item>
+            <Button variant="contained" size="large">
+              View Details
+            </Button>
           </Grid>
         </Grid>
       </CardContent>
-
-      <CardActions>
-        <Button variant="text">View More</Button>
-      </CardActions>
-          {/*
-            TODO: If claimed the display will show general contract 
-            information here and button will change to open contract details
-         */}
     </Card>
   );
 };
