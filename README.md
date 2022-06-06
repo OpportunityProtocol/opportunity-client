@@ -13,14 +13,10 @@
   <a href="https://github.com/elijahhampton/opportunity-client">
     <img src="public/assets/logo.svg" alt="Logo" width="150" height="150">
   </a>
-
 <h3 align="center">LensTalent</h3>
-
   <p align="center">
-    project_description
     <br />
     <a href="https://opportunity-website.vercel.app/"><strong>Explore the docs »</strong></a>
-    <br />
     <br />
     <a href="https://opportunity-website.vercel.app/">View Demo</a>
     ·
@@ -38,12 +34,16 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
+<div align="center">
+  
 
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
+  
+  </div>
 
 
 <!-- TABLE OF CONTENTS -->
@@ -74,12 +74,9 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
- <div align="center">
- <img src="public/assets/lenttalent2.png" alt="Logo" width="150" height="150">
-</div>
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
+<div align="left">
+      LensTalent is a decentralized and permission-less freelancing network built with LensProtocol. LensTalent allows freelancers and employers to find work or create contracts regardless of geographical location. Employers are able to create one time contracts that freelancers may accept, while freelancers are able to create long term services in which employers can invest in in order to bet on their success and quality of work. Through this method freelancers are incentivized to always provide the best quality work as it means a higher chance of passive income. Contracts and services created on LensTalent have the ability to gain exposure across any networking application that interfaces with LensProtocol. Other important features of LensTalent include one time identity creation which is persistent along  with self statistics, the ability to leverage your network through content referrals, decentralized dispute services and decentralized payouts. We imagine a world where freelancers can instantly find work at any moment and carry their services across any network based application. Welcome to the cooperation layer of the internet.
+  </div>
 
 
 ### Built With
