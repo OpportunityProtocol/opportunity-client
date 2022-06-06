@@ -116,7 +116,7 @@ function Work() {
                             <Checkbox
                               edge="end"
                               onChange={(e) => handleClick(e, idx)}
-                              checked={open[idx] == true}
+                              checked={open[idx] === true}
                             />
                           }
                         >
@@ -187,7 +187,7 @@ function Work() {
                             <Checkbox
                               edge="end"
                               onChange={(e) => handleClick(e, idx)}
-                              checked={open[idx] == true}
+                              checked={open[idx] === true}
                             />
                           }
                         >

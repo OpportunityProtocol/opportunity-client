@@ -123,7 +123,6 @@ function TabPanel(props: { [x: string]: any; children: any; value: any; index: a
 }
 
 TabPanel.propTypes = {
-  children: PropTypes.node,
   index: PropTypes.number.isRequired,
   value: PropTypes.number.isRequired,
 };
@@ -407,7 +406,7 @@ function Messenger() {
                   item
                   xs={12}
                   sx={{ bgcolor: "", height: "650px", overflow: "scroll" }}
-                ></Grid>
+                 />
                 <Divider />
                 <Grid item xs={12} sx={{ bgcolor: "", maxHeight: "44px" }}>
                   <Box
@@ -437,7 +436,8 @@ function Messenger() {
                 </Grid>
               </Grid>
             </TabPanel>
-            <TabPanel value={value} index={1}>              
+            <TabPanel value={value} index={1}>
+              Item One
             </TabPanel>
             <TabPanel value={value} index={2}>
               Item Three
