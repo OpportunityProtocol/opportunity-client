@@ -93,10 +93,6 @@
 * [Solidity](https://docs.soliditylang.org/en/v0.8.14/)
 * [EthersJS](https://docs.ethers.io/v5/)
 
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -122,8 +118,6 @@ This is an example of how to list things you need to use the software and how to
    yarn dev
    ```
 
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 <!-- ROADMAP -->
 <!--
 ## Roadmap
@@ -134,8 +128,6 @@ This is an example of how to list things you need to use the software and how to
     - [ ] Nested Feature
 
 See the [open issues](https://github.com/elijahhampton/opportunity-client/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#top">back to top</a>)</p>
 -->
 
 
@@ -153,16 +145,10 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
 <!-- LICENSE -->
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 
 <!-- CONTACT -->
 ## Contact
@@ -172,10 +158,7 @@ Elijah Hampton - [@elihampton_](https://twitter.com/elihampton_) - hamptonelijah
 
 Nathan Farley - natefarley@live.com
 
-Project Link: [https://github.com/OpportunityProtocol/opportunity-client](https://github.com/OpportunityProtocol/opportunity-client)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
+Project Link: [https://opportunity-client.vercel.app/](https://opportunity-client.vercel.app/)
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
