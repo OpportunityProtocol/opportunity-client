@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import cx from 'clsx';
 import {
   Card,
@@ -16,6 +16,7 @@ import {
 import { useStyles } from './ServiceCardStyle';
 import DAIIcon from '../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg';
 import { useRouter } from 'next/router';
+import { useGradientAvatarStyles } from '@mui-treasury/styles/avatar/gradient';
 
 interface IServiceCardProps {
   name: string;
@@ -27,14 +28,46 @@ const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps
   const cardStyles = useStyles();
   const router = useRouter()
   const classes = useStyles()
+  const [user, setUser] = useState([])
+
+  const renderUsers = async () => {
+    const a = await fetch('https://randomuser.me/api/?results=1', {});
+    const users = await a.json();
+    setUser(users.results)
+  };
+
+  useEffect(() => {
+    renderUsers()
+  }, [])
+
+  const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
+    size: 50,
+    gap: 3,
+    thickness: 3,
+    gapColor: '#f4f7fa',
+    color: 'linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)',
+  });
 
   return (
     <Card variant="outlined" className={cx(cardStyles.root)}>
-      <CardMedia sx={{ height: 200 }} image={headerSrc} />
+      <CardMedia sx={{ height: 200 }} component='img' src="https://picsum.photos/200" />
       <CardContent>
         <Box display='flex' alignItems='flex-start' justifyContent='space-between'>
         <Stack direction="row" alignItems="center" spacing={1}>
-          <Avatar src={avatarSrc} style={{ width: 30, height: 30 }} />
+        <div
+                      style={{
+                        margin: '5px 0px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                      }}
+                      className={styles.root}
+                    >
+                      <Avatar
+                      src={user[0]?.picture?.thumbnail}
+                        style={{ width: 30, height: 30 }}
+                      />
+                    </div>
 
           <Typography variant="subtitle2">{name}</Typography>
         </Stack>

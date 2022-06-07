@@ -3,7 +3,7 @@
  * @author Elijah Hampton
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useStyles } from './JobDisplayStyles';
 
@@ -22,9 +22,10 @@ import {
 import { AccessTime } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import { IJobDisplayProps } from '../../MarketInterface';
+import { useGradientAvatarStyles } from '@mui-treasury/styles/avatar/gradient';
 
 /*******  Temporary Placeholders Start *******/
-const TAGS = ['Python', 'Web Development', 'Flash'];
+const TAGS = ['Language', 'Translation', 'Spanish'];
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -33,6 +34,7 @@ function getRandomInt(min, max) {
 }
 
 const randomJobTitles = [
+  'Spanish-English Interpreter Needed for Several Meetings',
   'Business Manager',
   'Software Engineer',
   'HR Administrator',
@@ -42,6 +44,7 @@ const randomJobTitles = [
 ]
 
 const randomJobDescriptions = [
+  'I am an English speaker and I am going to be holding several interviews with Spanish speakers in June and July. Each meeting will take place on Zoom. I am hoping to hire an interpreter who can translate the conversation both in English to Spanish and in Spanish to English using the Chat feature on Zoom or verbally. The total number of hours is unknown at this point (it depends on how many people agree to be interviewed). I am estimating this project will take no more than 6 hours total.',
   'The Business Manager is responsible for the day-to-day management of the business. This includes overseeing all aspects of the business, including sales and marketing, customer service, finance and accounting, operations, legal, and compliance. The Business Manager is responsible for ensuring that the company meets its revenue and profitability goals.',
 'The Software Engineer is responsible for designing and developing software systems. This includes developing and maintaining the code that keeps a product running and ensuring that its scalable, modular, and maintainable.',
 'The HR Administrator is responsible for providing administrative support in the human resources department. This includes answering phones, typing correspondence, scheduling meetings, and processing routine HR tasks.',
@@ -56,8 +59,27 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
 }) => {
   const classes = useStyles();
   const router = useRouter();
+  const [user, setUser] = useState([])
 
-  const randomInt = getRandomInt(0, randomJobTitles.length - 1)
+  const renderUsers = async () => {
+    const a = await fetch('https://randomuser.me/api/?results=1', {});
+    const users = await a.json();
+    setUser(users.results)
+  };
+
+  useEffect(() => {
+    renderUsers()
+  }, [])
+
+  const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
+    size: 50,
+    gap: 3,
+    thickness: 3,
+    gapColor: '#f4f7fa',
+    color: 'linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)',
+  });
+
+  const randomInt = 0//getRandomInt(0, randomJobTitles.length - 1)
 
   return (
     <Card
@@ -68,9 +90,22 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
       variant="outlined"
     >
       <CardContent>
-        <Grid pb={2} container alignItems="center" flexWrap="nowrap" direction="row">
+        <Grid pb={5} container alignItems="center" flexWrap="nowrap" direction="row">
           <Grid item pr={2}>
-            <Avatar src={avatar} sx={{ width: 55, height: 55 }} />
+          <div
+                      style={{
+                        margin: '5px 0px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                      }}
+                      className={styles.root}
+                    >
+                      <Avatar
+                      src={user[0]?.picture?.thumbnail}
+                        style={{ width: 55, height: 55 }}
+                      />
+                    </div>
           </Grid>
 
           <Grid container item flexGrow={1}>
@@ -79,15 +114,15 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
                 <Typography fontWeight="bold">{randomJobTitles[randomInt]}</Typography>
               </Grid>
 
-              <Grid item fontWeight="bold">
-              ${Math.floor(Math.random() * 5000).toFixed(2)} DAI
+              <Grid item fontWeight="bold" fontSize={15} color='text.primary'>
+              {Math.floor(Math.random() * 5000).toFixed(2)} DAI
               </Grid>
             </Grid>
 
             <Grid container item alignItems="center" justifyContent="space-between">
               <Grid item>
-                <Typography fontWeight="bold" color={(theme) => theme.palette.primary.main}>
-                  @lensterWorker
+                <Typography fontSize={13} fontWeight="bold" color={(theme) => theme.palette.primary.main}>
+                  @janicecoleman007
                 </Typography>
               </Grid>
 
@@ -103,6 +138,23 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
           </Grid>
         </Grid>
 
+        <Box
+        component={Typography}
+          paragraph
+          color="rgb(94, 94, 94)"
+          fontSize={13}
+          fontWeight="medium"
+          sx={{
+            display: '-webkit-box',
+            overflow: 'hidden',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 3,
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {randomJobDescriptions[randomInt]}
+        </Box>
+
         <Grid
           container
           direction="row"
@@ -112,31 +164,12 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
         >
           {TAGS.map((tag) => {
             return (
-              <Grid item mr={1} my={1}>
-                <Chip variant="filled" className={classes.tagChip} label={tag} size="small" />
+              <Grid item mr={1}>
+                <Chip variant="filled" sx={{ fontSize: 12, padding: 1, backgroundColor: '#eee' }} label={tag} size="small" />
               </Grid>
             );
           })}
         </Grid>
-
-        <Box
-        component={Typography}
-          paragraph
-          color="rgb(94, 94, 94)"
-          py={1}
-          noWrap
-          fontSize={15}
-          fontWeight="medium"
-          sx={{
-            display: '-webkit-flex',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}
-        >
-          {randomJobDescriptions[randomInt]}
-        </Box>
 
         <Grid container item direction="row" alignItems="center" justifyContent="space-between">
           <Grid item>

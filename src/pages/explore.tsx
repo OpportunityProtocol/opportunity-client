@@ -48,7 +48,7 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
           <Typography color="#fff" fontWeight="bold" py={1} fontSize={45} width="60%">
             {item.title}
           </Typography>
-          <Typography color="#fff" fontSize={20} py={1} width='60%'>
+          <Typography color="#fff" fontSize={20} py={1} width="60%">
             {item.subtitle}
           </Typography>
           <Button
@@ -110,7 +110,13 @@ const Explore: FunctionComponent = () => {
   return (
     <Box>
       <Container maxWidth="lg" className={classes.root}>
-        <Carousel animation='slide' fullHeightHover={true} indicators={false} autoPlay interval={8000}>
+        <Carousel
+          animation="slide"
+          fullHeightHover={true}
+          indicators={false}
+          autoPlay
+          interval={8000}
+        >
           {loggedOutHeroCarouselItems.map((item, i, arr) => (
             <CarouselItem key={i} item={item} itemLength={arr.length} index={i} />
           ))}
@@ -118,15 +124,11 @@ const Explore: FunctionComponent = () => {
         <Box sx={{ width: '100%', margin: '0px' }}>
           <Box my={2}>
             <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Typography variant='h5' py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)">
+              <Typography variant="h5" py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)">
                 Expand your network
               </Typography>
 
-              <Button
-                endIcon={<KeyboardArrowRight />}
-                variant="text"
-                size="large"
-              >
+              <Button endIcon={<KeyboardArrowRight />} variant="text" size="large">
                 Explore freelancers
               </Button>
             </Stack>
@@ -157,10 +159,16 @@ const Explore: FunctionComponent = () => {
                       />
                     </div>
                     <Box textAlign="center">
-                      <Typography fontWeight='medium' variant="body2" color="#616161" width="auto" noWrap>
+                      <Typography
+                        fontWeight="medium"
+                        variant="body2"
+                        color="#616161"
+                        width="auto"
+                        noWrap
+                      >
                         {human.name.first + ' ' + human.name.last}
                       </Typography>
-                      <Typography variant="caption" color='text.primary' width="auto" noWrap>
+                      <Typography variant="caption" color="text.primary" width="auto" noWrap>
                         ${Math.floor(Math.random() * 101).toFixed(2)} Value
                       </Typography>
                     </Box>
@@ -178,13 +186,18 @@ const Explore: FunctionComponent = () => {
             <Box>
               <Typography py={3} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                 Buy{' '}
-                <Typography sx={{ color: (theme) => theme.palette.primary.main }} fontSize={30} fontWeight="bold" component="span">
+                <Typography
+                  sx={{ color: (theme) => theme.palette.primary.main }}
+                  fontSize={30}
+                  fontWeight="bold"
+                  component="span"
+                >
                   confidence
                 </Typography>{' '}
                 in top rated services
               </Typography>
             </Box>
-            <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={3} >
+            <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={3}>
               {suggestedConnections.slice(3, 7).map((human) => {
                 return (
                   <Grid item xs={3}>
@@ -202,15 +215,11 @@ const Explore: FunctionComponent = () => {
           <Grid container direction="column" alignItems="center" justifyContent="space-between">
             <Grid item py={2} width="100%">
               <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant='h5' py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)">
+                <Typography variant="h5" py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)">
                   Participate in markets
                 </Typography>
 
-                <Button
-                  endIcon={<KeyboardArrowRight />}
-                  variant="text"
-                  size="large"
-                >
+                <Button endIcon={<KeyboardArrowRight />} variant="text" size="large">
                   See all
                 </Button>
               </Stack>
@@ -229,21 +238,17 @@ const Explore: FunctionComponent = () => {
         <Box my={6}>
           <Box>
             <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Typography variant='h5' py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)">
+              <Typography variant="h5" py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)">
                 See gigs in your network
               </Typography>
 
-              <Button
-                endIcon={<KeyboardArrowRight />}
-                variant="text"
-                size="large"
-              >
+              <Button endIcon={<KeyboardArrowRight />} variant="text" size="large">
                 See all
               </Button>
             </Stack>
           </Box>
           <Grid container direction="row" overflow="scroll" flexWrap="wrap" spacing={2}>
-            {suggestedConnections.slice(3, 7).map((human: any) => {
+            {suggestedConnections.slice(3, 8).map((human: any) => {
               return (
                 <Grid item xs={6}>
                   <JobDisplay avatar={human.picture.large} suggestion={true} />

@@ -66,9 +66,8 @@ const useStyles = makeStyles((theme: Theme) => ({
         },
     },
     tagChip: {
-        fontSize: 11,
-        backgroundColor: '#eee',
-        borderRadius: 1,
+        fontSize: 1,
+        backgroundColor: 'red',
         border: 'none',
     },
     divider: {
