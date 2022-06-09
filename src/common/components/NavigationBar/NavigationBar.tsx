@@ -32,16 +32,37 @@ import { ethers } from 'ethers';
 import { SingleBedRounded } from '@mui/icons-material';
 import { providerOptions } from '../../../constant/provider';
 import { LensTalentLocalStorageKeys } from '../../../constant/types';
+import { useAccount, useBalance, useConnect, useDisconnect } from 'wagmi';
+import { InjectedConnector } from 'wagmi/connectors/injected'
+import { ZERO_ADDRESS } from '../../../constant';
 
+/**
+ * localStorage.getItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1) === 'connected'
+ * localStorage.setItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1, 'connected');
+ * @returns 
+ */
 const NavigationBar: FunctionComponent = () => {
   const classes = useStyles();
+  const router = useRouter();
+
   const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false);
   const [popoverTimerSet, setPopOverTimerSet] = useState<boolean>(false);
-  const [providerData, setProviderData] = useState<ethers.providers.Web3Provider>({});
-  const [signerData, setSignerData] = useState<ethers.providers.JsonRpcSigner>({});
   const [show, setShow] = useState(false);
+  const [walletData, setWalletData] = useState<any>({
+    address: ZERO_ADDRESS,
+    connector: 'Disconnected',
+    balance: 0
+  })
+  
+  const { data } = useAccount()
+  const balanceData = useBalance({
+    addressOrName: walletData.address
+  })
+  const { connect, connectors, error, isConnecting, pendingConnector } =
+  useConnect()
 
-  const router = useRouter();
+  const { disconnect } = useDisconnect()
+  
   const onMouseOverConnectedAvatar = () => setPopoverIsOpen(true);
 
   useEffect(() => {
@@ -55,40 +76,23 @@ const NavigationBar: FunctionComponent = () => {
   }, [popoverIsOpen]);
 
   useEffect(() => {
-    async function connect() {
-      const instance = await web3Modal.connect();
-      const provider: ethers.providers.Web3Provider = new ethers.providers.Web3Provider(instance);
-      setProviderData(provider);
-      const signer: ethers.providers.JsonRpcSigner = provider.getSigner();
-      setSignerData(signer);
-    }
-
-    if (localStorage.getItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1) === 'connected') {
-      connect();
-      setShow(true);
-    }
-  }, []);
-
-  const web3Modal = new Web3Modal({
-    network: process.env.NODE_ENV === 'development' ? 'rinkeby' : 'mainnet',
-    cacheProvider: true,
-    providerOptions,
-  });
-
-  async function connectWallet() {
-    const instance = await web3Modal.connect();
-
-    const provider: ethers.providers.Web3Provider = new ethers.providers.Web3Provider(instance);
-    const signer: ethers.providers.JsonRpcSigner = provider.getSigner();
-    if (provider._network === null) {
-      alert('bye');
-      setShow(false);
-      localStorage.setItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1, null);
-    } else {
-      setShow(true);
+    if (data) {
+      console.log('@@@@@@@@@@@')
+      console.log(data)
+      setWalletData({
+        address: data.address,
+        connector: data.connector,
+        balance: 0
+      })
+      setShow(true)
+      console.log(balanceData)
       localStorage.setItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1, 'connected');
+    } else {
+      setShow(false)
+      localStorage.setItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1, 'disconnected');
     }
-  }
+  }, [])
+
 
   return (
     <AppBar
@@ -211,7 +215,7 @@ const NavigationBar: FunctionComponent = () => {
                   onMouseOver={onMouseOverConnectedAvatar}
                 />
               ) : (
-                <Button variant="contained" onClick={connectWallet}>
+                <Button variant="contained" onClick={() => connect()}>
                   Connect Wallet
                 </Button>
               )}
@@ -277,13 +281,26 @@ const NavigationBar: FunctionComponent = () => {
 
                     <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
                       <Typography color="#212121" fontWeight="bold" fontSize={12}>
+                        <FaEthereum size={10} /> ETH Balance:{' '}
+                      </Typography>
+                      <Typography color="#212121" fontWeight="light" fontSize={12}>
+                        {balanceData.isLoading ? '-' : balanceData.data.value._hex}
+                      </Typography>
+                    </Grid>
+
+                    <Grid item sx={{ p: 1, bgcolor: '#fafafa' }}>
+                      <Typography color="#212121" fontWeight="bold" fontSize={12}>
                         <FaEthereum size={10} /> DAI Balance:{' '}
                       </Typography>
                       <Typography color="#212121" fontWeight="light" fontSize={12}>
                         $125.64
                       </Typography>
                     </Grid>
+
+                    
                   </Grid>
+
+                
                   <Stack spacing={2} m={2}>
                     <Button fullWidth variant="outlined" color="primary">
                       Add Funds
@@ -303,6 +320,23 @@ const NavigationBar: FunctionComponent = () => {
           </Grid>
         </Toolbar>
       </Container>
+      <div>
+      {connectors.map((connector) => (
+        <button
+          disabled={!connector.ready}
+          key={connector.id}
+          onClick={() => connect(connector)}
+        >
+          {connector.name}
+          {!connector.ready && ' (unsupported)'}
+          {isConnecting &&
+            connector.id === pendingConnector?.id &&
+            ' (connecting)'}
+        </button>
+      ))}
+
+      {error && <div>{error.message}</div>}
+    </div>
     </AppBar>
   );
 };

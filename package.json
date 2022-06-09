@@ -45,6 +45,7 @@
     "react-material-ui-carousel": "^2.3.10-mui5",
     "recharts": "^2.1.9",
     "styled-components": "^5.3.3",
+    "wagmi": "^0.4.10",
     "web3modal": "^1.9.7"
   },
   "devDependencies": {
