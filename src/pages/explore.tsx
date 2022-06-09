@@ -82,7 +82,13 @@ const Explore: FunctionComponent = () => {
   });
 
   const fetchNetworkSuggestions = async () => {
-    const a = await fetch('https://randomuser.me/api/?results=20');
+    console.log('@@')
+    console.log(process.env)
+    const a = await fetch('https://randomuser.me/api/?results=20', {
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
     const b = await a.json();
     setSuggestedConnections(b.results);
   };

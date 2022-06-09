@@ -4,10 +4,10 @@ import Torus from '@toruslabs/torus-embed';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import Fortmatic from 'fortmatic';
 
-export const ALCHEMY_API_KEY=process.env.REACT_APP_ALCHEMY_API_KEY
-export const ALCHEMY_HTTPS=process.env.REACT_APP_ALCHEMY_HTTPS
-export const FORTMATIC_DEV_KEY = process.env.REACT_APP_FORTMATIC_DEV_KEY
-export const FORTMATIC_PROD_KEY = process.env.REACT_APP_FORTMATIC_PROD_KEY
+export const ALCHEMY_API_KEY=process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
+export const ALCHEMY_HTTPS=process.env.NEXT_PUBLIC_ALCHEMY_HTTPS
+export const FORTMATIC_DEV_KEY = process.env.NEXT_PUBLIC_FORTMATIC_DEV_KEY
+export const FORTMATIC_PROD_KEY = process.env.NEXT_PUBLIC_FORTMATIC_PROD_KEY
 
 export const POLYGONSCAN_URL = process.env.NODE_ENV === 'production' ? 'https://polygonscan.com' : 'https://mumbai.polygonscan.com'
 
@@ -61,7 +61,7 @@ export const providerOptions = {
     fortmatic: {
       package: Fortmatic, // required
       options: {
-        key: process.env.REACT_APP_FORMATIC_DEV_KEY, // required
+        key: process.env.NEXT_PUBLIC_FORMATIC_DEV_KEY, // required
          // if we don't pass it, it will default to localhost:8454
       }
     }
