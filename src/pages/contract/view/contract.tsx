@@ -8,6 +8,7 @@ import {
   AlertTitle,
   Grid,
   Stack,
+  TablePagination,
   Avatar,
   ListItemIcon,
   Toolbar,
@@ -40,6 +41,8 @@ import clsx from 'clsx';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { timelineButtons } from '../../../modules/market/MarketConstants';
 import JobDisplay from '../../../modules/market/components/JobDisplay';
+import { useGradientAvatarStyles } from '@mui-treasury/styles/avatar/gradient';
+import moment from 'moment';
 
 const data = [
   {
@@ -91,15 +94,29 @@ function createData(action: string, user: string, timestamp: string) {
 }
 
 const rows = [
-  createData('Contract Created', 'bella.hughes@example.com', new Date().toDateString().toString()),
-  createData('Worker Assigned', 'bella.hughes@example.com', new Date().toDateString().toString()),
-  createData('Work Accepted', 'simon.rasmussen@example.com', new Date().toDateString().toString()),
+  createData('Created', '@janicecoleman007', moment().format('LL').toString()),
+  createData(
+    'Assigned',
+    '@janicecoleman007',
+    moment().add(2, 'days').add(4, 'hours').format('LL').toString()
+  ),
+  createData(
+    'Accepted',
+    '@iwriteforfun12',
+    moment().add(2, 'days').add(6, 'hours').format('LL').toString()
+  ),
 ];
 
 const TableToolbar = () => {
   return (
     <Toolbar>
-      <Typography variant="h6" id="contract-history-table-title" component="div">
+      <Typography
+        color="rgb(33, 33, 33, .85)"
+        fontWeight="medium"
+        variant="h6"
+        id="contract-history-table-title"
+        component="div"
+      >
         Contract History
       </Typography>
     </Toolbar>
@@ -109,7 +126,7 @@ const TableToolbar = () => {
 const contractDetailsPrimaryTypographyProps = {
   fontSize: 14,
   fontWeight: 'medium',
-  color: 'rgb(33, 33, 33, .85',
+  color: 'rgb(33, 33, 33, .85)',
 };
 
 const contractDetailsSecondaryTypographyProps = {
@@ -123,32 +140,59 @@ const isService = false;
 const ViewContract: React.FunctionComponent<any> = () => {
   const classes = useStyles();
   const [reviews, setReviews] = useState<any>([]);
+  const [page, setPage] = React.useState(0);
+  const [dense, setDense] = React.useState(false);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [user, setUser] = useState([]);
+
+  const renderUser = async () => {
+    const a = await fetch('https://randomuser.me/api/?results=1', {});
+    const users = await a.json();
+    setUser(users.results);
+  };
+
+  useEffect(() => {
+    renderUsers();
+    renderUser();
+  }, []);
+
+  const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
+    size: 50,
+    gap: 3,
+    thickness: 3,
+    gapColor: '#f4f7fa',
+    color: 'linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)',
+  });
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const isReferral = true;
+
   const renderUsers = async () => {
     const a = await fetch('https://randomuser.me/api/?results=20', {});
     const users = await a.json();
     setReviews(users.results);
   };
 
-  useEffect(() => {
-    renderUsers();
-  }, []);
-
   return (
     <>
       <Container maxWidth="lg">
         {isReferral ? (
-          <Alert severity="info">
+          <Alert sx={{ border: '1px solid #ddd' }} severity="info">
             <AlertTitle>Referral</AlertTitle>
             You are viewing this contract as a part of a referral. Your referrer will receive{' '}
             <strong>5%</strong> of the total payout upon completion.
           </Alert>
         ) : null}
       </Container>
-      <Container
-        maxWidth="lg"
-        className={classes.mainContainer}
-      >
+      <Container maxWidth="lg" className={classes.mainContainer}>
         <Grid
           container
           direction="row"
@@ -167,29 +211,60 @@ const ViewContract: React.FunctionComponent<any> = () => {
                 <Table aria-label="simple table">
                   <TableHead>
                     <TableRow>
-                      <TableCell>Action</TableCell>
-                      <TableCell>User</TableCell>
-                      <TableCell>Timestamp</TableCell>
+                      <TableCell>
+                        <Typography fontWeight="bold" fontSize={15} color="rgba(33, 33, 33, .85)">
+                          Status
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography fontWeight="bold" fontSize={15} color="rgba(33, 33, 33, .85)">
+                          User
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography fontWeight="bold" fontSize={15} color="rgba(33, 33, 33, .85)">
+                          Timestamp
+                        </Typography>
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {rows.map((row) => (
                       <TableRow key={row.action}>
                         <TableCell component="th" scope="row">
-                          {row.action}
+                          <Typography fontWeight="medium" fontSize={14}>
+                            {row.action}
+                          </Typography>
                         </TableCell>
-                        <TableCell>{row.user}</TableCell>
-                        <TableCell>{row.timestamp}</TableCell>
+                        <TableCell>
+                          <Typography color="primary" fontWeight="medium" variant="body2">
+                            {row.user}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography color="text.secondary" variant="body2">
+                            {row.timestamp}
+                          </Typography>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
             </Paper>
 
             <Card variant="outlined" className={classes.marginBottom}>
               <CardContent>
-                <Typography fontWeight="bold" fontSize={20} color="rgba(33, 33, 33, .85)">
+                <Typography pb={2} fontWeight="medium" fontSize={20} color="rgba(33, 33, 33, .85)">
                   Reviews for this user
                 </Typography>
                 {reviews.length === 0 ? (
@@ -216,15 +291,46 @@ const ViewContract: React.FunctionComponent<any> = () => {
                     ) => {
                       return (
                         <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
-                          <Avatar src={review?.picture.large} className={classes.avatar} />
+                          <Box>
+                            <div
+                              style={{
+                                margin: '5px 0px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                              }}
+                              className={styles.root}
+                            >
+                              <Avatar
+                                src={user[0]?.picture?.thumbnail}
+                                style={{ width: 45, height: 45 }}
+                              />
+                            </div>
+                          </Box>
+
                           <Stack>
-                            <Typography fontWeight='bold' fontSize={13} className={classes.overline}>
+                            <Typography
+                              fontWeight="bold"
+                              fontSize={13}
+                              className={classes.overline}
+                            >
                               {review?.name.first + ' ' + review.name.last}
                             </Typography>
-                            <Typography fontSize={14} fontWeight="medium" className={classes.name}>
+                            <Typography
+                              color="primary"
+                              fontSize={14}
+                              fontWeight="bold"
+                              className={classes.name}
+                            >
                               {review?.login.username}
                             </Typography>
-                            <Typography paragraph fontSize={14} className={classes.name}>
+                            <Typography
+                              fontWeight="medium"
+                              paragraph
+                              color="text.secondary"
+                              fontSize={14}
+                              className={classes.name}
+                            >
                               No hassle and no extra work apart from the contract description. I
                               will definitiely be looking to work with him again!
                             </Typography>
@@ -307,7 +413,12 @@ const ViewContract: React.FunctionComponent<any> = () => {
               </Button>
             </Stack>
 
-            <Alert variant="standard" icon={false} className={classes.marginBottom}>
+            <Alert
+              sx={{ border: '1px solid #ddd' }}
+              variant="standard"
+              icon={false}
+              className={classes.marginBottom}
+            >
               <Typography fontSize={20} fontWeight="bold">
                 Completion Details
               </Typography>
@@ -337,17 +448,17 @@ const ViewContract: React.FunctionComponent<any> = () => {
 
             <Card variant="outlined" className={classes.marginBottom}>
               <CardContent>
-                <Typography fontSize={20} fontWeight="bold">
+                <Typography fontSize={20} fontWeight="medium" color="rgba(33, 33, 33, .85)">
                   Metadata
                 </Typography>
-                <Typography variant='button' color='#2196F3'>
+                <Typography variant="button" color="#2196F3">
                   View on IPFS
                 </Typography>
                 <List>
                   <ListItem>
                     <ListItemText
                       primary="Market Name"
-                      secondary="Gitcoin Bounties"
+                      secondary="Writing and Translation"
                       primaryTypographyProps={contractDetailsPrimaryTypographyProps}
                       secondaryTypographyProps={contractDetailsSecondaryTypographyProps}
                     />

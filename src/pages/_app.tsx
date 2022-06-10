@@ -5,8 +5,50 @@ import Opportunity from '../Opportunity';
 import theme from '../../material_theme';
 import { ThemeProvider } from '@mui/material/styles';
 import NavigationBreadcrumbs from '../common/components/Breadcrumbs/Breadcrumbs';
-import Head from 'next/head';
+import Header from '../common/components/Head';
 import { CssBaseline } from '@mui/material';
+import { WagmiConfig, createClient, defaultChains, configureChains } from 'wagmi'
+
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { publicProvider } from 'wagmi/providers/public'
+import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
+import { InjectedConnector } from 'wagmi/connectors/injected'
+import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
+import { ALCHEMY_API_KEY, ALCHEMY_HTTPS } from '../constant';
+
+const { chains, provider, webSocketProvider } = configureChains(defaultChains, [
+  alchemyProvider({ alchemyId: ALCHEMY_API_KEY }),
+  publicProvider(),
+])
+
+const client = createClient({
+  autoConnect: true,
+  connectors: [
+    new MetaMaskConnector({ chains }),
+    new CoinbaseWalletConnector({
+      chains,
+      options: {
+        appName: 'wagmi',
+      },
+    }),
+    new WalletConnectConnector({
+      chains,
+      options: {
+        qrcode: true,
+      },
+    }),
+    new InjectedConnector({
+      chains,
+      options: {
+        name: 'Injected',
+        shimDisconnect: true,
+      },
+    }),
+  ],
+  provider,
+  webSocketProvider,
+})
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [showChild, setShowChild] = useState(false);
@@ -20,27 +62,16 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <React.Fragment>
-      <Head>
-        <title>GigEarth</title>
-        <meta name="description" content="Permissionless labor markets" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Chilanka&family=Manrope:wght@200;300;400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-        <link rel="stylesheet" href="https://use.typekit.net/bhd6hze.css" />
-      </Head>
+      <Header />
+      <WagmiConfig client={client}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
+      <CssBaseline />
         <Opportunity>
           <NavigationBreadcrumbs />
           <Component {...pageProps} />
         </Opportunity>
       </ThemeProvider>
+      </WagmiConfig>
     </React.Fragment>
   );
 }

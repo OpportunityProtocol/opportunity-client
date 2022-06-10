@@ -124,6 +124,7 @@ const Home = () => {
       media: url || "",
     });
 
+<<<<<<< HEAD
   const handleChange = (evant, newValue) => {
    // setValue(newValue);
     await setDoc(doc(db, "lastMsg", id), {
@@ -137,6 +138,10 @@ const Home = () => {
 
     setText("");
     setImg("");
+=======
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+>>>>>>> 71c7f5da437ec1816489ba09fa7cbabe941686a9
   };
 
   return (
@@ -590,7 +595,7 @@ justifyContent="space-between"
                   item
                   xs={12}
                   sx={{ bgcolor: "", height: "650px", overflow: "scroll" }}
-                ></Grid>
+                 />
                 <Divider />
                 <Grid item xs={12} sx={{ bgcolor: "", maxHeight: "44px" }}>
                   <Box
@@ -689,7 +694,9 @@ justifyContent="space-between"
 
               
             </TabPanel>
-            <TabPanel value={value} index={1}></TabPanel>
+            <TabPanel value={value} index={1}>
+              Item One
+            </TabPanel>
             <TabPanel value={value} index={2}>
               Item Three
             </TabPanel>

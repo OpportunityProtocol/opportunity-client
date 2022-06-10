@@ -7,15 +7,20 @@ import {
   Grid,
   Collapse,
   Container,
+  ListItem,
   List,
   ListItemButton,
   ListItemText,
+  Stack,
+  Checkbox,
   Tabs,
   Tab,
   Typography,
   Box,
 } from '@mui/material';
 import TabPanel from '../common/components/TabPanel/TabPanel';
+import SearchBarV2 from '../common/components/SearchBarV2/SearchBarV2';
+import ServiceCard from '../modules/contract/components/ServiceCard/ServiceCard';
 
 /**** Temporary Placeholders *****/
 const marketName = [
@@ -76,7 +81,7 @@ function Work() {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-  const handleClick = (id) => {
+  const handleClick = (e, id) => {
     setOpen((prevState) => ({ ...prevState, [id]: !prevState[id] }));
   };
 
@@ -88,208 +93,154 @@ function Work() {
       direction="column"
       sx={{ bgcolor: 'background.paper' }}
     >
-      <Grid item>
+      <Grid container item>
         <Box sx={{ width: '100%' }}>
-          <Box mt={3} sx={{ borderBottom: 1, borderColor: 'divider',  }}>
+          <Box mt={3} sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={value} onChange={handleChange} centered>
               <Tab sx={{ borderBottom: '1px solid #212121' }} label="Contracts" />
               <Tab sx={{ fontSize: '14px' }} label="Services" />
             </Tabs>
           </Box>
           <TabPanel value={value} index={0}>
-            <Grid container justifyContent="space-between">
-              <Grid item xs={3} sx={{}}>
-                <Typography pt={2} fontWeight="bold">Filter Markets</Typography>
-                <List
-                  component="nav"
-                >
-                  {marketName.map((item) => (
-                    <Fragment key={item.id}>
-                      <ListItemButton
-                        onClick={() => handleClick(item.id)}
-                      >
-                        <ListItemText
-                          primary={item.name}
-                          primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }}
-                        />
-                        {open[item.id] ? (
-                          <RemoveIcon fontSize="small" />
-                        ) : (
-                          <AddIcon fontSize="small" />
-                        )}
-                      </ListItemButton>
-                       <Collapse in={open[item.id]} timeout="auto" unmountOnExit>
-                        <List component="div" disablePadding>
-                          <ListItemButton sx={{ pl: 4 }} style={{ backgroundColor: 'transparent' }}>
-                            <ListItemText primary="Starred" sx={{ fontSize: 1 }} />
-                          </ListItemButton>
-                        </List>
-                  </Collapse>
-                    </Fragment>
-                  ))}
-                </List>
+            <Grid container>
+              <Grid item xs={3}>
+                <Box>
+                  <Typography pt={2} fontWeight="bold">
+                    Filter Markets
+                  </Typography>
+                  <List component="nav">
+                    {marketName.map((item, idx) => (
+                      <Fragment key={item.id}>
+                        <ListItem
+                          secondaryAction={
+                            <Checkbox
+                              edge="end"
+                              onChange={(e) => handleClick(e, idx)}
+                              checked={open[idx] === true}
+                            />
+                          }
+                        >
+                          <ListItemText
+                            primary={item.name}
+                            primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }}
+                          />
+                        </ListItem>
+                      </Fragment>
+                    ))}
+                  </List>
+                </Box>
               </Grid>
               <Grid
                 container
-                justifyContent="space-evenly"
-                alignItems="center"
+                flexDirection="column"
+                direction="column"
+                flexWrap="nowrap"
+                alignItems="flex-start"
+                justifyContent="flex-start"
                 item
                 xs={9}
-                sx={{ pt: 0, bgcolor: 'inherit', maxHeight: 840, overflow: 'auto' }}
+                sx={{
+                  pt: 0,
+                  width: '100%',
+                  bgcolor: '#fafafa',
+                  px: 2,
+                  minHeight: 'calc(100vh - 70px - 80px)',
+                  overflow: 'auto',
+                }}
               >
-                <Grid item xs={12} pb={0.5} pl={2}>
-                  <Typography py={2} fontSize={13} color={(theme) => theme.palette.primary.dark} fontWeight="bold">
-                    123,233,000 contracts
-                  </Typography>
+                <Grid sx={{ width: '100%' }} item height="auto" pt={1} pb={1.5}>
+                  <Stack display="flex" direction="row" alignItems="center">
+                    <Typography
+                      width="100%"
+                      fontSize={13}
+                      color={(theme) => theme.palette.primary.dark}
+                      fontWeight="bold"
+                    >
+                      123,233,000 contracts
+                    </Typography>
+                    <SearchBarV2 placeholder="Search for your next gig" />
+                  </Stack>
                 </Grid>
 
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
+                {new Array(10).fill(-1).map((item) => {
+                  return (
+                    <Grid mb={1.5} item sx={{ width: '100%' }}>
+                      <JobDisplay />
+                    </Grid>
+                  );
+                })}
               </Grid>
             </Grid>
           </TabPanel>
           <TabPanel value={value} index={1}>
             <Grid container justifyContent="space-between" sx={{ bgcolor: 'background.paper' }}>
               <Grid item xs={3} sx={{}}>
-              <Typography pt={2} fontWeight="bold">Filter Markets</Typography>
-                <List
-                  component="nav"
-                >
-                  {serviceName.map((item) => (
-                    <Fragment key={item.id}>
-                      <ListItemButton
-                        style={{ backgroundColor: 'transparent' }}
-                        onClick={() => handleClick(item.id)}
-                      >
-                        <ListItemText primary={item.name}   primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }} />
-                        {open[item.id] ? <RemoveIcon fontSize='small' /> : <AddIcon fontSize='small' />}
-                      </ListItemButton>
-                      <Collapse in={open[item.id]} timeout="auto" unmountOnExit>
-                        <List component="div" disablePadding>
-                          <ListItemButton sx={{ pl: 4 }} style={{ backgroundColor: 'transparent' }}>
-                            <ListItemText primary="Starred"   primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }} />
-                          </ListItemButton>
-                        </List>
-                      </Collapse>
-                    </Fragment>
-                  ))}
-                </List>
+                <Box>
+                  <Typography pt={2} fontWeight="bold">
+                    Filter Markets
+                  </Typography>
+                  <List component="nav">
+                    {marketName.map((item, idx) => (
+                      <Fragment key={item.id}>
+                        <ListItem
+                          secondaryAction={
+                            <Checkbox
+                              edge="end"
+                              onChange={(e) => handleClick(e, idx)}
+                              checked={open[idx] === true}
+                            />
+                          }
+                        >
+                          <ListItemText
+                            primary={item.name}
+                            primaryTypographyProps={{ fontSize: 13, fontWeight: 'medium' }}
+                          />
+                        </ListItem>
+                      </Fragment>
+                    ))}
+                  </List>
+                </Box>
               </Grid>
               <Grid
                 container
-                justifyContent="space-evenly"
-                alignItems="center"
+                flexDirection="column"
+                direction="column"
+                flexWrap="nowrap"
+                alignItems="flex-start"
+                justifyContent="flex-start"
                 item
                 xs={9}
-                sx={{ pt: 0, bgcolor: '#f8f8f898', maxHeight: 830, overflow: 'auto' }}
+                sx={{
+                  pt: 0,
+                  width: '100%',
+                  bgcolor: '#fafafa',
+                  px: 2,
+                  minHeight: 'calc(100vh - 70px - 80px)',
+                  overflow: 'auto',
+                }}
               >
-                <Grid
-                  item
-                  xs={12}
-                  pb={0.5}
-                  pl={2}
-                  sx={{ bgcolor: 'background.paper' }}
-                  justifyContent="flex-start"
-                  alignItems="flex start"
-                  justifySelf="flex-start"
-                >
-                  <Typography sx={{ bgcolor: 'background.paper' }} fontSize={13} fontWeight="bold">
-                    123,233,000 contracts
-                  </Typography>
-                </Grid>
-                <Grid item xs={12} p={1} sx={{ bgcolor: '#f8f8f898r' }}></Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
+                <Grid sx={{ width: '100%' }} item height="auto" pt={1} pb={1.5}>
+                  <Stack display="flex" direction="row" alignItems="center">
+                    <Typography
+                      width="100%"
+                      fontSize={13}
+                      color={(theme) => theme.palette.primary.dark}
+                      fontWeight="bold"
+                    >
+                      123,233,000 contracts
+                    </Typography>
+                    <SearchBarV2 placeholder="Search for your next gig" />
+                  </Stack>
                 </Grid>
 
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
-                </Grid>
-
-                <Grid item xs={5.7} pb={1}>
-                  <JobDisplay />
+                <Grid container item direction="row" justifyContent="space-between">
+                  {new Array(10).fill(-1).map((item) => {
+                    return (
+                      <Grid mb={1.5} xs={3.8} item sx={{ width: '100%' }}>
+                        <ServiceCard />
+                      </Grid>
+                    );
+                  })}
                 </Grid>
               </Grid>
             </Grid>

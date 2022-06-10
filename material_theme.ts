@@ -8,6 +8,10 @@ import { createTheme } from '@mui/material/styles';
         main: '#49A882',
         dark: '#1b4f31'
       },
+      text: {
+        primary: '#000000',
+        secondary: 'rgba(33, 33, 33, .85)'
+      },
       secondary: {
         light: '#edc2d7',
         main: '#d46290',

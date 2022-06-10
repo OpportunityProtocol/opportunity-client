@@ -37,8 +37,8 @@ const MarketToolbar: React.FunctionComponent = () => {
                 <Typography color='#212121' fontWeight="light" fontSize={12}>
                   MetaMask
                 </Typography>
-              </Grid>
-<Divider />
+              </Grid> 
+              <Divider />
               <Grid item sx={{p: 1}}>
                 <Typography color='#212121' fontWeight='bold' fontSize={12}>
                   <FaEthereum size={10} /> DAI Balance:{' '}

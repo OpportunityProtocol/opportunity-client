@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "start:dev": "NODE_ENV=test next dev",
+    "start:local": "NODE_ENV=development next dev",
     "build": "next build",
-    "start": "next start",
+    "start:prod": "NODE_ENV=production next start",
     "lint": "next lint",
     "build-logs": "vercel logs opportunity-client-jg0hwghxc-opportunity.vercel.app",
     "deploy-dev": "vercel",
@@ -13,6 +14,7 @@
     "deploy-ipfs": ""
   },
   "dependencies": {
+    "@coinbase/wallet-sdk": "^3.2.0",
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
     "@material-ui/core": "^4.12.4",
@@ -24,6 +26,8 @@
     "@mui/styled-engine-sc": "^5.4.2",
     "@mui/styles": "^5.4.2",
     "@svgr/webpack": "^6.2.1",
+    "@toruslabs/torus-embed": "^1.23.2",
+    "@walletconnect/web3-provider": "^1.7.8",
     "clsx": "^1.1.1",
     "cryptocurrency-icons": "^0.18.0",
     "eslint-config-airbnb-typescript-prettier": "^5.0.0",
@@ -31,7 +35,7 @@
     "firebase": "9.0.2",
     "fortmatic": "^2.4.0",
     "material-ui-dots": "^2.0.2",
-    "moment": "^2.29.1",
+    "moment": "^2.29.3",
     "next": "^12.1.5",
     "prettier": "^2.6.2",
     "prop-types": "^15.8.1",
@@ -42,7 +46,9 @@
     "react-icons": "^4.3.1",
     "react-material-ui-carousel": "^2.3.10-mui5",
     "recharts": "^2.1.9",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.3",
+    "wagmi": "^0.4.10",
+    "web3modal": "^1.9.7"
   },
   "devDependencies": {
     "@types/node": "17.0.18",

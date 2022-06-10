@@ -2,7 +2,6 @@ import React from 'react';
 
 import {
   Box,
-  CssBaseline,
 } from '@mui/material';
 
 import  { useRouter } from 'next/router';
@@ -36,8 +35,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
           bgcolor: APP_BACKGROUND,
           flexGrow: 1,
           paddingTop: isPadded ? '60px' : '0px',
-        }}
-      >
+        }}>
         {children}
       </Box>
     </Box>
