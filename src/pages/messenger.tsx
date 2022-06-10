@@ -6,6 +6,7 @@ import {
   Divider,
   Button,
   IconButton,
+  Stack,
 } from "@mui/material";
 
 import * as React from "react";
@@ -24,122 +25,118 @@ import FormControl from "@mui/material/FormControl";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import { InputLabel, Input } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import { positions } from "@mui/system";
+import { alignProperty } from "@mui/material/styles/cssUtils";
 
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(2),
-    width: "auto",
-  },
-}));
+import { useEffect, useState } from "react";
+import { db, auth, storage } from "../../firebase";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  Timestamp,
+  orderBy,
+  setDoc,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import User from "../components/User";
+import MessageForm from "../modules/user/components/Messenger/MessageForm";
+import Message from "../modules/user/components/Messenger/Message";
 
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
+const Home = () => {
+  const [users, setUsers] = useState([]);
+  const [chat, setChat] = useState("");
+  const [text, setText] = useState("");
+  const [img, setImg] = useState("");
+  const [msgs, setMsgs] = useState([]);
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
-    },
-  },
-}));
+  const user1 = auth.currentUser.uid;
 
-const BootstrapInput = styled(InputBase)(({ theme }) => ({
-  "label + &": {
-    marginTop: theme.spacing(3),
-  },
-  "& .MuiInputBase-input": {
-    borderRadius: 4,
-    position: "relative",
-    backgroundColor: theme.palette.mode === "light" ? "#fcfcfb" : "#2b2b2b",
-    border: "1px solid #ced4da",
-    fontSize: 16,
-    width: "auto",
-    padding: "10px 12px",
-    transition: theme.transitions.create([
-      "border-color",
-      "background-color",
-      "box-shadow",
-    ]),
-    // Use the system font instead of the default Roboto font.
-    fontFamily: [
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
-      "sans-serif",
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
-    ].join(","),
-    "&:focus": {
-      boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
-      borderColor: theme.palette.primary.main,
-    },
-  },
-}));
+  useEffect(() => {
+    const usersRef = collection(db, "users");
+    // create query object
+    const q = query(usersRef, where("uid", "not-in", [user1]));
+    // execute query
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      let users = [];
+      querySnapshot.forEach((doc) => {
+        users.push(doc.data());
+      });
+      setUsers(users);
+    });
+    return () => unsub();
+  }, []);
 
-function TabPanel(props: { [x: string]: any; children: any; value: any; index: any; }) {
-  const { children, value, index, ...other } = props;
+  const selectUser = async (user) => {
+    setChat(user);
 
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`vertical-tabpanel-${index}`}
-      aria-labelledby={`vertical-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
+    const user2 = user.uid;
+    const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
 
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
+    const msgsRef = collection(db, "messages", id, "chat");
+    const q = query(msgsRef, orderBy("createdAt", "asc"));
 
-function a11yProps(index: number) {
-  return {
-    id: `vertical-tab-${index}`,
-    "aria-controls": `vertical-tabpanel-${index}`,
+    onSnapshot(q, (querySnapshot) => {
+      let msgs = [];
+      querySnapshot.forEach((doc) => {
+        msgs.push(doc.data());
+      });
+      setMsgs(msgs);
+    });
+
+    // get last message b/w logged in user and selected user
+    const docSnap = await getDoc(doc(db, "lastMsg", id));
+    // if last message exists and message is from selected user
+    if (docSnap.data() && docSnap.data().from !== user1) {
+      // update last message doc, set unread to false
+      await updateDoc(doc(db, "lastMsg", id), { unread: false });
+    }
   };
-}
 
-function Messenger() {
-  const [value, setValue] = React.useState(0);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const user2 = chat.uid;
+
+    const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
+
+    let url;
+    if (img) {
+      const imgRef = ref(
+        storage,
+        `images/${new Date().getTime()} - ${img.name}`
+      );
+      const snap = await uploadBytes(imgRef, img);
+      const dlUrl = await getDownloadURL(ref(storage, snap.ref.fullPath));
+      url = dlUrl;
+    }
+
+    await addDoc(collection(db, "messages", id, "chat"), {
+      text,
+      from: user1,
+      to: user2,
+      createdAt: Timestamp.fromDate(new Date()),
+      media: url || "",
+    });
 
   const handleChange = (evant, newValue) => {
-    setValue(newValue);
+   // setValue(newValue);
+    await setDoc(doc(db, "lastMsg", id), {
+      text,
+      from: user1,
+      to: user2,
+      createdAt: Timestamp.fromDate(new Date()),
+      media: url || "",
+      unread: true,
+    });
+
+    setText("");
+    setImg("");
   };
 
   return (
@@ -152,7 +149,203 @@ function Messenger() {
         alignItems: "center",
       }}
     >
-      <Paper
+     <Paper
+        sx={{
+          bgcolor: "background.paper",
+          display: "flex",
+          width: "100%",
+          height: "100%",
+        }}
+      >
+        <div className="home_container">
+      <div className="users_container">
+        {users.map((user) => (
+          <User
+            key={user.uid}
+            user={user}
+            selectUser={selectUser}
+            user1={user1}
+            chat={chat}
+          />
+        ))}
+      </div>
+      <div className="messages_container">
+        {chat ? (
+          <>
+            <div className="messages_user">
+              <h3>{chat.name}</h3>
+            </div>
+            <div className="messages">
+              {msgs.length
+                ? msgs.map((msg, i) => (
+                    <Message key={i} msg={msg} user1={user1} />
+                  ))
+                : null}
+            </div>
+            <MessageForm
+              handleSubmit={handleSubmit}
+              text={text}
+              setText={setText}
+              setImg={setImg}
+            />
+          </>
+        ) : (
+          <h3 className="no_conv">Select a user to start conversation</h3>
+        )}
+      </div>
+    </div>
+
+      </Paper>
+    
+    </Container>
+  );
+}
+
+export default Messenger;
+
+
+/* <Grid
+container
+sx={{ bgcolor: "red", height: "100%" }}
+justifyContent="space-between"
+>
+<Grid
+  item
+  xs={12}
+  container
+  direction="row"
+  alignItems="center"
+  justifyContent="flex-start"
+  spacing={1}
+  sx={{ bgcolor: "yellow", marginLeft: "0px" }}
+>
+  <Avatar
+    alt="N"
+    src="/static/images/avatar/1.jpg"
+    sx={{
+      width: 35,
+      height: 35,
+      justifyContent: "center",
+      alignItems: "center",
+      marginRight: "10px",
+    }}
+  />
+  <Typography sx={{ fontSize: "18px" }}>
+    Nathan Farley
+  </Typography>
+</Grid>
+<Grid item sx={{ bgcolor: "" }}>
+  <Button>View Profile</Button>
+</Grid>
+<Divider sx={{ marginTop: "10px" }} />
+<Grid
+  item
+  xs={12}
+  sx={{
+    bgcolor: "blue",
+    display: "flex",
+    flexGrow: 1,
+    overflow: "scroll",
+  }}
+>
+  H
+</Grid>
+<Divider />
+<Grid
+  item
+  xs={12}
+  sx={{
+    bgcolor: "",
+    maxHeight: "100%",
+    height: "100%",
+    alignSelf: "flex-end",
+  }}
+>
+  <Box
+    component="form"
+    noValidate
+    autoComplete="off"
+    sx={{
+      maxHeight: "44px",
+      p: "2px 4px",
+      display: "flex",
+      alignItems: "center",
+    }}
+  >
+    <InputBase
+      sx={{ ml: 1, flex: 1 }}
+      placeholder="Write a message"
+      inputProps={{ "aria-label": "Write a message" }}
+    />
+    <IconButton
+      type="submit"
+      sx={{ p: "10px" }}
+      aria-label="search"
+    >
+      <SendIcon />
+    </IconButton>
+  </Box>
+</Grid>
+</Grid>
+
+
+<Stack direction="column"  spacing={2} display='flex' justifyContent="space-between">
+                  <Box display="flex" justifyContent="space-between" alignItems='space-between' >
+                        <Stack direction="row" alignItems='center'>
+                        <Avatar
+                            alt="N"
+                            src="/static/images/avatar/1.jpg"
+                            sx={{
+                            width: 40,
+                            height: 40,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            marginRight: "10px",
+                            }}
+                        />
+                        <Typography display='flex' sx={{ fontSize: "18px" }}>
+                              Nathan Farley
+                        </Typography>
+                        </Stack>
+                        <Button sx={{ fontSize: "14px" }} >View Profile</Button>
+                  </Box>
+                  <Divider />
+                  <Stack  direction="row" alignItems="stretch" sx={{ flexGrow: 2 }} >
+                  <Typography  alignItems="stretch"  sx={{ fontSize: "18px" }}>
+                              Nathan Farley
+                        </Typography>
+                  </Stack>
+                  <Divider />
+                  
+                  <Box
+    component="form"
+    noValidate
+    autoComplete="off"
+    sx={{
+      maxHeight: "20px",
+      p: "2px 4px",
+      display: "flex",
+      alignItems: "center",
+    }}
+  >
+    <InputBase
+      sx={{ ml: 1, flex: 1 }}
+      placeholder="Write a message"
+      inputProps={{ "aria-label": "Write a message" }}
+    />
+    <IconButton
+      type="submit"
+      sx={{ p: "10px" }}
+      aria-label="search"
+    >
+      <SendIcon />
+    </IconButton>
+  </Box>
+                  
+              </Stack>
+             
+
+  <Paper
         sx={{
           bgcolor: "background.paper",
           display: "flex",
@@ -163,7 +356,7 @@ function Messenger() {
         <Grid
           container
           direction="row"
-          sx={{ flexWrap: "no-wrap", maxHeight: "100%" }}
+          sx={{ flexWrap: "no-wrap", maxheight: "100%" }}
         >
           <Grid
             item
@@ -193,17 +386,7 @@ function Messenger() {
               }}
             />
 
-            <Typography>Elijah Hampton</Typography>
-
-            <Search sx={{ marginRight: "15%" }}>
-              <SearchIconWrapper sx={{ paddingLeft: "1px" }}>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
-              />
-            </Search>
+            <Typography sx={{ fontSize: "20px" }}>Elijah Hampton</Typography>
 
             <Divider sx={{ width: "90%" }} />
             <Tabs
@@ -436,6 +619,75 @@ function Messenger() {
                   </Box>
                 </Grid>
               </Grid>
+          <Grid item xs={8.5} sx={{ minHeight: "100%" }}>
+            <TabPanel value={value} index={0} maxHeight="379px" sx={{ minHeight: "100%", height:"100%", maxHeigh:"100%" }} height="739px">
+                  <Grid  container  direction="column" justifyContent="space-between" sx={{ bgcolor: "red", height:"100%" }} spacing={1}>
+                      <Grid item container direction='row' justifyContent='space-between' alignItems='center'  sx={{ bgcolor: "blue" }}>
+                          <Grid item  direction="row" display="flex" alignItems='center'  sx={{ bgcolor: "green" }}> 
+                              <Avatar
+                                  alt="N"
+                                  src="/static/images/avatar/1.jpg"
+                                  sx={{
+                                  width: 40,
+                                  height: 40,
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  marginRight: "10px",
+                                  }}
+                              />
+                              <Typography display='flex' sx={{ fontSize: "18px" }}>
+                                    Nathan Farley
+                              </Typography>
+                          </Grid>
+                              <Button sx={{ fontSize: "14px" }}>View Profile</Button>
+                      </Grid>
+                      <Grid item >
+                      <Divider />
+                      </Grid >
+                      <Grid item sx={{ bgcolor: "yellow", maxHeight: '10%', height: '10%' , minHeight: "10%"}}> 
+
+                      </Grid>
+                      <Grid item >
+                      <Divider />
+                      </Grid >
+                      
+                      <Grid item justifyContent="center" sx={{ bgcolor: "pink", position: "absolute", width:'56%', top: '84%'}}>
+                      <Divider sx={{ marginTop: "10px", marginBottom: "10px"}}/>
+                      <Box
+                      
+    component="form"
+    noValidate
+    autoComplete="off"
+    sx={{
+      maxHeight: "20px",
+      p: "2px 4px",
+      display: "flex",
+      alignItems: "center",
+    }}
+  >
+    <InputBase
+      sx={{ ml: 1, flex: 1 }}
+      placeholder="Write a message"
+      inputProps={{ "aria-label": "Write a message" }}
+    />
+    <IconButton
+      type="submit"
+      sx={{ p: "10px" }}
+      aria-label="search"
+    >
+      <SendIcon />
+    </IconButton>
+  </Box>
+
+                      </Grid>
+
+
+
+
+                  </Grid>
+              
+
+              
             </TabPanel>
             <TabPanel value={value} index={1}></TabPanel>
             <TabPanel value={value} index={2}>
@@ -459,8 +711,6 @@ function Messenger() {
           </Grid>
         </Grid>
       </Paper>
-    </Container>
-  );
-}
 
-export default Messenger;
+
+*/
