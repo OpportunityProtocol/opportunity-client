@@ -32,9 +32,10 @@ import { ethers } from 'ethers';
 import { SingleBedRounded } from '@mui/icons-material';
 import { providerOptions } from '../../../constant/provider';
 import { LensTalentLocalStorageKeys } from '../../../constant/types';
-import { useAccount, useBalance, useConnect, useDisconnect } from 'wagmi';
+import { useAccount, useBalance, useConnect, useContractRead, useDisconnect } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected'
-import { ZERO_ADDRESS } from '../../../constant';
+import { DAI_ADDRESS, ZERO_ADDRESS } from '../../../constant';
+import { Dai } from '../../../abis';
 
 /**
  * localStorage.getItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1) === 'connected'
@@ -62,6 +63,18 @@ const NavigationBar: FunctionComponent = () => {
   useConnect()
 
   const { disconnect } = useDisconnect()
+console.log(DAI_ADDRESS)
+  const daiGetBalance = useContractRead(
+    {
+  addressOrName: DAI_ADDRESS,
+  contractInterface: JSON.stringify(Dai)
+},
+    'getBalance',
+    {
+      watch: true,
+      onSuccess: (data) => console.log(data)
+    }
+  )
   
   const onMouseOverConnectedAvatar = () => setPopoverIsOpen(true);
 
@@ -77,15 +90,12 @@ const NavigationBar: FunctionComponent = () => {
 
   useEffect(() => {
     if (data) {
-      console.log('@@@@@@@@@@@')
-      console.log(data)
       setWalletData({
         address: data.address,
         connector: data.connector,
         balance: 0
       })
       setShow(true)
-      console.log(balanceData)
       localStorage.setItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1, 'connected');
     } else {
       setShow(false)
@@ -293,7 +303,7 @@ const NavigationBar: FunctionComponent = () => {
                         <FaEthereum size={10} /> DAI Balance:{' '}
                       </Typography>
                       <Typography color="#212121" fontWeight="light" fontSize={12}>
-                        $125.64
+                          {daiGetBalance.isLoading ? 0 : daiGetBalance.data}
                       </Typography>
                     </Grid>
 
