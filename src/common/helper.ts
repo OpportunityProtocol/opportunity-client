@@ -14,4 +14,6 @@ export const getRandomColor = () => {
     }
 }
 
-export default ''
+const hexToDecimal = (num: number) => parseInt(num, 16);
+
+export { hexToDecimal }

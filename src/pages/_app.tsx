@@ -7,7 +7,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import NavigationBreadcrumbs from '../common/components/Breadcrumbs/Breadcrumbs';
 import Header from '../common/components/Head';
 import { CssBaseline } from '@mui/material';
-import { WagmiConfig, createClient, defaultChains, configureChains } from 'wagmi'
+import { WagmiConfig, createClient, defaultChains, configureChains, chain } from 'wagmi'
 
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { publicProvider } from 'wagmi/providers/public'
@@ -17,8 +17,8 @@ import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
 import { ALCHEMY_API_KEY, ALCHEMY_HTTPS } from '../constant';
 
-const { chains, provider, webSocketProvider } = configureChains(defaultChains, [
-  alchemyProvider({ alchemyId: ALCHEMY_API_KEY }),
+const { chains, provider, webSocketProvider } = configureChains([chain.polygon, chain.polygonMumbai, chain.rinkeby, chain.mainnet, chain.hardhat, chain.localhost], [
+  alchemyProvider({ alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}),
   publicProvider(),
 ])
 

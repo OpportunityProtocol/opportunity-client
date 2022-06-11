@@ -1,2 +1,4 @@
-import { DaiInterface as Dai } from "./Dai";
-export { Dai }
+import { DaiInterface } from "./Dai";
+import { NetworkManagerInterface } from "./NetworkManager";
+import { LensHubInterface } from "./LensHub";
+export { DaiInterface, NetworkManagerInterface, LensHubInterface }

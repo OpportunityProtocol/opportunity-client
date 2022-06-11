@@ -47,20 +47,19 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   }));
 
   interface IConnectedAvatar {
-    onClick: MouseEventHandler<HTMLDivElement>,
-    onMouseOver: MouseEventHandler<HTMLDivElement>
+    onMouseOver: MouseEventHandler<HTMLDivElement>,
+    onMouseLeave: MouseEventHandler<HTMLDivElement>
   }
 
   
-  const ConnectedAvatar : FunctionComponent<IConnectedAvatar> = ({ onClick, onMouseOver }) => {
+  const ConnectedAvatar : FunctionComponent<IConnectedAvatar> = ({ onMouseOver, onMouseLeave }) => {
     return (
       <StyledBadge
-        onClick={onClick}
         overlap="circular"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         variant="dot"
       >
-        <Avatar onMouseOver={onMouseOver} sx={{ cursor: 'pointer' }} alt="Remy Sharp" src="/assets/stock/profile_three.jpeg" />
+        <Avatar onMouseOver={onMouseOver} onMouseLeave={onMouseLeave} sx={{ cursor: 'pointer' }} alt="Remy Sharp" src="/assets/stock/profile_three.jpeg" />
       </StyledBadge>
     );
   };
