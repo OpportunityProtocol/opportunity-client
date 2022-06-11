@@ -40,10 +40,12 @@ import {
   useDisconnect,
 } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
-import { DAI_ADDRESS, ZERO_ADDRESS, ALCHEMY_HTTPS } from "../../../constant";
-import { DaiInterface, NetworkManagerInterface } from "../../../abis";
+import { DAI_ADDRESS, ZERO_ADDRESS, ALCHEMY_HTTPS, NETWORK_MANAGER_ADDRESS, LENS_HUB_PROXY } from "../../../constant";
+import { DaiInterface, LensHubInterface, NetworkManagerInterface } from "../../../abis";
 import ethers from 'ethers'
 import { hexToDecimal } from "../../helper";
+import { Result } from "ethers/lib/utils";
+import VerificationDialog from "../../../modules/user/components/VerificationDialog";
 /**
  * localStorage.getItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1) === 'connected'
  * localStorage.setItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1, 'connected');
@@ -53,8 +55,9 @@ const NavigationBar: FunctionComponent = () => {
   const classes = useStyles();
   const router = useRouter();
 
+  const [verificationDialogOpen, setVerificationDialogOpen] = useState<boolean>(false)
+  const [lensProfileId, setLensProfileId] = useState<Result | any>(0)
   const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false);
-  const [popoverTimerSet, setPopOverTimerSet] = useState<boolean>(false);
   const [show, setShow] = useState(false);
   const [walletData, setWalletData] = useState<any>({
     address: ZERO_ADDRESS,
@@ -62,6 +65,7 @@ const NavigationBar: FunctionComponent = () => {
     ethBalance: 0,
     daiBalance: 0,
   });
+  const [lensProfile, setLensProfile] = useState<any>({})
 
   const {
     connect,
@@ -73,6 +77,64 @@ const NavigationBar: FunctionComponent = () => {
   } = useConnect();
   const { disconnect } = useDisconnect();
   const accountData = useAccount();
+
+  //getProfile 
+  const lensHub_getProfile = useContractRead(
+    {
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface
+  },
+  'getProfile',
+  {
+    enabled: false,
+    watch: false,
+    chainId: 8001,
+    args: lensProfileId,
+    onError: (error) => console.log(error)
+  }
+  )
+
+  useEffect(() => {
+    if (lensProfileId !== 0) {
+      console.log(lensProfileId)
+      console.log('BOOM')
+    lensHub_getProfile.refetch({
+      throwOnError: true
+    }).then(updatedResults => {
+      if (updatedResults.isSuccess) {
+        setLensProfile(updatedResults.data)
+      } else {
+        setLensProfile({})
+      }
+
+      console.log(updatedResults)
+    })
+
+    if (lensHub_getProfile.isSuccess) {
+      setLensProfile(lensHub_getProfile.data)
+      console.log(lensHub_getProfile.data)
+    } else {
+      setLensProfile({})
+    }
+  }
+  }, [lensProfileId])
+
+  const networkManager_getLensProfileIdFromAddress = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
+    },
+    'getLensProfileIdFromAddress',
+    {
+      enabled: false,
+      chainId: 80001,
+      args: accountData.data.address,
+      onSuccess: (data: Result) => {
+        setLensProfileId(hexToDecimal(data._hex))
+      },
+      onError: () => setLensProfileId(0)
+    }
+  )
   
   const dai_balanceOf = useContractRead(
     {
@@ -117,12 +179,27 @@ const NavigationBar: FunctionComponent = () => {
   }
 
   useEffect(() => {
-    if (isConnected) {
-      let address = 'Please connect a wallet', connector = 'No connector found', ethBalance = 0, daiBalance = 0
+    async function handleOnIsConnected() {
+      let address: string = 'Please connect a wallet', 
+          connector: any = '', 
+          ethBalance: string | number = 0, 
+          daiBalance: Result | number = 0
       
       if (accountData.isSuccess) {
         address = accountData.data.address
         connector = accountData.data.connector
+
+        networkManager_getLensProfileIdFromAddress.refetch({
+          throwOnError: true
+        })
+        .then(updatedResults => {
+          console.log('U<<<<<')
+          if (updatedResults.isSuccess) {
+            setLensProfile(updatedResults.data._hex)
+          } else {
+            setLensProfileId(0)
+          }
+        })
       }
 
       if (ethBalanceData.isSuccess) {
@@ -130,8 +207,15 @@ const NavigationBar: FunctionComponent = () => {
       }
 
       if (dai_balanceOf.isSuccess) {
-        daiBalance = dai_balanceOf.data
+        const result = await dai_balanceOf.refetch()
+        if (result.isSuccess) {
+          daiBalance = dai_balanceOf.data
+        } else {
+          daiBalance = 0
+        }
       }
+      
+
 
       setWalletData({
         address,
@@ -142,8 +226,11 @@ const NavigationBar: FunctionComponent = () => {
 
       setShow(true)
       localStorage.setItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1, 'connected');
+    }
+
+    if (isConnected) {
+      handleOnIsConnected()
     } else {
-      console.log('Umm')
       setWalletData({
         address: 0,
         connector: '',
@@ -158,6 +245,7 @@ const NavigationBar: FunctionComponent = () => {
   const onMouseOverConnectedAvatar = () => setPopoverIsOpen(true);
 
   return (
+    <React.Fragment>
     <AppBar
       position="fixed"
       variant="elevation"
@@ -407,14 +495,17 @@ const NavigationBar: FunctionComponent = () => {
                     </Grid>
                   </Grid>
 
-                  <Stack spacing={2} m={2}>
-                    <Button fullWidth variant="outlined" color="primary" onClick={handleOnAddFunds}>
-                      Add Funds
-                    </Button>
-                    <Button fullWidth variant="outlined" color="primary" onClick={() => disconnect()}>
+                  <Stack spacing={2}>
+                  <Button fullWidth variant="outlined" color="error" onClick={() => disconnect()}>
                       Disconnect
                     </Button>
+                    <Button fullWidth variant="outlined" color="secondary" onClick={handleOnAddFunds}>
+                      Add Funds
+                    </Button>
 
+                    <Button fullWidth variant="outlined" color="primary" onClick={() => setVerificationDialogOpen(true)}>
+                      Become a verified freelancer
+                    </Button>
                     <Button
                       fullWidth
                       variant="contained"
@@ -448,6 +539,8 @@ const NavigationBar: FunctionComponent = () => {
         {error && <div>{error.message}</div>}
       </div>
     </AppBar>
+    <VerificationDialog open={verificationDialogOpen} handleClose={() => setVerificationDialogOpen(false)} address={accountData.data.address} />
+    </React.Fragment>
   );
 };
 

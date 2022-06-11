@@ -38,31 +38,5 @@ const BootstrapInput = styled(InputBase)(({ theme }: { theme?: Theme }) => ({
     },
   }));
 
-  const useStyles = makeStyles(() => ({
-   focused: {
-     border: `${alpha('rgb(98, 202, 161)', .6)}`
-   },
-   notFocused: {
 
-   }
-  }));
-
-
-  interface ITextInputProps {
-    placeholder?: string,
-    size?: boolean,
-    selected?: false,
-    value?: string | number,
-    multiline?: boolean,
-    rows?: number,
-    width?: string | number
-  }
-
-  const TextInput : React.FunctionComponent<ITextInputProps> = ({ width, value, placeholder, size,  selected=false, multiline, rows }) => {
-    const classes = useStyles()
-  return (
-  <BootstrapInput sx={{ width }} placeholder={placeholder}  multiline rows={rows} />
-  )
-  }
-
-  export default TextInput
+  export default BootstrapInput
