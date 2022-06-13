@@ -1,3 +1,4 @@
+
 import {
   Grid,
   Container,
@@ -20,13 +21,12 @@ import CircleIcon from "@mui/icons-material/Circle";
 import { styled, alpha } from "@mui/material/styles";
 
 import InputBase from "@mui/material/InputBase";
-import SearchIcon from "@mui/icons-material/Search";
 import FormControl from "@mui/material/FormControl";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import { InputLabel, Input } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import { positions } from "@mui/system";
-import { alignProperty } from "@mui/material/styles/cssUtils";
+import SearchIcon from '@mui/icons-material/Search';
+
 
 import { useEffect, useState } from "react";
 import { db, auth, storage } from "../../firebase";
@@ -44,18 +44,18 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
-import User from "../components/User";
+import User from "../modules/user/components/Messenger/User";
 import MessageForm from "../modules/user/components/Messenger/MessageForm";
 import Message from "../modules/user/components/Messenger/Message";
 
-const Home = () => {
+const Messenger = () => {
   const [users, setUsers] = useState([]);
-  const [chat, setChat] = useState("");
+  const [chat, setChat] = useState({});
   const [text, setText] = useState("");
   const [img, setImg] = useState("");
   const [msgs, setMsgs] = useState([]);
 
-  const user1 = auth.currentUser.uid;
+  const user1 = 0//0auth.currentUser.uid;
 
   useEffect(() => {
     const usersRef = collection(db, "users");
@@ -124,9 +124,6 @@ const Home = () => {
       media: url || "",
     });
 
-<<<<<<< HEAD
-  const handleChange = (evant, newValue) => {
-   // setValue(newValue);
     await setDoc(doc(db, "lastMsg", id), {
       text,
       from: user1,
@@ -138,10 +135,6 @@ const Home = () => {
 
     setText("");
     setImg("");
-=======
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
->>>>>>> 71c7f5da437ec1816489ba09fa7cbabe941686a9
   };
 
   return (
@@ -162,8 +155,40 @@ const Home = () => {
           height: "100%",
         }}
       >
-        <div className="home_container">
-      <div className="users_container">
+        <Grid sx={{  position: 'relative', display: 'grid', gridTemplateColumns: '1fr  3fr', overflow: 'hidden', maxHeight: '100%' , width: '100vw'}} >
+         
+        <Grid sx={{  borderRight: '1px solid #ddd', overflowY: 'auto', overflow: 'hidden'}}>
+     
+         
+           <Grid
+              
+                
+                  container
+                  direction='column'
+                  alignItems="center"
+                  alignContent="center"
+                  justifyContent='space-between'
+                  sx={{ bgcolor: "", marginLeft: "0px" , padding: '15px', marginTop: '20px', borderBottom: '1px solid #ddd', height: '25%' }}
+                >
+
+      <Avatar
+              alt="Remy Sharp"
+              src="/static/images/avatar/1.jpg"
+              sx={{
+                width: 85,
+                height: 85,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            />
+
+            <Typography sx={{ fontSize: "20px" , marginBottom: '20px'}}>Elijah Hampton</Typography>
+
+        </Grid>
+
+      
+        <Grid sx={{  overflow: 'scroll', maxHeight: '473px' , marginTop: '10px'}}>
+     
         {users.map((user) => (
           <User
             key={user.uid}
@@ -173,20 +198,40 @@ const Home = () => {
             chat={chat}
           />
         ))}
-      </div>
-      <div className="messages_container">
+        </Grid>
+      </Grid>
+      <Grid sx={{ position: 'relative' , width: '100%' }}>
         {chat ? (
           <>
-            <div className="messages_user">
-              <h3>{chat.name}</h3>
-            </div>
-            <div className="messages">
+          <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ padding: '15px', borderBottom: '1px solid #ddd'}} >
+                        <Stack direction="row" alignItems='center'>
+                        
+                        <Avatar
+                            alt=''
+                            src="/static/images/avatar/1.jpg"
+                            sx={{
+                            width: 40,
+                            height: 40,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            marginRight: "15px",
+                            }}
+                        />
+                        <Typography display='flex' sx={{ fontSize: "20px" }}>
+                              {chat.name}
+                        </Typography>
+                        </Stack>
+                        <Button sx={{ fontSize: "14px" }} ><SearchIcon /></Button>
+                  </Box>
+                
+            <Grid sx={{ height: 'calc(100vh - 395px)', overflowY: 'auto' , borderBottom: '1px solid #ddd', overflowX: 'hidden'}}>
               {msgs.length
                 ? msgs.map((msg, i) => (
                     <Message key={i} msg={msg} user1={user1} />
                   ))
                 : null}
-            </div>
+            </Grid>
+          
             <MessageForm
               handleSubmit={handleSubmit}
               text={text}
@@ -195,10 +240,10 @@ const Home = () => {
             />
           </>
         ) : (
-          <h3 className="no_conv">Select a user to start conversation</h3>
+          <Typography sx={{ fontSize: '20px', color: 'grey', textAlign: 'center' }}>Select a user to start conversation</Typography>
         )}
-      </div>
-    </div>
+      </Grid>
+    </Grid>
 
       </Paper>
     

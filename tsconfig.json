@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/messenger"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/messenger", "src/modules/user/components/Messenger/Message.js", "src/pages/messenger.js", "src/context/auth.js", "src/pages/messenger.js", "src/modules/user/components/Messenger/User.js", "src/modules/user/components/Messenger/Message.js"],
   "exclude": ["node_modules"]
 }
