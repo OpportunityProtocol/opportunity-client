@@ -37,7 +37,7 @@ import { createTheme } from '@mui/material/styles';
       },
       MuiTabs: {
         defaultProps: {
-            indicatorColor: 'none !important',
+            indicatorColor: 'primary',
         },
         styleOverrides: {
           root: {
