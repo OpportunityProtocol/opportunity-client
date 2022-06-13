@@ -15,12 +15,32 @@ import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
 import { InjectedConnector } from 'wagmi/connectors/injected'
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
-import { ALCHEMY_API_KEY, ALCHEMY_HTTPS } from '../constant';
+import { ALCHEMY_API_KEY, ALCHEMY_HTTPS, NETWORK_MANAGER_ADDRESS } from '../constant';
+import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 
-const { chains, provider, webSocketProvider } = configureChains([chain.polygon, chain.polygonMumbai, chain.rinkeby, chain.mainnet, chain.hardhat, chain.localhost], [
-  alchemyProvider({ alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}),
-  publicProvider(),
+const getConfiguredChain = () => {
+  switch(process.env.NODE_ENV) {
+    case 'production':
+      return chain.polygon
+    case 'development':
+      return chain.localhost
+    case 'test':
+      return chain.polygonMumbai
+    default:
+      return chain.localhost
+  }
+}
+
+const { chains, provider, webSocketProvider } = configureChains([getConfiguredChain()], [
+  alchemyProvider({ alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY, priority: 0 }),
+  jsonRpcProvider({
+    rpc: (chain) => ({
+      http: 'http://localhost:8545'
+    }),
+  }),
 ])
+
+console.log(chains)
 
 const client = createClient({
   autoConnect: true,

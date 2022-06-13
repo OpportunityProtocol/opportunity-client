@@ -29,7 +29,7 @@ import ConnectedAvatar from "../ConnectedAvatar/ConnectedAvatar";
 import SearchBarV1 from "../SearchBarV1/SearchBarV1";
 import Web3Modal from "web3modal";
 import { SingleBedRounded } from "@mui/icons-material";
-import { providerOptions } from "../../../constant/provider";
+import { CHAIN_ID, providerOptions } from "../../../constant/provider";
 import { LensTalentLocalStorageKeys } from "../../../constant/types";
 import {
   useAccount,
@@ -78,6 +78,7 @@ const NavigationBar: FunctionComponent = () => {
   const { disconnect } = useDisconnect();
   const accountData = useAccount();
 
+
   //getProfile 
   const lensHub_getProfile = useContractRead(
     {
@@ -88,8 +89,8 @@ const NavigationBar: FunctionComponent = () => {
   {
     enabled: false,
     watch: false,
-    chainId: 8001,
-    args: lensProfileId,
+    chainId: CHAIN_ID,
+    args: [lensProfileId],
     onError: (error) => console.log(error)
   }
   )
@@ -106,8 +107,10 @@ const NavigationBar: FunctionComponent = () => {
       } else {
         setLensProfile({})
       }
-
-      console.log(updatedResults)
+    })
+    .catch(error => {
+      console.log('lensHub_getProfile')
+      console.log(error)
     })
 
     if (lensHub_getProfile.isSuccess) {
@@ -119,20 +122,24 @@ const NavigationBar: FunctionComponent = () => {
   }
   }, [lensProfileId])
 
+
   const networkManager_getLensProfileIdFromAddress = useContractRead(
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface
+      contractInterface: JSON.stringify(NetworkManagerInterface)
     },
     'getLensProfileIdFromAddress',
     {
       enabled: false,
-      chainId: 80001,
-      args: accountData.data.address,
+      chainId: CHAIN_ID,
+      args: [accountData ? accountData?.data?.address : 0],
       onSuccess: (data: Result) => {
         setLensProfileId(hexToDecimal(data._hex))
       },
-      onError: () => setLensProfileId(0)
+      onError: (error) => {
+        console.log(error)
+        setLensProfileId(0)
+      }
     }
   )
   
@@ -146,13 +153,17 @@ const NavigationBar: FunctionComponent = () => {
       enabled: false,
       cacheTime: 50000,
       watch: false,
-      chainId: 80001,
-      args: accountData.data.address,
+      chainId: CHAIN_ID,
+      args: [accountData ? accountData?.data?.address : 0],
+      onError: (error: Error) => {
+        console.log('dai_balanceOf')
+        console.log(error)
+      }
     }
   );
 
   const ethBalanceData = useBalance({
-    addressOrName: accountData.data.address,
+    addressOrName: accountData ? accountData?.data?.address : 0,
   });
 
   const dai_mint = useContractWrite(
@@ -162,19 +173,42 @@ const NavigationBar: FunctionComponent = () => {
     },
     'mint',
     {
-      args: [accountData.data.address, 10000]
+      args: [accountData ? accountData?.data?.address : 0, 10000]
     }
   )
-
-
 
   const handleOnAddFunds = async () => {
     await dai_mint.write()
     const result = await dai_balanceOf.refetch()
+    console.log(result)
     
     setWalletData({
       ...walletData,
       daiBalance: result.data
+    })
+  }
+
+  const onFetchLensProfileId = () => {
+    console.log('Calling onFetchLensProfileId.')
+    console.log(accountData.data.address)
+    console.log(walletData.address)
+    console.log(NETWORK_MANAGER_ADDRESS)
+    console.log(CHAIN_ID)
+    networkManager_getLensProfileIdFromAddress.refetch({
+      throwOnError: true
+    })
+    .then(updatedResults => {
+      console.log('U<<<<<')
+      if (updatedResults.isSuccess) {
+        setLensProfile(updatedResults.data._hex)
+        console.log(updatedResults)
+      } else {
+        setLensProfileId(0)
+      }
+    })
+    .catch(error => {
+      console.log('@@@@@@@getLens')
+      console.log(error)
     })
   }
 
@@ -189,17 +223,7 @@ const NavigationBar: FunctionComponent = () => {
         address = accountData.data.address
         connector = accountData.data.connector
 
-        networkManager_getLensProfileIdFromAddress.refetch({
-          throwOnError: true
-        })
-        .then(updatedResults => {
-          console.log('U<<<<<')
-          if (updatedResults.isSuccess) {
-            setLensProfile(updatedResults.data._hex)
-          } else {
-            setLensProfileId(0)
-          }
-        })
+        onFetchLensProfileId()
       }
 
       if (ethBalanceData.isSuccess) {
@@ -368,10 +392,7 @@ const NavigationBar: FunctionComponent = () => {
                 justifyContent: "flex-end",
               }}
             >
-              {show === true &&
-              localStorage.getItem(
-                LensTalentLocalStorageKeys.ConnectedWalletDataV1
-              ) == "connected" ? (
+              {show === true ? (
                 <ConnectedAvatar
                   onMouseOver={onMouseOverConnectedAvatar}
                 //  onMouseLeave={() => setPopoverIsOpen(false)}
@@ -421,7 +442,7 @@ const NavigationBar: FunctionComponent = () => {
                           color: "#212121",
                         }}
                       >
-                        @happytowork
+                        {lensProfileId === 0 ? <Button variant='text'> Become a verified freelancer </Button> : <Typography> @happytowork </Typography>}
                       </Box>
 
                       <Box
@@ -539,7 +560,7 @@ const NavigationBar: FunctionComponent = () => {
         {error && <div>{error.message}</div>}
       </div>
     </AppBar>
-    <VerificationDialog open={verificationDialogOpen} handleClose={() => setVerificationDialogOpen(false)} address={accountData.data.address} />
+    <VerificationDialog open={verificationDialogOpen} handleClose={() => setVerificationDialogOpen(false)} address={walletData.address} />
     </React.Fragment>
   );
 };

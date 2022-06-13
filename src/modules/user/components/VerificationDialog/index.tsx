@@ -23,7 +23,7 @@ import { Check } from "@material-ui/icons";
 import Image from "next/image";
 import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
 import { useContractWrite } from "wagmi";
-import { NETWORK_MANAGER_ADDRESS } from "../../../../constant";
+import { NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "../../../../constant";
 import { NetworkManagerInterface } from "../../../../abis";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 
@@ -50,24 +50,36 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
   const networkManager_registerWorker = useContractWrite(
       {
           addressOrName: NETWORK_MANAGER_ADDRESS,
-          contractInterface: NetworkManagerInterface
+          contractInterface: JSON.stringify(NetworkManagerInterface),
       },
-      'registerWorker'
+      'registerWorker',
+      {
+        args: [{
+          to: NETWORK_MANAGER_ADDRESS,
+        handle: 'coolnameman',
+        imageURI: 'sdfsdjfopisdjfosdj;foasdijfsodij',
+        followModule: '0xf2ccc94C945C4CC7669d681fE740f1eF13ac0603',
+        followModuleInitData: [],
+        followNFTURI: 'dsoifajsdfjsdoifsdf'
+        }],
+        onError: error => console.log(error),
+        onSuccess: data => console.log(data)
+      }
   )
 
   const handleOnVerify = async () => {
-
-    const createProfileData = {
+    await networkManager_registerWorker.writeAsync({
+      args: [{
         to: NETWORK_MANAGER_ADDRESS,
-        handle: 'NEWCOOLHANDLEONE',
-        imageURI: '',
-        followModule: '0xe7AB9BA11b97EAC820DbCc861869092b52B65C06',
-        followModuleInitData: [],
-        followNFTURI: ''
-    }
-
-    const txResponse: TransactionResponse = await networkManager_registerWorker.writeAsync({
-        args: createProfileData,
+      handle: 'coolnameman',
+      imageURI: 'sdfsdjfopisdjfosdj;foasdijfsodij',
+      followModule: '0xf2ccc94C945C4CC7669d681fE740f1eF13ac0603',
+      followModuleInitData: [],
+      followNFTURI: 'dsoifajsdfjsdoifsdf'
+      }],
+      overrides: {
+        gasLimit: 50000
+      }
     })
   } 
 

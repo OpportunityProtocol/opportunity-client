@@ -25,7 +25,7 @@ export const POLYGON_MUMBAI = {
   rpcUrls: { default: 'https://rpc-mumbai.maticvigil.com' }
 }
 
-export const CHAIN_ID = 1337 //process.env.NODE_ENV === 'production' ? POLYGON_MAINNET.id : POLYGON_MUMBAI.id
+export const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID)
 
 export const providerOptions = {
     /* See Provider Options Section */

@@ -82,8 +82,6 @@ const Explore: FunctionComponent = () => {
   });
 
   const fetchNetworkSuggestions = async () => {
-    console.log('@@')
-    console.log(process.env)
     const a = await fetch('https://randomuser.me/api/?results=20', {
       headers: {
         'Access-Control-Allow-Origin': '*'
