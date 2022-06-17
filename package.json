@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start:dev": "NODE_ENV=test next dev",
-    "start:local": "NODE_ENV=development next dev",
+    "start:dev": "NODE_ENV=test CHAIN_ENV=test next dev",
+    "start:local": "NODE_ENV=development CHAIN_ENV=development next dev",
     "build": "next build",
-    "start:prod": "NODE_ENV=production next start",
+    "start:prod": "NODE_ENV=production CHAIN_ENV=production next start",
     "lint": "next lint",
     "build-logs": "vercel logs opportunity-client-jg0hwghxc-opportunity.vercel.app",
     "deploy-dev": "vercel",

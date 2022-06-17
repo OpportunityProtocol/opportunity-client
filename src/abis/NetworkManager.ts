@@ -172,25 +172,6 @@ const NetworkManagerInterface = [
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "oldOwner",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "contract IArbitrator",
         "name": "_arbitrator",
@@ -644,19 +625,6 @@ const NetworkManagerInterface = [
   },
   {
     "inputs": [],
-    "name": "getOwner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "getProtocolFee",
     "outputs": [
       {
@@ -843,11 +811,6 @@ const NetworkManagerInterface = [
     "inputs": [
       {
         "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
         "name": "tokenFactory",
         "type": "address"
       },
@@ -864,6 +827,11 @@ const NetworkManagerInterface = [
       {
         "internalType": "address",
         "name": "_lensHub",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_proxyProfileCreator",
         "type": "address"
       },
       {
@@ -907,6 +875,19 @@ const NetworkManagerInterface = [
     "outputs": [
       {
         "internalType": "contract ILensHub",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "proxyProfileCreator",
+    "outputs": [
+      {
+        "internalType": "contract IProfileCreator",
         "name": "",
         "type": "address"
       }
@@ -1465,19 +1446,6 @@ const NetworkManagerInterface = [
       }
     ],
     "name": "setMaxWaitlistSize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "setOwner",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

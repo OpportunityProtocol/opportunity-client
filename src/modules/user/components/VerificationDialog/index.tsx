@@ -26,6 +26,7 @@ import { useContractWrite } from "wagmi";
 import { NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "../../../../constant";
 import { NetworkManagerInterface } from "../../../../abis";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
+import { ethers, providers } from "ethers";
 
 const steps = [
   "Select campaign settings",
@@ -39,49 +40,43 @@ interface IVerificationDialogProps {
   address: string;
 }
 
+export const MOCK_PROFILE_URI =
+  "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu";
+export const MOCK_FOLLOW_NFT_URI =
+  "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan";
+
 const VerificationDialog: FC<IVerificationDialogProps> = ({
   open = false,
   handleClose,
-  address
+  address,
 }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set<number>());
 
   const networkManager_registerWorker = useContractWrite(
-      {
-          addressOrName: NETWORK_MANAGER_ADDRESS,
-          contractInterface: JSON.stringify(NetworkManagerInterface),
-      },
-      'registerWorker',
-      {
-        args: [{
-          to: NETWORK_MANAGER_ADDRESS,
-        handle: 'coolnameman',
-        imageURI: 'sdfsdjfopisdjfosdj;foasdijfsodij',
-        followModule: '0xf2ccc94C945C4CC7669d681fE740f1eF13ac0603',
-        followModuleInitData: [],
-        followNFTURI: 'dsoifajsdfjsdoifsdf'
-        }],
-        onError: error => console.log(error),
-        onSuccess: data => console.log(data)
-      }
-  )
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    "registerWorker",
+    {
+      args: {to: "0x55008E732C906624aF96fb54C29E6cD224a0CBF0", handle: "nbujdo21",  imageURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu", followModule: "0x0000000000000000000000000000000000000000", followModuleInitData: [], followNFTURI: "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan"},
+        overrides: {
+          gasLimit: 40000,
+        },
+      onError: (error) => console.log(error),
+      onSuccess: (data) => console.log(data),
+    }
+  );
 
   const handleOnVerify = async () => {
-    await networkManager_registerWorker.writeAsync({
-      args: [{
-        to: NETWORK_MANAGER_ADDRESS,
-      handle: 'coolnameman',
-      imageURI: 'sdfsdjfopisdjfosdj;foasdijfsodij',
-      followModule: '0xf2ccc94C945C4CC7669d681fE740f1eF13ac0603',
-      followModuleInitData: [],
-      followNFTURI: 'dsoifajsdfjsdoifsdf'
-      }],
+    await networkManager_registerWorker.write({
+      args: {to: "0x55008E732C906624aF96fb54C29E6cD224a0CBF0", handle: "nbujdo21",  imageURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu", followModule: "0x0000000000000000000000000000000000000000", followModuleInitData: [], followNFTURI: "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan"},
       overrides: {
-        gasLimit: 50000
-      }
-    })
-  } 
+        gasLimit: 40000,
+      },
+    });
+  };
 
   const isStepOptional = (step: number) => {
     return step === 1;
@@ -274,7 +269,9 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
       <DialogActions>
         <Button onClick={handleClose}>Close</Button>
         {activeStep === 0 ? (
-          <Button onClick={() => setActiveStep(prevState => prevState + 1)}>Next</Button>
+          <Button onClick={() => setActiveStep((prevState) => prevState + 1)}>
+            Next
+          </Button>
         ) : (
           <Button onClick={handleOnVerify}>Verify on LensTalent</Button>
         )}

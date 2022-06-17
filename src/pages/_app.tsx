@@ -19,7 +19,7 @@ import { ALCHEMY_API_KEY, ALCHEMY_HTTPS, NETWORK_MANAGER_ADDRESS } from '../cons
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 
 const getConfiguredChain = () => {
-  switch(process.env.NODE_ENV) {
+  switch(process.env.NEXT_PUBLIC_CHAIN_ENV) {
     case 'production':
       return chain.polygon
     case 'development':

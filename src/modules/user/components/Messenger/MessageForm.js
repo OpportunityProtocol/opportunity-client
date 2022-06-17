@@ -4,9 +4,6 @@ import FormControl from '@mui/material/FormControl';
 import InputBase from '@mui/material/InputBase';
 import { Button, Grid, Input, IconButton } from "@mui/material";
 
-
-
-
 const MessageForm = ({ handleSubmit, text, setText, setImg }) => {
   return (
 
