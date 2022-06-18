@@ -1,5 +1,6 @@
 import '../../styles/globals.css';
 import React, { useEffect, useState } from 'react';
+import { Box, Container } from '@mui/material'
 import type { AppProps } from 'next/app';
 import Opportunity from '../Opportunity';
 import theme from '../../material_theme';
@@ -17,6 +18,8 @@ import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
 import { ALCHEMY_API_KEY, ALCHEMY_HTTPS, NETWORK_MANAGER_ADDRESS } from '../constant';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
+import MarketDisplay from '../modules/market/components/MarketDisplay';
+import MarketToolbar from '../modules/market/components/MarketToolbar';
 
 const getConfiguredChain = () => {
   switch(process.env.NEXT_PUBLIC_CHAIN_ENV) {

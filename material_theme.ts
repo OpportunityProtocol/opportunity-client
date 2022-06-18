@@ -66,9 +66,12 @@ import { createTheme } from '@mui/material/styles';
       MuiTab: {
         styleOverrides: {
           root: {
-            border: 'none !important',
-            fontWeight: 'bold'
-          }
+            backgroundColor: '#f9f9fb',
+            border: '1px solid #EFF2F6',
+            "&.Mui-selected": {
+              "backgroundColor": "#ffffff !important"
+            }
+          },
         }
       },
       MuiChip: {

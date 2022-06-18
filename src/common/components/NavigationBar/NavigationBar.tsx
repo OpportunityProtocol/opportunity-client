@@ -46,6 +46,8 @@ import ethers from 'ethers'
 import { hexToDecimal } from "../../helper";
 import { Result } from "ethers/lib/utils";
 import VerificationDialog from "../../../modules/user/components/VerificationDialog";
+import MarketDisplay from "../../../modules/market/components/MarketDisplay";
+import MarketToolbar from "../../../modules/market/components/MarketToolbar";
 /**
  * localStorage.getItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1) === 'connected'
  * localStorage.setItem(LensTalentLocalStorageKeys.ConnectedWalletDataV1, 'connected');
@@ -267,7 +269,7 @@ const NavigationBar: FunctionComponent = () => {
         borderBottom: "1px solid #ddd !important",
       }}
     >
-      <Container maxWidth="lg" sx={{ bgcolor: "#fff" }}>
+      <Container maxWidth="lg" sx={{ display: 'flex', flexDirection: 'column', bgcolor: "#fff" }}>
         <Toolbar className={classes.toolbar}>
           <Grid
             width="100%"
@@ -525,8 +527,10 @@ const NavigationBar: FunctionComponent = () => {
             </Grid>
           </Grid>
         </Toolbar>
-      </Container>
-      <div>
+              </Container>
+
+
+    {/*  <div>
         {connectors.map((connector) => (
           <button
             disabled={!connector.ready}
@@ -542,8 +546,9 @@ const NavigationBar: FunctionComponent = () => {
         ))}
 
         {error && <div>{error.message}</div>}
-      </div>
+            </div> */}
     </AppBar>
+    
     <VerificationDialog open={verificationDialogOpen} handleClose={() => setVerificationDialogOpen(false)} address={walletData.address} />
     </React.Fragment>
   );

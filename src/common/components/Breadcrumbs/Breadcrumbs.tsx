@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { Breadcrumbs, Chip, Container, Box, Theme } from '@mui/material';
+import { Breadcrumbs, Chip, Container, Stack, Button, Box, Theme } from '@mui/material';
 import { styled, emphasize } from '@mui/system';
 
 import HomeIcon from '@mui/icons-material/Home';
@@ -25,12 +25,22 @@ const StyledBreadcrumb = styled(Chip)(({ theme }: { theme?: Theme }) => {
 const NavigationBreadcrumbs: FunctionComponent = () => {
   const router = useRouter();
   return (
-    <Container maxWidth="lg" sx={{ padding: '1% 0%' }}>
+    <Container maxWidth="lg" sx={{ padding: '1% 0%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <Breadcrumbs aria-label="breadcrumb" separator="›">
         <StyledBreadcrumb component="a" href="#" label="Home" />
         <StyledBreadcrumb component="a" href="#" label="Catalog" />
         <StyledBreadcrumb label="Accessories" />
       </Breadcrumbs>
+
+      <Stack direction='row' justifyContent='flex-end' spacing={2}>
+      <Button size='small' variant='contained' sx={{ width: 'auto', height: 25}}>
+              Create Contract
+            </Button>
+
+            <Button size='small' variant='contained' sx={{width: 'auto', height: 25}}>
+              Create Service
+            </Button>
+      </Stack>
     </Container>
   );
 };

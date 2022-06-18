@@ -10,6 +10,7 @@ import {
   IOpportunityProps,
 } from './OpportunityInterfaces';
 import NavigationBar from './common/components/NavigationBar/NavigationBar';
+import MarketToolbar from './modules/market/components/MarketToolbar';
 
 const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) => {
   const router = useRouter();
@@ -27,7 +28,7 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
 
 
   return (
-    <Box sx={{ display: 'flex', bgcolor: APP_BACKGROUND }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: APP_BACKGROUND }}>
       <NavigationBar />
       <Box
         component="main"
