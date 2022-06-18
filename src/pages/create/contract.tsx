@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import clsx from 'clsx';
+import { useState } from "react";
+import clsx from "clsx";
 
 import {
   Box,
@@ -11,176 +11,114 @@ import {
   Container,
   Divider,
   Grid,
-  TextField,
-  InputBase,
   Typography,
-  Stepper,
-  Step,
-  StepLabel,
-} from '@mui/material';
+} from "@mui/material";
 
-import { styled } from '@mui/material/styles';
-import Check from '@mui/icons-material/Check';
-import BoltIcon from '@mui/icons-material/Bolt';
-import DateRangeIcon from '@mui/icons-material/DateRange';
-import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
-import { StepIconProps } from '@mui/material/StepIcon';
-import { useStyles } from '../../modules/contract/ContractStyles';
-import { alpha } from '@mui/material';
-import Link from 'next/link';
-import ClickableCard from '../../common/components/ClickableCard/ClickableCard';
-import { useRouter } from 'next/router';
-import { Add } from '@mui/icons-material';
-import TextInput from '../../common/components/BootstrapInput/BootstrapInput';
+import BoltIcon from "@mui/icons-material/Bolt";
+import DateRangeIcon from "@mui/icons-material/DateRange";
+import HourglassTopIcon from "@mui/icons-material/HourglassTop";
+import { useStyles } from "../../modules/contract/ContractStyles";
+import { alpha } from "@mui/material";
+import Link from "next/link";
+import ClickableCard from "../../common/components/ClickableCard/ClickableCard";
+import { NextRouter, useRouter } from "next/router";
+import { Add } from "@mui/icons-material";
+import TextInput from "../../common/components/BootstrapInput/BootstrapInput";
+import { NextPage } from "next";
+import StepperComponent from "../../common/components/Stepper";
 
-const steps = ['Complete the basic information', 'Pay fees'];
+const steps = ["Complete the basic information", "Pay fees"];
 
-const QontoConnector = styled(StepConnector)(({ theme }) => ({
-  [`&.${stepConnectorClasses.alternativeLabel}`]: {
-    top: 10,
-    left: 'calc(-50% + 16px)',
-    right: 'calc(50% + 16px)',
-  },
-  [`&.${stepConnectorClasses.active}`]: {
-    [`& .${stepConnectorClasses.line}`]: {
-      borderColor: '#eee',
-    },
-  },
-  [`&.${stepConnectorClasses.completed}`]: {
-    [`& .${stepConnectorClasses.line}`]: {
-      borderColor: '#43A047',
-    },
-  },
-  [`& .${stepConnectorClasses.line}`]: {
-    borderColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : '#eaeaf0',
-    borderTopWidth: 3,
-    borderRadius: 1,
-  },
-}));
+const CreateContractPage: NextPage = (): JSX.Element => {
+  const [step, setStep] = useState<number>(0);
+  const router: NextRouter = useRouter();
 
-const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean } }>(
-  ({ theme, ownerState }) => ({
-    color: '#eaeaf0',
-    display: 'flex',
-    height: 22,
-    alignItems: 'center',
-    ...(ownerState.active && {
-      color: '#784af4',
-    }),
-    '& .QontoStepIcon-completedIcon': {
-      color: '#43A047',
-      zIndex: 1,
-      fontSize: 18,
-    },
-    '& .QontoStepIcon-circle': {
-      width: 8,
-      height: 8,
-      borderRadius: '50%',
-      backgroundColor: '#eee',
-    },
-  })
-);
-
-function QontoStepIcon(props: StepIconProps) {
-  const { active, completed, className } = props;
-
-  return (
-    <QontoStepIconRoot ownerState={{ active }} className={className}>
-      {completed ? (
-        <Check className="QontoStepIcon-completedIcon" />
-      ) : (
-        <div className="QontoStepIcon-circle" />
-      )}
-    </QontoStepIconRoot>
-  );
-}
-
-function CustomizedSteppers() {
-  return (
-    <Stepper sx={{ my: 5 }} alternativeLabel activeStep={1} connector={<QontoConnector />}>
-      {steps.map((label) => (
-        <Step key={label}>
-          <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
-        </Step>
-      ))}
-    </Stepper>
-  );
-}
-
-const Create: React.FunctionComponent = () => {
-  const classes = useStyles();
-  const [step, setStep] = useState(0);
-  const router = useRouter();
-
-  const onCreateRelationship = () => {
-    router.push('/jobs');
+  const onCreateRelationship = (): void => {
+    router.push("/jobs");
   };
 
   return (
-    <Container maxWidth="lg" sx={{ bgcolor: '#fff !important', padding: '1% 4%', width: '100%' }}>
-      <CustomizedSteppers />
+    <Container
+      maxWidth="lg"
+      sx={{ bgcolor: "#fff !important", padding: "2% 4%", width: "100%" }}
+    >
+      <StepperComponent steps={steps} activeStep={step} />
       <Box my={2}>
         <Typography fontWeight="bold" fontSize={25} py={1}>
           Post a Contract
         </Typography>
-        <Card variant="outlined" sx={{ p: 2, backgroundColor: '#fafafa', width: '100%' }}>
+        <Card
+          variant="outlined"
+          sx={{ p: 2, backgroundColor: "#fafafa", width: "100%" }}
+        >
           <Typography fontSize={14} py={1}>
-            - Incase of disputes this information will be sent as evidence to Kleros courts to be
-            arbitrated by unbiased third parties.{' '}
+            - Incase of disputes this information will be sent as evidence to
+            Kleros courts to be arbitrated by unbiased third parties.{" "}
             <Link href="/">
-              <Typography variant="button" style={{ color: '#1E88E5' }}>
+              <Typography variant="button" style={{ color: "#1E88E5" }}>
                 Learn more.
               </Typography>
             </Link>
           </Typography>
 
           <Typography fontSize={14} py={1}>
-            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean cursus sodales
-            sollicitudin. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur id
-            purus id sapien efficitur aliquam.
+            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+            cursus sodales sollicitudin. Lorem ipsum dolor sit amet, consectetur
+            adipiscing elit. Curabitur id purus id sapien efficitur aliquam.
           </Typography>
 
           <Typography fontSize={14} py={1}>
-            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean cursus sodales
-            sollicitudin. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur id
-            purus id sapien efficitur aliquam.
+            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+            cursus sodales sollicitudin. Lorem ipsum dolor sit amet, consectetur
+            adipiscing elit. Curabitur id purus id sapien efficitur aliquam.
           </Typography>
 
           <Divider sx={{ my: 2 }} />
 
           <Typography fontSize={14} py={1}>
-            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean cursus sodales
-            sollicitudin. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur id
-            purus id sapien efficitur aliquam.
+            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+            cursus sodales sollicitudin. Lorem ipsum dolor sit amet, consectetur
+            adipiscing elit. Curabitur id purus id sapien efficitur aliquam.
           </Typography>
 
           <Typography fontSize={14} py={1}>
-            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean cursus sodales
-            sollicitudin. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur id
-            purus id sapien efficitur aliquam.
+            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
+            cursus sodales sollicitudin. Lorem ipsum dolor sit amet, consectetur
+            adipiscing elit. Curabitur id purus id sapien efficitur aliquam.
           </Typography>
         </Card>
       </Box>
       {step === 0 ? <CreateBasicInformation /> : <CreateValueAndFees />}
-      <Divider sx={{ width: '100%' }} />
-      <Grid sx={{ my: 2 }} container direction="row" alignItems="center" justifyContent="flex-end">
+      <Divider sx={{ width: "100%" }} />
+      <Grid
+        sx={{ my: 2 }}
+        container
+        direction="row"
+        alignItems="center"
+        justifyContent="flex-end"
+      >
         {step === 1 ? (
           <Button
-            sx={{ mx: 1, width: 120, color: '#43A047', p: 1 }}
+            sx={{ mx: 1, width: 120, color: "#43A047", p: 1 }}
             variant="outlined"
-            onClick={() => router.push('/jobs')}
+            onClick={() => router.push("/jobs")}
           >
             <Typography>Back</Typography>
           </Button>
         ) : null}
         <Grid item>
           <Button
-            sx={{ mx: 1, width: 120, color: '#43A047', p: 1 }}
+            sx={{ mx: 1, width: 120, color: "#43A047", p: 1 }}
             variant="outlined"
-            onClick={step === 0 ? () => setStep(1) : () => onCreateRelationship()}
+            onClick={
+              step === 0 ? () => setStep(1) : () => onCreateRelationship()
+            }
           >
-            {step === 0 ? <Typography>Next</Typography> : <Typography>Create</Typography>}
+            {step === 0 ? (
+              <Typography>Next</Typography>
+            ) : (
+              <Typography>Create</Typography>
+            )}
           </Button>
         </Grid>
       </Grid>
@@ -190,39 +128,47 @@ const Create: React.FunctionComponent = () => {
 
 const CreateBasicInformation: React.FunctionComponent = () => {
   const classes = useStyles();
-  const [contractDuration, setContractDuration] = useState('Quick Job');
+  const [contractDuration, setContractDuration] = useState("Quick Job");
   return (
     <Box sx={{ pb: 3 }}>
-      <Box sx={{ width: '100%' }}>
+      <Box sx={{ width: "100%" }}>
         <Box py={1}>
           <Typography fontWeight="medium" fontSize={16}>
             Contract Duration
           </Typography>
           <Typography variant="body2" className={classes.sectionSubheader}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt ipsum ut
-            maximus malesuada.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
+            tincidunt ipsum ut maximus malesuada.
           </Typography>
         </Box>
 
-        <Grid sx={{ width: '100%' }} container spacing={3} direction="row" alignItems="center">
+        <Grid
+          sx={{ width: "100%" }}
+          container
+          spacing={3}
+          direction="row"
+          alignItems="center"
+        >
           <Grid item>
             <ClickableCard
               variant="outlined"
               sx={{
                 border:
-                  contractDuration === 'Quick Job'
-                    ? `4px solid ${alpha('rgb(98, 202, 161)', 0.6)}`
-                    : 'none',
+                  contractDuration === "Quick Job"
+                    ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
+                    : "none",
               }}
               className={clsx(
                 classes.marketTypeCard,
-                contractDuration === 'Quick Job' ? classes.selectedCard : null
+                contractDuration === "Quick Job" ? classes.selectedCard : null
               )}
             >
-              <BoltIcon sx={{ color: '#FFEB3B' }} />
+              <BoltIcon sx={{ color: "#FFEB3B" }} />
               <Box py={2} className={classes.columnCenter}>
                 <Typography>Quick Job</Typography>
-                <Typography variant="body2">Time Range: 30min - 1 Hour</Typography>
+                <Typography variant="body2">
+                  Time Range: 30min - 1 Hour
+                </Typography>
               </Box>
             </ClickableCard>
           </Grid>
@@ -232,10 +178,10 @@ const CreateBasicInformation: React.FunctionComponent = () => {
               variant="outlined"
               className={clsx(
                 classes.marketTypeCard,
-                contractDuration === 'Short Term' ? classes.selectedCard : null
+                contractDuration === "Short Term" ? classes.selectedCard : null
               )}
             >
-              <DateRangeIcon sx={{ color: '#2196F3' }} />
+              <DateRangeIcon sx={{ color: "#2196F3" }} />
               <Box py={2} className={classes.columnCenter}>
                 <Typography>Short Term Work</Typography>
                 <Typography variant="body2">A few days - 1 Month</Typography>
@@ -248,10 +194,10 @@ const CreateBasicInformation: React.FunctionComponent = () => {
               variant="outlined"
               className={clsx(
                 classes.marketTypeCard,
-                contractDuration === 'Long Term' ? classes.selectedCard : null
+                contractDuration === "Long Term" ? classes.selectedCard : null
               )}
             >
-              <HourglassTopIcon sx={{ color: '#4CAF50' }} />
+              <HourglassTopIcon sx={{ color: "#4CAF50" }} />
               <Box py={2} className={classes.columnCenter}>
                 <Typography>Long Term Work</Typography>
                 <Typography variant="body2">A Month or Longer</Typography>
@@ -269,15 +215,23 @@ const CreateBasicInformation: React.FunctionComponent = () => {
             Basic Information
           </Typography>
           <Typography variant="body2" className={classes.sectionSubheader}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt ipsum ut
-            maximus malesuada.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
+            tincidunt ipsum ut maximus malesuada.
           </Typography>
         </Box>
 
-        <Grid sx={{ py: 2 }} container direction="row" alignItems="center" spacing={10}>
+        <Grid
+          sx={{ py: 2 }}
+          container
+          direction="row"
+          alignItems="center"
+          spacing={10}
+        >
           <Grid item>
             <Typography className={classes.subSectionHeader}>Title</Typography>
-            <Typography variant="caption">This will be the display for your contract</Typography>
+            <Typography variant="caption">
+              This will be the display for your contract
+            </Typography>
           </Grid>
 
           <Grid item>
@@ -285,15 +239,25 @@ const CreateBasicInformation: React.FunctionComponent = () => {
           </Grid>
         </Grid>
 
-        <Grid sx={{ py: 2 }} container direction="row" alignItems="flex-start" spacing={10}>
+        <Grid
+          sx={{ py: 2 }}
+          container
+          direction="row"
+          alignItems="flex-start"
+          spacing={10}
+        >
           <Grid item>
-            <Typography className={classes.subSectionHeader}>Description</Typography>
-            <Typography variant="caption">This will be the display for your contract</Typography>
+            <Typography className={classes.subSectionHeader}>
+              Description
+            </Typography>
+            <Typography variant="caption">
+              This will be the display for your contract
+            </Typography>
           </Grid>
 
           <Grid item>
             <TextInput
-              value={''}
+              value={""}
               placeholder="Enter a description"
               width={500}
               multiline
@@ -302,10 +266,18 @@ const CreateBasicInformation: React.FunctionComponent = () => {
           </Grid>
         </Grid>
 
-        <Grid sx={{ py: 2 }} container direction="row" alignItems="flex-start" spacing={10}>
+        <Grid
+          sx={{ py: 2 }}
+          container
+          direction="row"
+          alignItems="flex-start"
+          spacing={10}
+        >
           <Grid item>
             <Typography className={classes.subSectionHeader}>Budget</Typography>
-            <Typography variant="caption">This will be the display for your contract</Typography>
+            <Typography variant="caption">
+              This will be the display for your contract
+            </Typography>
           </Grid>
 
           <Grid item>
@@ -313,10 +285,20 @@ const CreateBasicInformation: React.FunctionComponent = () => {
           </Grid>
         </Grid>
 
-        <Grid sx={{ py: 2 }} container direction="row" alignItems="flex-start" spacing={10}>
+        <Grid
+          sx={{ py: 2 }}
+          container
+          direction="row"
+          alignItems="flex-start"
+          spacing={10}
+        >
           <Grid item>
-            <Typography className={classes.subSectionHeader}>Deadline</Typography>
-            <Typography variant="caption">This will be the display for your contract</Typography>
+            <Typography className={classes.subSectionHeader}>
+              Deadline
+            </Typography>
+            <Typography variant="caption">
+              This will be the display for your contract
+            </Typography>
           </Grid>
 
           <Grid item>
@@ -324,7 +306,13 @@ const CreateBasicInformation: React.FunctionComponent = () => {
           </Grid>
         </Grid>
 
-        <Grid sx={{ py: 2 }} container direction="row" alignItems="flex-start" spacing={10}>
+        <Grid
+          sx={{ py: 2 }}
+          container
+          direction="row"
+          alignItems="flex-start"
+          spacing={10}
+        >
           <Grid item>
             <Button
               endIcon={<Add />}
@@ -351,8 +339,8 @@ const CreateBasicInformation: React.FunctionComponent = () => {
             Definition of Done
           </Typography>
           <Typography variant="body2" className={classes.sectionSubheader}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt ipsum ut
-            maximus malesuada.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
+            tincidunt ipsum ut maximus malesuada.
           </Typography>
         </Box>
 
@@ -371,8 +359,8 @@ const CreateBasicInformation: React.FunctionComponent = () => {
             Optional
           </Typography>
           <Typography variant="body2" className={classes.sectionSubheader}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce tincidunt ipsum ut
-            maximus malesuada.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
+            tincidunt ipsum ut maximus malesuada.
           </Typography>
         </Box>
 
@@ -408,9 +396,9 @@ const CreateValueAndFees: React.FunctionComponent = () => {
   const classes = useStyles();
 
   return (
-    <Box sx={{ pb: 3, width: '100%' }}>
+    <Box sx={{ pb: 3, width: "100%" }}>
       <Box my={2} className={classes.columnCenter}>
-        <Card variant="outlined" sx={{ p: 2, width: '100%' }}>
+        <Card variant="outlined" sx={{ p: 2, width: "100%" }}>
           <Typography variant="body2">Protocol Fee: 0</Typography>
           <Typography variant="body2">Estimated Gas Fee: 0</Typography>
           <Divider sx={{ my: 2 }} />
