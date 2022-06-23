@@ -80,17 +80,16 @@ const Contracts: React.FunctionComponent<any> = () => {
           <Tabs
             value={tabValue}
             onChange={handleOnChangeTab}
-            textColor="secondary"
-            indicatorColor="secondary"
-            aria-label="secondary tabs example"
+            textColor="primary"
+            indicatorColor="primary"
           >
             <Tab value={0} label="My Services" />
-            <Tab value={1} label="My Gigs" />
-            <Tab value={2} label="My Posted Gigs" />
+            <Tab value={1} label="My Contracts" />
+            <Tab value={2} label="Pending Services" />
+            <Tab value={3} label="Pending Contracts" />
           </Tabs>
           <Divider />
         </Box>
-        <SearchBarV2 placeholder="Search Gigs and Services" />
         <TabPanel index={0} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>

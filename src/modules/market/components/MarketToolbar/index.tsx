@@ -68,7 +68,6 @@ const MarketToolbar: React.FunctionComponent = () => {
 
   return (
     <Box display='flex' >
-       
             <Button size='small' variant='contained'>
               Create Contract
             </Button>

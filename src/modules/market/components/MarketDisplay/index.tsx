@@ -9,9 +9,10 @@ import {
 import ClickableCard from "../../../../common/components/ClickableCard/ClickableCard";
 import { NextRouter, useRouter } from "next/router";
 import { ClassNameMap } from "@material-ui/core/styles/withStyles";
+import { MarketDetailsStruct } from "../../../../typechain-types/ITokenFactory";
 
 interface IMarketDisplayProps {
-  market: string;
+  market: MarketDetailsStruct,
   isShowingStats: boolean;
   showDescription: boolean;
   showStats: boolean;
@@ -40,6 +41,8 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
     onSelect(market);
   };
 
+  if (!market.exists) return null
+
   return (
     <ClickableCard
       sx={{
@@ -65,7 +68,7 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
                 fontWeight: (theme) => theme.typography.fontWeightBold,
               }}
             >
-              {market}
+              {market.name}
             </Typography>
           </Grid>
 

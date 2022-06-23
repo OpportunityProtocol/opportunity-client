@@ -29,7 +29,7 @@ import ConnectedAvatar from "../ConnectedAvatar/ConnectedAvatar";
 import SearchBarV1 from "../SearchBarV1/SearchBarV1";
 import Web3Modal from "web3modal";
 import { SingleBedRounded } from "@mui/icons-material";
-import { CHAIN_ID, providerOptions } from "../../../constant/provider";
+import { CHAIN_ID } from "../../../constant/provider";
 import { LensTalentLocalStorageKeys } from "../../../constant/types";
 import {
   useAccount,
@@ -107,6 +107,7 @@ const NavigationBar: FC = () => {
   );
 
   useEffect(() => {
+    console.log(lensProfileId)
     if (lensProfileId !== 0) {
       lensHub_getProfile.refetch({
         throwOnError: true,
@@ -125,6 +126,7 @@ const NavigationBar: FC = () => {
       chainId: CHAIN_ID,
       args: [accountData?.data?.address],
       onSuccess: (data: Result) => {
+        console.log(data)
         setLensProfileId(hexToDecimal(data._hex));
       },
       onError: (error) => {
@@ -183,6 +185,7 @@ const NavigationBar: FC = () => {
       })
       .then((updatedResults) => {
         if (updatedResults.isSuccess) {
+          console.log(updatedResults)
           setLensProfile(updatedResults.data._hex);
         } else {
           setLensProfileId(0);
@@ -433,7 +436,7 @@ const NavigationBar: FC = () => {
                           }}
                         >
                           {!lensProfile.handle ? (
-                            <Button variant="text">
+                            <Button variant="text" onClick={() => setVerificationDialogOpen(true)}>
                               {" "}
                               Become a verified freelancer{" "}
                             </Button>
@@ -533,15 +536,6 @@ const NavigationBar: FC = () => {
                       >
                         Add Funds
                       </Button>
-
-                      <Button
-                        fullWidth
-                        variant="outlined"
-                        color="primary"
-                        onClick={() => setVerificationDialogOpen(true)}
-                      >
-                        Become a verified freelancer
-                      </Button>
                       <Button
                         fullWidth
                         variant="contained"
@@ -558,7 +552,7 @@ const NavigationBar: FC = () => {
           </Toolbar>
         </Container>
 
-        {/*  <div>
+          <div>
         {connectors.map((connector) => (
           <button
             disabled={!connector.ready}
@@ -574,7 +568,7 @@ const NavigationBar: FC = () => {
         ))}
 
         {error && <div>{error.message}</div>}
-            </div> */}
+            </div> 
       </AppBar>
 
       <VerificationDialog

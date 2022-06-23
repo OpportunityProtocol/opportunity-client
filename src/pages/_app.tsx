@@ -20,6 +20,7 @@ import { ALCHEMY_API_KEY, ALCHEMY_HTTPS, NETWORK_MANAGER_ADDRESS } from '../cons
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import MarketDisplay from '../modules/market/components/MarketDisplay';
 import MarketToolbar from '../modules/market/components/MarketToolbar';
+import { ethers, getDefaultProvider } from 'ethers';
 
 const getConfiguredChain = () => {
   switch(process.env.NEXT_PUBLIC_CHAIN_ENV) {
@@ -34,16 +35,16 @@ const getConfiguredChain = () => {
   }
 }
 
-const { chains, provider, webSocketProvider } = configureChains([getConfiguredChain()], [
-  alchemyProvider({ alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY, priority: 0 }),
+const { chains, provider, webSocketProvider } = configureChains([chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat], [
+  alchemyProvider({ alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY }),
+  publicProvider(),
   jsonRpcProvider({
     rpc: (chain) => ({
-      http: 'http://localhost:8545'
+      http: 'http://127.0.0.1:8545'
     }),
+    static: false
   }),
 ])
-
-console.log(chains)
 
 const client = createClient({
   autoConnect: true,
@@ -69,8 +70,19 @@ const client = createClient({
       },
     }),
   ],
-  provider,
-  webSocketProvider,
+  provider(config) {
+    console.log(config)
+    console.log(process.env.NEXT_PUBLIC_CHAIN_ID)
+    if (Number(process.env.NEXT_PUBLIC_CHAIN_ID) == 1337) {
+      return new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545', { name: 'unknown', chainId: 1337 })
+    } else if (Number(process.env.NEXT_PUBLIC_CHAIN_ID) == 80001) {
+      return new ethers.providers.AlchemyProvider(config.chainId, process.env.NEXT_PUBLIC_ALCHEMY_HTTPS)
+    } else if (Number(process.env.NEXT_PUBLIC_CHAIN_ID) == 137) {
+      return new ethers.providers.AlchemyProvider(config.chainId, process.env.NEXT_PUBLIC_ALCHEMY_HTTPS)
+    } else {
+      return getDefaultProvider()
+    }
+  },
 })
 
 function MyApp({ Component, pageProps }: AppProps) {

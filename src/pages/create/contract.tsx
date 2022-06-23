@@ -5,10 +5,15 @@ import {
   Box,
   Card,
   Checkbox,
+  Paper,
+  InputBase,
+  Chip,
   FormControlLabel,
   Button,
+  TextField,
   FormGroup,
   Container,
+  Stack,
   Divider,
   Grid,
   Typography,
@@ -26,114 +31,173 @@ import { Add } from "@mui/icons-material";
 import TextInput from "../../common/components/BootstrapInput/BootstrapInput";
 import { NextPage } from "next";
 import StepperComponent from "../../common/components/Stepper";
+import SearchBarV2 from "../../common/components/SearchBarV2/SearchBarV2";
+import MarketDisplay from "../../modules/market/components/MarketDisplay";
 
 const steps = ["Complete the basic information", "Pay fees"];
 
 const CreateContractPage: NextPage = (): JSX.Element => {
+  const [createContractForm, setCreateContractForm] = useState({
+    contractTitle: "",
+    contractDescription: "",
+    contractTags: "",
+    marketId: 1,
+    tags: [],
+    contractThumbnail: "",
+    thumbnail: '',
+    offers: {
+      beginner: {
+        price: 0,
+        values: new Array(6).fill(''),
+      },
+      business: {
+        price: 0,
+        values: new Array(6).fill(''),
+      },
+      enterprise: {
+        price: 0,
+        values: new Array(6).fill(''),
+      }
+    },
+  })
   const [step, setStep] = useState<number>(0);
   const router: NextRouter = useRouter();
+  const classes = useStyles();
+  const [contractDuration, setContractDuration] = useState("Quick Job");
 
   const onCreateRelationship = (): void => {
     router.push("/jobs");
   };
 
+  const handleOnChangeCreateContractForm = (e) => {}
+
+  const onTagInputKeyPress = (e) => {
+    if (e.code === "Space") {
+      if (createServiceForm.tags.length >= 5) {
+        alert('No more tags')
+        return
+      }
+
+      if (String(e.target.value).trim() == '') {
+        return
+      }
+
+      const tag = createServiceForm.serviceTags;
+      const updatedTags = createServiceForm.tags;
+      updatedTags.push(tag);
+      setCreateServiceForm({
+        ...createServiceForm,
+        tags: updatedTags,
+        serviceTags: "",
+      });
+    }
+  };
+
+  const handleOnDeleteTag = (idx) => {
+    const updatedTags = createServiceForm.tags
+    updatedTags.splice(idx, 1)
+
+    setCreateServiceForm({
+      ...createServiceForm,
+      tags: updatedTags
+    });
+  }
+
   return (
     <Container
       maxWidth="lg"
-      sx={{ bgcolor: "#fff !important", padding: "2% 4%", width: "100%" }}
+      component={Stack}
+      spacing={5}
+      sx={{ border: '1px solid #ddd', bgcolor: "#fff !important", padding: "2% 4%", width: "100%" }}
     >
       <StepperComponent steps={steps} activeStep={step} />
-      <Box my={2}>
-        <Typography fontWeight="bold" fontSize={25} py={1}>
-          Post a Contract
+      <Box>
+        <Typography fontWeight="bold" fontSize={25}>
+          Create a contract
         </Typography>
-        <Card
-          variant="outlined"
-          sx={{ p: 2, backgroundColor: "#fafafa", width: "100%" }}
-        >
-          <Typography fontSize={14} py={1}>
-            - Incase of disputes this information will be sent as evidence to
-            Kleros courts to be arbitrated by unbiased third parties.{" "}
-            <Link href="/">
-              <Typography variant="button" style={{ color: "#1E88E5" }}>
-                Learn more.
-              </Typography>
-            </Link>
+        <Typography color="text.secondary">
+          Create a contract and instantly connect with thousands of freelancers.{" "}
+          <Typography variant="button" color="primary">
+            Learn more
           </Typography>
-
-          <Typography fontSize={14} py={1}>
-            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
-            cursus sodales sollicitudin. Lorem ipsum dolor sit amet, consectetur
-            adipiscing elit. Curabitur id purus id sapien efficitur aliquam.
-          </Typography>
-
-          <Typography fontSize={14} py={1}>
-            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
-            cursus sodales sollicitudin. Lorem ipsum dolor sit amet, consectetur
-            adipiscing elit. Curabitur id purus id sapien efficitur aliquam.
-          </Typography>
-
-          <Divider sx={{ my: 2 }} />
-
-          <Typography fontSize={14} py={1}>
-            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
-            cursus sodales sollicitudin. Lorem ipsum dolor sit amet, consectetur
-            adipiscing elit. Curabitur id purus id sapien efficitur aliquam.
-          </Typography>
-
-          <Typography fontSize={14} py={1}>
-            - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean
-            cursus sodales sollicitudin. Lorem ipsum dolor sit amet, consectetur
-            adipiscing elit. Curabitur id purus id sapien efficitur aliquam.
-          </Typography>
-        </Card>
+        </Typography>
       </Box>
-      {step === 0 ? <CreateBasicInformation /> : <CreateValueAndFees />}
-      <Divider sx={{ width: "100%" }} />
-      <Grid
-        sx={{ my: 2 }}
-        container
-        direction="row"
-        alignItems="center"
-        justifyContent="flex-end"
-      >
-        {step === 1 ? (
-          <Button
-            sx={{ mx: 1, width: 120, color: "#43A047", p: 1 }}
-            variant="outlined"
-            onClick={() => router.push("/jobs")}
+      <Box>
+        <Stack
+        sx={{ display: 'flex', width: '100% !important'}}
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Typography
+            width={600}
+            fontWeight="700"
+            fontSize={18}
+            color="text.primary"
           >
-            <Typography>Back</Typography>
-          </Button>
-        ) : null}
-        <Grid item>
-          <Button
-            sx={{ mx: 1, width: 120, color: "#43A047", p: 1 }}
-            variant="outlined"
-            onClick={
-              step === 0 ? () => setStep(1) : () => onCreateRelationship()
-            }
-          >
-            {step === 0 ? (
-              <Typography>Next</Typography>
-            ) : (
-              <Typography>Create</Typography>
-            )}
-          </Button>
-        </Grid>
-      </Grid>
-    </Container>
-  );
-};
+            Select a market
+          </Typography>
 
-const CreateBasicInformation: React.FunctionComponent = () => {
-  const classes = useStyles();
-  const [contractDuration, setContractDuration] = useState("Quick Job");
-  return (
-    <Box sx={{ pb: 3 }}>
+<SearchBarV2 />
+        </Stack>
+
+        <Grid
+          container
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Grid item xs={2.8}>
+            <MarketDisplay
+              selected={true}
+              selectable
+              onSelect={() => {}}
+              market="Writing and Translation"
+              showDescription={false}
+              showStats={false}
+            />
+          </Grid>
+
+          <Grid item xs={2.8}>
+            <MarketDisplay
+              selectable
+              onSelect={() => {}}
+              market="Accounting and Finance"
+              showDescription={false}
+              showStats={false}
+            />
+          </Grid>
+
+          <Grid item xs={2.8}>
+            <MarketDisplay
+              selectable
+              onSelect={() => {}}
+              market="Social Media"
+              showDescription={false}
+              showStats={false}
+            />
+          </Grid>
+
+          <Grid item xs={2.8}>
+            <MarketDisplay
+              selectable
+              onSelect={() => {}}
+              market="Graphic Design"
+              showDescription={false}
+              showStats={false}
+            />
+          </Grid>
+        </Grid>
+      </Box>
+
       <Box sx={{ width: "100%" }}>
         <Box py={1}>
-          <Typography fontWeight="medium" fontSize={16}>
+        <Typography
+            width={600}
+            fontWeight="700"
+            fontSize={18}
+            color="text.primary"
+          >
             Contract Duration
           </Typography>
           <Typography variant="body2" className={classes.sectionSubheader}>
@@ -165,7 +229,7 @@ const CreateBasicInformation: React.FunctionComponent = () => {
             >
               <BoltIcon sx={{ color: "#FFEB3B" }} />
               <Box py={2} className={classes.columnCenter}>
-                <Typography>Quick Job</Typography>
+                <Typography fontWeight='medium' color='text.primary'>Quick</Typography>
                 <Typography variant="body2">
                   Time Range: 30min - 1 Hour
                 </Typography>
@@ -183,7 +247,7 @@ const CreateBasicInformation: React.FunctionComponent = () => {
             >
               <DateRangeIcon sx={{ color: "#2196F3" }} />
               <Box py={2} className={classes.columnCenter}>
-                <Typography>Short Term Work</Typography>
+                <Typography fontWeight='medium' color='text.primary'>Short</Typography>
                 <Typography variant="body2">A few days - 1 Month</Typography>
               </Box>
             </ClickableCard>
@@ -199,7 +263,7 @@ const CreateBasicInformation: React.FunctionComponent = () => {
             >
               <HourglassTopIcon sx={{ color: "#4CAF50" }} />
               <Box py={2} className={classes.columnCenter}>
-                <Typography>Long Term Work</Typography>
+                <Typography fontWeight='medium' color='text.primary'>Long</Typography>
                 <Typography variant="body2">A Month or Longer</Typography>
               </Box>
             </ClickableCard>
@@ -207,35 +271,63 @@ const CreateBasicInformation: React.FunctionComponent = () => {
         </Grid>
       </Box>
 
-      <Divider sx={{ my: 5 }} />
-
       <Box>
-        <Box pb={1}>
-          <Typography fontWeight="medium" fontSize={16}>
+        <Box>
+        <Typography
+            width={600}
+            fontWeight="700"
+            color="text.primary"
+            fontSize={18}
+          >
             Basic Information
           </Typography>
-          <Typography variant="body2" className={classes.sectionSubheader}>
+          <Typography fontSize={15} color="text.secondary">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
             tincidunt ipsum ut maximus malesuada.
           </Typography>
         </Box>
 
+        <TextField
+            margin="normal"
+            sx={{ width: 600 }}
+            variant="outlined"
+            label="Contract Title"
+            aria-label="Pick a title for your contract"
+            name="contractTitle"
+            type="text"
+            onChange={handleOnChangeCreateContractForm}
+          />
+
+<TextField
+rows={6}
+multiline
+            margin="normal"
+            sx={{ width: 600 }}
+            variant="outlined"
+            label="Contract Description"
+            aria-label="Write a description"
+            name="contractDescription"
+            type="text"
+            onChange={handleOnChangeCreateContractForm}
+          />
+
+
         <Grid
           sx={{ py: 2 }}
           container
           direction="row"
-          alignItems="center"
+          alignItems="flex-start"
           spacing={10}
         >
           <Grid item>
-            <Typography className={classes.subSectionHeader}>Title</Typography>
-            <Typography variant="caption">
-              This will be the display for your contract
+            <Typography fontWeight='medium' color='text.primary'>Budget</Typography>
+            <Typography variant='body2' color='text.secondary' width={350}>
+              Your budget will reflect to freelancers how much you are willing to spend
             </Typography>
           </Grid>
 
           <Grid item>
-            <TextInput value="" width={500} placeholder="I am hiring a..." />
+            <TextInput value={0} placeholder="$550.00" sx={{ width: 100 }} />
           </Grid>
         </Grid>
 
@@ -247,105 +339,76 @@ const CreateBasicInformation: React.FunctionComponent = () => {
           spacing={10}
         >
           <Grid item>
-            <Typography className={classes.subSectionHeader}>
-              Description
-            </Typography>
-            <Typography variant="caption">
-              This will be the display for your contract
-            </Typography>
-          </Grid>
-
-          <Grid item>
-            <TextInput
-              value={""}
-              placeholder="Enter a description"
-              width={500}
-              multiline
-              rows={6}
-            />
-          </Grid>
-        </Grid>
-
-        <Grid
-          sx={{ py: 2 }}
-          container
-          direction="row"
-          alignItems="flex-start"
-          spacing={10}
-        >
-          <Grid item>
-            <Typography className={classes.subSectionHeader}>Budget</Typography>
-            <Typography variant="caption">
-              This will be the display for your contract
-            </Typography>
-          </Grid>
-
-          <Grid item>
-            <TextInput value={0} placeholder="$550.00" width={200} />
-          </Grid>
-        </Grid>
-
-        <Grid
-          sx={{ py: 2 }}
-          container
-          direction="row"
-          alignItems="flex-start"
-          spacing={10}
-        >
-          <Grid item>
-            <Typography className={classes.subSectionHeader}>
+            <Typography fontWeight='medium' color='text.primary'>
               Deadline
             </Typography>
-            <Typography variant="caption">
+            <Typography  variant='body2' color='text.secondary' width={350}>
               This will be the display for your contract
             </Typography>
           </Grid>
 
           <Grid item>
-            <TextInput value={0} placeholder="No deadline" width={200} />
+            <TextInput value={0} placeholder="No deadline" sx={{ width: 100 }} />
           </Grid>
         </Grid>
-
-        <Grid
-          sx={{ py: 2 }}
-          container
-          direction="row"
-          alignItems="flex-start"
-          spacing={10}
-        >
-          <Grid item>
-            <Button
-              endIcon={<Add />}
-              disableRipple
-              disableFocusRipple
-              disableElevation
-              disableTouchRipple
-              color="secondary"
-              variant="text"
-            >
-              Add Tags
-            </Button>
-          </Grid>
-
-          <Grid item />
-        </Grid>
+        <Box mt={3}>
+          <Typography
+            width={400}
+            pb={1}
+            variant="subtitle2"
+            color="text.secondary"
+          >
+            Become more recognizable with tags (max 5). Begin typing and add a tab using the space button
+          </Typography>
+          <Paper
+            component="form"
+            sx={{
+              p: "10px 4px",
+              display: "flex",
+              alignItems: "center",
+              width: 600,
+            }}
+          >
+            <InputBase
+            placeholder='Try shorttermjob...'
+              name="contractTags"
+              aria-label="contractTags"
+              type="text"
+              value={createContractForm.contractTags}
+              sx={{ ml: 1, flex: 1 }}
+              onKeyPress={onTagInputKeyPress}
+              onChange={handleOnChangeCreateContractForm}
+              startAdornment={
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  sx={{ margin: "0 0.2rem 0 0", display: "flex" }}
+                >
+                  {createContractForm.tags.map((tag, idx) => {
+                    return (
+                      <Chip key={tag} label={tag} size="small" onDelete={() => handleOnDeleteTag(idx)} />
+                    );
+                  })}
+                </Stack>
+              }
+            />
+          </Paper>
+        </Box>
       </Box>
 
-      <Divider sx={{ my: 5 }} />
-
       <Box>
-        <Box pb={1}>
-          <Typography fontWeight="medium" fontSize={16}>
+        <Box>
+        <Typography fontWeight="700" fontSize={18} color="text.primary">
             Definition of Done
           </Typography>
-          <Typography variant="body2" className={classes.sectionSubheader}>
+          <Typography fontSize={15} color="text.secondary">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
             tincidunt ipsum ut maximus malesuada.
           </Typography>
         </Box>
 
         <TextInput
-          value={0}
+          label="Definition of done"
           multiline
           rows={6}
           width={500}
@@ -355,10 +418,10 @@ const CreateBasicInformation: React.FunctionComponent = () => {
 
       <Box>
         <Box pb={1}>
-          <Typography fontWeight="medium" fontSize={16}>
+        <Typography fontWeight="700" fontSize={18} color="text.primary">
             Optional
           </Typography>
-          <Typography variant="body2" className={classes.sectionSubheader}>
+          <Typography fontSize={15} color="text.secondary">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
             tincidunt ipsum ut maximus malesuada.
           </Typography>
@@ -388,27 +451,20 @@ const CreateBasicInformation: React.FunctionComponent = () => {
           />
         </FormGroup>
       </Box>
-    </Box>
+
+      <Stack justifyContent='flex-end' direction='row'>
+      <Button
+            sx={{ mx: 1, width: 120,  p: 1 }}
+            variant="contained"
+            onClick={onCreateRelationship}
+          >
+              Create
+          </Button>
+      </Stack>
+
+    </Container>
   );
 };
 
-const CreateValueAndFees: React.FunctionComponent = () => {
-  const classes = useStyles();
 
-  return (
-    <Box sx={{ pb: 3, width: "100%" }}>
-      <Box my={2} className={classes.columnCenter}>
-        <Card variant="outlined" sx={{ p: 2, width: "100%" }}>
-          <Typography variant="body2">Protocol Fee: 0</Typography>
-          <Typography variant="body2">Estimated Gas Fee: 0</Typography>
-          <Divider sx={{ my: 2 }} />
-          <Typography fontWeight="bold" fontSize={15}>
-            Total: 0
-          </Typography>
-        </Card>
-      </Box>
-    </Box>
-  );
-};
-
-export default Create;
+export default CreateContractPage;

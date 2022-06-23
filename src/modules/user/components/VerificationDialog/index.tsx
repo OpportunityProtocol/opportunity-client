@@ -27,6 +27,7 @@ import { NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "../../../../constant";
 import { NetworkManagerInterface } from "../../../../abis";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { ethers, providers } from "ethers";
+import { AbiCoder } from "ethers/lib/utils";
 
 const steps = [
   "Select campaign settings",
@@ -56,24 +57,28 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
   const networkManager_registerWorker = useContractWrite(
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+      contractInterface: JSON.stringify(NetworkManagerInterface),
     },
     "registerWorker",
     {
-      args: {to: "0x55008E732C906624aF96fb54C29E6cD224a0CBF0", handle: "nbujdo21",  imageURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu", followModule: "0x0000000000000000000000000000000000000000", followModuleInitData: [], followNFTURI: "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan"},
+      args: [{to: NETWORK_MANAGER_ADDRESS, handle: "babys2",  imageURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu", followModule: "0x0000000000000000000000000000000000000000", followModuleInitData: [], followNFTURI: "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan"}],
         overrides: {
-          gasLimit: 40000,
+          gasLimit: ethers.BigNumber.from('2000000'),
+          gasPrice: 90000000000
         },
       onError: (error) => console.log(error),
-      onSuccess: (data) => console.log(data),
+      onSuccess: (data) => {
+        handleClose()
+      },
     }
   );
 
   const handleOnVerify = async () => {
     await networkManager_registerWorker.write({
-      args: {to: "0x55008E732C906624aF96fb54C29E6cD224a0CBF0", handle: "nbujdo21",  imageURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu", followModule: "0x0000000000000000000000000000000000000000", followModuleInitData: [], followNFTURI: "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan"},
+      args: [{to: NETWORK_MANAGER_ADDRESS, handle: "babys2",  imageURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu", followModule: "0x0000000000000000000000000000000000000000", followModuleInitData: [], followNFTURI: "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan"}],
       overrides: {
-        gasLimit: 40000,
+        gasLimit:  ethers.BigNumber.from('2000000'),
+        gasPrice: 90000000000
       },
     });
   };

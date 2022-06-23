@@ -14,6 +14,13 @@ import JobDisplay from '../modules/market/components/JobDisplay';
 import ServiceCard from '../modules/contract/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
 import { KeyboardArrowRight } from '@mui/icons-material';
+import { useContractRead } from 'wagmi';
+import { NETWORK_MANAGER_ADDRESS } from '../constant';
+import { NetworkManagerInterface } from '../abis';
+import { CHAIN_ID } from '../constant/provider';
+import { ProfileDataStruct } from '../typechain-types/FeeFollowModule';
+import { MarketDetailsStruct } from '../typechain-types/ITokenExchange';
+import { NextPage } from 'next';
 
 const HEIGHT = '600px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
@@ -65,13 +72,14 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
   );
 }
 
-const Explore: FunctionComponent = () => {
+const ExplorePage: NextPage = () => {
   const classes = useStyles();
   const [suggestedConnections, setSuggestedConnections] = useState<any[]>([]);
-  const [markets, setMarkets] = useState<any[]>([]);
-  const [desiredMarkets, setDesiredMarkets] = useState<string>('Filter desired markets');
-  const [sortBy, setSortBy] = useState<string>('Sort by');
-  const [participatedChecked, setParticipatedChecked] = useState<any>('');
+  const [markets, setMarkets] = useState<Array<MarketDetailsStruct>>([]);
+  const [marketsLoading, setMarketsLoading] = useState<boolean>(false);
+  const [verifiedFreelancersLoading, setVerifiedFreelancersLoading] = useState<boolean>(false)
+  const [verifiedFreelancers, setVerifiedFreelancers] = useState<Array<ProfileDataStruct>>([])
+
   const router = useRouter();
   const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
     size: 50,
@@ -91,12 +99,57 @@ const Explore: FunctionComponent = () => {
     setSuggestedConnections(b.results);
   };
 
-  const handleOnChangeParticipatedChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setParticipatedChecked(event.target.checked);
-  };
+  const networkManager_getMarkets = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
+    },
+    "getMarkets",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      onSuccess: (data: Array<MarketDetailsStruct>) => {
+        setMarkets(data)
+        setMarketsLoading(false)
+      },
+      onError: error => {
+        console.log('getMarkets')
+        console.log(error)
+        setMarketsLoading(false)
+      }
+    }
+  )
 
-  const handleOnChangeDesiredMarkets = () => {};
-  const handleOnChangeSortBy = () => {};
+  const networkManager_getVerifiedFreelancers = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
+    },
+    "getVerifiedFreelancers",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      onSuccess: (data: Array<ProfileDataStruct>) => {
+        setVerifiedFreelancers(data)
+        setVerifiedFreelancersLoading(false)
+      },
+      onError: error => {
+        console.log('getVerifiedFreelancers')
+        console.log(error)
+        setVerifiedFreelancersLoading(false)
+      }
+    }
+  )
+
+  //prepare explore page
+  useEffect(() => {
+    setMarkets(true)
+    setVerifiedFreelancersLoading(true)
+    networkManager_getMarkets.refetch()
+    networkManager_getVerifiedFreelancers.refetch()
+  }), []
 
   useEffect(() => {
     fetchNetworkSuggestions();
@@ -266,6 +319,4 @@ const Explore: FunctionComponent = () => {
   );
 };
 
-Explore.propTypes = {};
-
-export default Explore;
+export default ExplorePage;

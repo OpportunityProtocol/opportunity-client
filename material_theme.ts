@@ -25,7 +25,7 @@ import { createTheme } from '@mui/material/styles';
       ].join(','),
       button: {
         textTransform: 'none',
-      }
+      },
     },
     components: {
       MuiContainer: {
@@ -50,7 +50,7 @@ import { createTheme } from '@mui/material/styles';
           button: {
             ':hover': {
               cursor: 'pointer',
-            }
+            },
           }
         }
       },
