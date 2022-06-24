@@ -47,7 +47,6 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({ avatarSize=70, address }) =>
   );
 
   useEffect(() => {
-    console.log(lensProfileId)
     if (lensProfileId !== 0) {
       lensHub_getProfile.refetch({
         throwOnError: true,
@@ -66,7 +65,6 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({ avatarSize=70, address }) =>
       chainId: CHAIN_ID,
       args: [address],
       onSuccess: (data: Result) => {
-        console.log(data)
         setLensProfileId(hexToDecimal(data._hex));
       },
       onError: (error) => {

@@ -24,19 +24,6 @@ import { ethers, getDefaultProvider } from 'ethers';
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from '../store';
 
-const getConfiguredChain = () => {
-  switch(process.env.NEXT_PUBLIC_CHAIN_ENV) {
-    case 'production':
-      return chain.polygon
-    case 'development':
-      return chain.localhost
-    case 'test':
-      return chain.polygonMumbai
-    default:
-      return chain.localhost
-  }
-}
-
 const { chains, provider, webSocketProvider } = configureChains([chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat], [
   alchemyProvider({ alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY }),
   publicProvider(),
@@ -73,8 +60,6 @@ const client = createClient({
     }),
   ],
   provider(config) {
-    console.log(config)
-    console.log(process.env.NEXT_PUBLIC_CHAIN_ID)
     if (Number(process.env.NEXT_PUBLIC_CHAIN_ID) == 1337) {
       return new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545', { name: 'unknown', chainId: 1337 })
     } else if (Number(process.env.NEXT_PUBLIC_CHAIN_ID) == 80001) {

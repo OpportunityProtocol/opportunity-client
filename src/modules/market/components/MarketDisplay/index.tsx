@@ -39,7 +39,6 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
   const router: NextRouter = useRouter();
   const [marketDetails, setMarketDetails] = useState<MarketDetailsStruct>({})
   const [marketInfo, setMarketInfo] = useState<any>([])
-console.log('ASDAS: ', marketId)
   const tokenFactory_getMarketDetails = useContractRead(
     {
       addressOrName: TOKEN_FACTORY_ADDRESS,
@@ -51,8 +50,6 @@ console.log('ASDAS: ', marketId)
       enabled: false,
       watch: false,
       onSuccess: (data: Result) => {
-        console.log('BOOM')
-        console.log(data)
         setMarketDetails(data)
       },
       onError: error => {
@@ -64,17 +61,13 @@ console.log('ASDAS: ', marketId)
 
   useEffect(() => {
     tokenFactory_getMarketDetails.refetch()
-    if (tokenFactory_getMarketDetails.isSuccess) {
-      console.log(marketDetails)
-    }
-
   }, [marketId])
 
   const handleOnSelect = (): void => {
     // internal
 
     // external
-    onSelect(market);
+    onSelect();
   };
 
 

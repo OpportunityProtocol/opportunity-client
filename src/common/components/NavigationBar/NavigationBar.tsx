@@ -52,33 +52,42 @@ import {
   LensHubInterface,
   NetworkManagerInterface,
 } from "../../../abis";
-import ethers from "ethers";
+
 import { hexToDecimal } from "../../helper";
 import { Result } from "ethers/lib/utils";
 import VerificationDialog from "../../../modules/user/components/VerificationDialog";
-import MarketDisplay from "../../../modules/market/components/MarketDisplay";
-import MarketToolbar from "../../../modules/market/components/MarketToolbar";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUserBalance, userWalletDataStored } from "../../../modules/user/userReduxSlice";
+import {
+  selectLens,
+  selectErc20Balance,
+  selectUserBalance,
+  selectUserConnectionStatus,
+  selectUserConnector,
+  userWalletDataStored,
+  userLensDataStored,
+  userERC20BalanceChanged,
+  selectUserAddress,
+} from "../../../modules/user/userReduxSlice";
+import { BigNumber } from "ethers";
+import { RootState } from "../../../store";
 
 const NavigationBar: FC = () => {
   const classes = useStyles();
   const router = useRouter();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const [verificationDialogOpen, setVerificationDialogOpen] =
     useState<boolean>(false);
   const [lensProfileId, setLensProfileId] = useState<Result | any>(0);
   const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false);
-  const [show, setShow] = useState(false);
-  const userBalance = useSelector(selectUserBalance)
-  const [walletData, setWalletData] = useState<any>({
-    address: ZERO_ADDRESS,
-    connector: "Disconnected",
-    ethBalance: 0,
-    daiBalance: 0,
-  });
-  const [lensProfile, setLensProfile] = useState<any>({});
+  const userAddress = useSelector(selectUserAddress);
+  const userBalance = useSelector(selectUserBalance);
+  const daiBalance = useSelector((state: RootState) =>
+    selectErc20Balance(state, DAI_ADDRESS)
+  );
+  const connected = useSelector(selectUserConnectionStatus);
+  const userConnector = useSelector(selectUserConnector);
+  const lensProfile = useSelector(selectLens);
 
   const {
     connect,
@@ -104,7 +113,25 @@ const NavigationBar: FC = () => {
       chainId: CHAIN_ID,
       args: [lensProfileId],
       onSuccess: (data) => {
-        setLensProfile(data);
+        const {
+          followModule,
+          followNFT,
+          followNFTURI,
+          handle,
+          imageURI,
+          pubCount,
+        } = data;
+        dispatch(
+          userLensDataStored({
+            followModule,
+            followNFT,
+            followNFTURI,
+            handle,
+            imageURI,
+            pubCount: hexToDecimal(Number(pubCount._hex)),
+            profileId: Number(lensProfileId),
+          })
+        );
       },
       onError: (error) => console.log(error),
     }
@@ -116,6 +143,8 @@ const NavigationBar: FC = () => {
         throwOnError: true,
       });
     }
+
+    console.log(lensProfileId);
   }, [lensProfileId]);
 
   const networkManager_getLensProfileIdFromAddress = useContractRead(
@@ -129,7 +158,6 @@ const NavigationBar: FC = () => {
       chainId: CHAIN_ID,
       args: [accountData?.data?.address],
       onSuccess: (data: Result) => {
-        console.log(data)
         setLensProfileId(hexToDecimal(data._hex));
       },
       onError: (error) => {
@@ -175,10 +203,11 @@ const NavigationBar: FC = () => {
     await dai_mint.write();
     const result = await dai_balanceOf.refetch();
 
-    setWalletData({
-      ...walletData,
-      daiBalance: result.data,
-    });
+    dispatch(
+      userERC20BalanceChanged({
+        [DAI_ADDRESS]: hexToDecimal(Number(result.data._hex)),
+      })
+    );
   };
 
   const onFetchLensProfileId = () => {
@@ -188,8 +217,7 @@ const NavigationBar: FC = () => {
       })
       .then((updatedResults) => {
         if (updatedResults.isSuccess) {
-          console.log(updatedResults)
-          setLensProfile(updatedResults.data._hex);
+          setLensProfileId(updatedResults.data._hex);
         } else {
           setLensProfileId(0);
         }
@@ -206,10 +234,11 @@ const NavigationBar: FC = () => {
         ethBalance: string | number = 0,
         daiBalance: Result | number = 0;
 
-      if (accountData.isSuccess) {
+      accountData.refetch();
+
+      if (accountData.isSuccess && accountData.data) {
         address = accountData.data.address;
         connector = accountData.data.connector;
-
         onFetchLensProfileId();
       }
 
@@ -217,44 +246,39 @@ const NavigationBar: FC = () => {
         ethBalance = ethBalanceData.data.formatted;
       }
 
-      if (dai_balanceOf.isSuccess) {
-        const result = await dai_balanceOf.refetch();
-        if (result.isSuccess) {
-          daiBalance = dai_balanceOf.data;
-        } else {
-          daiBalance = 0;
-        }
+      const result = await dai_balanceOf.refetch();
+      if (result.isSuccess) {
+        daiBalance = dai_balanceOf.data;
+      } else {
+        daiBalance = 0;
       }
 
-      setWalletData({
-        address,
-        connector,
-        daiBalance,
-        ethBalance,
-      });
-
-      dispatch(userWalletDataStored({ balance: daiBalance, connector, address, connected: accountData.isSuccess && !accountData.isError}))
-
-      setShow(true);
-      localStorage.setItem(
-        LensTalentLocalStorageKeys.ConnectedWalletDataV1,
-        "connected"
+      dispatch(
+        userWalletDataStored({
+          balance: ethBalance,
+          erc20Balance: {
+            [DAI_ADDRESS]: hexToDecimal(
+              Number(BigNumber.from(daiBalance)._hex)
+            ),
+          },
+          connector: String(connector?.name),
+          address,
+          connected: accountData.isSuccess && !accountData.isError,
+        })
       );
     }
-
+    handleOnIsConnected();
     if (isConnected) {
       handleOnIsConnected();
     } else {
-      setWalletData({
-        address: 0,
-        connector: "",
-        ethBalance: "-",
-        daiBalance: "-",
-      });
-      setShow(false);
-      localStorage.setItem(
-        LensTalentLocalStorageKeys.ConnectedWalletDataV1,
-        "disconnected"
+      dispatch(
+        userWalletDataStored({
+          balance: 0,
+          erc20Balance: {},
+          connector: null,
+          address: ZERO_ADDRESS,
+          connected: false,
+        })
       );
     }
   }, [isConnected]);
@@ -388,7 +412,7 @@ const NavigationBar: FC = () => {
                   justifyContent: "flex-end",
                 }}
               >
-                {show === true ? (
+                {connected === true ? (
                   <ConnectedAvatar
                     onMouseOver={onMouseOverConnectedAvatar}
                     //  onMouseLeave={() => setPopoverIsOpen(false)}
@@ -441,7 +465,10 @@ const NavigationBar: FC = () => {
                           }}
                         >
                           {!lensProfile.handle ? (
-                            <Button variant="text" onClick={() => setVerificationDialogOpen(true)}>
+                            <Button
+                              variant="text"
+                              onClick={() => setVerificationDialogOpen(true)}
+                            >
                               {" "}
                               Become a verified freelancer{" "}
                             </Button>
@@ -459,7 +486,7 @@ const NavigationBar: FC = () => {
                             color: "rgb(94, 94, 94)",
                           }}
                         >
-                          {walletData.address}
+                          {userAddress}
                         </Box>
                       </Typography>
                     </Box>
@@ -485,7 +512,7 @@ const NavigationBar: FC = () => {
                           fontWeight="light"
                           fontSize={12}
                         >
-                          {walletData.connector.name}
+                          {userConnector}
                         </Typography>
                       </Grid>
 
@@ -502,7 +529,7 @@ const NavigationBar: FC = () => {
                           fontWeight="light"
                           fontSize={12}
                         >
-                          {hexToDecimal(walletData.ethBalance)}
+                          {userBalance}
                         </Typography>
                       </Grid>
 
@@ -519,7 +546,7 @@ const NavigationBar: FC = () => {
                           fontWeight="light"
                           fontSize={12}
                         >
-                          {hexToDecimal(walletData?.daiBalance?._hex)}
+                          {daiBalance}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -557,29 +584,28 @@ const NavigationBar: FC = () => {
           </Toolbar>
         </Container>
 
-          <div>
-        {connectors.map((connector) => (
-          <button
-            disabled={!connector.ready}
-            key={connector.id}
-            onClick={() => connect(connector)}
-          >
-            {connector.name}
-            {!connector.ready && " (unsupported)"}
-            {isConnecting &&
-              connector.id === pendingConnector?.id &&
-              " (connecting)"}
-          </button>
-        ))}
+        <div>
+          {connectors.map((connector) => (
+            <button
+              disabled={!connector.ready}
+              key={connector.id}
+              onClick={() => connect(connector)}
+            >
+              {connector.name}
+              {!connector.ready && " (unsupported)"}
+              {isConnecting &&
+                connector.id === pendingConnector?.id &&
+                " (connecting)"}
+            </button>
+          ))}
 
-        {error && <div>{error.message}</div>}
-            </div> 
+          {error && <div>{error.message}</div>}
+        </div>
       </AppBar>
 
       <VerificationDialog
         open={verificationDialogOpen}
         handleClose={() => setVerificationDialogOpen(false)}
-        address={walletData.address}
       />
     </React.Fragment>
   );

@@ -25,6 +25,8 @@ import { hexToDecimal } from '../common/helper';
 import { BigNumber } from 'ethers';
 import { Result } from 'ethers/lib/utils';
 import VerifiedAvatar from '../modules/user/components/VerifiedAvatar';
+import { ServiceStruct } from '../typechain-types/NetworkManager';
+import SearchBarV2 from '../common/components/SearchBarV2/SearchBarV2';
 
 const HEIGHT = '600px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
@@ -107,11 +109,9 @@ const ExplorePage: NextPage = () => {
       watch: false,
       chainId: CHAIN_ID,
       onSuccess: (data: Result) => {
-        console.log(data)
         const total = hexToDecimal(data._hex)
         let list = []
         for (let i = 0; i < total; i++) {
-          console.log(i)
           list.push(Number(i) + 1)
         }
         setNumMarkets(list)
@@ -137,7 +137,6 @@ const ExplorePage: NextPage = () => {
       watch: false,
       chainId: CHAIN_ID,
       onSuccess: (data: Result) => {
-        console.log(data)
         setVerifiedFreelancers(data as Array<any>)
         setVerifiedFreelancersLoading(false)
       },
@@ -228,6 +227,7 @@ const ExplorePage: NextPage = () => {
             elevation={0}
             sx={{ my: 6, px: 3, pb: 6, backgroundColor: '#fff' }}
           >
+            <Stack justifyContent='space-between' direction='row' alignItems='center'>
             <Box>
               <Typography py={3} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                 Buy{' '}
@@ -239,17 +239,20 @@ const ExplorePage: NextPage = () => {
                 >
                   confidence
                 </Typography>{' '}
-                in top rated services
+                newly created services
               </Typography>
             </Box>
+
+            <SearchBarV2 />
+            </Stack>
+
             <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={3}>
-              {suggestedConnections.slice(3, 7).map((human) => {
+              {services.slice(0, 4).map((serviceData: ServiceStruct) => {
                 return (
                   <Grid item xs={3}>
                     <ServiceCard
-                      name={human.name.first + ' ' + human.name.last}
-                      avatarSrc={human.picture.large}
-                      headerSrc="https://picsum.photos/200"
+                      id={serviceData.id}
+                      data={serviceData}
                     />
                   </Grid>
                 );
@@ -276,7 +279,7 @@ const ExplorePage: NextPage = () => {
               numMarkets.slice(0, 6).map((marketId) => {
                 return (
                   <Grid item sm={4}>
-                  <MarketDisplay marketId={marketId+1} isShowingStats />
+                  <MarketDisplay marketId={marketId} isShowingStats />
                 </Grid>
                 )
               })

@@ -15,20 +15,59 @@ import {
 } from '@mui/material';
 import { useStyles } from './ServiceCardStyle';
 import DAIIcon from '../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg';
-import { useRouter } from 'next/router';
+import { NextRouter, useRouter } from 'next/router';
 import { useGradientAvatarStyles } from '@mui-treasury/styles/avatar/gradient';
+import { ServiceStruct } from '../../../../typechain-types/NetworkManager';
+import { useContractRead } from 'wagmi';
+import { NETWORK_MANAGER_ADDRESS } from '../../../../constant';
+import { NetworkManagerInterface } from '../../../../abis';
+import { Result } from 'ethers/lib/utils';
 
 interface IServiceCardProps {
-  name: string;
-  headerSrc: string;
-  avatarSrc: string;
+  id: string;
+  data?: ServiceStruct;
 }
 
-const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps) => {
+const ServiceCard = ({ id, data }: IServiceCardProps) => {
   const cardStyles = useStyles();
-  const router = useRouter()
-  const classes = useStyles()
+  const router: NextRouter = useRouter()
   const [user, setUser] = useState([])
+  const [loadedData, setLoadedData] = useState<ServiceStruct>(data)
+
+  const networkManager_getServiceData = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
+    },
+    "getServiceData",
+    {
+      enabled: false,
+      watch: false,
+      args: id,
+      onSuccess: (data: Result) => {
+        console.log(data)
+        setLoadedData(data)
+      },
+      onError: error => {
+        console.log('networkManager_getServiceData')
+        console.log(error)
+      }
+    }
+  )
+
+  const handleOnNavigateToServicePage = () => {
+    router.push({
+      pathname: '/contract/view/service',
+      query: { ...loadedData }
+    })
+  }
+
+  useEffect(() => {
+    //if data doesnt exist get it from contract
+    if (!data) {
+      networkManager_getServiceData.refetch()
+    }
+  }, [id])
 
   const renderUsers = async () => {
     const a = await fetch('https://randomuser.me/api/?results=1', {});
@@ -105,7 +144,7 @@ const ServiceCard = ({ name, avatarSrc = '', headerSrc = '' }: IServiceCardProps
           </Stack>
       </CardContent>
       <CardActions>
-        <Button fullWidth variant="outlined" onClick={() => router.push('/contract/view/service')}>
+        <Button fullWidth variant="outlined" onClick={handleOnNavigateToServicePage}>
           See service
         </Button>
       </CardActions>

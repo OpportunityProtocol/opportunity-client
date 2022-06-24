@@ -2,6 +2,8 @@ import React, { FunctionComponent } from 'react';
 import { Breadcrumbs, Chip, Container, Stack, Button, Box, Theme } from '@mui/material';
 import { styled, emphasize } from '@mui/system';
 import { NextRouter, useRouter } from 'next/router';
+import { useSelector } from 'react-redux';
+import { selectLens, selectVerificationStatus } from '../../../modules/user/userReduxSlice';
 
 const StyledBreadcrumb = styled(Chip)(({ theme }: { theme?: Theme }) => {
   const backgroundColor = theme?.palette.grey[100];
@@ -21,6 +23,7 @@ const StyledBreadcrumb = styled(Chip)(({ theme }: { theme?: Theme }) => {
 
 const NavigationBreadcrumbs: FunctionComponent = () => {
   const router: NextRouter = useRouter();
+  const isVerifiedFreelancer = useSelector(selectVerificationStatus)
 
   return (
     <Container maxWidth="lg" sx={{ padding: '1% 0%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -35,7 +38,7 @@ const NavigationBreadcrumbs: FunctionComponent = () => {
               Create Contract
             </Button>
 
-            <Button onClick={() => router.push('/create/service')} size='small' variant='contained' sx={{width: 'auto', height: 25}}>
+            <Button onClick={() => router.push('/create/service')} size='small' variant='contained' sx={{width: 'auto', height: 25}} disabled={isVerifiedFreelancer === false}>
               Create Service
             </Button>
       </Stack>

@@ -1,4 +1,4 @@
-import React, { FC, useState, ReactNode } from "react";
+import React, { FC, useState, useEffect, ReactNode } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,46 +13,102 @@ import {
   Box,
   TextField,
   FormHelperText,
-  Stack,
-  Stepper,
-  Step,
-  StepLabel,
+  Stack
 } from "@mui/material";
-import TextInput from "../../../../common/components/BootstrapInput/BootstrapInput";
 import { Check } from "@material-ui/icons";
-import Image from "next/image";
 import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
-import { useContractWrite } from "wagmi";
-import { NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "../../../../constant";
-import { NetworkManagerInterface } from "../../../../abis";
-import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { ethers, providers } from "ethers";
-import { AbiCoder } from "ethers/lib/utils";
-
-const steps = [
-  "Select campaign settings",
-  "Create an ad group",
-  "Create an ad",
-];
+import { useContractRead, useContractWrite } from "wagmi";
+import {
+  LENS_HUB_PROXY,
+  NETWORK_MANAGER_ADDRESS
+} from "../../../../constant";
+import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
+import { ethers } from "ethers";
+import { Result } from "ethers/lib/utils";
+import { hexToDecimal } from "../../../../common/helper";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUserAddress, userLensDataStored } from "../../userReduxSlice";
+import { CHAIN_ID } from "../../../../constant/provider";
+import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
+import { ClassNameMap } from "@material-ui/core/styles/withStyles";
 
 interface IVerificationDialogProps {
   open: boolean;
   handleClose: () => void;
-  address: string;
 }
 
-export const MOCK_PROFILE_URI =
-  "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu";
-export const MOCK_FOLLOW_NFT_URI =
-  "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan";
-
 const VerificationDialog: FC<IVerificationDialogProps> = ({
-  open = false,
+  open = true,
   handleClose,
-  address,
 }) => {
-  const [activeStep, setActiveStep] = useState(0);
-  const [skipped, setSkipped] = useState(new Set<number>());
+  const [lensProfileId, setLensProfileId] = useState(0);
+  const userAddress = useSelector(selectUserAddress);
+  const dispatch = useDispatch();
+
+  //getProfile
+  const lensHub_getProfile = useContractRead(
+    {
+      addressOrName: LENS_HUB_PROXY,
+      contractInterface: LensHubInterface,
+    },
+    "getProfile",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      args: [lensProfileId],
+      onSuccess: (data) => {
+        const {
+          followModule,
+          followNFT,
+          followNFTURI,
+          handle,
+          imageURI,
+          pubCount,
+        } = data;
+
+        dispatch(
+          userLensDataStored({
+            followModule,
+            followNFT,
+            followNFTURI,
+            handle,
+            imageURI,
+            pubCount: hexToDecimal(Number(pubCount._hex)),
+            profileId: Number(lensProfileId),
+          })
+        );
+      },
+      onError: (error) => console.log(error),
+    }
+  );
+
+  useEffect(() => {
+    if (lensProfileId !== 0) {
+      lensHub_getProfile.refetch({
+        throwOnError: true,
+      });
+    }
+  }, [lensProfileId]);
+
+  const networkManager_getLensProfileIdFromAddress = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    "getLensProfileIdFromAddress",
+    {
+      enabled: false,
+      chainId: CHAIN_ID,
+      args: [userAddress],
+      onSuccess: (data: Result) => {
+        setLensProfileId(hexToDecimal(data._hex));
+      },
+      onError: (error) => {
+        console.log(error);
+      },
+    }
+  );
 
   const networkManager_registerWorker = useContractWrite(
     {
@@ -61,68 +117,49 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     },
     "registerWorker",
     {
-      args: [{to: NETWORK_MANAGER_ADDRESS, handle: "babys2",  imageURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu", followModule: "0x0000000000000000000000000000000000000000", followModuleInitData: [], followNFTURI: "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan"}],
-        overrides: {
-          gasLimit: ethers.BigNumber.from('2000000'),
-          gasPrice: 90000000000
+      args: [
+        {
+          to: NETWORK_MANAGER_ADDRESS,
+          handle: "babys2",
+          imageURI:
+            "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+          followModule: "0x0000000000000000000000000000000000000000",
+          followModuleInitData: [],
+          followNFTURI:
+            "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan",
         },
+      ],
+      overrides: {
+        gasLimit: ethers.BigNumber.from("2000000"),
+        gasPrice: 90000000000,
+      },
       onError: (error) => console.log(error),
       onSuccess: (data) => {
-        handleClose()
+        networkManager_getLensProfileIdFromAddress.refetch();
+        handleClose();
       },
     }
   );
 
   const handleOnVerify = async () => {
-    await networkManager_registerWorker.write({
-      args: [{to: NETWORK_MANAGER_ADDRESS, handle: "babys2",  imageURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu", followModule: "0x0000000000000000000000000000000000000000", followModuleInitData: [], followNFTURI: "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan"}],
+    await networkManager_registerWorker.writeAsync({
+      args: [
+        {
+          to: NETWORK_MANAGER_ADDRESS,
+          handle: "babys79",
+          imageURI:
+            "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+          followModule: "0x0000000000000000000000000000000000000000",
+          followModuleInitData: [],
+          followNFTURI:
+            "https://ipfs.fleek.co/ipfs/ghostplantghostplantghostplantghostplantghostplantghostplan",
+        },
+      ],
       overrides: {
-        gasLimit:  ethers.BigNumber.from('2000000'),
-        gasPrice: 90000000000
+        gasLimit: ethers.BigNumber.from("2000000"),
+        gasPrice: 90000000000,
       },
     });
-  };
-
-  const isStepOptional = (step: number) => {
-    return step === 1;
-  };
-
-  const isStepSkipped = (step: number) => {
-    return skipped.has(step);
-  };
-
-  const handleNext = () => {
-    let newSkipped = skipped;
-    if (isStepSkipped(activeStep)) {
-      newSkipped = new Set(newSkipped.values());
-      newSkipped.delete(activeStep);
-    }
-
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped(newSkipped);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleSkip = () => {
-    if (!isStepOptional(activeStep)) {
-      // You probably want to guard against something like this,
-      // it should never occur unless someone's actively trying to break something.
-      throw new Error("You can't skip a step that isn't optional.");
-    }
-
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped((prevSkipped) => {
-      const newSkipped = new Set(prevSkipped.values());
-      newSkipped.add(activeStep);
-      return newSkipped;
-    });
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
   };
 
   const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
@@ -135,32 +172,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
 
   return (
     <Dialog maxWidth="sm" open={open} onClose={handleClose} sx={{}}>
-      <Stepper
-        sx={{ marginTop: 2, paddingLeft: 2, paddingRight: 2 }}
-        activeStep={activeStep}
-      >
-        {steps.map((label, index) => {
-          const stepProps: { completed?: boolean } = {};
-          const labelProps: {
-            optional?: ReactNode;
-          } = {};
-          if (isStepOptional(index)) {
-          }
-          if (isStepSkipped(index)) {
-            stepProps.completed = false;
-          }
-          return (
-            <Step key={label} {...stepProps}>
-              <StepLabel {...labelProps}>
-                <Typography fontSize={14}>{label}</Typography>
-              </StepLabel>
-            </Step>
-          );
-        })}
-      </Stepper>
       <Divider sx={{ marginTop: 2, marginBottom: 4 }} />
-      {activeStep === 0 ? (
-        <React.Fragment>
           <Box
             textAlign="center"
             sx={{
@@ -268,18 +280,10 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
               </Stack>
             </Stack>
           </Box>
-        </React.Fragment>
-      ) : null}
 
       <DialogActions>
         <Button onClick={handleClose}>Close</Button>
-        {activeStep === 0 ? (
-          <Button onClick={() => setActiveStep((prevState) => prevState + 1)}>
-            Next
-          </Button>
-        ) : (
-          <Button onClick={handleOnVerify}>Verify on LensTalent</Button>
-        )}
+        <Button onClick={handleOnVerify}>Verify on LensTalent</Button>
       </DialogActions>
     </Dialog>
   );
