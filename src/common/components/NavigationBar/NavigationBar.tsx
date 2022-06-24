@@ -58,16 +58,20 @@ import { Result } from "ethers/lib/utils";
 import VerificationDialog from "../../../modules/user/components/VerificationDialog";
 import MarketDisplay from "../../../modules/market/components/MarketDisplay";
 import MarketToolbar from "../../../modules/market/components/MarketToolbar";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUserBalance, userWalletDataStored } from "../../../modules/user/userReduxSlice";
 
 const NavigationBar: FC = () => {
   const classes = useStyles();
   const router = useRouter();
+  const dispatch = useDispatch()
 
   const [verificationDialogOpen, setVerificationDialogOpen] =
     useState<boolean>(false);
   const [lensProfileId, setLensProfileId] = useState<Result | any>(0);
   const [popoverIsOpen, setPopoverIsOpen] = useState<boolean>(false);
   const [show, setShow] = useState(false);
+  const userBalance = useSelector(selectUserBalance)
   const [walletData, setWalletData] = useState<any>({
     address: ZERO_ADDRESS,
     connector: "Disconnected",
@@ -107,7 +111,6 @@ const NavigationBar: FC = () => {
   );
 
   useEffect(() => {
-    console.log(lensProfileId)
     if (lensProfileId !== 0) {
       lensHub_getProfile.refetch({
         throwOnError: true,
@@ -229,6 +232,8 @@ const NavigationBar: FC = () => {
         daiBalance,
         ethBalance,
       });
+
+      dispatch(userWalletDataStored({ balance: daiBalance, connector, address, connected: accountData.isSuccess && !accountData.isError}))
 
       setShow(true);
       localStorage.setItem(

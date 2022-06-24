@@ -21,6 +21,8 @@ import { jsonRpcProvider } from 'wagmi/providers/jsonRpc'
 import MarketDisplay from '../modules/market/components/MarketDisplay';
 import MarketToolbar from '../modules/market/components/MarketToolbar';
 import { ethers, getDefaultProvider } from 'ethers';
+import { Provider as ReduxProvider } from 'react-redux';
+import { store } from '../store';
 
 const getConfiguredChain = () => {
   switch(process.env.NEXT_PUBLIC_CHAIN_ENV) {
@@ -99,6 +101,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <React.Fragment>
       <Header />
       <WagmiConfig client={client}>
+        <ReduxProvider store={store}>
       <ThemeProvider theme={theme}>
       <CssBaseline />
         <Opportunity>
@@ -106,6 +109,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
         </Opportunity>
       </ThemeProvider>
+      </ReduxProvider>
       </WagmiConfig>
     </React.Fragment>
   );

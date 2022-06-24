@@ -1,4 +1,4 @@
-import { useState, FC } from "react";
+import { useState, FC, useEffect, memo } from "react";
 import { useStyles } from "./MarketDisplayStyles";
 
 import {
@@ -10,29 +10,65 @@ import ClickableCard from "../../../../common/components/ClickableCard/Clickable
 import { NextRouter, useRouter } from "next/router";
 import { ClassNameMap } from "@material-ui/core/styles/withStyles";
 import { MarketDetailsStruct } from "../../../../typechain-types/ITokenFactory";
-
+import { useContractRead } from "wagmi";
+import { MARKET_DESCRIPTION_MAPPING, TOKEN_FACTORY_ADDRESS } from "../../../../constant";
+import { TokenFactoryInterface } from "../../../../abis";
+import { Result } from "ethers/lib/utils";
+import ethers from 'ethers'
 interface IMarketDisplayProps {
-  market: MarketDetailsStruct,
-  isShowingStats: boolean;
-  showDescription: boolean;
-  showStats: boolean;
+  isShowingStats?: boolean;
+  showDescription?: boolean;
+  showStats?: boolean;
   selectable?: boolean;
   selected?: boolean;
   onSelect?: (marketData: object) => void;
+  marketId: number;
 }
 
 const MarketDisplay: FC<IMarketDisplayProps> = ({
-  market,
   isShowingStats=true,
   showDescription = true,
   showStats = true,
   selectable,
   selected = false,
   onSelect,
+  marketId
 }) => {
   const classes: ClassNameMap<"marketTitle" | "primaryContentContainer"> =
     useStyles();
   const router: NextRouter = useRouter();
+  const [marketDetails, setMarketDetails] = useState<MarketDetailsStruct>({})
+  const [marketInfo, setMarketInfo] = useState<any>([])
+console.log('ASDAS: ', marketId)
+  const tokenFactory_getMarketDetails = useContractRead(
+    {
+      addressOrName: TOKEN_FACTORY_ADDRESS,
+      contractInterface: TokenFactoryInterface
+    },
+    "getMarketDetailsByID",
+    {
+      args: [marketId],
+      enabled: false,
+      watch: false,
+      onSuccess: (data: Result) => {
+        console.log('BOOM')
+        console.log(data)
+        setMarketDetails(data)
+      },
+      onError: error => {
+        console.log(error)
+        console.log("getMarketDetailsByID")
+      }
+    }
+  )
+
+  useEffect(() => {
+    tokenFactory_getMarketDetails.refetch()
+    if (tokenFactory_getMarketDetails.isSuccess) {
+      console.log(marketDetails)
+    }
+
+  }, [marketId])
 
   const handleOnSelect = (): void => {
     // internal
@@ -41,7 +77,6 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
     onSelect(market);
   };
 
-  if (!market.exists) return null
 
   return (
     <ClickableCard
@@ -64,11 +99,11 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
           <Grid item>
             <Typography
               sx={{
-                height: 20,
+                height: 25,
                 fontWeight: (theme) => theme.typography.fontWeightBold,
               }}
             >
-              {market.name}
+            {marketDetails.name}
             </Typography>
           </Grid>
 
@@ -76,12 +111,19 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
         </Grid>
         {showDescription && (
           <Typography
-            py={1}
-            style={{ height: 120, fontSize: 15 }}
+     
+            style={{  
+              fontSize: 13,  
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              'WebkitLineClamp': 3,
+              'WebkitBoxOrient': 'vertical' 
+            }}
             color="text.secondary"
           >
-            Lizards are a widespread group of squamate reptiles, with over 6,000
-            species, ranging across all continents except Antarctica
+
+             {MARKET_DESCRIPTION_MAPPING[marketDetails.name]} 
           </Typography>
         )}
 
@@ -90,7 +132,7 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
             color="#49A882"
             pt={2}
             variant="body2"
-            sx={{ height: 60 }}
+            sx={{ height: 25 }}
           >
             {Math.floor(Math.random() * 3200)} contracts and services available
           </Typography>
@@ -100,5 +142,5 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
   );
 };
 
-export{ IMarketDisplayProps }
-export default MarketDisplay;
+export{ type IMarketDisplayProps }
+export default memo(MarketDisplay);

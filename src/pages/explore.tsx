@@ -15,12 +15,16 @@ import ServiceCard from '../modules/contract/components/ServiceCard/ServiceCard'
 import { useRouter } from 'next/router';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import { useContractRead } from 'wagmi';
-import { NETWORK_MANAGER_ADDRESS } from '../constant';
-import { NetworkManagerInterface } from '../abis';
+import { NETWORK_MANAGER_ADDRESS, TOKEN_FACTORY_ADDRESS } from '../constant';
+import { NetworkManagerInterface, TokenFactoryInterface } from '../abis';
 import { CHAIN_ID } from '../constant/provider';
 import { ProfileDataStruct } from '../typechain-types/FeeFollowModule';
 import { MarketDetailsStruct } from '../typechain-types/ITokenExchange';
 import { NextPage } from 'next';
+import { hexToDecimal } from '../common/helper';
+import { BigNumber } from 'ethers';
+import { Result } from 'ethers/lib/utils';
+import VerifiedAvatar from '../modules/user/components/VerifiedAvatar';
 
 const HEIGHT = '600px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
@@ -75,19 +79,12 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
 const ExplorePage: NextPage = () => {
   const classes = useStyles();
   const [suggestedConnections, setSuggestedConnections] = useState<any[]>([]);
-  const [markets, setMarkets] = useState<Array<MarketDetailsStruct>>([]);
   const [marketsLoading, setMarketsLoading] = useState<boolean>(false);
   const [verifiedFreelancersLoading, setVerifiedFreelancersLoading] = useState<boolean>(false)
-  const [verifiedFreelancers, setVerifiedFreelancers] = useState<Array<ProfileDataStruct>>([])
+  const [verifiedFreelancers, setVerifiedFreelancers] = useState<Array<any>>([])
+  const [numMarkets, setNumMarkets] = useState<any>([])
+  const [services, setServices] = useState([])
 
-  const router = useRouter();
-  const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
-    size: 50,
-    gap: 3,
-    thickness: 3,
-    gapColor: '#f4f7fa',
-    color: 'linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)',
-  });
 
   const fetchNetworkSuggestions = async () => {
     const a = await fetch('https://randomuser.me/api/?results=20', {
@@ -101,16 +98,24 @@ const ExplorePage: NextPage = () => {
 
   const networkManager_getMarkets = useContractRead(
     {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface
+      addressOrName: TOKEN_FACTORY_ADDRESS,
+      contractInterface: TokenFactoryInterface
     },
-    "getMarkets",
+    "getNumMarkets",
     {
       enabled: false,
       watch: false,
       chainId: CHAIN_ID,
-      onSuccess: (data: Array<MarketDetailsStruct>) => {
-        setMarkets(data)
+      onSuccess: (data: Result) => {
+        console.log(data)
+        const total = hexToDecimal(data._hex)
+        let list = []
+        for (let i = 0; i < total; i++) {
+          console.log(i)
+          list.push(Number(i) + 1)
+        }
+        setNumMarkets(list)
+       // setMarketsDetails(data)
         setMarketsLoading(false)
       },
       onError: error => {
@@ -131,8 +136,9 @@ const ExplorePage: NextPage = () => {
       enabled: false,
       watch: false,
       chainId: CHAIN_ID,
-      onSuccess: (data: Array<ProfileDataStruct>) => {
-        setVerifiedFreelancers(data)
+      onSuccess: (data: Result) => {
+        console.log(data)
+        setVerifiedFreelancers(data as Array<any>)
         setVerifiedFreelancersLoading(false)
       },
       onError: error => {
@@ -143,27 +149,50 @@ const ExplorePage: NextPage = () => {
     }
   )
 
+  const networkManager_getServices = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
+    },
+    "getServices",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      onSuccess(data: Result) {
+        console.log(data)
+        setServices(data)
+      },
+      onError: error => {
+        console.log('getServices')
+        console.log(error)
+      }
+    }
+  )
+
+  const renderFreelancers = () => {
+    const freelancers = verifiedFreelancers.slice()
+      return freelancers.splice(0, 6).map((address) => {
+        return <VerifiedAvatar address={address} />
+  })
+}
+
   //prepare explore page
   useEffect(() => {
-    setMarkets(true)
+    setMarketsLoading(true)
     setVerifiedFreelancersLoading(true)
     networkManager_getMarkets.refetch()
     networkManager_getVerifiedFreelancers.refetch()
-  }), []
+    networkManager_getServices.refetch()
+  }, [])
 
   useEffect(() => {
     fetchNetworkSuggestions();
-    let updatedMarkets = [];
-    updatedMarkets.push('Writing and Translation');
-    updatedMarkets.push('Development & IT');
-    updatedMarkets.push('Accounting and Finance');
-    updatedMarkets.push('Design and Creative');
-    updatedMarkets.push('Engineering and Architecture');
-    updatedMarkets.push('Sales and Marketing');
-    setMarkets(updatedMarkets);
   }, []);
 
-  const AVATAR_SIZE = 70;
+
+
+
   return (
     <Box>
       <Container maxWidth="lg" className={classes.root}>
@@ -190,48 +219,7 @@ const ExplorePage: NextPage = () => {
               </Button>
             </Stack>
             <Grid container alignItems="center" direction="row" flexWrap="nowrap">
-              {suggestedConnections.splice(0, 7).map((human) => {
-                return (
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="flex-start"
-                    alignItems="center"
-                    component={Button}
-                    mx={4}
-                    onClick={() => router.push('/profile')}
-                  >
-                    <div
-                      style={{
-                        margin: '5px 0px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                      }}
-                      className={styles.root}
-                    >
-                      <Avatar
-                        style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
-                        src={human.picture.large}
-                      />
-                    </div>
-                    <Box textAlign="center">
-                      <Typography
-                        fontWeight="medium"
-                        variant="body2"
-                        color="#616161"
-                        width="auto"
-                        noWrap
-                      >
-                        {human.name.first + ' ' + human.name.last}
-                      </Typography>
-                      <Typography variant="caption" color="text.primary" width="auto" noWrap>
-                        ${Math.floor(Math.random() * 101).toFixed(2)} Value
-                      </Typography>
-                    </Box>
-                  </Box>
-                );
-              })}
+              {renderFreelancers()}
             </Grid>
           </Box>
 
@@ -284,11 +272,15 @@ const ExplorePage: NextPage = () => {
             <Grid item />
           </Grid>
           <Grid container direction="row" flexDirection="row" alignItems="center" spacing={2}>
-            {markets.map((market) => (
-              <Grid item sm={4}>
-                <MarketDisplay market={market} isShowingStats />
-              </Grid>
-            ))}
+            {
+              numMarkets.slice(0, 6).map((marketId) => {
+                return (
+                  <Grid item sm={4}>
+                  <MarketDisplay marketId={marketId+1} isShowingStats />
+                </Grid>
+                )
+              })
+            }
           </Grid>
         </Box>
 
