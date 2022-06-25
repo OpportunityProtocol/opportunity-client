@@ -19,24 +19,50 @@ import { NextRouter, useRouter } from "next/router";
 import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
 import { ServiceStruct } from "../../../../typechain-types/NetworkManager";
 import { useContractRead } from "wagmi";
-import { NETWORK_MANAGER_ADDRESS } from "../../../../constant";
-import { NetworkManagerInterface } from "../../../../abis";
+import { LENS_HUB_PROXY, NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "../../../../constant";
+import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
 import { Result } from "ethers/lib/utils";
 import fleek from "../../../../fleek";
 import { create } from "ipfs-http-client";
 
+import BrokenImageIcon from '@mui/icons-material/BrokenImage';
+import { useSelector } from "react-redux";
+import { selectLens, selectUserAddress, selectVerificationStatus } from "../../../user/userReduxSlice";
+
+import { ClassNameMap } from "@material-ui/core/styles/withStyles";
+import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
+import { Check } from "@material-ui/icons";
+
 interface IServiceCardProps {
   id: string;
   data?: ServiceStruct;
+  purchase?: boolean;
 }
 
-const ServiceCard = ({ id, data }: IServiceCardProps) => {
+import Jazzicon, { jsNumberForAddress } from 'react-jazzicon'
+import VerifiedAvatar from "../../../user/components/VerifiedAvatar";
+import { ProfileStructStruct } from "../../../../typechain-types/ILensHub";
+import { hexToDecimal } from "../../../../common/helper";
+import { CHAIN_ID } from "../../../../constant/provider";
+
+const ServiceCard = ({ id, data, purchase=false }: IServiceCardProps) => {
   const cardStyles = useStyles();
   const router: NextRouter = useRouter();
   const [user, setUser] = useState([]);
   const [loadedData, setLoadedData] = useState<ServiceStruct>(data);
+  const [serviceOwnerLensData, setServiceOwnerLensData] = useState<ProfileStructStruct>({})
+  const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] = useState<number>(0)
   const [serviceMetadata, setServiceMetadata] = useState<any>({});
-  const [displayImg, setDisplayImg] = useState();
+  const [purchaseMetadata, setPurchaseMetadata] = useState<any>({})
+  const [displayImg, setDisplayImg] = useState<Buffer>();
+  const [errors, setErrors] = useState<object>({
+    metadataError: false
+  })
+
+  const userAddress = useSelector(selectUserAddress)
+  const userLensProfileInformation = useSelector(selectLens)
+  const userVerificationStatus = useSelector(selectVerificationStatus)
+
   const networkManager_getServiceData = useContractRead(
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -57,32 +83,93 @@ const ServiceCard = ({ id, data }: IServiceCardProps) => {
     }
   );
 
+  const lensHub_getProfile = useContractRead(
+    {
+      addressOrName: LENS_HUB_PROXY,
+      contractInterface: LensHubInterface,
+    },
+    "getProfile",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      args: [serviceOwnerLensProfileId],
+      onSuccess: (data) => {
+        setServiceOwnerLensData(data);
+      },
+      onError: (error) => console.log(error),
+    }
+  );
+
+  useEffect(() => {
+    if (serviceOwnerLensProfileId !== 0) {
+      lensHub_getProfile.refetch({
+        throwOnError: true,
+      });
+    }
+  }, [serviceOwnerLensProfileId]);
+
+  const networkManager_getLensProfileIdFromAddress = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    "getLensProfileIdFromAddress",
+    {
+      enabled: false,
+      chainId: CHAIN_ID,
+      args: [loadedData?.owner ? loadedData?.owner : ZERO_ADDRESS],
+      onSuccess: (data: Result) => {
+        setServiceOwnerLensProfileId(hexToDecimal(data._hex));
+      },
+      onError: (error) => {
+        console.log(error);
+      },
+    }
+  );
+
+  useEffect(() => {
+    networkManager_getLensProfileIdFromAddress.refetch();
+  }, [loadedData?.owner]);
+
   const getServiceMetadata = async (ptr) => {
     let retVal: any = {};
 
-    if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
-      const ipfs = create({
-        url: "/ip4/127.0.0.1/tcp/8080",
-      });
-
-      retVal = await ipfs.get(`/ipfs/${ptr}`).next();
-    } else {
-      retVal = await fleek.getService(loadedData.metadataPtr);
-    }
-
-    if (!retVal) {
-      throw new Error("Unable to retrieve service metadata data");
-    } else {
-      const jsonString = Buffer.from(retVal.value).toString("utf8");
-      const parsedString = jsonString.slice(
-        jsonString.indexOf("{"),
-        jsonString.lastIndexOf("}") + 1
-      );
-      const parsedData = JSON.parse(parsedString);
-      const updatedImg = Buffer.from(parsedData.serviceThumbnail.data);
-      
-      setDisplayImg(updatedImg);
-      setServiceMetadata(parsedData);
+    try {
+      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+        const ipfs = create({
+          url: "/ip4/127.0.0.1/tcp/8080",
+        });
+  
+        retVal = await ipfs.get(`/ipfs/${ptr}`).next();
+      } else {
+        retVal = await fleek.getService(loadedData?.metadataPtr);
+      }
+  
+      if (!retVal) {
+        throw new Error("Unable to retrieve service metadata data");
+      } else {
+        const jsonString = Buffer.from(retVal.value).toString("utf8");
+        const parsedString = jsonString.slice(
+          jsonString.indexOf("{"),
+          jsonString.lastIndexOf("}") + 1
+        );
+        const parsedData = JSON.parse(parsedString);
+        const updatedImg = Buffer.from(parsedData.serviceThumbnail.data);
+        
+        setDisplayImg(updatedImg);
+        setServiceMetadata(parsedData);
+      }
+      setErrors({
+        metadataErrors: false
+      })
+    } catch(error) {
+      setErrors({
+        ...errors,
+        metadataError: true
+      })
+      console.log('getServiceMetadata')
+      console.log(error)
     }
   };
 
@@ -102,7 +189,7 @@ const ServiceCard = ({ id, data }: IServiceCardProps) => {
   };
 
   useEffect(() => {
-    getServiceMetadata(loadedData.metadataPtr);
+    getServiceMetadata(loadedData?.metadataPtr);
   }, [id]);
 
   useEffect(() => {
@@ -112,27 +199,132 @@ const ServiceCard = ({ id, data }: IServiceCardProps) => {
     }
   }, [id]);
 
-  const renderUsers = async () => {
-    const a = await fetch("https://randomuser.me/api/?results=1", {});
-    const users = await a.json();
-    setUser(users.results);
-  };
 
-  useEffect(() => {
-    renderUsers();
-  }, []);
+  const renderButtonState = () => {
+    if (!purchase && !purchaseMetadata) {
+      return (
+        // view service
+        <CardActions>
+        <Button
+          fullWidth
+          variant="outlined"
+          onClick={handleOnNavigateToServicePage}
+        >
+          View service
+        </Button>
+      </CardActions>
+      )
+    }
 
-  const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
-    size: 50,
-    gap: 3,
-    thickness: 3,
-    gapColor: "#f4f7fa",
-    color: "linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)",
-  });
+    // owner is viewing
+    if (loadedData?.owner === userAddress) {
+      if (purchase && purchaseMetadata) {
+        switch(purchaseMetadata.status) {
+          case 0:
+            return (
+              //pending resolution from client and disabled...
+              <CardActions>
+              <Button
+                fullWidth
+                variant="outlined"
+                disabled
+              >
+                Pending resolution
+              </Button>
+            </CardActions>
+            )
+          case 1:
+            return (
+              //view dispute
+              <CardActions>
+              <Button
+                fullWidth
+                variant="outlined"
+                color='error'
+              >
+                View dispute
+              </Button>
+            </CardActions>
+            )
+          case 2:
+            return (
+              //confirmed with check mark and disabled
+              <CardActions>
+              <Button
+                fullWidth
+                variant="outlined"
+                disabled
+                startIcon={<Check />}
+              >
+                Confirmed
+              </Button>
+            </CardActions>
+            )
+        }
+      }
+    } else { //purchaser is viewing
+      if (purchase && purchaseMetadata) {
+        switch(purchaseMetadata.status) {
+          case 0:
+            return (
+              //Complete contract if pending state
+              <CardActions>
+              <Button
+                fullWidth
+                variant="outlined"
+              >
+                Confirm
+              </Button>
+            </CardActions>
+            )
+          case 1:
+            return (
+              //view dispute
+              <CardActions>
+              <Button
+                fullWidth
+                variant="outlined"
+                color='error'
+              >
+                View dispute
+              </Button>
+            </CardActions>
+            )
+          case 2:
+            return (
+              //confirmed with check mark and disabled
+              <CardActions>
+              <Button
+                fullWidth
+                variant="outlined"
+                disabled
+                startIcon={<Check />}
+              >
+                Confirmed
+              </Button>
+            </CardActions>
+            )
+        }
+      }
+    }
+
+  }
 
   return (
     <Card variant="outlined" className={cx(cardStyles.root)}>
-      <CardMedia image={URL.createObjectURL(new Blob([displayImg]))} sx={{ height: 250, width: '100%' }} />
+      {
+        errors.metadataError ?
+        (
+          <Box display='flex' alignItems='center' justifyContent='center' sx={{ width: '100%', height: 200 }}>
+              <BrokenImageIcon sx={{ color: '#dbdbdb', width: 100, height: 100 }} fontSize='large' />
+          </Box>
+        )
+        :
+        (
+          <CardMedia image={URL.createObjectURL(new Blob([displayImg]))} sx={{ height: 250, width: '100%' }} />
+        )
+      }
+     
       <CardContent>
         <Box
           display="flex"
@@ -140,22 +332,9 @@ const ServiceCard = ({ id, data }: IServiceCardProps) => {
           justifyContent="space-between"
         >
           <Stack direction="row" alignItems="center" spacing={1}>
-            <div
-              style={{
-                margin: "5px 0px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
-              className={styles.root}
-            >
-              <Avatar
-                src={user[0]?.picture?.thumbnail}
-                style={{ width: 30, height: 30 }}
-              />
-            </div>
+            <VerifiedAvatar address={loadedData?.owner} showValue={false} avatarSize={30} />
 
-            <Typography variant="subtitle2">{name}</Typography>
+            <Typography variant="subtitle2">{serviceOwnerLensData && serviceOwnerLensData?.handle ? serviceOwnerLensData?.handle : 'Could not load handle'} </Typography>
           </Stack>
         </Box>
 
@@ -197,15 +376,7 @@ const ServiceCard = ({ id, data }: IServiceCardProps) => {
           </Stack>
         </Stack>
       </CardContent>
-      <CardActions>
-        <Button
-          fullWidth
-          variant="outlined"
-          onClick={handleOnNavigateToServicePage}
-        >
-          See service
-        </Button>
-      </CardActions>
+      {renderButtonState()}
     </Card>
   );
 };

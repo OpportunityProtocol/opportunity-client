@@ -10,6 +10,7 @@ import {
   Box,
   Popover,
   InputBase,
+  IconButton,
   Grid,
   Badge,
   CardContent,
@@ -48,6 +49,7 @@ import {
 import { hexToDecimal } from "../../helper";
 import { DaiInterface } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
+import { ExitToApp } from "@material-ui/icons";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -150,19 +152,16 @@ const ConnectedAvatar: FC = () => {
       variant="dot"
     >
       <Avatar
-        onMouseEnter={handlePopoverOpen}
-        onMouseLeave={handlePopoverClose}
+      onClick={handlePopoverOpen}
+       
         sx={{ cursor: "pointer" }}
         alt="Remy Sharp"
         src="/assets/stock/profile_three.jpeg"
       />
       <Popover
-        sx={{
-          pointerEvents: "none",
-        }}
         aria-owns={open ? "mouse-over-connected-avatar-popover" : undefined}
         aria-haspopup="true"
-        style={{ position: "absolute", top: 55 }}
+        style={{ position: "absolute", top: 50 }}
         id="mouse-over-connected-avatar-popover"
         open={open}
         anchorEl={anchorEl}
@@ -174,7 +173,8 @@ const ConnectedAvatar: FC = () => {
         disableRestoreFocus
       >
         <CardContent>
-          <Box sx={{ p: 1 }}>
+          <Box>
+            <Stack direction='row' alignItems='flex-start'>
             <Typography component="div">
               <Box sx={{ fontWeight: "bold" }}>Welcome to GigEarth</Box>
               <Box
@@ -187,6 +187,12 @@ const ConnectedAvatar: FC = () => {
                 Permissionless labor markets powered by unstoppable networks
               </Box>
             </Typography>
+
+            <IconButton onClick={handlePopoverClose}>
+              <ExitToApp />
+            </IconButton>
+            </Stack>
+
           </Box>
           <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
             <Avatar

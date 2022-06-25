@@ -40,6 +40,8 @@ import TabPanel from '../../common/components/TabPanel/TabPanel';
 
 import SearchBarV2 from '../../common/components/SearchBarV2/SearchBarV2';
 import ServiceCard from '../../modules/contract/components/ServiceCard/ServiceCard';
+import { useSelector } from 'react-redux';
+import { selectLens, selectUserAddress, selectVerificationStatus } from '../../modules/user/userReduxSlice';
 const fileTypes = ['PDF', 'PNG', 'DOC'];
 
 const resources = [1, 2, 3, 4, 5, 6, 4];
@@ -53,8 +55,11 @@ const Contracts: React.FunctionComponent<any> = () => {
   const classes = useStyles();
   const [conversationSelected, setConversationSelected] = useState<boolean>(true);
   const [relationships, setRelationships] = useState<any>([]);
-
   const [tabValue, setTabValue] = React.useState<number>(0);
+
+  const userAddress = useSelector(selectUserAddress)
+  const userLensProfileInformation = useSelector(selectLens)
+  const userVerificationStatus = useSelector(selectVerificationStatus)
 
   const handleOnChangeTab = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -83,10 +88,10 @@ const Contracts: React.FunctionComponent<any> = () => {
             textColor="primary"
             indicatorColor="primary"
           >
-            <Tab value={0} label="My Services" />
-            <Tab value={1} label="My Contracts" />
-            <Tab value={2} label="Pending Services" />
-            <Tab value={3} label="Pending Contracts" />
+            <Tab value={0} label="Published Services" disabled={!userVerificationStatus && !userLensProfileInformation.profileId || userLensProfileInformation.profileId === 0} />
+            <Tab value={1} label="Services Purchased" />
+            <Tab value={2} label="Published Contracts" />
+            <Tab value={3} label="Contract Working" />
           </Tabs>
           <Divider />
         </Box>
@@ -116,7 +121,7 @@ const Contracts: React.FunctionComponent<any> = () => {
         </TabPanel>
         <TabPanel index={1} value={tabValue}>
           <Box>
-            <Grid container direction="row" alignItems="center" justifyContent="space-between">
+            <Grid container direction="row" alignItems="center" spacing={2}>
               {relationships
                 .slice(10, 15)
                 .map(
@@ -124,11 +129,12 @@ const Contracts: React.FunctionComponent<any> = () => {
                     relationship: { picture: { large: string | undefined } },
                     idx: React.Key | null | undefined
                   ) => (
-                    <Grid item xs={5.9} sx={{ m: 0.5 }}>
-                      <JobDisplay
-                        avatar={relationship.picture.large}
-                        suggestion={idx === 0 ? true : false}
-                      />
+                    <Grid item xs={3}>
+                                         <ServiceCard
+                      name={relationship.name.first + ' ' + relationship.name.last}
+                      avatarSrc={relationship.picture.large}
+                      headerSrc="https://picsum.photos/200"
+                    />
                     </Grid>
                   )
                 )}
