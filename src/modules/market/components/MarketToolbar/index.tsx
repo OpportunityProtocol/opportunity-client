@@ -1,69 +1,83 @@
-import * as React from 'react'
+import * as React from "react";
 
 import {
-    Grid,
-    Typography,
-    Box, 
-    Paper,
-    Divider,
-    Button
-} from '@mui/material'
+  Grid,
+  Typography,
+  Box,
+  Paper,
+  Tabs,
+  Tab,
+  Toolbar,
+  Divider,
+  Button,
+  AppBar,
+  Container,
+} from "@mui/material";
 
-import Link from 'next/link'
+import Link from "next/link";
 
-import { useStyles } from './MarketToolbarStyles'
-import { FaEthereum } from 'react-icons/fa'
-import { IoWalletSharp } from 'react-icons/io5'
-import { useRouter } from 'next/router'
+import { useStyles } from "./MarketToolbarStyles";
+import { FaEthereum } from "react-icons/fa";
+import { IoWalletSharp } from "react-icons/io5";
+import { useRouter } from "next/router";
+import Explore from "../../../../pages/explore";
 
-const MarketToolbar: React.FunctionComponent = () => {
-  const classes = useStyles()
-  const router = useRouter()
-  
-    return (
-      <Box component={Paper}  elevation={0} 
-      classes={{
-        root: classes.container
-      }}
-      >
-          <Grid
-          flexWrap="nowrap"
-          container
-          direction="column">
-              <Grid item sx={{p: 1}}>
-                <Typography color='#212121' noWrap fontWeight='bold' fontSize={12}>
-                  <IoWalletSharp size={10} />  Web3/Wallet Provider:{' '}
-                </Typography>
-                <Typography color='#212121' fontWeight="light" fontSize={12}>
-                  MetaMask
-                </Typography>
-              </Grid> 
-              <Divider />
-              <Grid item sx={{p: 1}}>
-                <Typography color='#212121' fontWeight='bold' fontSize={12}>
-                  <FaEthereum size={10} /> DAI Balance:{' '}
-                </Typography>
-                <Typography color='#212121' fontWeight="light" fontSize={12}>
-                  $125.64
-                </Typography>
-              </Grid>
-              <Divider />
-              <Grid item sx={{p: 1}}>
-                <Typography color='#212121' fontWeight='bold' fontSize={12}>
-                  <FaEthereum size={10} /> UST Balance:{' '}
-                </Typography>
-                <Typography color='#212121' fontWeight="light" fontSize={12}>
-                  $23.22
-                </Typography>
-              </Grid>
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
 
-        </Grid>
-      </Box>
-    )
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
 }
 
-export default MarketToolbar
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+const MarketToolbar: React.FunctionComponent = () => {
+  const classes = useStyles();
+  const router = useRouter();
+
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
 
 
+  return (
+    <Box display='flex' >
+            <Button size='small' variant='contained'>
+              Create Contract
+            </Button>
 
-      
+            <Button size='small' variant='contained' disabled>
+              Create Service
+            </Button>
+
+      </Box>
+  );
+};
+
+export default MarketToolbar;

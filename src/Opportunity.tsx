@@ -4,19 +4,20 @@ import {
   Box,
 } from '@mui/material';
 
-import  { useRouter } from 'next/router';
+import  { NextRouter, useRouter } from 'next/router';
 
 import {
   IOpportunityProps,
 } from './OpportunityInterfaces';
 import NavigationBar from './common/components/NavigationBar/NavigationBar';
+import MarketToolbar from './modules/market/components/MarketToolbar';
 
-const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) => {
-  const router = useRouter();
+const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
+  const router: NextRouter = useRouter();
 
-  const APP_BACKGROUND = '#f8f8f8'
+  const APP_BACKGROUND: string = '#f8f8f8'
 
-  const isPadded =
+  const isPadded: boolean =
     router.pathname === '/jobs' ||
     router.pathname === '/profile' ||
     router.pathname === '/contract/view/contract' ||
@@ -25,9 +26,8 @@ const Opportunity: React.FunctionComponent<IOpportunityProps> = ({ children }) =
     router.pathname === '/markets' ||
     router.pathname === '/contract' 
 
-
   return (
-    <Box sx={{ display: 'flex', bgcolor: APP_BACKGROUND }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: APP_BACKGROUND }}>
       <NavigationBar />
       <Box
         component="main"

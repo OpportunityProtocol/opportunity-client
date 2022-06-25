@@ -14,6 +14,19 @@ import JobDisplay from '../modules/market/components/JobDisplay';
 import ServiceCard from '../modules/contract/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
 import { KeyboardArrowRight } from '@mui/icons-material';
+import { useContractRead } from 'wagmi';
+import { NETWORK_MANAGER_ADDRESS, TOKEN_FACTORY_ADDRESS } from '../constant';
+import { NetworkManagerInterface, TokenFactoryInterface } from '../abis';
+import { CHAIN_ID } from '../constant/provider';
+import { ProfileDataStruct } from '../typechain-types/FeeFollowModule';
+import { MarketDetailsStruct } from '../typechain-types/ITokenExchange';
+import { NextPage } from 'next';
+import { hexToDecimal } from '../common/helper';
+import { BigNumber } from 'ethers';
+import { Result } from 'ethers/lib/utils';
+import VerifiedAvatar from '../modules/user/components/VerifiedAvatar';
+import { ServiceStruct } from '../typechain-types/NetworkManager';
+import SearchBarV2 from '../common/components/SearchBarV2/SearchBarV2';
 
 const HEIGHT = '600px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
@@ -65,21 +78,15 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
   );
 }
 
-const Explore: FunctionComponent = () => {
+const ExplorePage: NextPage = () => {
   const classes = useStyles();
   const [suggestedConnections, setSuggestedConnections] = useState<any[]>([]);
-  const [markets, setMarkets] = useState<any[]>([]);
-  const [desiredMarkets, setDesiredMarkets] = useState<string>('Filter desired markets');
-  const [sortBy, setSortBy] = useState<string>('Sort by');
-  const [participatedChecked, setParticipatedChecked] = useState<any>('');
-  const router = useRouter();
-  const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
-    size: 50,
-    gap: 3,
-    thickness: 3,
-    gapColor: '#f4f7fa',
-    color: 'linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)',
-  });
+  const [marketsLoading, setMarketsLoading] = useState<boolean>(false);
+  const [verifiedFreelancersLoading, setVerifiedFreelancersLoading] = useState<boolean>(false)
+  const [verifiedFreelancers, setVerifiedFreelancers] = useState<Array<any>>([])
+  const [numMarkets, setNumMarkets] = useState<any>([])
+  const [services, setServices] = useState([])
+
 
   const fetchNetworkSuggestions = async () => {
     const a = await fetch('https://randomuser.me/api/?results=20', {
@@ -91,26 +98,100 @@ const Explore: FunctionComponent = () => {
     setSuggestedConnections(b.results);
   };
 
-  const handleOnChangeParticipatedChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setParticipatedChecked(event.target.checked);
-  };
+  const networkManager_getMarkets = useContractRead(
+    {
+      addressOrName: TOKEN_FACTORY_ADDRESS,
+      contractInterface: TokenFactoryInterface
+    },
+    "getNumMarkets",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      onSuccess: (data: Result) => {
+        const total = hexToDecimal(data._hex)
+        let list = []
+        for (let i = 0; i < total; i++) {
+          list.push(Number(i) + 1)
+        }
+        setNumMarkets(list)
+       // setMarketsDetails(data)
+        setMarketsLoading(false)
+      },
+      onError: error => {
+        console.log('getMarkets')
+        console.log(error)
+        setMarketsLoading(false)
+      }
+    }
+  )
 
-  const handleOnChangeDesiredMarkets = () => {};
-  const handleOnChangeSortBy = () => {};
+  const networkManager_getVerifiedFreelancers = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
+    },
+    "getVerifiedFreelancers",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      onSuccess: (data: Result) => {
+        setVerifiedFreelancers(data as Array<any>)
+        setVerifiedFreelancersLoading(false)
+      },
+      onError: error => {
+        console.log('getVerifiedFreelancers')
+        console.log(error)
+        setVerifiedFreelancersLoading(false)
+      }
+    }
+  )
+
+  const networkManager_getServices = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
+    },
+    "getServices",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      onSuccess(data: Result) {
+        console.log(data)
+        setServices(data)
+      },
+      onError: error => {
+        console.log('getServices')
+        console.log(error)
+      }
+    }
+  )
+
+  const renderFreelancers = () => {
+    const freelancers = verifiedFreelancers.slice()
+      return freelancers.splice(0, 6).map((address) => {
+        return <VerifiedAvatar address={address} />
+  })
+}
+
+  //prepare explore page
+  useEffect(() => {
+    setMarketsLoading(true)
+    setVerifiedFreelancersLoading(true)
+    networkManager_getMarkets.refetch()
+    networkManager_getVerifiedFreelancers.refetch()
+    networkManager_getServices.refetch()
+  }, [])
 
   useEffect(() => {
     fetchNetworkSuggestions();
-    let updatedMarkets = [];
-    updatedMarkets.push('Writing and Translation');
-    updatedMarkets.push('Development & IT');
-    updatedMarkets.push('Accounting and Finance');
-    updatedMarkets.push('Design and Creative');
-    updatedMarkets.push('Engineering and Architecture');
-    updatedMarkets.push('Sales and Marketing');
-    setMarkets(updatedMarkets);
   }, []);
 
-  const AVATAR_SIZE = 70;
+
+
+
   return (
     <Box>
       <Container maxWidth="lg" className={classes.root}>
@@ -137,48 +218,7 @@ const Explore: FunctionComponent = () => {
               </Button>
             </Stack>
             <Grid container alignItems="center" direction="row" flexWrap="nowrap">
-              {suggestedConnections.splice(0, 7).map((human) => {
-                return (
-                  <Box
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="flex-start"
-                    alignItems="center"
-                    component={Button}
-                    mx={4}
-                    onClick={() => router.push('/profile')}
-                  >
-                    <div
-                      style={{
-                        margin: '5px 0px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                      }}
-                      className={styles.root}
-                    >
-                      <Avatar
-                        style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}
-                        src={human.picture.large}
-                      />
-                    </div>
-                    <Box textAlign="center">
-                      <Typography
-                        fontWeight="medium"
-                        variant="body2"
-                        color="#616161"
-                        width="auto"
-                        noWrap
-                      >
-                        {human.name.first + ' ' + human.name.last}
-                      </Typography>
-                      <Typography variant="caption" color="text.primary" width="auto" noWrap>
-                        ${Math.floor(Math.random() * 101).toFixed(2)} Value
-                      </Typography>
-                    </Box>
-                  </Box>
-                );
-              })}
+              {renderFreelancers()}
             </Grid>
           </Box>
 
@@ -187,6 +227,7 @@ const Explore: FunctionComponent = () => {
             elevation={0}
             sx={{ my: 6, px: 3, pb: 6, backgroundColor: '#fff' }}
           >
+            <Stack justifyContent='space-between' direction='row' alignItems='center'>
             <Box>
               <Typography py={3} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
                 Buy{' '}
@@ -198,17 +239,22 @@ const Explore: FunctionComponent = () => {
                 >
                   confidence
                 </Typography>{' '}
-                in top rated services
+                newly created services
               </Typography>
             </Box>
+
+            <SearchBarV2 />
+            </Stack>
+
             <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={3}>
-              {suggestedConnections.slice(3, 7).map((human) => {
+              {services.slice(0, 4).map((serviceData: ServiceStruct) => {
+                console.log('HI')
+                console.log(serviceData)
                 return (
                   <Grid item xs={3}>
                     <ServiceCard
-                      name={human.name.first + ' ' + human.name.last}
-                      avatarSrc={human.picture.large}
-                      headerSrc="https://picsum.photos/200"
+                      id={hexToDecimal(serviceData.id._hex)}
+                      data={serviceData}
                     />
                   </Grid>
                 );
@@ -231,11 +277,15 @@ const Explore: FunctionComponent = () => {
             <Grid item />
           </Grid>
           <Grid container direction="row" flexDirection="row" alignItems="center" spacing={2}>
-            {markets.map((market) => (
-              <Grid item sm={4}>
-                <MarketDisplay market={market} isShowingStats />
-              </Grid>
-            ))}
+            {
+              numMarkets.slice(0, 6).map((marketId) => {
+                return (
+                  <Grid item sm={4}>
+                  <MarketDisplay marketId={marketId} isShowingStats />
+                </Grid>
+                )
+              })
+            }
           </Grid>
         </Box>
 
@@ -266,6 +316,4 @@ const Explore: FunctionComponent = () => {
   );
 };
 
-Explore.propTypes = {};
-
-export default Explore;
+export default ExplorePage;

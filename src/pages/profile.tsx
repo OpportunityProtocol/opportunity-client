@@ -19,6 +19,13 @@ import { timelineButtons } from '../modules/market/MarketConstants';
 import ServiceCard from '../modules/contract/components/ServiceCard/ServiceCard';
 import { useRouter } from 'next/router';
 import UserCard from '../modules/user/components/UserCard/UserCard';
+import { NextPage } from 'next';
+import { useAccount, useContractRead } from 'wagmi';
+import { LENS_HUB_PROXY, NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from '../constant';
+import { LensHubInterface, NetworkManagerInterface } from '../abis';
+import { CHAIN_ID } from '../constant/provider';
+import { hexToDecimal } from '../common/helper';
+import { Result } from 'ethers/lib/utils';
 
 const data = [
   {
@@ -67,13 +74,57 @@ const data = [
 
 const COLUMN_HEIGHT = 'calc(100vh - 70px)';
 
-const Dashboard: React.FunctionComponent = () => {
+const ProfilePage: NextPage = () => {
   const classes = useStyles();
   const [value, setValue] = useState<any>(0);
   const [connections, setConnections] = useState<any>([]);
   const [featuredServices, setFeaturedServices] = useState<any>([]);
   const [reviews, setReviews] = useState<any>([]);
   const router = useRouter();
+  const accountData = useAccount()
+  const [lensProfileId, setLensProfileId] = useState<any>(0)
+  const [lensProfile, setLensProfile] = useState<any>({});
+  const [publications, setPublications] = useState<any>([])
+  
+
+  const networkManager_getLensProfileIdFromAddress = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    "getLensProfileIdFromAddress",
+    {
+      enabled: false,
+      chainId: CHAIN_ID,
+      args: [accountData?.data?.address],
+      onSuccess: (data: Result) => {
+        setLensProfileId(hexToDecimal(data._hex));
+
+      },
+      onError: (error) => {
+        console.log(error);
+      },
+    }
+  );
+
+    //getProfile
+    const lensHub_getProfile = useContractRead(
+      {
+        addressOrName: LENS_HUB_PROXY,
+        contractInterface: LensHubInterface,
+      },
+      "getProfile",
+      {
+        enabled: false,
+        watch: false,
+        chainId: CHAIN_ID,
+        args: [lensProfileId],
+        onSuccess: (data) => {
+          setLensProfile(data);
+        },
+        onError: (error) => console.log(error),
+      }
+    );
 
   const renderUsers = async () => {
     const a = await fetch('https://randomuser.me/api/?results=20', {});
@@ -87,6 +138,52 @@ const Dashboard: React.FunctionComponent = () => {
     const users = await a.json();
     setFeaturedServices(users.results);
   };
+
+  const getAllPublications = (): void => {
+    let updatedPubArr = []
+    if (lensProfile.pubCount > 0) {
+      for (let i = 0; i < lensProfile.pubCount; i++) {
+          updatedPubArr.push(i)
+      }
+    }
+
+    setPublications(updatedPubArr)
+  }
+
+  useEffect(() => {
+      getAllPublications()
+  }, [lensProfile])
+
+  useEffect(() => {
+    if (lensProfileId !== 0) {
+      lensHub_getProfile.refetch({
+        throwOnError: true,
+      });
+    }
+  }, [lensProfileId]);
+
+  const onFetchLensProfileId = () => {
+    networkManager_getLensProfileIdFromAddress
+      .refetch({
+        throwOnError: true,
+      })
+      .then((updatedResults) => {
+        if (updatedResults.isSuccess) {
+          setLensProfile(updatedResults.data._hex);
+        } else {
+          setLensProfileId(0);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  useEffect(() => {
+    if (accountData.isSuccess && accountData.data.address !== ZERO_ADDRESS && accountData.data.address != '0') {
+      onFetchLensProfileId();
+    }
+  }, [accountData.data.address]);
 
   useEffect(() => {
     renderUsers();
@@ -199,7 +296,7 @@ const Dashboard: React.FunctionComponent = () => {
                     {connections[2]?.name.first + ' ' + connections[2]?.name.last}
                   </Typography>
                   <Typography variant="body2" color="rgb(94, 94, 94)" fontSize={14}>
-                    @lensterWorker
+                    {lensProfile.handle}
                   </Typography>
                 </Box>
                 <Typography pt={2}>32 connections</Typography>
@@ -274,13 +371,13 @@ const Dashboard: React.FunctionComponent = () => {
           Services
         </Typography>
         <Grid container direction="row" spacing={2} alignItems="center">
-          {featuredServices.map((element, idx, arr) => {
+          {publications.map((element, idx, arr) => {
             return (
               <Grid item xs={3} key={idx}>
                 <ServiceCard
-                  name={element.name.first + ' ' + arr[0].name.last}
+                  name={'Elton John'}
                   headerSrc="https://picsum.photos/200"
-                  avatarSrc={element.picture.large}
+                  avatarSrc=''
                 />
               </Grid>
             );
@@ -343,4 +440,4 @@ const Dashboard: React.FunctionComponent = () => {
   );
 };
 
-export default Dashboard;
+export default ProfilePage;

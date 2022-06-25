@@ -90,7 +90,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
       variant="outlined"
     >
       <CardContent>
-        <Grid pb={5} container alignItems="center" flexWrap="nowrap" direction="row">
+        <Grid pb={3} container alignItems="center" flexWrap="nowrap" direction="row">
           <Grid item pr={2}>
           <div
                       style={{
@@ -111,10 +111,10 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
           <Grid container item flexGrow={1}>
             <Grid container item alignItems="center" justifyContent="space-between">
               <Grid item>
-                <Typography fontWeight="bold">{randomJobTitles[randomInt]}</Typography>
+                <Typography fontWeight='600'>{randomJobTitles[randomInt]}</Typography>
               </Grid>
 
-              <Grid item fontWeight="bold" fontSize={15} color='text.primary'>
+              <Grid item fontWeight="medium" fontSize={15} color='text.secondary'>
               {Math.floor(Math.random() * 5000).toFixed(2)} DAI
               </Grid>
             </Grid>
@@ -156,6 +156,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
         </Box>
 
         <Grid
+        py={2}
           container
           direction="row"
           flexDirection="row"

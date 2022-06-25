@@ -16,8 +16,9 @@ const SearchBarV2StyledInputBase = styled(InputBase)(({ theme }) => ({
   '& .MuiInputBase-input': {
     marginLeft: theme.spacing(1),
     flex: 1,
-    minWidth: 'auto',
     backgroundColor: 'transparent',
+    borderBottom: '1px solid #ddd',
+    maxWidth: 500
   },
 }));
 

@@ -210,9 +210,15 @@ const NetworkManagerInterface = [
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "purchaseId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "pubId",
         "type": "uint256"
       },
       {
@@ -220,6 +226,12 @@ const NetworkManagerInterface = [
         "internalType": "uint256",
         "name": "serviceId",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
       },
       {
         "indexed": true,
@@ -390,14 +402,9 @@ const NetworkManagerInterface = [
         "type": "string"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint256[]",
         "name": "wad",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "initialMaxWaitlistSize",
-        "type": "uint256"
+        "type": "uint256[]"
       },
       {
         "internalType": "uint256",
@@ -405,31 +412,9 @@ const NetworkManagerInterface = [
         "type": "uint256"
       },
       {
-        "components": [
-          {
-            "internalType": "uint8",
-            "name": "v",
-            "type": "uint8"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "r",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "s",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
-            "name": "deadline",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct DataTypes.EIP712Signature",
-        "name": "postSignature",
-        "type": "tuple"
+        "internalType": "address",
+        "name": "lensTalentServiceCollectModule",
+        "type": "address"
       }
     ],
     "name": "createService",
@@ -644,6 +629,44 @@ const NetworkManagerInterface = [
         "type": "uint256"
       }
     ],
+    "name": "getPubIdFromServiceId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "serviceId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getPurchaseIdFromServiceId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "serviceId",
+        "type": "uint256"
+      }
+    ],
     "name": "getServiceData",
     "outputs": [
       {
@@ -664,9 +687,9 @@ const NetworkManagerInterface = [
             "type": "string"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint256[]",
             "name": "wad",
-            "type": "uint256"
+            "type": "uint256[]"
           },
           {
             "internalType": "uint256",
@@ -684,9 +707,9 @@ const NetworkManagerInterface = [
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
-            "name": "maxSize",
-            "type": "uint256"
+            "internalType": "address",
+            "name": "collectModule",
+            "type": "address"
           }
         ],
         "internalType": "struct NetworkLibrary.Service",
@@ -719,9 +742,9 @@ const NetworkManagerInterface = [
             "type": "string"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint256[]",
             "name": "wad",
-            "type": "uint256"
+            "type": "uint256[]"
           },
           {
             "internalType": "uint256",
@@ -739,14 +762,27 @@ const NetworkManagerInterface = [
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
-            "name": "maxSize",
-            "type": "uint256"
+            "internalType": "address",
+            "name": "collectModule",
+            "type": "address"
           }
         ],
         "internalType": "struct NetworkLibrary.Service[]",
         "name": "",
         "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getVerifiedFreelancers",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
       }
     ],
     "stateMutability": "view",
@@ -906,6 +942,38 @@ const NetworkManagerInterface = [
         "internalType": "address",
         "name": "referral",
         "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "package",
+        "type": "uint8"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint8",
+            "name": "v",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "r",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "s",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "deadline",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DataTypes.EIP712Signature",
+        "name": "sig",
+        "type": "tuple"
       }
     ],
     "name": "purchaseServiceOffering",
@@ -953,6 +1021,11 @@ const NetworkManagerInterface = [
         "internalType": "address",
         "name": "referral",
         "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "package",
+        "type": "uint8"
       }
     ],
     "stateMutability": "view",
@@ -1287,7 +1360,26 @@ const NetworkManagerInterface = [
         "type": "uint256"
       }
     ],
-    "name": "serviceIdToMaxWaitlistSize",
+    "name": "serviceIdToPublicationId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "serviceIdToPurchaseId",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1325,11 +1417,6 @@ const NetworkManagerInterface = [
       },
       {
         "internalType": "uint256",
-        "name": "wad",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
         "name": "referralShare",
         "type": "uint256"
       },
@@ -1344,9 +1431,9 @@ const NetworkManagerInterface = [
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "maxSize",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "collectModule",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -1379,11 +1466,6 @@ const NetworkManagerInterface = [
       },
       {
         "internalType": "uint256",
-        "name": "wad",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
         "name": "referralShare",
         "type": "uint256"
       },
@@ -1398,9 +1480,9 @@ const NetworkManagerInterface = [
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "maxSize",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "collectModule",
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -1428,24 +1510,6 @@ const NetworkManagerInterface = [
       }
     ],
     "name": "setLensFollowModule",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "newMaxWaitlistSize",
-        "type": "uint256"
-      }
-    ],
-    "name": "setMaxWaitlistSize",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1510,6 +1574,25 @@ const NetworkManagerInterface = [
     "name": "updateTaskMetadataPointer",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "verifiedFreelancers",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]
