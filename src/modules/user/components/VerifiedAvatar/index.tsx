@@ -14,14 +14,15 @@ import { Result } from 'ethers/lib/utils';
 interface IVerifiedAvatarProps {
   avatarSize?: number;
   address: string;
+  src: string;
 }
 
-const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({ avatarSize=70, address }) => {
+const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({ avatarSize=80, address, src }) => {
   const [lensProfileId, setLensProfileId] = useState<any>(0);
   const [lensProfile, setLensProfile] = useState<any>({});
   const router: NextRouter = useRouter()
   const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
-    size: 50,
+    size: avatarSize,
     gap: 3,
     thickness: 3,
     gapColor: '#f4f7fa',
@@ -97,8 +98,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({ avatarSize=70, address }) =>
             className={styles.root}
           >
             <Avatar
-              style={{ width: avatarSize, height: avatarSize }}
-              src=''
+              src={src}
             />
           </div>
           <Box textAlign="center">
@@ -119,4 +119,5 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({ avatarSize=70, address }) =>
     )
 }
 
+export { type IVerifiedAvatarProps }
 export default VerifiedAvatar

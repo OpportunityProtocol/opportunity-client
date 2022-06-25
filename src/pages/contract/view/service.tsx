@@ -46,7 +46,7 @@ import {
 import { CHAIN_ID } from "../../../constant/provider";
 import {
   ProfileStructStruct,
-  PaymentProcessingDataStruct,
+  PublicationStructStruct,
 } from "../../../typechain-types/ILensHub";
 import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../../common/helper";
@@ -54,6 +54,8 @@ import { useDispatch } from "react-redux";
 import { userLensDataStored } from "../../../modules/user/userReduxSlice";
 import { create } from "ipfs-http-client";
 import fleek from "../../../fleek";
+import { PaymentProcessingDataStruct } from "../../../typechain-types/ServiceCollectModule";
+import VerifiedAvatar from "../../../modules/user/components/VerifiedAvatar";
 
 interface IDeliverable {
   type: string;
@@ -107,16 +109,17 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const dispatch = useDispatch();
   const [reviews, setReviews] = useState<any>([]);
   const [serviceData, setServiceData] = useState<ServiceStruct>({});
-  const [servicePubId, setServicePubId] = useState<number>(-1);
+  const [servicePubId, setServicePubId] = useState<number>(0);
   const [servicePublicationData, setServicePublicationData] =
-    useState<PaymentProcessingDataStruct>({});
+    useState<PublicationStructStruct>({});
   const [paymentProcessingData, setServicePaymentProcessingData] =
     useState<PaymentProcessingDataStruct>({});
   const [serviceMetadata, setServiceMetadata] = useState({});
   const [user, setUser] = useState([]);
+  const [displayImg, setDisplayImg] = useState();
 
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
-    useState<number>(-1);
+    useState<number>(0);
   const [serviceOnwerLensProfile, setSeriviceOwnerLensProfile] =
     useState<ProfileStructStruct>({});
   const isReferral = true;
@@ -127,13 +130,13 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     setUser(users.results);
   };
 
-  useEffect(() => {
-    renderUsers();
-  }, []);
-
-  useEffect(() => {
-    setServiceData(router.query);
-  }, [router.query.id]);
+  const renderPackageInformation = (idx: number) => {
+   try {
+    return `${hexToDecimal(paymentProcessingData.packages[idx]._hex)} DAI`
+   } catch(error) {
+    return '0 DAI'
+   }
+  }
 
   //get user lens profile id
   const networkManager_getLensProfileIdFromAddress = useContractRead(
@@ -145,7 +148,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     {
       enabled: false,
       chainId: CHAIN_ID,
-      args: serviceData.owner,
+      args: router.query.owner,
       onSuccess: (data: Result) => {
         setServiceOwnerLensProfileId(hexToDecimal(data._hex));
       },
@@ -174,15 +177,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       onError: (error) => console.log(error),
     }
   );
-
-  //fetch lens profile among  lens profile id change
-  useEffect(() => {
-    if (serviceOwnerLensProfileId !== 0) {
-      lensHub_getProfile.refetch({
-        throwOnError: true,
-      });
-    }
-  }, [serviceOwnerLensProfileId]);
 
   //get pub id
   const networkManager_getPubIdFromServiceId = useContractRead(
@@ -250,15 +244,15 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     }
   );
 
-  const getServiceMetadata = async () => {
+  const getServiceMetadata = async (ptr) => {
     let retVal: any = {};
 
-    if (process.env.CHAIN_EV === "development") {
+    if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
       const ipfs = create({
-        url: "https://ipfs.infura.io:5001/api/v0",
+        url: "/ip4/127.0.0.1/tcp/8080",
       });
 
-      retVal = await ipfs.get(serviceData.metadataPtr);
+      retVal = await ipfs.get(`/ipfs/${ptr}`).next();
     } else {
       retVal = await fleek.getService(serviceData.metadataPtr);
     }
@@ -266,9 +260,43 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     if (!retVal) {
       throw new Error("Unable to retrieve service metadata data");
     } else {
-      setServiceMetadata(retVal);
+      const jsonString = Buffer.from(retVal.value).toString("utf8");
+      const parsedString = jsonString.slice(
+        jsonString.indexOf("{"),
+        jsonString.lastIndexOf("}") + 1
+      );
+      const parsedData = JSON.parse(parsedString);
+      const updatedImg = Buffer.from(parsedData.serviceThumbnail.data);
+
+      setDisplayImg(updatedImg);
+      setServiceMetadata(parsedData);
     }
   };
+
+  useEffect(() => {
+    lensHub_getPub.refetch();
+    serviceCollectModule_getPaymentProcessingData.refetch();
+  }, [serviceOwnerLensProfileId, servicePubId]);
+
+  //fetch lens profile among  lens profile id change
+  useEffect(() => {
+    if (serviceOwnerLensProfileId !== 0) {
+      lensHub_getProfile.refetch({
+        throwOnError: true,
+      });
+    }
+  }, [serviceOwnerLensProfileId]);
+
+  useEffect(() => {
+    renderUsers();
+  }, []);
+
+  useEffect(() => {
+    getServiceMetadata(router.query.metadataPtr);
+    setServiceData(router.query);
+    networkManager_getLensProfileIdFromAddress.refetch();
+    networkManager_getPubIdFromServiceId.refetch();
+  }, [router.query.id]);
 
   const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
     size: 50,
@@ -306,19 +334,16 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     }}
                     className={styles.root}
                   >
-                    <Avatar
-                      src={user[0]?.picture?.thumbnail}
-                      style={{ width: 45, height: 45 }}
-                    />
+                    <VerifiedAvatar  src={user[0]?.picture?.thumbnail} />
                   </div>
                   <Typography fontSize={16} color="primary" fontWeight="bold">
-                    mickeyrock12
+                    {serviceOnwerLensProfile.handle}
                   </Typography>
                 </Stack>
               </Box>
 
               <Typography fontWeight="bold" fontSize={22} pb={2}>
-                Hire me to promote your website and social media accounts
+                {serviceMetadata.serviceTitle}
               </Typography>
               <Typography
                 paragraph
@@ -326,11 +351,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                 fontWeight="medium"
                 color="rgb(0, 0, 0, 0.52)"
               >
-                Need help in increasing sales or engagement on your social media
-                profiles? We aim to deliver a first class service in social
-                media marketing, from quality content and strong audience
-                building, we will make sure your brand stands out in the crowded
-                market and gain awareness to the core audience.
+                {serviceMetadata.serviceDescription}
               </Typography>
 
               <Stack
@@ -460,7 +481,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     alignItems="center"
                   >
                     <Typography fontWeight="medium" fontSize={25}>
-                      19.99 DAI
+                      {renderPackageInformation(0)}
                     </Typography>
 
                     <Chip
@@ -540,7 +561,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     alignItems="center"
                   >
                     <Typography fontWeight="medium" fontSize={25}>
-                      29.99 DAI
+                    {renderPackageInformation(1)}
                     </Typography>
 
                     <Chip
@@ -620,7 +641,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     alignItems="center"
                   >
                     <Typography fontWeight="medium" fontSize={25}>
-                      39.99 DAI
+                    {renderPackageInformation(2)}
                     </Typography>
 
                     <Chip
@@ -712,4 +733,5 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   );
 };
 
+export { type IViewContractPage }
 export default withRouter(ViewContractPage);

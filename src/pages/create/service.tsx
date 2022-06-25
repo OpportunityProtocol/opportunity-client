@@ -91,6 +91,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     "createService",
     {
       onError(error, variables, context) {
+        console.log("createService")
         console.log(error);
         console.log(variables);
       },
@@ -156,10 +157,11 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
         //https://ipfs.infura.io:5001/api/v0
         const ipfs = create({
-          url: "https://ipfs.infura.io:5001/api/v0",
+          url: "/ip4/0.0.0.0/tcp/5001",
         });
 
-        retVal = await (await ipfs.add(JSON.stringify(createServiceForm))).path;
+
+        retVal = await (await ipfs.add(JSON.stringify(createServiceForm))).path
       } else {
         retVal = await fleek.uploadService(
           String(accountData.data.address) +
@@ -283,11 +285,16 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   };
 
   const handleOnChangeFile = (e) => {
-    setSelectedImage(e.target.files[0]);
-    setCreateServiceForm({
-      ...createServiceForm,
-      thumbnail: e.target.files[0],
-    });
+    let reader = new FileReader()
+    reader.onloadend = () => {
+      const buffer = Buffer.from(reader.result)
+      setSelectedImage(e.target.files[0]);
+      setCreateServiceForm({
+        ...createServiceForm,
+        serviceThumbnail: buffer,
+      });
+    }
+    reader.readAsArrayBuffer(e.target.files[0])
   };
 
   return (

@@ -17,7 +17,7 @@ import { FunctionFragment, Result } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export type ProfilePublicationDataStruct = {
+export type PaymentProcessingDataStruct = {
   amount: BigNumberish;
   currency: string;
   recipient: string;
@@ -26,7 +26,7 @@ export type ProfilePublicationDataStruct = {
   packages: BigNumberish[];
 };
 
-export type ProfilePublicationDataStructOutput = [
+export type PaymentProcessingDataStructOutput = [
   BigNumber,
   string,
   string,
@@ -47,7 +47,7 @@ export interface ServiceCollectModuleInterface extends utils.Interface {
     "HUB()": FunctionFragment;
     "MODULE_GLOBALS()": FunctionFragment;
     "emergencyReleaseDisputedFunds(uint256,uint256,address,uint8)": FunctionFragment;
-    "getPublicationData(uint256,uint256)": FunctionFragment;
+    "getPaymentProcessingData(uint256,uint256)": FunctionFragment;
     "initializePublicationCollectModule(uint256,uint256,bytes)": FunctionFragment;
     "processCollect(uint256,address,uint256,uint256,bytes)": FunctionFragment;
     "releaseCollectedFunds(uint256,uint256,uint8)": FunctionFragment;
@@ -63,7 +63,7 @@ export interface ServiceCollectModuleInterface extends utils.Interface {
     values: [BigNumberish, BigNumberish, string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getPublicationData",
+    functionFragment: "getPaymentProcessingData",
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -89,7 +89,7 @@ export interface ServiceCollectModuleInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPublicationData",
+    functionFragment: "getPaymentProcessingData",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -147,11 +147,11 @@ export interface ServiceCollectModule extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    getPublicationData(
+    getPaymentProcessingData(
       profileId: BigNumberish,
       pubId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[ProfilePublicationDataStructOutput]>;
+    ): Promise<[PaymentProcessingDataStructOutput]>;
 
     initializePublicationCollectModule(
       profileId: BigNumberish,
@@ -189,11 +189,11 @@ export interface ServiceCollectModule extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  getPublicationData(
+  getPaymentProcessingData(
     profileId: BigNumberish,
     pubId: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<ProfilePublicationDataStructOutput>;
+  ): Promise<PaymentProcessingDataStructOutput>;
 
   initializePublicationCollectModule(
     profileId: BigNumberish,
@@ -231,11 +231,11 @@ export interface ServiceCollectModule extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    getPublicationData(
+    getPaymentProcessingData(
       profileId: BigNumberish,
       pubId: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<ProfilePublicationDataStructOutput>;
+    ): Promise<PaymentProcessingDataStructOutput>;
 
     initializePublicationCollectModule(
       profileId: BigNumberish,
@@ -276,7 +276,7 @@ export interface ServiceCollectModule extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    getPublicationData(
+    getPaymentProcessingData(
       profileId: BigNumberish,
       pubId: BigNumberish,
       overrides?: CallOverrides
@@ -319,7 +319,7 @@ export interface ServiceCollectModule extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    getPublicationData(
+    getPaymentProcessingData(
       profileId: BigNumberish,
       pubId: BigNumberish,
       overrides?: CallOverrides

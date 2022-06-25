@@ -248,10 +248,12 @@ const ExplorePage: NextPage = () => {
 
             <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={3}>
               {services.slice(0, 4).map((serviceData: ServiceStruct) => {
+                console.log('HI')
+                console.log(serviceData)
                 return (
                   <Grid item xs={3}>
                     <ServiceCard
-                      id={serviceData.id}
+                      id={hexToDecimal(serviceData.id._hex)}
                       data={serviceData}
                     />
                   </Grid>

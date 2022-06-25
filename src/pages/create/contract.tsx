@@ -34,8 +34,15 @@ import StepperComponent from "../../common/components/Stepper";
 import SearchBarV2 from "../../common/components/SearchBarV2/SearchBarV2";
 import MarketDisplay from "../../modules/market/components/MarketDisplay";
 
-const steps = ["Complete the basic information", "Pay fees"];
+const steps = ["Complete the basic information"];
 
+/**
+ * 
+ * @returns 
+ * TODO:
+ * * Limit title character count to ?
+ * * Limit description character count to 1112
+ */
 const CreateContractPage: NextPage = (): JSX.Element => {
   const [createContractForm, setCreateContractForm] = useState({
     contractTitle: "",
