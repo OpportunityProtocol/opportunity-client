@@ -14,11 +14,9 @@ interface ISearchBarV2Props {
 
 const SearchBarV2StyledInputBase = styled(InputBase)(({ theme }) => ({
   '& .MuiInputBase-input': {
-    marginLeft: theme.spacing(1),
     flex: 1,
     backgroundColor: 'transparent',
-    borderBottom: '1px solid #ddd',
-    maxWidth: 500
+    borderBottom: '1px solid #eee',
   },
 }));
 
@@ -27,7 +25,8 @@ const SearchBarV2: FunctionComponent<ISearchBarV2Props> = ({ placeholder, isFilt
   return (
     <Paper elevation={0} component="form" className={classes.paper}>
       <SearchBarV2StyledInputBase 
-        startAdornment={<Search sx={{ mr: 2, color: '#9E9E9E' }} />}
+      fullWidth
+        startAdornment={<Search sx={{mr: 1, color: '#9E9E9E' }} />}
         placeholder={placeholder}
         inputProps={{ 'aria-label': 'search gigs' }}
       />

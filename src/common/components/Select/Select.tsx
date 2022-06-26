@@ -23,7 +23,7 @@ const SelectInput = styled(InputBase)(({ theme }) => ({
     borderRadius: 4,
     position: 'relative',
     backgroundColor: theme.palette.background.paper,
-    border: '1px solid #ddd',
+    border: '1px solid #eee',
     fontSize: 16,
     height: 20,
     padding: '10px 26px 15px 12px',

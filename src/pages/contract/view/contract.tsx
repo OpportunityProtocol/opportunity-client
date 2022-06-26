@@ -185,7 +185,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
     <>
       <Container maxWidth="lg">
         {isReferral ? (
-          <Alert sx={{ border: '1px solid #ddd' }} severity="info">
+          <Alert sx={{ border: '1px solid #eee' }} severity="info">
             <AlertTitle>Referral</AlertTitle>
             You are viewing this contract as a part of a referral. Your referrer will receive{' '}
             <strong>5%</strong> of the total payout upon completion.
@@ -414,7 +414,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
             </Stack>
 
             <Alert
-              sx={{ border: '1px solid #ddd' }}
+              sx={{ border: '1px solid #eee' }}
               variant="standard"
               icon={false}
               className={classes.marginBottom}

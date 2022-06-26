@@ -4,7 +4,11 @@ import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gra
 import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
 import { ClassNameMap } from "@mui/material";
 import { useState, useEffect, FC } from "react";
-import { LENS_HUB_PROXY, NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "../../../../constant";
+import {
+  LENS_HUB_PROXY,
+  NETWORK_MANAGER_ADDRESS,
+  ZERO_ADDRESS,
+} from "../../../../constant";
 import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
 import { CHAIN_ID } from "../../../../constant/provider";
 import { hexToDecimal } from "../../../../common/helper";
@@ -16,19 +20,19 @@ import { ProfileStructStruct } from "../../../../typechain-types/ILensHub";
 interface IVerifiedAvatarProps {
   avatarSize?: number;
   address: string;
-  src: string;
+  lensProfileId: number;
+  lensProfile: ProfileStructStruct;
   showValue?: boolean;
 }
 
 const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
   avatarSize = 80,
-  address=ZERO_ADDRESS,
-  src,
-  showValue = false,
+  address = ZERO_ADDRESS,
+  lensProfileId = 0,
+  lensProfile,
+  showValue = true,
 }) => {
-  const [lensProfileId, setLensProfileId] = useState<number>(0);
-  const [lensProfile, setLensProfile] = useState<ProfileStructStruct>({});
-  const [displayImg, setDisplayImg] = useState<Buffer | string>('')
+  const [displayImg, setDisplayImg] = useState<Buffer | string>("");
   const router: NextRouter = useRouter();
   const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
     size: avatarSize,
@@ -37,6 +41,9 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
     gapColor: "#f4f7fa",
     color: "linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)",
   });
+
+  const [fallbackLensProfileId, setFallbackLensProfileId] = useState<number>(0)
+  const [fallbackLensProfile, setFallbackLensProfile] = useState<ProfileStructStruct>({})
 
   const lensHub_getProfile = useContractRead(
     {
@@ -48,21 +55,21 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
       enabled: false,
       watch: false,
       chainId: CHAIN_ID,
-      args: [lensProfileId],
+      args: [fallbackLensProfileId],
       onSuccess: (data) => {
-        setLensProfile(data);
+        setFallbackLensProfile(data);
       },
       onError: (error) => console.log(error),
     }
   );
 
   useEffect(() => {
-    if (lensProfileId !== 0) {
+    if (fallbackLensProfileId !== 0) {
       lensHub_getProfile.refetch({
         throwOnError: true,
       });
     }
-  }, [lensProfileId]);
+  }, [fallbackLensProfileId]);
 
   const networkManager_getLensProfileIdFromAddress = useContractRead(
     {
@@ -75,7 +82,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
       chainId: CHAIN_ID,
       args: [address],
       onSuccess: (data: Result) => {
-        setLensProfileId(hexToDecimal(data._hex));
+        setFallbackLensProfileId(hexToDecimal(data._hex));
       },
       onError: (error) => {
         console.log(error);
@@ -84,8 +91,20 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
   );
 
   useEffect(() => {
-    networkManager_getLensProfileIdFromAddress.refetch();
-  }, [address]);
+    if (address) {
+      networkManager_getLensProfileIdFromAddress.refetch()
+    }
+  }, [address])
+
+  const renderHandle = (): string => {
+    if (lensProfile && lensProfile.handle) {
+      return lensProfile.handle
+    } else if (fallbackLensProfile && fallbackLensProfile.handle) {
+      return fallbackLensProfile.handle
+    } else {
+      return "Unable to display handle"
+    }
+  }
 
   return (
     <Box
@@ -100,26 +119,24 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
       disableTouchRipple
       onClick={() => router.push("/profile")}
     >
-      {
-        !displayImg ?
-        (
-          <Jazzicon diameter={30} seed={jsNumberForAddress(String(address))} />
-        )
-        :
-          (
-            <div
-            style={{
-              margin: "5px 0px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-            className={styles.root}
-          >
-            <Avatar src={src} />
-          </div>
-          )
-      }
+      <div
+        style={{
+          margin: "5px 0px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+        className={styles.root}
+      >
+        {!displayImg ? (
+          <Jazzicon
+            diameter={avatarSize}
+            seed={jsNumberForAddress(String(address))}
+          />
+        ) : (
+          <Avatar src={src} />
+        )}
+      </div>
 
       <Box textAlign="center">
         <Typography
@@ -129,7 +146,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
           width="auto"
           noWrap
         >
-          {lensProfile?.handle}
+          {renderHandle()}
         </Typography>
         {showValue ? (
           <Typography

@@ -21,6 +21,7 @@ import {
   Toolbar,
   Typography,
   Divider,
+  Theme,
 } from "@mui/material";
 
 import { styled } from "@mui/material/styles";
@@ -51,15 +52,17 @@ import { DaiInterface } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
 import { ExitToApp } from "@material-ui/icons";
 
-const StyledBadge = styled(Badge)(({ theme }) => ({
+const StyledBadge = styled(Badge, {
+  shouldForwardProp: prop => prop !== 'connected'
+})(({ theme, connected }: { theme: Theme, connected: boolean }) => ({
   "& .MuiBadge-badge": {
+    display: connected === true ? 'flex' : 'none',
     backgroundColor: "#44b700",
     color: "#44b700",
+    bottom: 13,
+    right: 12,
     boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
     "&::after": {
-      position: "absolute",
-      top: 0,
-      left: 0,
       width: "100%",
       height: "100%",
       borderRadius: "50%",
@@ -147,21 +150,23 @@ const ConnectedAvatar: FC = () => {
 
   return (
     <StyledBadge
+      connected={connected}
       overlap="circular"
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       variant="dot"
     >
-      <Avatar
-      onClick={handlePopoverOpen}
-       
-        sx={{ cursor: "pointer" }}
-        alt="Remy Sharp"
-        src="/assets/stock/profile_three.jpeg"
-      />
+      <IconButton onClick={handlePopoverOpen}>
+        <Avatar
+          sx={{ cursor: "pointer" }}
+          alt="Remy Sharp"
+          src="/assets/stock/profile_three.jpeg"
+        />
+      </IconButton>
+
       <Popover
         aria-owns={open ? "mouse-over-connected-avatar-popover" : undefined}
         aria-haspopup="true"
-        style={{ position: "absolute", top: 50 }}
+        style={{ position: "absolute" }}
         id="mouse-over-connected-avatar-popover"
         open={open}
         anchorEl={anchorEl}
@@ -174,25 +179,24 @@ const ConnectedAvatar: FC = () => {
       >
         <CardContent>
           <Box>
-            <Stack direction='row' alignItems='flex-start'>
-            <Typography component="div">
-              <Box sx={{ fontWeight: "bold" }}>Welcome to GigEarth</Box>
-              <Box
-                sx={{
-                  fontSize: 16,
-                  fontWeight: "medium",
-                  color: "rgb(94, 94, 94)",
-                }}
-              >
-                Permissionless labor markets powered by unstoppable networks
-              </Box>
-            </Typography>
+            <Stack direction="row" alignItems="flex-start">
+              <Typography component="div">
+                <Box sx={{ fontWeight: "bold" }}>Welcome to GigEarth</Box>
+                <Box
+                  sx={{
+                    fontSize: 16,
+                    fontWeight: "medium",
+                    color: "rgb(94, 94, 94)",
+                  }}
+                >
+                  Permissionless labor markets powered by unstoppable networks
+                </Box>
+              </Typography>
 
-            <IconButton onClick={handlePopoverClose}>
-              <ExitToApp />
-            </IconButton>
+              <IconButton onClick={handlePopoverClose}>
+                <ExitToApp />
+              </IconButton>
             </Stack>
-
           </Box>
           <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
             <Avatar
@@ -236,7 +240,7 @@ const ConnectedAvatar: FC = () => {
 
           <Grid
             my={3}
-            sx={{ border: "1px solid #ddd" }}
+            sx={{ border: "1px solid #eee" }}
             flexWrap="nowrap"
             container
             direction="column"

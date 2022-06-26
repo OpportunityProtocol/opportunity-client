@@ -57,8 +57,8 @@ import { createTheme } from '@mui/material/styles';
       MuiDivider: {
         styleOverrides: {
           root: {
-            color: '#ddd',
-            borderColor: '#ddd',
+            color: '#eee',
+            borderColor: '#eee',
             width: '100%'
           }
         }
@@ -77,7 +77,7 @@ import { createTheme } from '@mui/material/styles';
       MuiChip: {
         styleOverrides: {
           outlined: {
-            border: '1px solid #ddd'
+            border: '1px solid #eee'
           }
         }
       },

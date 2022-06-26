@@ -115,7 +115,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
       maxWidth="lg"
       component={Stack}
       spacing={5}
-      sx={{ border: '1px solid #ddd', bgcolor: "#fff !important", padding: "2% 4%", width: "100%" }}
+      sx={{ border: '1px solid #eee', bgcolor: "#fff !important", padding: "2% 4%", width: "100%" }}
     >
       <StepperComponent steps={steps} activeStep={step} />
       <Box>

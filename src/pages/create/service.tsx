@@ -303,7 +303,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       spacing={5}
       maxWidth="lg"
       sx={{
-        border: "1px solid #ddd",
+        border: "1px solid #eee",
         bgcolor: "#fff",
         padding: "2% 4% !important",
       }}

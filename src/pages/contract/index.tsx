@@ -42,6 +42,9 @@ import SearchBarV2 from '../../common/components/SearchBarV2/SearchBarV2';
 import ServiceCard from '../../modules/contract/components/ServiceCard/ServiceCard';
 import { useSelector } from 'react-redux';
 import { selectLens, selectUserAddress, selectVerificationStatus } from '../../modules/user/userReduxSlice';
+import { useContractEvent } from 'wagmi';
+import { NETWORK_MANAGER_ADDRESS } from '../../constant';
+import { NetworkManagerInterface } from '../../abis';
 const fileTypes = ['PDF', 'PNG', 'DOC'];
 
 const resources = [1, 2, 3, 4, 5, 6, 4];
@@ -61,6 +64,7 @@ const Contracts: React.FunctionComponent<any> = () => {
   const userLensProfileInformation = useSelector(selectLens)
   const userVerificationStatus = useSelector(selectVerificationStatus)
 
+  const [publishedServices, setPublishedServices] = useState([])
   const handleOnChangeTab = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
@@ -74,6 +78,20 @@ const Contracts: React.FunctionComponent<any> = () => {
   useEffect(() => {
     renderUsers();
   }, []);
+
+  useContractEvent(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    'ServiceCreated',
+    (event) => {
+      
+      console.log(event)
+      console.log('hi')
+    
+    }
+  )
 
   return (
     <Container maxWidth="lg">
@@ -93,12 +111,12 @@ const Contracts: React.FunctionComponent<any> = () => {
             <Tab value={2} label="Published Contracts" />
             <Tab value={3} label="Contract Working" />
           </Tabs>
-          <Divider />
+          <Divider sx={{ borderBottom: '1px solid #ddd' }} />
         </Box>
         <TabPanel index={0} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
-              {relationships.slice(10, 15).map(
+              {publishedServices.map(
                 (
                   relationship: {
                     name: { first: string; last: string };

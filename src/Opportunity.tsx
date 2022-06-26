@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {
+  alpha,
   Box,
 } from '@mui/material';
 
@@ -28,13 +29,13 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: APP_BACKGROUND }}>
-      <NavigationBar />
+
       <Box
         component="main"
         sx={{
           bgcolor: APP_BACKGROUND,
           flexGrow: 1,
-          paddingTop: isPadded ? '60px' : '0px',
+          paddingTop: isPadded ? '90px' : '0px',
         }}>
         {children}
       </Box>

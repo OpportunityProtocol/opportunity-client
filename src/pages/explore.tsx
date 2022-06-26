@@ -27,6 +27,7 @@ import { Result } from 'ethers/lib/utils';
 import VerifiedAvatar from '../modules/user/components/VerifiedAvatar';
 import { ServiceStruct } from '../typechain-types/NetworkManager';
 import SearchBarV2 from '../common/components/SearchBarV2/SearchBarV2';
+import Dropdown from '../common/components/Dropdown';
 
 const HEIGHT = '600px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
@@ -159,7 +160,6 @@ const ExplorePage: NextPage = () => {
       watch: false,
       chainId: CHAIN_ID,
       onSuccess(data: Result) {
-        console.log(data)
         setServices(data)
       },
       onError: error => {
@@ -217,9 +217,9 @@ const ExplorePage: NextPage = () => {
                 Explore freelancers
               </Button>
             </Stack>
-            <Grid container alignItems="center" direction="row" flexWrap="nowrap">
+            <Stack direction='row' flexWrap='nowrap' alignItems='center' spacing={5}>
               {renderFreelancers()}
-            </Grid>
+            </Stack>
           </Box>
 
           <Paper
@@ -239,17 +239,18 @@ const ExplorePage: NextPage = () => {
                 >
                   confidence
                 </Typography>{' '}
-                newly created services
+                recently created services
               </Typography>
             </Box>
 
-            <SearchBarV2 />
+         
+              <Dropdown />
+        
+
             </Stack>
 
             <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={3}>
-              {services.slice(0, 4).map((serviceData: ServiceStruct) => {
-                console.log('HI')
-                console.log(serviceData)
+              {services.slice(0,4).map((serviceData: ServiceStruct) => {
                 return (
                   <Grid item xs={3}>
                     <ServiceCard
