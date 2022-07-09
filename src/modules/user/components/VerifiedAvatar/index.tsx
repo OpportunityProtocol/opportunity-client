@@ -102,7 +102,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
     } else if (fallbackLensProfile && fallbackLensProfile.handle) {
       return fallbackLensProfile.handle
     } else {
-      return "Unable to display handle"
+      return "Unknown Handle"
     }
   }
 

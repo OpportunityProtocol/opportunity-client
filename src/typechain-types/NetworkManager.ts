@@ -80,6 +80,34 @@ export type ServiceStructOutput = [
   collectModule: string;
 };
 
+export type PurchasedServiceMetadataStruct = {
+  purchaseId: BigNumberish;
+  client: string;
+  exist: boolean;
+  timestampPurchased: BigNumberish;
+  referral: string;
+  package: BigNumberish;
+  status: BigNumberish;
+};
+
+export type PurchasedServiceMetadataStructOutput = [
+  BigNumber,
+  string,
+  boolean,
+  BigNumber,
+  string,
+  number,
+  number
+] & {
+  purchaseId: BigNumber;
+  client: string;
+  exist: boolean;
+  timestampPurchased: BigNumber;
+  referral: string;
+  package: number;
+  status: number;
+};
+
 export type EIP712SignatureStruct = {
   v: BigNumberish;
   r: BytesLike;
@@ -140,6 +168,7 @@ export interface NetworkManagerInterface extends utils.Interface {
     "getPubIdFromServiceId(uint256)": FunctionFragment;
     "getPurchaseIdFromServiceId(uint256)": FunctionFragment;
     "getServiceData(uint256)": FunctionFragment;
+    "getServicePurchaseMetadata(uint256)": FunctionFragment;
     "getServices()": FunctionFragment;
     "getVerifiedFreelancers()": FunctionFragment;
     "getWaitlistLength(uint256)": FunctionFragment;
@@ -246,6 +275,10 @@ export interface NetworkManagerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getServiceData",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getServicePurchaseMetadata",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -446,6 +479,10 @@ export interface NetworkManagerInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getServicePurchaseMetadata",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getServices",
     data: BytesLike
   ): Result;
@@ -568,8 +605,9 @@ export interface NetworkManagerInterface extends utils.Interface {
     "MarketCreated(uint256,string)": EventFragment;
     "MetaEvidence(uint256,string)": EventFragment;
     "Ruling(address,uint256,uint256)": EventFragment;
-    "ServiceCreated(uint256)": EventFragment;
+    "ServiceCreated(uint256,uint256,address)": EventFragment;
     "ServicePurchased(uint256,uint256,uint256,address,address,address)": EventFragment;
+    "ServiceResolved(uint256,uint256,address,address,uint8)": EventFragment;
     "UserRegistered(address,string)": EventFragment;
   };
 
@@ -582,6 +620,7 @@ export interface NetworkManagerInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Ruling"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ServiceCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ServicePurchased"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ServiceResolved"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UserRegistered"): EventFragment;
 }
 
@@ -620,7 +659,7 @@ export type EvidenceEventFilter = TypedEventFilter<EvidenceEvent>;
 
 export type MarketCreatedEvent = TypedEvent<
   [BigNumber, string],
-  { index: BigNumber; marketName: string }
+  { id: BigNumber; marketName: string }
 >;
 
 export type MarketCreatedEventFilter = TypedEventFilter<MarketCreatedEvent>;
@@ -640,8 +679,8 @@ export type RulingEvent = TypedEvent<
 export type RulingEventFilter = TypedEventFilter<RulingEvent>;
 
 export type ServiceCreatedEvent = TypedEvent<
-  [BigNumber],
-  { serviceId: BigNumber }
+  [BigNumber, BigNumber, string],
+  { serviceId: BigNumber; marketId: BigNumber; creator: string }
 >;
 
 export type ServiceCreatedEventFilter = TypedEventFilter<ServiceCreatedEvent>;
@@ -649,9 +688,9 @@ export type ServiceCreatedEventFilter = TypedEventFilter<ServiceCreatedEvent>;
 export type ServicePurchasedEvent = TypedEvent<
   [BigNumber, BigNumber, BigNumber, string, string, string],
   {
+    serviceId: BigNumber;
     purchaseId: BigNumber;
     pubId: BigNumber;
-    serviceId: BigNumber;
     owner: string;
     purchaser: string;
     referral: string;
@@ -660,6 +699,19 @@ export type ServicePurchasedEvent = TypedEvent<
 
 export type ServicePurchasedEventFilter =
   TypedEventFilter<ServicePurchasedEvent>;
+
+export type ServiceResolvedEvent = TypedEvent<
+  [BigNumber, BigNumber, string, string, number],
+  {
+    serviceId: BigNumber;
+    purchaseId: BigNumber;
+    serviceOwner: string;
+    serviceClient: string;
+    packageAmount: number;
+  }
+>;
+
+export type ServiceResolvedEventFilter = TypedEventFilter<ServiceResolvedEvent>;
 
 export type UserRegisteredEvent = TypedEvent<
   [string, string],
@@ -775,6 +827,11 @@ export interface NetworkManager extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[ServiceStructOutput]>;
 
+    getServicePurchaseMetadata(
+      purchaseId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[PurchasedServiceMetadataStructOutput]>;
+
     getServices(overrides?: CallOverrides): Promise<[ServiceStructOutput[]]>;
 
     getVerifiedFreelancers(overrides?: CallOverrides): Promise<[string[]]>;
@@ -825,13 +882,14 @@ export interface NetworkManager extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, string, boolean, BigNumber, string, number] & {
+      [BigNumber, string, boolean, BigNumber, string, number, number] & {
         purchaseId: BigNumber;
         client: string;
         exist: boolean;
         timestampPurchased: BigNumber;
         referral: string;
         package: number;
+        status: number;
       }
     >;
 
@@ -1093,6 +1151,11 @@ export interface NetworkManager extends BaseContract {
     overrides?: CallOverrides
   ): Promise<ServiceStructOutput>;
 
+  getServicePurchaseMetadata(
+    purchaseId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<PurchasedServiceMetadataStructOutput>;
+
   getServices(overrides?: CallOverrides): Promise<ServiceStructOutput[]>;
 
   getVerifiedFreelancers(overrides?: CallOverrides): Promise<string[]>;
@@ -1143,13 +1206,14 @@ export interface NetworkManager extends BaseContract {
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, string, boolean, BigNumber, string, number] & {
+    [BigNumber, string, boolean, BigNumber, string, number, number] & {
       purchaseId: BigNumber;
       client: string;
       exist: boolean;
       timestampPurchased: BigNumber;
       referral: string;
       package: number;
+      status: number;
     }
   >;
 
@@ -1413,6 +1477,11 @@ export interface NetworkManager extends BaseContract {
       overrides?: CallOverrides
     ): Promise<ServiceStructOutput>;
 
+    getServicePurchaseMetadata(
+      purchaseId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PurchasedServiceMetadataStructOutput>;
+
     getServices(overrides?: CallOverrides): Promise<ServiceStructOutput[]>;
 
     getVerifiedFreelancers(overrides?: CallOverrides): Promise<string[]>;
@@ -1463,13 +1532,14 @@ export interface NetworkManager extends BaseContract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, string, boolean, BigNumber, string, number] & {
+      [BigNumber, string, boolean, BigNumber, string, number, number] & {
         purchaseId: BigNumber;
         client: string;
         exist: boolean;
         timestampPurchased: BigNumber;
         referral: string;
         package: number;
+        status: number;
       }
     >;
 
@@ -1689,11 +1759,11 @@ export interface NetworkManager extends BaseContract {
     ): EvidenceEventFilter;
 
     "MarketCreated(uint256,string)"(
-      index?: BigNumberish | null,
+      id?: BigNumberish | null,
       marketName?: string | null
     ): MarketCreatedEventFilter;
     MarketCreated(
-      index?: BigNumberish | null,
+      id?: BigNumberish | null,
       marketName?: string | null
     ): MarketCreatedEventFilter;
 
@@ -1717,27 +1787,48 @@ export interface NetworkManager extends BaseContract {
       _ruling?: null
     ): RulingEventFilter;
 
-    "ServiceCreated(uint256)"(
-      serviceId?: BigNumberish | null
+    "ServiceCreated(uint256,uint256,address)"(
+      serviceId?: BigNumberish | null,
+      marketId?: BigNumberish | null,
+      creator?: string | null
     ): ServiceCreatedEventFilter;
-    ServiceCreated(serviceId?: BigNumberish | null): ServiceCreatedEventFilter;
+    ServiceCreated(
+      serviceId?: BigNumberish | null,
+      marketId?: BigNumberish | null,
+      creator?: string | null
+    ): ServiceCreatedEventFilter;
 
     "ServicePurchased(uint256,uint256,uint256,address,address,address)"(
+      serviceId?: BigNumberish | null,
       purchaseId?: null,
       pubId?: null,
-      serviceId?: BigNumberish | null,
       owner?: string | null,
       purchaser?: string | null,
       referral?: null
     ): ServicePurchasedEventFilter;
     ServicePurchased(
+      serviceId?: BigNumberish | null,
       purchaseId?: null,
       pubId?: null,
-      serviceId?: BigNumberish | null,
       owner?: string | null,
       purchaser?: string | null,
       referral?: null
     ): ServicePurchasedEventFilter;
+
+    "ServiceResolved(uint256,uint256,address,address,uint8)"(
+      serviceId?: null,
+      purchaseId?: null,
+      serviceOwner?: null,
+      serviceClient?: null,
+      packageAmount?: null
+    ): ServiceResolvedEventFilter;
+    ServiceResolved(
+      serviceId?: null,
+      purchaseId?: null,
+      serviceOwner?: null,
+      serviceClient?: null,
+      packageAmount?: null
+    ): ServiceResolvedEventFilter;
 
     "UserRegistered(address,string)"(
       registeredAddress?: string | null,
@@ -1825,6 +1916,11 @@ export interface NetworkManager extends BaseContract {
 
     getServiceData(
       serviceId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getServicePurchaseMetadata(
+      purchaseId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -2069,6 +2165,11 @@ export interface NetworkManager extends BaseContract {
 
     getServiceData(
       serviceId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getServicePurchaseMetadata(
+      purchaseId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

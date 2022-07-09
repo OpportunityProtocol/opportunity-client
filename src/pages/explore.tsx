@@ -28,12 +28,13 @@ import VerifiedAvatar from '../modules/user/components/VerifiedAvatar';
 import { ServiceStruct } from '../typechain-types/NetworkManager';
 import SearchBarV2 from '../common/components/SearchBarV2/SearchBarV2';
 import Dropdown from '../common/components/Dropdown';
+import TransactionTokenDialog from '../modules/market/components/TransactionTokenDialog';
 
 const HEIGHT = '600px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
   const classes = useStyles();
   return (
-    <Box position="relative" width="100%" bgcolor="inherit">
+    <Box>
       <img src={item.source} style={{ width: '100%', height: HEIGHT }} />
       <div
         style={{
@@ -222,11 +223,7 @@ const ExplorePage: NextPage = () => {
             </Stack>
           </Box>
 
-          <Paper
-            variant="outlined"
-            elevation={0}
-            sx={{ my: 6, px: 3, pb: 6, backgroundColor: '#fff' }}
-          >
+      
             <Stack justifyContent='space-between' direction='row' alignItems='center'>
             <Box>
               <Typography py={3} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
@@ -261,7 +258,7 @@ const ExplorePage: NextPage = () => {
                 );
               })}
             </Grid>
-          </Paper>
+     
 
           <Grid container direction="column" alignItems="center" justifyContent="space-between">
             <Grid item py={2} width="100%">
@@ -294,7 +291,7 @@ const ExplorePage: NextPage = () => {
           <Box>
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Typography variant="h5" py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)">
-                See gigs in your network
+                Featured contracts
               </Typography>
 
               <Button endIcon={<KeyboardArrowRight />} variant="text" size="large">

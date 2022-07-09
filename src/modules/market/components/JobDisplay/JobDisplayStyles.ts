@@ -6,7 +6,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     card: {
         height: 'auto',
         '&:hover': {
-            boxShadow: '0px 6px 6px -3px #ccc, 0px 10px 14px 1px #ccc, 0px 4px 18px 3px #ccc',
             cursor: 'pointer',
             //  backgroundColor: '#eee'
         },

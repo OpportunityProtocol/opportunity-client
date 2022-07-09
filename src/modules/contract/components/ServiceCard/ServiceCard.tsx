@@ -18,8 +18,8 @@ import { useStyles } from "./ServiceCardStyle";
 import DAIIcon from "../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg";
 import { NextRouter, useRouter } from "next/router";
 import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
-import { ServiceStruct } from "../../../../typechain-types/NetworkManager";
-import { useContractRead } from "wagmi";
+import { PurchasedServiceMetadataStruct, ServiceStruct } from "../../../../typechain-types/NetworkManager";
+import { useContractRead, useContractWrite } from "wagmi";
 import {
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
@@ -31,15 +31,13 @@ import fleek from "../../../../fleek";
 import { create } from "ipfs-http-client";
 
 import BrokenImageIcon from "@mui/icons-material/BrokenImage";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   selectLens,
   selectUserAddress,
   selectVerificationStatus,
 } from "../../../user/userReduxSlice";
 
-import { ClassNameMap } from "@material-ui/core/styles/withStyles";
-import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
 import { Check } from "@material-ui/icons";
 
 interface IServiceCardProps {
@@ -53,11 +51,12 @@ import VerifiedAvatar from "../../../user/components/VerifiedAvatar";
 import { ProfileStructStruct } from "../../../../typechain-types/ILensHub";
 import { hexToDecimal } from "../../../../common/helper";
 import { CHAIN_ID } from "../../../../constant/provider";
+import { activePublishedServiceDataAdded, purchasedServiceDataAdded } from "../../contractReduxSlice";
 
 const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
   const cardStyles = useStyles();
   const router: NextRouter = useRouter();
-  const [loadedData, setLoadedData] = useState<ServiceStruct>(data);
+  const [loadedData, setLoadedData] = useState<ServiceStruct & PurchasedServiceMetadataStruct & { servicePurchaseId: number, servicePurchaser: string }>(data);
   const [serviceOwnerLensData, setServiceOwnerLensData] =
     useState<ProfileStructStruct>({});
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
@@ -68,8 +67,39 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
   const [errors, setErrors] = useState<any>({
     metadataError: false,
   });
+  const dispatch =useDispatch()
 
   const userAddress = useSelector(selectUserAddress);
+
+ const networkManager_resolveService = useContractWrite(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    "resolveService",
+    {
+      args: [loadedData.id, loadedData?.servicePurchaseId],
+      onSuccess: async (data) => {
+        if (userAddress === loadedData?.owner) {
+          dispatch(activePublishedServiceDataAdded({
+            ...loadedData,
+            status: 2
+          }))
+        }
+
+        if (userAddress == loadedData?.servicePurchaser) {
+          dispatch(purchasedServiceDataAdded({
+            ...loadedData,
+            status: 2
+          }))
+        }
+      },
+      onError: (error) => {
+        console.log("networkManager_resolveService");
+        console.log(error);
+      },
+    }
+ )
 
   const networkManager_getServiceData = useContractRead(
     {
@@ -82,7 +112,7 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
       watch: false,
       args: id,
       onSuccess: (data: Result) => {
-        setLoadedData(data);
+       
       },
       onError: (error) => {
         console.log("networkManager_getServiceData");
@@ -208,13 +238,14 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
   }, [id]);
 
   const renderButtonState = () => {
-    if (!purchase && !purchaseMetadata) {
+    if (!purchase) {
       return (
         // view service
         <CardActions>
           <Button
+          sx={{ borderRadius: 1 }}
             fullWidth
-            variant="outlined"
+            variant="text"
             onClick={handleOnNavigateToServicePage}
           >
             View service
@@ -225,8 +256,8 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
 
     // owner is viewing
     if (loadedData?.owner === userAddress) {
-      if (purchase && purchaseMetadata) {
-        switch (purchaseMetadata.status) {
+      if (purchase) {
+        switch (loadedData.status) {
           case 0:
             return (
               //pending resolution from client and disabled...
@@ -263,13 +294,13 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
       }
     } else {
       //purchaser is viewing
-      if (purchase && purchaseMetadata) {
-        switch (purchaseMetadata.status) {
+      if (purchase) {
+        switch (loadedData.status) {
           case 0:
             return (
               //Complete contract if pending state
               <CardActions>
-                <Button fullWidth variant="outlined">
+                <Button fullWidth variant="outlined" onClick={() => networkManager_resolveService.write()}>
                   Confirm
                 </Button>
               </CardActions>

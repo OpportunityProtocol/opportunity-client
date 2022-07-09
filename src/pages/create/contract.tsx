@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import clsx from "clsx";
 
 import {
@@ -33,8 +33,16 @@ import { NextPage } from "next";
 import StepperComponent from "../../common/components/Stepper";
 import SearchBarV2 from "../../common/components/SearchBarV2/SearchBarV2";
 import MarketDisplay from "../../modules/market/components/MarketDisplay";
-
-const steps = ["Complete the basic information"];
+import { DesktopDatePicker } from "@mui/lab";
+import { create } from "ipfs-http-client";
+import fleek from "../../fleek";
+import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { NETWORK_MANAGER_ADDRESS, TOKEN_FACTORY_ADDRESS } from "../../constant";
+import { NetworkManagerInterface, TokenFactoryInterface } from "../../abis";
+import { BigNumber } from "ethers";
+import { Result } from "ethers/lib/utils";
+import { hexToDecimal } from "../../common/helper";
+import { CHAIN_ID } from "../../constant/provider";
 
 /**
  * 
@@ -45,42 +53,113 @@ const steps = ["Complete the basic information"];
  */
 const CreateContractPage: NextPage = (): JSX.Element => {
   const [createContractForm, setCreateContractForm] = useState({
-    contractTitle: "",
-    contractDescription: "",
-    contractTags: "",
-    marketId: 1,
+    contract_title: "",
+    contract_description: "",
+    contract_tags: "",
+    contract_market_id: -1,
     tags: [],
-    contractThumbnail: "",
-    thumbnail: '',
-    offers: {
-      beginner: {
-        price: 0,
-        values: new Array(6).fill(''),
-      },
-      business: {
-        price: 0,
-        values: new Array(6).fill(''),
-      },
-      enterprise: {
-        price: 0,
-        values: new Array(6).fill(''),
-      }
-    },
+    contract_budget: 0,
+    deadline: new Date('2014-08-18T21:11:54'),
+    contract_definition_of_done: '',
+    meta: {
+      duration: 'quick',
+      specific_langauges: [],
+    }
   })
-  const [step, setStep] = useState<number>(0);
   const router: NextRouter = useRouter();
   const classes = useStyles();
-  const [contractDuration, setContractDuration] = useState("Quick Job");
+  const accountData = useAccount()
+  const [contractMetadataURI, setContractMetadataURI] = useState<string>("")
+  const [numMarkets, setNumMarkets] = useState<any>([]);
+  const [marketsLoading, setMarketsLoading] = useState<boolean>(false);
 
-  const onCreateRelationship = (): void => {
-    router.push("/jobs");
+  const networkManager_getMarkets = useContractRead(
+    {
+      addressOrName: TOKEN_FACTORY_ADDRESS,
+      contractInterface: TokenFactoryInterface,
+    },
+    "getNumMarkets",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      onSuccess: (data: Result) => {
+        const total = hexToDecimal(data._hex);
+        let list = [];
+        for (let i = 0; i < total; i++) {
+          list.push(Number(i) + 1);
+        }
+        setNumMarkets(list);
+        // setMarketsDetails(data)
+        setMarketsLoading(false);
+      },
+      onError: (error) => {
+        console.log("getMarkets");
+        console.log(error);
+        setMarketsLoading(false);
+      },
+    }
+  );
+
+  useEffect(() => {
+    //if is first render
+    networkManager_getMarkets.refetch();
+  }, []);
+
+  const handleOnChangeDeadline = (newValue: Date | null) => {
+    setCreateContractForm({
+      ...createContractForm,
+      deadline: newValue
+    })
   };
 
-  const handleOnChangeCreateContractForm = (e) => {}
+  const handleOnChangeCreateContractForm = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    switch(e.target.id) {
+      case 'contractTag':
+        setCreateContractForm({
+          ...createContractForm,
+          contract_tags: e.target.value
+        })
+        break;
+      case 'contractTitle':
+        setCreateContractForm({
+          ...createContractForm,
+          contract_title: e.target.value
+        })
+        break;
+      case 'contractDescription':
+        setCreateContractForm({
+          ...createContractForm,
+          contract_description: e.target.value
+        })
+        break;
+      case 'contractBudget':
+        setCreateContractForm({
+          ...createContractForm,
+          contract_budget: Number(e.target.value)
+        })
+        break;
+      case 'contractDefinitionOfDone':
+        setCreateContractForm({
+          ...createContractForm,
+          contract_definition_of_done: e.target.value
+        })
+        break;
+      case 'contractLanguageCheckbox':
+        setCreateContractForm({
+          ...createContractForm,
+          meta: {
+            ...createContractForm.meta,
+            specific_langauges: e.target?.checked
+          }
+        })
+        break;
+    }
+  }
 
   const onTagInputKeyPress = (e) => {
     if (e.code === "Space") {
-      if (createServiceForm.tags.length >= 5) {
+      if (createContractForm.tags.length >= 5) {
         alert('No more tags')
         return
       }
@@ -89,25 +168,75 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         return
       }
 
-      const tag = createServiceForm.serviceTags;
-      const updatedTags = createServiceForm.tags;
+      const tag = createContractForm.contract_tags.trim();
+      const updatedTags = createContractForm.tags;
       updatedTags.push(tag);
-      setCreateServiceForm({
-        ...createServiceForm,
+      setCreateContractForm({
+        ...createContractForm,
         tags: updatedTags,
-        serviceTags: "",
+        contract_tags: "",
       });
     }
   };
 
   const handleOnDeleteTag = (idx) => {
-    const updatedTags = createServiceForm.tags
+    const updatedTags = createContractForm.tags
     updatedTags.splice(idx, 1)
 
-    setCreateServiceForm({
-      ...createServiceForm,
+    setCreateContractForm({
+      ...createContractForm,
       tags: updatedTags
     });
+  }
+
+  const networkManager_createContract = useContractWrite(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
+  },
+  "createContract",
+  {
+    args: [createContractForm.market_id, contractMetadataURI]
+  }
+  )
+
+  const handleOnCreate = async () => {
+    try {
+      let retVal;
+      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+        //https://ipfs.infura.io:5001/api/v0
+        const ipfs = create({
+          url: "/ip4/0.0.0.0/tcp/5001",
+        });
+
+
+        retVal = await (await ipfs.add(JSON.stringify(createContractForm))).path
+      } else {
+        retVal = await fleek.uploadService(
+          String(accountData.data.address) +
+            ":" +
+            createContractForm.contract_title,
+          JSON.stringify(createContractForm)
+        );
+      }
+
+      setContractMetadataURI(retVal);
+
+      console.log(retVal)
+      console.log(createContractForm)
+
+     /* if (retVal) {
+        await networkManager_createContract.write({
+          args: [createContractForm.market_id, retVal]
+        })
+      } else {
+        throw new Error('Error retrieving ipfs metadata hash')
+      }*/
+
+      //router.push("/jobs");
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -117,7 +246,6 @@ const CreateContractPage: NextPage = (): JSX.Element => {
       spacing={5}
       sx={{ border: '1px solid #eee', bgcolor: "#fff !important", padding: "2% 4%", width: "100%" }}
     >
-      <StepperComponent steps={steps} activeStep={step} />
       <Box>
         <Typography fontWeight="bold" fontSize={25}>
           Create a contract
@@ -145,7 +273,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
             Select a market
           </Typography>
 
-<SearchBarV2 />
+<SearchBarV2 placeholder='Search...' />
         </Stack>
 
         <Grid
@@ -154,46 +282,35 @@ const CreateContractPage: NextPage = (): JSX.Element => {
           alignItems="center"
           justifyContent="space-between"
         >
-          <Grid item xs={2.8}>
-            <MarketDisplay
-              selected={true}
-              selectable
-              onSelect={() => {}}
-              market="Writing and Translation"
-              showDescription={false}
-              showStats={false}
-            />
+          
+          {numMarkets && numMarkets.length > 0 ?
+          numMarkets.slice(0, 6).map((marketId) => {
+            return (
+              <Grid item xs={2.9}>
+                <MarketDisplay
+                  marketId={marketId + 1}
+                  isShowingStats={false}
+                  selected={marketId === createContractForm.contract_market_id}
+                  selectable
+                  onSelect={() => setCreateContractForm({
+                    ...createContractForm,
+                    contract_market_id: marketId
+                  })}
+                  showDescription={false}
+                  showStats={false}
+                />
+              </Grid>
+            );
+          })
+          :
+          <Grid item xs={12}>
+            <Typography color='error'>
+              Error occurred while loading marketplaces. <Typography component='span' variant="button"> Try again</Typography>
+            </Typography>
           </Grid>
 
-          <Grid item xs={2.8}>
-            <MarketDisplay
-              selectable
-              onSelect={() => {}}
-              market="Accounting and Finance"
-              showDescription={false}
-              showStats={false}
-            />
-          </Grid>
-
-          <Grid item xs={2.8}>
-            <MarketDisplay
-              selectable
-              onSelect={() => {}}
-              market="Social Media"
-              showDescription={false}
-              showStats={false}
-            />
-          </Grid>
-
-          <Grid item xs={2.8}>
-            <MarketDisplay
-              selectable
-              onSelect={() => {}}
-              market="Graphic Design"
-              showDescription={false}
-              showStats={false}
-            />
-          </Grid>
+        }
+          
         </Grid>
       </Box>
 
@@ -204,6 +321,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
             fontWeight="700"
             fontSize={18}
             color="text.primary"
+            id='contractDuration'
           >
             Contract Duration
           </Typography>
@@ -222,16 +340,23 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         >
           <Grid item>
             <ClickableCard
+            onClick={ () => setCreateContractForm({
+              ...createContractForm,
+              meta: {
+                ...createContractForm.meta,
+                duration: 'quick'
+              }
+            })}
               variant="outlined"
               sx={{
                 border:
-                  contractDuration === "Quick Job"
+                  createContractForm.meta.duration === "quick"
                     ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
                     : "none",
               }}
               className={clsx(
                 classes.marketTypeCard,
-                contractDuration === "Quick Job" ? classes.selectedCard : null
+                createContractForm.meta.duration === "quick" ? classes.selectedCard : null
               )}
             >
               <BoltIcon sx={{ color: "#FFEB3B" }} />
@@ -246,10 +371,23 @@ const CreateContractPage: NextPage = (): JSX.Element => {
 
           <Grid item>
             <ClickableCard
+                        onClick={ () => setCreateContractForm({
+                          ...createContractForm,
+                          meta: {
+                            ...createContractForm.meta,
+                            duration: 'short'
+                          }
+                        })}
               variant="outlined"
+              sx={{
+                border:
+                  createContractForm.meta.duration === "short"
+                    ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
+                    : "none",
+              }}
               className={clsx(
                 classes.marketTypeCard,
-                contractDuration === "Short Term" ? classes.selectedCard : null
+                createContractForm.meta.duration === 'short' ? classes.selectedCard : null
               )}
             >
               <DateRangeIcon sx={{ color: "#2196F3" }} />
@@ -262,10 +400,23 @@ const CreateContractPage: NextPage = (): JSX.Element => {
 
           <Grid item>
             <ClickableCard
+                        onClick={ () => setCreateContractForm({
+                          ...createContractForm,
+                          meta: {
+                            ...createContractForm.meta,
+                            duration: 'long'
+                          }
+                        })}
               variant="outlined"
+              sx={{
+                border:
+                  createContractForm.meta.duration === "long"
+                    ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
+                    : "none",
+              }}
               className={clsx(
                 classes.marketTypeCard,
-                contractDuration === "Long Term" ? classes.selectedCard : null
+                createContractForm.meta.duration === "long" ? classes.selectedCard : null
               )}
             >
               <HourglassTopIcon sx={{ color: "#4CAF50" }} />
@@ -298,7 +449,10 @@ const CreateContractPage: NextPage = (): JSX.Element => {
             margin="normal"
             sx={{ width: 600 }}
             variant="outlined"
-            label="Contract Title"
+            size='small'
+            label="Title"
+            id='contractTitle'
+            placeholder='Need software developer to...'
             aria-label="Pick a title for your contract"
             name="contractTitle"
             type="text"
@@ -310,8 +464,11 @@ rows={6}
 multiline
             margin="normal"
             sx={{ width: 600 }}
+            size='small'
+            id='contractDescription'
             variant="outlined"
-            label="Contract Description"
+            label="Description"
+            placeholder='"In a maximum of 2-4 weeks I am looking to complete a website based on..."'
             aria-label="Write a description"
             name="contractDescription"
             type="text"
@@ -334,7 +491,9 @@ multiline
           </Grid>
 
           <Grid item>
-            <TextInput value={0} placeholder="$550.00" sx={{ width: 100 }} />
+            <TextField size='small'  value={createContractForm.contract_budget} placeholder="550.00" id='contractBudget' onChange={handleOnChangeCreateContractForm} sx={{ width: 100 }} InputProps={{
+              startAdornment: <Typography>$</Typography>
+            }} />
           </Grid>
         </Grid>
 
@@ -355,7 +514,13 @@ multiline
           </Grid>
 
           <Grid item>
-            <TextInput value={0} placeholder="No deadline" sx={{ width: 100 }} />
+          <DesktopDatePicker
+          label="Date desktop"
+          inputFormat="MM/dd/yyyy"
+          value={createContractForm.deadline}
+          onChange={handleOnChangeDeadline}
+          renderInput={(params) => <TextField {...params} />}
+        />
           </Grid>
         </Grid>
         <Box mt={3}>
@@ -381,9 +546,10 @@ multiline
               name="contractTags"
               aria-label="contractTags"
               type="text"
-              value={createContractForm.contractTags}
+              value={createContractForm.contract_tags}
               sx={{ ml: 1, flex: 1 }}
               onKeyPress={onTagInputKeyPress}
+              id='contractTag'
               onChange={handleOnChangeCreateContractForm}
               startAdornment={
                 <Stack
@@ -414,11 +580,16 @@ multiline
           </Typography>
         </Box>
 
-        <TextInput
+        <TextField
           label="Definition of done"
+          id='contractDefinitionOfDone'
+          value={createContractForm.contract_definition_of_done}
           multiline
+          size='small'
+          margin='normal'
           rows={6}
-          width={500}
+          onChange={handleOnChangeCreateContractForm}
+          sx={{ width: 600 }}
           placeholder="To complete the job you must..."
         />
       </Box>
@@ -434,21 +605,10 @@ multiline
           </Typography>
         </Box>
 
-        <FormGroup>
-          <FormControlLabel
-            control={<Checkbox defaultChecked />}
-            label="Do you want to payout your contract in milestones?"
-            componentsProps={{
-              typography: {
-                fontSize: 15,
-              },
-            }}
-          />
-        </FormGroup>
 
         <FormGroup>
           <FormControlLabel
-            control={<Checkbox defaultChecked />}
+            control={<Checkbox id='contractLanguageCheckbox' onChange={handleOnChangeCreateContractForm} defaultChecked checked={createContractForm.meta.specific_langauges} />}
             label="Only specific languages"
             componentsProps={{
               typography: {
@@ -463,7 +623,7 @@ multiline
       <Button
             sx={{ mx: 1, width: 120,  p: 1 }}
             variant="contained"
-            onClick={onCreateRelationship}
+            onClick={handleOnCreate}
           >
               Create
           </Button>

@@ -13,6 +13,11 @@ import {
   Avatar,
   Button,
   Stack,
+  Menu,
+  ListItemIcon,
+  MenuItem,
+  MenuList,
+  ListItemText,
   AppBar,
   Toolbar,
   Typography,
@@ -61,6 +66,7 @@ import {
 import { BigNumber } from "ethers";
 import { RootState } from "../../../store";
 import { LocalGasStation } from "@mui/icons-material";
+import { Work, GroupWork } from "@material-ui/icons";
 
 const NavigationBar: FC = () => {
   const classes = useStyles();
@@ -157,7 +163,7 @@ const NavigationBar: FC = () => {
     {
       enabled: false,
       cacheTime: 50000,
-      watch: false,
+      watch: true,
       chainId: CHAIN_ID,
       args: [userAddress],
       onError: (error: Error) => {
@@ -169,6 +175,15 @@ const NavigationBar: FC = () => {
   const ethBalanceData = useBalance({
     addressOrName: accountData ? accountData?.data?.address : String(0),
   });
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const onFetchLensProfileId = () => {
     networkManager_getLensProfileIdFromAddress
@@ -316,7 +331,7 @@ const NavigationBar: FC = () => {
                     fontSize={18}
                     color="#212121"
                   >
-                    GigEarth
+                    Lens Talent
                   </Typography>
                 </Link>
               </Grid>
@@ -341,6 +356,21 @@ const NavigationBar: FC = () => {
                     </Typography>
                   </Link>
 
+                  <Link href="/">
+                    <Typography
+                      component={Button}
+                      mx={2}
+                      fontSize={14}
+                      variant="button"
+                      color={
+                        router.pathname.includes("/explore") ? "primary" : "text.secondary"
+                      }
+                      fontWeight="bold"
+                    >
+                      Community
+                    </Typography>
+                  </Link>
+
                   <Link href="/work">
                     <Typography
                       component={Button}
@@ -357,6 +387,10 @@ const NavigationBar: FC = () => {
                       disableElevation
                       disableRipple
                       disableTouchRipple
+                      aria-controls={open ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={handleClick}
                     >
                       Work
                     </Typography>
@@ -436,7 +470,6 @@ const NavigationBar: FC = () => {
           {error && <div>{error.message}</div>}
         </div>
       </AppBar>
-
       <VerificationDialog
         open={verificationDialogOpen}
         handleClose={() => setVerificationDialogOpen(false)}

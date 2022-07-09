@@ -12,6 +12,7 @@ import {
 } from './OpportunityInterfaces';
 import NavigationBar from './common/components/NavigationBar/NavigationBar';
 import MarketToolbar from './modules/market/components/MarketToolbar';
+import Footer from './common/components/Footer';
 
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
@@ -28,8 +29,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     router.pathname === '/contract' 
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: APP_BACKGROUND }}>
-
+  
       <Box
         component="main"
         sx={{
@@ -38,8 +38,10 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
           paddingTop: isPadded ? '90px' : '0px',
         }}>
         {children}
+        <Footer />
       </Box>
-    </Box>
+
+ 
   );
 };
 

@@ -34,7 +34,7 @@ const NavigationBreadcrumbs: FunctionComponent = () => {
       </Breadcrumbs>
 
       <Stack direction='row' justifyContent='flex-end' spacing={2}>
-      <Button onClick={() => router.push('/create/service')} size='small' variant='contained' sx={{ width: 'auto', height: 25}}>
+      <Button  onClick={() => router.push('/create/contract')} size='small' variant='contained' sx={{width: 'auto', height: 25}}>
               Create Contract
             </Button>
 

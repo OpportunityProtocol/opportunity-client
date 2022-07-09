@@ -91,12 +91,12 @@ function Work() {
       maxWidth="xl"
       container
       direction="column"
-      sx={{ bgcolor: 'background.paper' }}
+      /*sx={{ bgcolor: 'background.paper' }}*/
     >
       <Grid container item>
         <Box sx={{ width: '100%' }}>
-          <Box mt={3} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={value} onChange={handleChange} centered>
+          <Box mt={8} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={value} onChange={handleChange}>
               <Tab sx={{ borderBottom: '1px solid #212121' }} label="Contracts" />
               <Tab sx={{ fontSize: '14px' }} label="Services" />
             </Tabs>
@@ -142,7 +142,7 @@ function Work() {
                 sx={{
                   pt: 0,
                   width: '100%',
-                  bgcolor: '#fafafa',
+            
                   px: 2,
                   minHeight: 'calc(100vh - 70px - 80px)',
                   overflow: 'auto',
@@ -173,7 +173,7 @@ function Work() {
             </Grid>
           </TabPanel>
           <TabPanel value={value} index={1}>
-            <Grid container justifyContent="space-between" sx={{ bgcolor: 'background.paper' }}>
+            <Grid container justifyContent="space-between">
               <Grid item xs={3} sx={{}}>
                 <Box>
                   <Typography pt={2} fontWeight="bold">

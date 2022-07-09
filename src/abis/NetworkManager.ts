@@ -136,7 +136,7 @@ const NetworkManagerInterface = [
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "index",
+        "name": "id",
         "type": "uint256"
       },
       {
@@ -201,6 +201,18 @@ const NetworkManagerInterface = [
         "internalType": "uint256",
         "name": "serviceId",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "marketId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
       }
     ],
     "name": "ServiceCreated",
@@ -209,6 +221,12 @@ const NetworkManagerInterface = [
   {
     "anonymous": false,
     "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "serviceId",
+        "type": "uint256"
+      },
       {
         "indexed": false,
         "internalType": "uint256",
@@ -219,12 +237,6 @@ const NetworkManagerInterface = [
         "indexed": false,
         "internalType": "uint256",
         "name": "pubId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "serviceId",
         "type": "uint256"
       },
       {
@@ -247,6 +259,43 @@ const NetworkManagerInterface = [
       }
     ],
     "name": "ServicePurchased",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "serviceId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "purchaseId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "serviceOwner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "serviceClient",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "packageAmount",
+        "type": "uint8"
+      }
+    ],
+    "name": "ServiceResolved",
     "type": "event"
   },
   {
@@ -721,6 +770,62 @@ const NetworkManagerInterface = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "purchaseId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getServicePurchaseMetadata",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "purchaseId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "client",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "exist",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestampPurchased",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "referral",
+            "type": "address"
+          },
+          {
+            "internalType": "uint8",
+            "name": "package",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum NetworkLibrary.ServiceResolutionStatus",
+            "name": "status",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct NetworkLibrary.PurchasedServiceMetadata",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getServices",
     "outputs": [
@@ -1025,6 +1130,11 @@ const NetworkManagerInterface = [
       {
         "internalType": "uint8",
         "name": "package",
+        "type": "uint8"
+      },
+      {
+        "internalType": "enum NetworkLibrary.ServiceResolutionStatus",
+        "name": "status",
         "type": "uint8"
       }
     ],

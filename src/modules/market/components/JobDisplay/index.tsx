@@ -19,7 +19,7 @@ import {
   Stack,
 } from '@mui/material';
 
-import { AccessTime } from '@mui/icons-material';
+import { AccessTime, KeyboardArrowDown } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import { IJobDisplayProps } from '../../MarketInterface';
 import { useGradientAvatarStyles } from '@mui-treasury/styles/avatar/gradient';
@@ -109,30 +109,16 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
           </Grid>
 
           <Grid container item flexGrow={1}>
-            <Grid container item alignItems="center" justifyContent="space-between">
+            <Grid container item direction='column' alignItems="flex-start">
               <Grid item>
                 <Typography fontWeight='600'>{randomJobTitles[randomInt]}</Typography>
               </Grid>
 
               <Grid item fontWeight="medium" fontSize={15} color='text.secondary'>
-              {Math.floor(Math.random() * 5000).toFixed(2)} DAI
-              </Grid>
-            </Grid>
-
-            <Grid container item alignItems="center" justifyContent="space-between">
-              <Grid item>
-                <Typography fontSize={13} fontWeight="bold" color={(theme) => theme.palette.primary.main}>
+              <Typography py={1} fontSize={13} fontWeight="bold" color={(theme) => theme.palette.primary.main}>
                   @janicecoleman007
                 </Typography>
-              </Grid>
-
-              <Grid item>
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <AccessTime fontSize="small" />
-                  <Typography fontWeight="medium" color="text.secondary" fontSize={13}>
-                    Short Term
-                  </Typography>
-                </Stack>
+            
               </Grid>
             </Grid>
           </Grid>
@@ -172,17 +158,37 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({
           })}
         </Grid>
 
-        <Grid container item direction="row" alignItems="center" justifyContent="space-between">
+        <Grid container item direction="row" alignItems="flex-end" justifyContent="space-between">
           <Grid item>
-            <Typography color="text.secondary" fontSize={14}>
+<Stack>
+<Typography fontSize={13} fontWeight='medium'>
+              {Math.floor(Math.random() * 5000).toFixed(2)} DAI
+              </Typography>
+<Typography color="text.secondary" fontSize={13}>
               August 1, 2022 - 1:59 PM
             </Typography>
+           
+                  <Typography variant='caption' fontWeight="medium" color="text.secondary">
+                    Short term contract
+                  </Typography>
+           
+             
+</Stack>
           </Grid>
 
           <Grid item>
-            <Button variant="contained" size="large">
-              View Details
+            <Stack direction='row' alignItems='center'>
+            <Button variant="text" size="large">
+             Open contract
             </Button>
+
+            <Button variant="text" size="large" disabled endIcon={<KeyboardArrowDown />}>
+              See status
+            </Button>
+
+            </Stack>
+
+
           </Grid>
         </Grid>
       </CardContent>

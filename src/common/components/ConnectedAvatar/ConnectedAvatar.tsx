@@ -116,7 +116,7 @@ const ConnectedAvatar: FC = () => {
       args: [userAddress, 10000],
     }
   );
-
+ 
   const dai_balanceOf = useContractRead(
     {
       addressOrName: DAI_ADDRESS,
@@ -126,7 +126,7 @@ const ConnectedAvatar: FC = () => {
     {
       enabled: false,
       cacheTime: 50000,
-      watch: false,
+      watch: true,
       chainId: CHAIN_ID,
       args: [userAddress],
       onError: (error: Error) => {
@@ -181,7 +181,7 @@ const ConnectedAvatar: FC = () => {
           <Box>
             <Stack direction="row" alignItems="flex-start">
               <Typography component="div">
-                <Box sx={{ fontWeight: "bold" }}>Welcome to GigEarth</Box>
+                <Box sx={{ fontWeight: "bold" }}>Welcome to Lens Talent</Box>
                 <Box
                   sx={{
                     fontSize: 16,

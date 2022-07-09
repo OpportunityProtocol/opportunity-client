@@ -9,7 +9,6 @@ const useStyles = makeStyles((theme: Theme) => {
             display: 'flex',
             flex: 1,  
             alignItems: 'center',
-            backgroundColor: 'red !important',
         },
         iconButton: {
             padding: '10px'

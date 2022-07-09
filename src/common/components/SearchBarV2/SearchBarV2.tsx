@@ -28,7 +28,7 @@ const SearchBarV2: FunctionComponent<ISearchBarV2Props> = ({ placeholder, isFilt
       fullWidth
         startAdornment={<Search sx={{mr: 1, color: '#9E9E9E' }} />}
         placeholder={placeholder}
-        inputProps={{ 'aria-label': 'search gigs' }}
+        inputProps={{ 'aria-label': 'search' }}
       />
       {isFilterable && (
         <IconButton type="submit" className={classes.iconButton} aria-label="search">
