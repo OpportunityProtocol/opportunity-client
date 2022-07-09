@@ -196,7 +196,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
   },
   "createContract",
   {
-    args: [createContractForm.market_id, contractMetadataURI]
+    args: [createContractForm.contract_market_id, contractMetadataURI]
   }
   )
 
@@ -225,13 +225,13 @@ const CreateContractPage: NextPage = (): JSX.Element => {
       console.log(retVal)
       console.log(createContractForm)
 
-     /* if (retVal) {
+      if (retVal) {
         await networkManager_createContract.write({
           args: [createContractForm.market_id, retVal]
         })
       } else {
         throw new Error('Error retrieving ipfs metadata hash')
-      }*/
+      }
 
       //router.push("/jobs");
     } catch (error) {

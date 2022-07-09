@@ -88,6 +88,8 @@ const ExplorePage: NextPage = () => {
   const [verifiedFreelancers, setVerifiedFreelancers] = useState<Array<any>>([])
   const [numMarkets, setNumMarkets] = useState<any>([])
   const [services, setServices] = useState([])
+  const [contracts, setContracts] = useState([])
+  const [contractsLoading, setContractsLoading] = useState(false)
 
 
   const fetchNetworkSuggestions = async () => {
@@ -125,6 +127,28 @@ const ExplorePage: NextPage = () => {
         console.log(error)
         setMarketsLoading(false)
       }
+    }
+  )
+
+  const networkManager_getContracts = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
+    },
+    "getContracts",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      onSuccess(data: Result) {
+          setContracts(data)
+      },
+      onError(error) {
+        console.log(error)
+      },
+      onSettled(data, error) {
+        setContractsLoading(false)
+      },
     }
   )
 
@@ -181,9 +205,11 @@ const ExplorePage: NextPage = () => {
   useEffect(() => {
     setMarketsLoading(true)
     setVerifiedFreelancersLoading(true)
+    setContractsLoading(true)
     networkManager_getMarkets.refetch()
     networkManager_getVerifiedFreelancers.refetch()
     networkManager_getServices.refetch()
+    networkManager_getContracts.refetch()
   }, [])
 
   useEffect(() => {
@@ -300,10 +326,10 @@ const ExplorePage: NextPage = () => {
             </Stack>
           </Box>
           <Grid container direction="row" overflow="scroll" flexWrap="wrap" spacing={2}>
-            {suggestedConnections.slice(3, 8).map((human: any) => {
+            {contracts.map((contract: any) => {
               return (
                 <Grid item xs={6}>
-                  <JobDisplay avatar={human.picture.large} suggestion={true} />
+                  <JobDisplay id={contract.id} data={contract} />
                 </Grid>
               );
             })}

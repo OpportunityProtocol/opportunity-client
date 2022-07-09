@@ -1,4 +1,5 @@
 import { MouseEventHandler } from "react";
+import { RelationshipStruct } from "../../typechain-types/IGigEarth";
 
 interface ICarouselItemProp {
     source: string,
@@ -15,9 +16,8 @@ interface ICarouselItemProp {
   }
 
   interface IJobDisplayProps {
-    hasButton?: boolean,
-    avatar?: string;
-    suggestion?: boolean;
+    id: number;
+    data: RelationshipStruct;
   }
 
   export type { ICarouselItemProp, ICarouselItemProps, IJobDisplayProps }
