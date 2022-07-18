@@ -23,6 +23,7 @@ interface IVerifiedAvatarProps {
   lensProfileId: number;
   lensProfile: ProfileStructStruct;
   showValue?: boolean;
+  showHandle?: boolean;
 }
 
 const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
@@ -31,6 +32,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
   lensProfileId = 0,
   lensProfile,
   showValue = true,
+  showHandle = true
 }) => {
   const [displayImg, setDisplayImg] = useState<Buffer | string>("");
   const router: NextRouter = useRouter();
@@ -139,15 +141,20 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
       </div>
 
       <Box textAlign="center">
-        <Typography
-          fontWeight="medium"
-          variant="body2"
-          color="#616161"
-          width="auto"
-          noWrap
-        >
-          {renderHandle()}
-        </Typography>
+        {
+          showHandle && (
+            <Typography
+            fontWeight="medium"
+            variant="body2"
+            color="#616161"
+            width="auto"
+            noWrap
+          >
+            {renderHandle()}
+          </Typography>
+          )
+        }
+       
         {showValue ? (
           <Typography
             variant="caption"

@@ -105,15 +105,15 @@ const ConnectedAvatar: FC = () => {
   const handlePopoverClose = () => {
     setAnchorEl(null);
   };
-  useContractWrite;
+  
   const dai_mint = useContractWrite(
     {
       addressOrName: DAI_ADDRESS,
       contractInterface: JSON.stringify(DaiInterface),
     },
-    "mint",
+    "mint(uint256)",
     {
-      args: [userAddress, 10000],
+      args: [10000],
     }
   );
  
@@ -129,19 +129,25 @@ const ConnectedAvatar: FC = () => {
       watch: true,
       chainId: CHAIN_ID,
       args: [userAddress],
+      onSuccess(data) {
+        alert(data)
+      },
       onError: (error: Error) => {
+        alert(error)
         console.log(error);
       },
     }
   );
 
   const handleOnAddFunds = async () => {
-    await dai_mint.write();
+   // await dai_mint.write();
     const result = await dai_balanceOf.refetch();
+
+    
 
     dispatch(
       userERC20BalanceChanged({
-        [DAI_ADDRESS]: hexToDecimal(Number(result.data._hex)),
+        [DAI_ADDRESS]: Number(result.data._hex),
       })
     );
   };

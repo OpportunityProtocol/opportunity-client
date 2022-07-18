@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { ZERO_ADDRESS } from '../../constant';
 import { RootState } from '../../store';
-import { PurchasedServiceMetadataStruct, ServiceStruct } from '../../typechain-types/NetworkManager';
+import { PurchasedServiceMetadataStruct, RelationshipStruct, ServiceStruct } from '../../typechain-types/NetworkManager';
 
 type PurchasedServiceStruct = ServiceStruct & PurchasedServiceMetadataStruct
 
 interface ContractReducerState {
+    /** Services **/
     //published
     publishedServicesIds: Array<number>;
     publishedServicesById: { [serviceId: string]: ServiceStruct};
@@ -21,6 +22,15 @@ interface ContractReducerState {
     purchasedServicesIds: Array<number>;
     purchasedServicesById: { [serviceId: string]: ServiceStruct};
     purchasedServices: Array<ServiceStruct>;
+
+    /** Contracts **/
+    publishedContractsIds: Array<number>;
+    publishedContractsById: { [contractId: string]: RelationshipStruct & any }
+    publishedContracts: Array<RelationshipStruct & any>;
+
+    activeContractsIds: Array<number>;
+    activeContractsById: { [contractId: string]: RelationshipStruct & any};
+    activeContracts: Array<RelationshipStruct & any>;
 }
 
 const initialState: ContractReducerState = {
@@ -35,7 +45,15 @@ const initialState: ContractReducerState = {
 
     purchasedServicesIds: [],
     purchasedServicesById: {},
-    purchasedServices: []
+    purchasedServices: [],
+
+    publishedContractsIds: [],
+    publishedContractsById: {},
+    publishedContracts: [],
+
+    activeContractsIds: [],
+    activeContractsById: {},
+    activeContracts: []
 }
 
 const contractSlice = createSlice({
@@ -63,9 +81,29 @@ const contractSlice = createSlice({
     purchasedServiceDataAdded(state, action) {
       state.purchasedServices.push(action.payload)
       state.purchasedServicesById[action.payload.id] = action.payload;
+    },
+    contractIdAdded(state, action) {
+      state.publishedContractsIds.push(action.payload)
+    },
+    contractDataAdded(state, action) {
+      state.publishedContracts.push(action.payload)
+      state.publishedContractsById[action.payload.id] = action.payload
+    },
+    activeContractIdAdded(state, action) {
+      state.activeContractsIds.push(action.payload)
+    },
+    activeContractDataAdded(state, action) {
+      state.activeContracts.push(action.payload)
+      state.activeContractsById[action.payload.id] = action.payload
     }
   }
 })
+
+export const selectPublishedContracts = (state: RootState) => state.contract.publishedContracts
+export const selectPublishedContractsIds = (state: RootState) => state.contract.publishedContractsIds
+
+export const selectActiveContractIds = (state: RootState) => state.contract.activeContracts
+export const selectActiveContracts = (state: RootState) => state.contract.activeContractsIds
 
 export const selectPublishedServicesIdMapping = (state: RootState) => state.contract.publishedServicesById
 export const selectPublishedServices = (state: RootState) => state.contract.publishedServices

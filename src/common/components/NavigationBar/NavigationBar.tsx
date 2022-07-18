@@ -186,6 +186,7 @@ const NavigationBar: FC = () => {
   };
 
   const onFetchLensProfileId = () => {
+    if (accountData.data.address && accountData.data.address != ZERO_ADDRESS) {
     networkManager_getLensProfileIdFromAddress
       .refetch({
         throwOnError: true,
@@ -200,6 +201,7 @@ const NavigationBar: FC = () => {
       .catch((error) => {
         console.log(error);
       });
+    }
   };
 
   useEffect(() => {
@@ -240,7 +242,7 @@ const NavigationBar: FC = () => {
         })
       );
     }
-    handleOnIsConnected();
+
     if (isConnected) {
       handleOnIsConnected();
     } else {
@@ -276,19 +278,19 @@ const NavigationBar: FC = () => {
             sx={{ padding: '5px 0px', display: "flex", flexDirection: "column", bgcolor: "#fff" }}
           >
             <Stack spacing={5} direction="row" alignItems="center">
-              <Typography color={(theme) => darken(theme.palette.primary.dark, 0.15)} fontSize={10.5} fontWeight='medium'>
+              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
                 Labor Markets: <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>1</Typography>
               </Typography>
 
-              <Typography color={(theme) => darken(theme.palette.primary.dark, 0.15)} fontSize={10.5} fontWeight='medium'>
+              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
                 Total Services Available: <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>20</Typography>
               </Typography>
 
-              <Typography color={(theme) => darken(theme.palette.primary.dark, 0.15)} fontSize={10.5} fontWeight='medium'>
+              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
                 Total Contracts Available: <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>55</Typography>
               </Typography>
 
-              <Typography color={(theme) => darken(theme.palette.primary.dark, 0.15)} fontSize={10.5} fontWeight='medium'>
+              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
                 <span>
                   <Stack spacing={0.2} direction='row' alignItems='center'>
                   <LocalGasStation fontSize='small' sx={{ mr: 0.5 }} />

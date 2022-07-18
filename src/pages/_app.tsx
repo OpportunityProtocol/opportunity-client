@@ -34,9 +34,10 @@ import { ethers, getDefaultProvider } from "ethers";
 import { Provider as ReduxProvider } from "react-redux";
 import { store } from "../store";
 import NavigationBar from "../common/components/NavigationBar/NavigationBar";
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/lab";
-
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import apolloClient from "../apollo";
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat],
   [
@@ -111,17 +112,19 @@ function MyApp({ Component, pageProps }: AppProps) {
     <React.Fragment>
       <Header />
       <WagmiConfig client={client}>
-      <LocalizationProvider dateAdapter={AdapterMoment}>
-        <ReduxProvider store={store}>
-          <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Opportunity>
-              <NavigationBar />
-              <NavigationBreadcrumbs />
-              <Component {...pageProps} />
-            </Opportunity>
-          </ThemeProvider>
-        </ReduxProvider>
+        <LocalizationProvider dateAdapter={AdapterMoment}>
+          <ReduxProvider store={store}>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <ApolloProvider client={apolloClient}>
+                <Opportunity>
+                  <NavigationBar />
+                  <NavigationBreadcrumbs />
+                  <Component {...pageProps} />
+                </Opportunity>
+              </ApolloProvider>
+            </ThemeProvider>
+          </ReduxProvider>
         </LocalizationProvider>
       </WagmiConfig>
     </React.Fragment>

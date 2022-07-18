@@ -17,6 +17,7 @@ import { createTheme } from '@mui/material/styles';
         main: '#d46290',
         dark: '#6a3c55'
       },
+      divider: '#ddd'
     },   
     typography: {
       fontFamily: [
@@ -51,15 +52,6 @@ import { createTheme } from '@mui/material/styles';
             ':hover': {
               cursor: 'pointer',
             },
-          }
-        }
-      },
-      MuiDivider: {
-        styleOverrides: {
-          root: {
-            color: '#eee',
-            borderColor: '#eee',
-            width: '100%'
           }
         }
       },
@@ -105,7 +97,7 @@ import { createTheme } from '@mui/material/styles';
             borderRadius: 0
           },
         }
-      }
+      },
     }
   });
 

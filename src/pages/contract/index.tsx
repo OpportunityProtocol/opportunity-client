@@ -46,7 +46,7 @@ import {
   useContractRead,
   useSigner,
 } from "wagmi";
-import { NETWORK_MANAGER_ADDRESS } from "../../constant";
+import { NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "../../constant";
 import { NetworkManagerInterface } from "../../abis";
 import { ethers, Event } from "ethers";
 import { Interface } from "ethers/lib/utils";
@@ -58,8 +58,11 @@ import {
   contractServiceIdAdded,
   purchasedServiceDataAdded,
   purchasedServiceIdAdded,
+  selectActiveContractIds,
+  selectActiveContracts,
   selectActivePublishedServiceIds,
   selectActivePublishedServices,
+  selectPublishedContracts,
   selectPublishedServiceIds,
   selectPublishedServices,
   selectPublishedServicesIdMapping,
@@ -68,8 +71,18 @@ import {
   selectPurchasedServices,
   selectPurchasedServicesIdMapping,
 } from "../../modules/contract/contractReduxSlice";
-import { ServiceStruct } from "../../typechain-types/NetworkManager";
+import {
+  RelationshipStruct,
+  ServiceStruct,
+} from "../../typechain-types/NetworkManager";
 import { hexToDecimal } from "../../common/helper";
+import { QueryResult, useQuery } from "@apollo/client";
+import {
+  GET_CONTRACTS_BY_EMPLOYER,
+  GET_PURCHASED_SERVICES_BY_CLIENT,
+  GET_SERVICE,
+  GET_SERVICES_BY_CREATOR,
+} from "../../modules/contract/ContractGQLQueries";
 
 const fileTypes = ["PDF", "PNG", "DOC"];
 
@@ -85,15 +98,16 @@ const Contracts: React.FunctionComponent<any> = () => {
   const dispatch = useDispatch();
   const [conversationSelected, setConversationSelected] =
     useState<boolean>(true);
-  const [relationships, setRelationships] = useState<any>([]);
+
   const [tabValue, setTabValue] = React.useState<number>(0);
 
   const userAddress = useSelector(selectUserAddress);
   const userLensProfileInformation = useSelector(selectLens);
   const userVerificationStatus = useSelector(selectVerificationStatus);
-  const userPublishedServices = useSelector(selectPublishedServices);
   const userPurchasedServices = useSelector(selectPurchasedServices);
-  const userActivePublishedServices = useSelector(selectActivePublishedServices)
+  const userActivePublishedServices = useSelector(
+    selectActivePublishedServices
+  );
 
   const [servicePurchasedToggle, setServicePurchasedToggle] = useState(false);
   const [servicePublishedToggle, setServicePublishedToggle] = useState(false);
@@ -110,12 +124,21 @@ const Contracts: React.FunctionComponent<any> = () => {
 
   const activePublishedServiceIds: Array<number> = useSelector(
     selectActivePublishedServiceIds
-  )
+  );
 
-  const userPurchasedServicesMapping  = useSelector(selectPurchasedServicesIdMapping)
-  const userActivePublishedServicesMapping = useSelector(selectPurchasedServicesIdMapping)
-  const userPublishedServicesMapping = useSelector(selectPublishedServicesIdMapping)
-  
+  const publishedContractIds: Array<number> = useSelector(
+    selectPublishedServiceIds
+  );
+
+  const activeContractIds: Array<number> = useSelector(selectActiveContractIds);
+
+  const userPurchasedServicesMapping = useSelector(
+    selectPurchasedServicesIdMapping
+  );
+  const userActivePublishedServicesMapping = useSelector(
+    selectPurchasedServicesIdMapping
+  );
+
   const { data: signer, isError, isLoading } = useSigner();
 
   const networkManagerContract = useContract({
@@ -124,114 +147,52 @@ const Contracts: React.FunctionComponent<any> = () => {
     signerOrProvider: signer,
   });
 
-  const renderUsers = async () => {
-    const a = await fetch("https://randomuser.me/api/?results=20");
-    const b = await a.json();
-    setRelationships(b.results);
-  };
-
+  // published services
+  const [publishedServices, setPublishedServices] = useState<any>([]);
+  const servicesByCreatorQuery: QueryResult = useQuery(GET_SERVICES_BY_CREATOR);
   useEffect(() => {
-    renderUsers();
-  }, []);
+    if (!servicesByCreatorQuery.loading && servicesByCreatorQuery.data) {
+      setPublishedServices(servicesByCreatorQuery.data.services);
+    }
+  }, [userAddress, servicesByCreatorQuery.loading]);
 
-  useContractEvent(
+  //purchased services
+  const [purchasedServices, setPurchasedServices] = useState<any>([]);
+  const serviceQuery: QueryResult = useQuery(GET_SERVICE);
+  const purchasedServicesByClientQuery: QueryResult = useQuery(
+    GET_PURCHASED_SERVICES_BY_CLIENT,
     {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "ServiceCreated",
-    async (event: Event) => {
-      const iface = [
-        "event ServiceCreated(uint256 indexed serviceId, uint256 indexed marketId, address indexed creator)",
-      ];
-      const serviceId = event[0];
-      const marketId = event[1];
-      const serviceOwnerAddress = event[2];
-      const eventInterface: Interface = new ethers.utils.Interface(iface);
-
-      if (
-        serviceOwnerAddress === userAddress &&
-        !publishedServiceIds.includes(serviceId)
-      ) {
-        const payload: ServiceStruct =
-        await networkManagerContract.getServiceData(serviceId);
-
-        dispatch(contractServiceIdAdded(Number(hexToDecimal(serviceId._hex))));
-
-        dispatch(
-          contractServiceDataAdded({
-            ...payload,
-            id: hexToDecimal(Number(payload.id._hex)),
-          })
-        );
-      }
+      variables: {
+        client: userAddress,
+      },
     }
   );
-
-  useContractEvent(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "ServicePurchased",
-    async (event: Event) => {
-      const iface = [
-        "event ServicePurchased(uint256 indexed serviceId, uint256 purchaseId, uint256 pubId,  address indexed owner, address indexed purchaser, address referral)",
-      ];
-      const serviceId = event[0];
-      const servicePurchaseId = event[1];
-      const servicePubId = event[2];
-      const serviceOwnerAddress = event[3];
-      const servicePurchaser = event[4];
-      const serviceReferral = event[5];
-
-      if (
-        userAddress === servicePurchaser &&
-        !purchasedServiceIds.includes(serviceId)
+  useEffect(() => {
+    let data = [];
+    if (
+      !purchasedServicesByClientQuery.loading &&
+      purchasedServicesByClientQuery.data
+    ) {
+      for (
+        let i = 0;
+        i < purchasedServicesByClientQuery.data.services.length;
+        i++
       ) {
-        const servicePayload: ServiceStruct =
-          await networkManagerContract.getServiceData(serviceId);
-
-        const purchaseMetadataPayload: any = await networkManagerContract.getServicePurchaseMetadata(servicePurchaseId);
-
-        dispatch(purchasedServiceIdAdded(Number(hexToDecimal(serviceId._hex))));
-
-        dispatch(
-          purchasedServiceDataAdded({
-            ...servicePayload,
-            id: hexToDecimal(Number(servicePayload.id._hex)),
-            servicePurchaser,
-            servicePubId,
-            serviceReferral,
-            servicePurchaseId,
-            ...purchaseMetadataPayload
-          })
-        );
+        data[i]["purchaseData"] =
+          purchasedServicesByClientQuery.data.services[i];
+        serviceQuery.refetch({
+          serviceId: purchasedServicesByClientQuery.data.services[i].serviceId,
+        });
+        if (serviceQuery.data) {
+          data[i]["serviceData"] = serviceQuery.data.service;
+        }
       }
-
-      if (userAddress === serviceOwnerAddress && !activePublishedServiceIds.includes(serviceId)) {
-        const servicePayload: ServiceStruct =
-        await networkManagerContract.getServiceData(serviceId);
-
-        const purchaseMetadataPayload: any = await networkManagerContract.getServicePurchaseMetadata(servicePurchaseId);
-
-        dispatch(activePublishedServiceIdAdded(Number(hexToDecimal(serviceId._hex))))
-
-        dispatch(
-          activePublishedServiceDataAdded({
-            ...servicePayload,
-            id: hexToDecimal(Number(servicePayload.id._hex)),
-            servicePurchaser,
-            servicePubId,
-            serviceReferral,
-            servicePurchaseId,
-            ...purchaseMetadataPayload
-          })
-        )
-      }
-
     }
-  );
+
+    setPurchasedServices(data);
+  }, [userAddress, purchasedServicesByClientQuery.loading]);
+
+  //TODO: ServiceResolved
 
   useContractEvent(
     {
@@ -240,17 +201,17 @@ const Contracts: React.FunctionComponent<any> = () => {
     },
     "ServiceResolved",
     async (event: Event) => {
-      const serviceOwner = event[0]
-      const serviceClient = event[1]
-      const purchaseId = event[2]
-      const serviceId = event[3]
-      const amount = event[4]
+      const serviceOwner = event[0];
+      const serviceClient = event[1];
+      const purchaseId = event[2];
+      const serviceId = event[3];
+      const amount = event[4];
 
       if (userAddress === serviceClient) {
         dispatch(
           purchasedServiceDataAdded({
             ...userPurchasedServicesMapping[serviceId],
-            status: 2
+            status: 2,
           })
         );
       }
@@ -259,11 +220,55 @@ const Contracts: React.FunctionComponent<any> = () => {
         dispatch(
           activePublishedServiceDataAdded({
             ...userActivePublishedServicesMapping[serviceId],
-            status: 2
+            status: 2,
           })
-        )
+        );
+      }
+    }
+  );
+
+  const [publishedContracts, setPublishedContracts] = useState<
+    Array<RelationshipStruct>
+  >([]);
+  const contractsCreatedByEmployerQuery = useQuery(GET_CONTRACTS_BY_EMPLOYER, {
+    variables: {
+      employer: userAddress,
+    },
+  });
+
+  //TODO: Contract Updated
+
+  useEffect(() => {
+    if (
+      userAddress != ZERO_ADDRESS &&
+      userAddress &&
+      !contractsCreatedByEmployerQuery.loading &&
+      contractsCreatedByEmployerQuery.data
+    ) {
+      setPublishedContracts(contractsCreatedByEmployerQuery.data.contracts);
+    }
+  }, [userAddress, contractsCreatedByEmployerQuery.loading]);
+
+  useContractEvent(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    "ContractOwnershipUpdate",
+    async (event: Event) => {
+      const contractId = event[0];
+      const marketId = event[1];
+      const ownership = event[2];
+      const employer = event[3];
+      const worker = event[4];
+
+      if (userAddress === employer) {
+        //update contract in redux for user under contracts created
       }
 
+      if (userAddress === worker) {
+        //update contracts in redux for user under contracts working
+      }
     }
   );
 
@@ -299,28 +304,22 @@ const Contracts: React.FunctionComponent<any> = () => {
         <TabPanel index={0} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
-              {userPublishedServices.map(
-                (service: ServiceStruct, idx: number) => (
-                  <Grid item xs={3} key={service.id}>
-                    <ServiceCard id={Number(service.id)} data={service} />
-                  </Grid>
-                )
-              )}
+              {publishedServices.map((service: ServiceStruct, idx: number) => (
+                <Grid item xs={3} key={service.id}>
+                  <ServiceCard id={Number(service.id)} data={service} />
+                </Grid>
+              ))}
             </Grid>
           </Box>
         </TabPanel>
         <TabPanel index={1} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
-              {
-                userPurchasedServices.map(
-                  (service: ServiceStruct, idx: number) => (
-                    <Grid item xs={3} key={service.id}>
-                      <ServiceCard purchase id={Number(service.id)} data={service} />
-                    </Grid>
-                  )
-                )
-              }
+              {purchasedServices.map((service: ServiceStruct, idx: number) => (
+                <Grid item xs={3} key={service.id}>
+                  <ServiceCard purchase data={service} />
+                </Grid>
+              ))}
             </Grid>
           </Box>
         </TabPanel>
@@ -332,15 +331,35 @@ const Contracts: React.FunctionComponent<any> = () => {
               alignItems="center"
               justifyContent="space-between"
             >
-              {
-                userActivePublishedServices.map(
-                  (service: ServiceStruct, idx: number) => (
-                    <Grid item xs={3} key={service.id}>
-                      <ServiceCard purchase id={Number(service.id)} data={service} />
-                    </Grid>
-                  )
+              {userActivePublishedServices.map(
+                (service: ServiceStruct, idx: number) => (
+                  <Grid item xs={3} key={service.id}>
+                    <ServiceCard
+                      purchase
+                      id={Number(service.id)}
+                      data={service}
+                    />
+                  </Grid>
                 )
-              }
+              )}
+            </Grid>
+          </Box>
+        </TabPanel>
+        <TabPanel index={3} value={tabValue}>
+          <Box>
+            <Grid
+              container
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              {publishedContracts.map(
+                (contract: RelationshipStruct, idx: number) => (
+                  <Grid item xs={3} key={contract.id}>
+                    <JobDisplay data={contract} />
+                  </Grid>
+                )
+              )}
             </Grid>
           </Box>
         </TabPanel>

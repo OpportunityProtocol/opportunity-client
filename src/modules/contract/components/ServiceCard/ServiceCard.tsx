@@ -18,8 +18,11 @@ import { useStyles } from "./ServiceCardStyle";
 import DAIIcon from "../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg";
 import { NextRouter, useRouter } from "next/router";
 import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
-import { PurchasedServiceMetadataStruct, ServiceStruct } from "../../../../typechain-types/NetworkManager";
-import { useContractRead, useContractWrite } from "wagmi";
+import {
+  PurchasedServiceMetadataStruct,
+  ServiceStruct,
+} from "../../../../typechain-types/NetworkManager";
+import { useContractRead, useContractWrite, useQuery } from "wagmi";
 import {
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
@@ -40,82 +43,73 @@ import {
 
 import { Check } from "@material-ui/icons";
 
-interface IServiceCardProps {
-  id: string;
-  data?: ServiceStruct;
-  purchase?: boolean;
-}
-
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import VerifiedAvatar from "../../../user/components/VerifiedAvatar";
 import { ProfileStructStruct } from "../../../../typechain-types/ILensHub";
 import { hexToDecimal } from "../../../../common/helper";
 import { CHAIN_ID } from "../../../../constant/provider";
-import { activePublishedServiceDataAdded, purchasedServiceDataAdded } from "../../contractReduxSlice";
+import {
+  activePublishedServiceDataAdded,
+  purchasedServiceDataAdded,
+} from "../../contractReduxSlice";
+import { GET_PURCHASED_SERVICE } from "../../ContractGQLQueries";
 
-const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
+interface IServiceCardProps {
+  id: string;
+  purchaseData?: PurchasedServiceMetadataStruct;
+  data?: ServiceStruct;
+  purchase?: boolean;
+}
+
+const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardProps) => {
   const cardStyles = useStyles();
   const router: NextRouter = useRouter();
-  const [loadedData, setLoadedData] = useState<ServiceStruct & PurchasedServiceMetadataStruct & { servicePurchaseId: number, servicePurchaser: string }>(data);
+  const [loadedData, setLoadedData] = useState<
+    ServiceStruct
+  >(data);
+
   const [serviceOwnerLensData, setServiceOwnerLensData] =
     useState<ProfileStructStruct>({});
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
   const [serviceMetadata, setServiceMetadata] = useState<any>({});
-  const [purchaseMetadata, setPurchaseMetadata] = useState<any>({});
   const [displayImg, setDisplayImg] = useState<Buffer>();
   const [errors, setErrors] = useState<any>({
     metadataError: false,
   });
-  const dispatch =useDispatch()
+  const dispatch = useDispatch();
 
   const userAddress = useSelector(selectUserAddress);
 
- const networkManager_resolveService = useContractWrite(
+  const networkManager_resolveService = useContractWrite(
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
       contractInterface: NetworkManagerInterface,
     },
     "resolveService",
     {
-      args: [loadedData.id, loadedData?.servicePurchaseId],
+      args: [loadedData?.id, purchaseData?.purchaseId],
       onSuccess: async (data) => {
         if (userAddress === loadedData?.owner) {
-          dispatch(activePublishedServiceDataAdded({
-            ...loadedData,
-            status: 2
-          }))
+          dispatch(
+            activePublishedServiceDataAdded({
+              ...loadedData,
+              status: 2,
+            })
+          );
         }
 
-        if (userAddress == loadedData?.servicePurchaser) {
-          dispatch(purchasedServiceDataAdded({
-            ...loadedData,
-            status: 2
-          }))
+        if (userAddress == purchaseData.client) {
+          dispatch(
+            purchasedServiceDataAdded({
+              ...loadedData,
+              status: 2,
+            })
+          );
         }
       },
       onError: (error) => {
         console.log("networkManager_resolveService");
-        console.log(error);
-      },
-    }
- )
-
-  const networkManager_getServiceData = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "getServiceData",
-    {
-      enabled: false,
-      watch: false,
-      args: id,
-      onSuccess: (data: Result) => {
-       
-      },
-      onError: (error) => {
-        console.log("networkManager_getServiceData");
         console.log(error);
       },
     }
@@ -139,14 +133,6 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
     }
   );
 
-  useEffect(() => {
-    if (serviceOwnerLensProfileId !== 0) {
-      lensHub_getProfile.refetch({
-        throwOnError: true,
-      });
-    }
-  }, [serviceOwnerLensProfileId]);
-
   const networkManager_getLensProfileIdFromAddress = useContractRead(
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -165,10 +151,6 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
       },
     }
   );
-
-  useEffect(() => {
-    networkManager_getLensProfileIdFromAddress.refetch();
-  }, [loadedData?.owner]);
 
   const getServiceMetadata = async (ptr) => {
     let retVal: any = {};
@@ -206,8 +188,6 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
         ...errors,
         metadataError: true,
       });
-      console.log("getServiceMetadata error");
-      //console.log(error);
     }
   };
 
@@ -218,24 +198,38 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
         ...loadedData,
         id: Number(id),
         wad: [
-          Number(loadedData.wad[0]),
-          Number(loadedData.wad[1]),
-          Number(loadedData.wad[2]),
+          Number(loadedData.offers[0]),
+          Number(loadedData.offers[1]),
+          Number(loadedData.offers[2]),
         ],
       },
     });
   };
 
   useEffect(() => {
-    getServiceMetadata(loadedData?.metadataPtr);
-  }, [id]);
+    if (serviceOwnerLensProfileId !== 0) {
+      lensHub_getProfile.refetch({
+        throwOnError: false,
+      });
+    }
+  }, [serviceOwnerLensProfileId]);
+
+  useEffect(() => {
+    networkManager_getLensProfileIdFromAddress.refetch();
+  }, [loadedData?.owner]);
 
   useEffect(() => {
     //if data doesnt exist get it from contract
     if (!data) {
-      networkManager_getServiceData.refetch();
+      //TODOD: get serivce gql call
+      setLoadedData({});
+    } else {
+      if (loadedData.metadataPtr) {
+        getServiceMetadata(loadedData.metadataPtr);
+      }
     }
-  }, [id]);
+  }, [id, loadedData.id]);
+
 
   const renderButtonState = () => {
     if (!purchase) {
@@ -243,7 +237,7 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
         // view service
         <CardActions>
           <Button
-          sx={{ borderRadius: 1 }}
+            sx={{ borderRadius: 1 }}
             fullWidth
             variant="text"
             onClick={handleOnNavigateToServicePage}
@@ -256,8 +250,8 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
 
     // owner is viewing
     if (loadedData?.owner === userAddress) {
-      if (purchase) {
-        switch (loadedData.status) {
+      if (purchaseData) {
+        switch (purchaseData.status) {
           case 0:
             return (
               //pending resolution from client and disabled...
@@ -294,13 +288,17 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
       }
     } else {
       //purchaser is viewing
-      if (purchase) {
-        switch (loadedData.status) {
+      if (purchaseData) {
+        switch (purchaseData.status) {
           case 0:
             return (
               //Complete contract if pending state
               <CardActions>
-                <Button fullWidth variant="outlined" onClick={() => networkManager_resolveService.write()}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={() => networkManager_resolveService.write()}
+                >
                   Confirm
                 </Button>
               </CardActions>
@@ -365,7 +363,11 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
           alignItems="flex-start"
           justifyContent="space-between"
         >
-          <Stack direction="row" alignItems="center" justifyContent='flex-start'>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="flex-start"
+          >
             <VerifiedAvatar
               lensProfile={serviceOwnerLensData}
               lensProfileId={serviceOwnerLensProfileId}
@@ -373,7 +375,6 @@ const ServiceCard = ({ id, data, purchase = false }: IServiceCardProps) => {
               showValue={false}
               avatarSize={30}
             />
-
           </Stack>
         </Box>
 

@@ -227,7 +227,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
 
       if (retVal) {
         await networkManager_createContract.write({
-          args: [createContractForm.market_id, retVal]
+          args: [createContractForm.contract_market_id, retVal]
         })
       } else {
         throw new Error('Error retrieving ipfs metadata hash')

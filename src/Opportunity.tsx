@@ -17,7 +17,7 @@ import Footer from './common/components/Footer';
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
 
-  const APP_BACKGROUND: string = '#f8f8f8'
+  const APP_BACKGROUND: string = '#fafafa'
 
   const isPadded: boolean =
     router.pathname === '/jobs' ||

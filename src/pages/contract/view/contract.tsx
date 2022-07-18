@@ -192,7 +192,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
           </Alert>
         ) : null}
       </Container>
-      <Container maxWidth="lg" className={classes.mainContainer}>
+      <Container maxWidth="lg" >
         <Grid
           container
           direction="row"
@@ -205,7 +205,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
               <JobDisplay />
             </Box>
 
-            <Paper variant="outlined" className={classes.marginBottom}>
+            <Card variant="outlined" className={classes.marginBottom}>
               <TableToolbar />
               <TableContainer>
                 <Table aria-label="simple table">
@@ -260,7 +260,7 @@ const ViewContract: React.FunctionComponent<any> = () => {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
-            </Paper>
+            </Card>
 
             <Card variant="outlined" className={classes.marginBottom}>
               <CardContent>

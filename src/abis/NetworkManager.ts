@@ -58,13 +58,69 @@ const NetworkManagerInterface = [
   },
   {
     "anonymous": false,
-    "inputs": [],
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "creator",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "marketId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "string",
+        "name": "metadataPtr",
+        "type": "string"
+      }
+    ],
     "name": "ContractCreated",
     "type": "event"
   },
   {
     "anonymous": false,
-    "inputs": [],
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "marketId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "enum NetworkLibrary.ContractOwnership",
+        "name": "ownership",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "employer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "worker",
+        "type": "address"
+      }
+    ],
     "name": "ContractOwnershipUpdate",
     "type": "event"
   },
@@ -213,6 +269,24 @@ const NetworkManagerInterface = [
         "internalType": "address",
         "name": "creator",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "offers",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "metadataPtr",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "pubId",
+        "type": "uint256"
       }
     ],
     "name": "ServiceCreated",
@@ -265,28 +339,28 @@ const NetworkManagerInterface = [
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
+        "indexed": true,
+        "internalType": "address",
+        "name": "serviceOwner",
+        "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
+        "internalType": "address",
+        "name": "serviceClient",
+        "type": "address"
+      },
+      {
+        "indexed": true,
         "internalType": "uint256",
         "name": "purchaseId",
         "type": "uint256"
       },
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "serviceOwner",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "serviceClient",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "serviceId",
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -452,7 +526,7 @@ const NetworkManagerInterface = [
       },
       {
         "internalType": "uint256[]",
-        "name": "wad",
+        "name": "offers",
         "type": "uint256[]"
       },
       {
@@ -737,7 +811,7 @@ const NetworkManagerInterface = [
           },
           {
             "internalType": "uint256[]",
-            "name": "wad",
+            "name": "offers",
             "type": "uint256[]"
           },
           {
@@ -759,6 +833,11 @@ const NetworkManagerInterface = [
             "internalType": "address",
             "name": "collectModule",
             "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "pubId",
+            "type": "uint256"
           }
         ],
         "internalType": "struct NetworkLibrary.Service",
@@ -808,7 +887,7 @@ const NetworkManagerInterface = [
           },
           {
             "internalType": "uint8",
-            "name": "package",
+            "name": "offer",
             "type": "uint8"
           },
           {
@@ -848,7 +927,7 @@ const NetworkManagerInterface = [
           },
           {
             "internalType": "uint256[]",
-            "name": "wad",
+            "name": "offers",
             "type": "uint256[]"
           },
           {
@@ -870,6 +949,11 @@ const NetworkManagerInterface = [
             "internalType": "address",
             "name": "collectModule",
             "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "pubId",
+            "type": "uint256"
           }
         ],
         "internalType": "struct NetworkLibrary.Service[]",
@@ -891,25 +975,6 @@ const NetworkManagerInterface = [
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getWaitlistLength",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1050,7 +1115,7 @@ const NetworkManagerInterface = [
       },
       {
         "internalType": "uint8",
-        "name": "package",
+        "name": "offerIndex",
         "type": "uint8"
       },
       {
@@ -1129,7 +1194,7 @@ const NetworkManagerInterface = [
       },
       {
         "internalType": "uint8",
-        "name": "package",
+        "name": "offer",
         "type": "uint8"
       },
       {
@@ -1544,6 +1609,11 @@ const NetworkManagerInterface = [
         "internalType": "address",
         "name": "collectModule",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "pubId",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1593,6 +1663,11 @@ const NetworkManagerInterface = [
         "internalType": "address",
         "name": "collectModule",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "pubId",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",

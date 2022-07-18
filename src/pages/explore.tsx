@@ -29,6 +29,8 @@ import { ServiceStruct } from '../typechain-types/NetworkManager';
 import SearchBarV2 from '../common/components/SearchBarV2/SearchBarV2';
 import Dropdown from '../common/components/Dropdown';
 import TransactionTokenDialog from '../modules/market/components/TransactionTokenDialog';
+import { useQuery } from '@apollo/client';
+import { GET_SERVICES } from '../modules/contract/ContractGQLQueries';
 
 const HEIGHT = '600px';
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
@@ -82,7 +84,7 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
 
 const ExplorePage: NextPage = () => {
   const classes = useStyles();
-  const [suggestedConnections, setSuggestedConnections] = useState<any[]>([]);
+  
   const [marketsLoading, setMarketsLoading] = useState<boolean>(false);
   const [verifiedFreelancersLoading, setVerifiedFreelancersLoading] = useState<boolean>(false)
   const [verifiedFreelancers, setVerifiedFreelancers] = useState<Array<any>>([])
@@ -91,16 +93,8 @@ const ExplorePage: NextPage = () => {
   const [contracts, setContracts] = useState([])
   const [contractsLoading, setContractsLoading] = useState(false)
 
-
-  const fetchNetworkSuggestions = async () => {
-    const a = await fetch('https://randomuser.me/api/?results=20', {
-      headers: {
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
-    const b = await a.json();
-    setSuggestedConnections(b.results);
-  };
+  const getServices = useQuery(GET_SERVICES);
+  console.log(getServices)
 
   const networkManager_getMarkets = useContractRead(
     {
@@ -174,26 +168,6 @@ const ExplorePage: NextPage = () => {
     }
   )
 
-  const networkManager_getServices = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface
-    },
-    "getServices",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      onSuccess(data: Result) {
-        setServices(data)
-      },
-      onError: error => {
-        console.log('getServices')
-        console.log(error)
-      }
-    }
-  )
-
   const renderFreelancers = () => {
     const freelancers = verifiedFreelancers.slice()
       return freelancers.splice(0, 6).map((address) => {
@@ -206,15 +180,20 @@ const ExplorePage: NextPage = () => {
     setMarketsLoading(true)
     setVerifiedFreelancersLoading(true)
     setContractsLoading(true)
-    networkManager_getMarkets.refetch()
-    networkManager_getVerifiedFreelancers.refetch()
-    networkManager_getServices.refetch()
-    networkManager_getContracts.refetch()
+    //networkManager_getMarkets.refetch()
+    //networkManager_getVerifiedFreelancers.refetch()
+    //networkManager_getContracts.refetch()
   }, [])
 
   useEffect(() => {
-    fetchNetworkSuggestions();
-  }, []);
+    if (!getServices.loading && getServices.data) {
+      const serviceData = getServices.data.services
+      setServices(serviceData)
+    } else {
+      setServices([])
+    }
+
+  }, [getServices.loading])
 
 
 
@@ -274,6 +253,7 @@ const ExplorePage: NextPage = () => {
 
             <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={3}>
               {services.slice(0,4).map((serviceData: ServiceStruct) => {
+                console.log(serviceData)
                 return (
                   <Grid item xs={3}>
                     <ServiceCard
@@ -325,11 +305,11 @@ const ExplorePage: NextPage = () => {
               </Button>
             </Stack>
           </Box>
-          <Grid container direction="row" overflow="scroll" flexWrap="wrap" spacing={2}>
-            {contracts.map((contract: any) => {
+          <Grid sx={{ mb: 2}} container direction="row" overflow="scroll" flexWrap="wrap" spacing={2}>
+            {[0,1,2,3,4].map((contract: any) => {
               return (
-                <Grid item xs={6}>
-                  <JobDisplay id={contract.id} data={contract} />
+                <Grid item xs={5.9}>
+                  <JobDisplay id={contract?.id} data={contract} />
                 </Grid>
               );
             })}

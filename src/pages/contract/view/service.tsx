@@ -298,7 +298,10 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   }, []);
 
   useEffect(() => {
-    getServiceMetadata(router.query.metadataPtr);
+    if (router.query.metadataPtr) {
+      getServiceMetadata(router.query.metadataPtr);
+    }
+
     setServiceData(router.query);
     networkManager_getLensProfileIdFromAddress.refetch();
     networkManager_getPubIdFromServiceId.refetch();

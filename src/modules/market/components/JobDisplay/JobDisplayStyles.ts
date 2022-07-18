@@ -6,7 +6,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     card: {
         height: 'auto',
         '&:hover': {
-            cursor: 'pointer',
+           // cursor: 'pointer',
             //  backgroundColor: '#eee'
         },
         position: 'relative',

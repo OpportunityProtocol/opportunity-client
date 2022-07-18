@@ -16,7 +16,6 @@ interface ICarouselItemProp {
   }
 
   interface IJobDisplayProps {
-    id: number;
     data: RelationshipStruct;
   }
 
