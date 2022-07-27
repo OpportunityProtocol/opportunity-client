@@ -272,6 +272,48 @@ const Contracts: React.FunctionComponent<any> = () => {
     }
   );
 
+  useContractEvent(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    "ContractCreated",
+    async (event: Event) => {
+      const creator = event[0]
+      const marketId = event[1]
+      const metadataPtr = event[2]
+
+      if (userAddress === creator) {
+        //dispatch into contracts created
+      }
+    }
+  );
+
+  useContractEvent(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    "ContractOwnershipUpdate",
+    async (event: Event) => {
+      const contractId = event[0]
+      const marketId = event[1]
+      const ownership = event[2]
+      const employer = event[3]
+      const worker = event[4]
+
+
+      if (userAddress === employer) {
+        //update contract in redux for user under contracts created
+      }
+
+      if (userAddress === worker) {
+        //update contracts in redux for user under contracts working
+      }
+    }
+  );
+
+
   return (
     <Container maxWidth="lg" sx={{ height: "100vh" }}>
       <Typography pl={1} fontSize={25} fontWeight="medium">

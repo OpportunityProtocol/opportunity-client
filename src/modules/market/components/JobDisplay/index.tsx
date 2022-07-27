@@ -210,6 +210,18 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ data }) => {
           alignItems="flex-end"
           justifyContent="space-between"
         >
+
+          <Grid item>
+          <Button
+              onClick={() => router.push('/contract/view/contract')}
+              sx={{ borderRadius: 8 }}
+             variant='contained'
+                size="small"
+              >
+                View Contract
+              </Button>
+          </Grid>
+
           <Grid item>
             <Button
               onClick={() => router.push("/contract/view/contract")}
@@ -303,4 +315,8 @@ export default JobDisplay;
             </Grid>
           </Grid>
         </Grid>
+<<<<<<< Updated upstream
         */
+=======
+        */
+>>>>>>> Stashed changes

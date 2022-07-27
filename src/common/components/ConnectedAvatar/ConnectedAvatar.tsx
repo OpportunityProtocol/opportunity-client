@@ -24,6 +24,8 @@ import {
   Theme,
 } from "@mui/material";
 
+import { ethers, BigNumber } from 'ethers'
+
 import { styled } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -114,6 +116,10 @@ const ConnectedAvatar: FC = () => {
     "mint(uint256)",
     {
       args: [10000],
+      overrides: {
+        gasLimit: ethers.BigNumber.from("2000000"),
+        gasPrice: 90000000000,
+      }
     }
   );
  
