@@ -189,14 +189,13 @@ const ExplorePage: NextPage = () => {
     if (!getServices.loading && getServices.data) {
       const serviceData = getServices.data.services
       setServices(serviceData)
+      console.log('@@@')
+      console.log(serviceData)
     } else {
       setServices([])
     }
 
   }, [getServices.loading])
-
-
-
 
   return (
     <Box>

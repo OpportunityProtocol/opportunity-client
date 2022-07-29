@@ -91,9 +91,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     "createService",
     {
       onError(error, variables, context) {
-        console.log("createService")
         console.log(error);
-        console.log(variables);
       },
       onSuccess(data, variables, context) {},
       args: [

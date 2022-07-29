@@ -192,12 +192,14 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
   };
 
   const handleOnNavigateToServicePage = () => {
+    console.log('@@@@@@@@@@@')
+    console.log(loadedData)
     router.push({
       pathname: "/contract/view/service",
       query: {
         ...loadedData,
-        id: Number(id),
-        wad: [
+        id: Number(loadedData.id),
+        offers: [
           Number(loadedData.offers[0]),
           Number(loadedData.offers[1]),
           Number(loadedData.offers[2]),

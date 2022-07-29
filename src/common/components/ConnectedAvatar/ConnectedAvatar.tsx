@@ -122,7 +122,7 @@ const ConnectedAvatar: FC = () => {
       }
     }
   );
- 
+
   const dai_balanceOf = useContractRead(
     {
       addressOrName: DAI_ADDRESS,
@@ -146,10 +146,10 @@ const ConnectedAvatar: FC = () => {
   );
 
   const handleOnAddFunds = async () => {
-   // await dai_mint.write();
+    await dai_mint.write();
     const result = await dai_balanceOf.refetch();
 
-    
+    console.log(result)
 
     dispatch(
       userERC20BalanceChanged({

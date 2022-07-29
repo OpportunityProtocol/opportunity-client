@@ -59,7 +59,7 @@ import { create } from "ipfs-http-client";
 import fleek from "../../../fleek";
 import { PaymentProcessingDataStruct } from "../../../typechain-types/ServiceCollectModule";
 import VerifiedAvatar from "../../../modules/user/components/VerifiedAvatar";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import TransactionTokenDialog from "../../../modules/market/components/TransactionTokenDialog";
 
 interface IDeliverable {
@@ -140,12 +140,15 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const userAddress = useSelector(selectUserAddress)
 
   const renderPackageInformation = (idx: number) => {
+    console.log(serviceData.offers)
    try {
-    return `${hexToDecimal(paymentProcessingData.packages[idx]._hex)} DAI`
+    return `${Number(serviceData.offers[idx])} DAI`
    } catch(error) {
     return '0 DAI'
    }
   }
+
+
 
   //get user lens profile id
   const networkManager_getLensProfileIdFromAddress = useContractRead(
@@ -202,8 +205,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         setServicePubId(hexToDecimal(data._hex));
       },
       onError(error) {
-        console.log("getPubIdFromServiceId");
-        console.log(error);
+     
       },
     }
   );
@@ -223,8 +225,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         setServicePublicationData(data);
       },
       onError(error) {
-        console.log("getPub");
-        console.log(error);
+ 
       },
     }
   );
@@ -314,15 +315,16 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     },
     "purchaseServiceOffering",
     {
-      args: [serviceData.id, ZERO_ADDRESS, 0, collectSig],
       onSuccess(data, variables, context) {
-          console.log('purchase service success')
-          console.log(data)
+        console.log('Success')
       },
       onError(error, variables, context) {
           console.log('purchase service error')
           console.log(error)
+          console.log(variables)
       },
+      
+      args: [serviceData.id, ZERO_ADDRESS, 0, collectSig],
       overrides: {
         gasLimit: ethers.BigNumber.from("2000000"),
         gasPrice: 90000000000,
@@ -339,8 +341,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     {
       args: [serviceData.id, ZERO_ADDRESS, 1, collectSig],
       onSuccess(data, variables, context) {
-          console.log('purchase service success')
-          console.log(data)
+
       },
       onError(error, variables, context) {
           console.log('purchase service error')
@@ -352,6 +353,8 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     }
   )
 
+
+
   const networkManager_purchaseServicePackageThree = useContractWrite(
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -361,12 +364,10 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     {
       args: [serviceData.id, ZERO_ADDRESS, 2, collectSig],
       onSuccess(data, variables, context) {
-          console.log('purchase service success')
-          console.log(data)
+    
       },
       onError(error, variables, context) {
-          console.log('purchase service error')
-          console.log(error)
+      
       },
       overrides: {
         gasLimit: ethers.BigNumber.from('900000')
@@ -388,8 +389,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const { data, isError, isLoading, isSuccess, error, signTypedData } =
     useSignTypedData({
       onSettled(data, error, variables, context) {
-        console.log('sign success')
-        console.log(data)
+
       },
       onError(error, variables, context) {
         console.log('sign error')
@@ -419,7 +419,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     }
 
     const getValues = async () => {
-      const nonce = await ethers.providers.getDefaultProvider().getTransactionCount(userAddress)
+      const nonce = await new ethers.providers.JsonRpcProvider().getTransactionCount(userAddress)
       return  {
         profileId: serviceOwnerLensProfileId,
         pubId: servicePubId,
@@ -430,15 +430,15 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         
     }
 
-  const onPurchaseServicePackage = async () => {
+  const onApprove = async () => {
+    await dai_approve.write()
+  }
+
+  const onSign = async () => {
     const domain = getDomain()
     const types = getTypes()
     const value = await getValues()
 
-    console.log('Check values')
-    console.log(domain)
-    console.log(types)
-    console.log(value)
 
 
     await signTypedData({ domain, types, value })
@@ -447,16 +447,16 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       console.log('Error whilet rhing')
       console.log(error)
     }
+  }
 
+  const onPurchaseServicePackage = async () => {
+
+console.log("AAAAAA")
     if (isSuccess) {
       const splitSignature: ethers.Signature = await ethers.utils.splitSignature(data)
-      console.log('split singature')
-      console.log(splitSignature)
-
-      await dai_approve.write()
-
+console.log("BBBBB")
       await networkManager_purchaseServicePackageOne.write({
-        args: [serviceData.id, ZERO_ADDRESS, 0, {
+        args: [serviceData.id, ZERO_ADDRESS, BigNumber.from('0'), {
           v: splitSignature.v,
           r: splitSignature.r,
           s: splitSignature.s,
@@ -707,9 +707,21 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                       </Typography>
                     </Box>
 
-                    <Button variant="outlined" fullWidth size="large" onClick={onPurchaseServicePackage}>
+<Stack direction='row'>
+<Button variant="outlined" fullWidth size="large" onClick={onApprove}>
                       Get started
                     </Button>
+
+                    <Button onClick={onSign}>
+                      Sign
+                    </Button>
+
+                    <Button variant="outlined" fullWidth size="large" onClick={onPurchaseServicePackage}>
+                      Pay
+                    </Button>
+</Stack>
+                 
+
                   </Stack>
                 </CardContent>
               </Card>

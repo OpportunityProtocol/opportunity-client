@@ -41,8 +41,8 @@ import apolloClient from "../apollo";
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat],
   [
-    alchemyProvider({ alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY }),
-    publicProvider(),
+   // alchemyProvider({ alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY }),
+  //  publicProvider(),
     jsonRpcProvider({
       rpc: (chain) => ({
         http: "http://127.0.0.1:8545",
@@ -79,7 +79,7 @@ const client = createClient({
   provider(config) {
     if (Number(process.env.NEXT_PUBLIC_CHAIN_ID) == 1337) {
       return new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545", {
-        name: "unknown",
+        name: "localhost",
         chainId: 1337,
       });
     } else if (Number(process.env.NEXT_PUBLIC_CHAIN_ID) == 80001) {

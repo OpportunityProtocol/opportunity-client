@@ -315,8 +315,4 @@ export default JobDisplay;
             </Grid>
           </Grid>
         </Grid>
-<<<<<<< Updated upstream
         */
-=======
-        */
->>>>>>> Stashed changes
