@@ -80,7 +80,8 @@ import { QueryResult, useQuery } from "@apollo/client";
 import {
   GET_CONTRACTS_BY_EMPLOYER,
   GET_PURCHASED_SERVICES_BY_CLIENT,
-  GET_SERVICE,
+  GET_SERVICE_BY_ID,
+  GET_SERVICES,
   GET_SERVICES_BY_CREATOR,
 } from "../../modules/contract/ContractGQLQueries";
 
@@ -158,7 +159,12 @@ const Contracts: React.FunctionComponent<any> = () => {
 
   //purchased services
   const [purchasedServices, setPurchasedServices] = useState<any>([]);
-  const serviceQuery: QueryResult = useQuery(GET_SERVICE);
+  const serviceQuery: QueryResult = useQuery(GET_SERVICE_BY_ID, {
+    variables: {
+      serviceId: -1
+    }
+  });
+
   const purchasedServicesByClientQuery: QueryResult = useQuery(
     GET_PURCHASED_SERVICES_BY_CLIENT,
     {
@@ -167,30 +173,42 @@ const Contracts: React.FunctionComponent<any> = () => {
       },
     }
   );
+
   useEffect(() => {
     let data = [];
+    console.log(purchasedServicesByClientQuery)
+
     if (
       !purchasedServicesByClientQuery.loading &&
       purchasedServicesByClientQuery.data
     ) {
       for (
         let i = 0;
-        i < purchasedServicesByClientQuery.data.services.length;
+        i < purchasedServicesByClientQuery.data.purchasedServices.length;
         i++
       ) {
-        data[i]["purchaseData"] =
-          purchasedServicesByClientQuery.data.services[i];
+        data[i] = {
+          ...data[i],
+          purchaseData: purchasedServicesByClientQuery.data.purchasedServices[i]
+        }
+
         serviceQuery.refetch({
-          serviceId: purchasedServicesByClientQuery.data.services[i].serviceId,
+          serviceId: purchasedServicesByClientQuery.data.purchasedServices[i].serviceId,
         });
+        console.log(serviceQuery)
         if (serviceQuery.data) {
-          data[i]["serviceData"] = serviceQuery.data.service;
+          data[i] = {
+            ...data[i],
+            serviceData: serviceQuery.data.service
+          }
         }
       }
-    }
+  }
 
+    //console.log("HEEEEEEREEEE")
+    console.log(data)
     setPurchasedServices(data);
-  }, [userAddress, purchasedServicesByClientQuery.loading]);
+  }, [purchasedServicesByClientQuery.loading]);
 
   //TODO: ServiceResolved
 

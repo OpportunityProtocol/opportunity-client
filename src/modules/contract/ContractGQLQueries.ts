@@ -44,7 +44,7 @@ const GET_SERVICES = gql`
     services {
       id
       marketId
-      owner
+      creator
       metadataPtr
       pubId
       offers
@@ -55,11 +55,12 @@ const GET_SERVICES = gql`
 const GET_SERVICE_BY_ID = gql`
   query GetService($serviceId: ID!) {
     service(id: $serviceId) {
-        id
-        marketId
-        creator
-        metadata
-        pubId
+      id
+      marketId
+      creator
+      metadataPtr
+      pubId
+      offers
     }
   }
 `
@@ -99,8 +100,8 @@ const GET_PURCHASED_SERVICE = gql`
 `
 
 const GET_PURCHASED_SERVICES_BY_CLIENT = gql`
-  query GetPurchasedService($client: ID!) {
-    purchasedService(client: $client) {
+  query GetPurchasedServices($client: ID!) {
+    purchasedServices(client: $client) {
         id
         client
         referral
@@ -108,7 +109,6 @@ const GET_PURCHASED_SERVICES_BY_CLIENT = gql`
         purchaseId
         offer
         status
-        owner
         pubId
         serviceId
     }

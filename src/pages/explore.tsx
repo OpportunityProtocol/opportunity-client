@@ -189,8 +189,6 @@ const ExplorePage: NextPage = () => {
     if (!getServices.loading && getServices.data) {
       const serviceData = getServices.data.services
       setServices(serviceData)
-      console.log('@@@')
-      console.log(serviceData)
     } else {
       setServices([])
     }
@@ -252,7 +250,6 @@ const ExplorePage: NextPage = () => {
 
             <Grid container alignItems="center" direction="row" flexWrap="nowrap" spacing={3}>
               {services.slice(0,4).map((serviceData: ServiceStruct) => {
-                console.log(serviceData)
                 return (
                   <Grid item xs={3}>
                     <ServiceCard
