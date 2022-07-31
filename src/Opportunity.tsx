@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {
+  alpha,
   Box,
 } from '@mui/material';
 
@@ -11,11 +12,12 @@ import {
 } from './OpportunityInterfaces';
 import NavigationBar from './common/components/NavigationBar/NavigationBar';
 import MarketToolbar from './modules/market/components/MarketToolbar';
+import Footer from './common/components/Footer';
 
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
 
-  const APP_BACKGROUND: string = '#f8f8f8'
+  const APP_BACKGROUND: string = '#fafafa'
 
   const isPadded: boolean =
     router.pathname === '/jobs' ||
@@ -24,21 +26,24 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     router.pathname === '/contract/view/service' ||
     router.pathname === '/' ||
     router.pathname === '/markets' ||
-    router.pathname === '/contract' 
+    router.pathname === '/contract' ||
+    router.pathname.includes('/view/contract') ||
+    router.pathname.includes('/view/service')
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: APP_BACKGROUND }}>
-      <NavigationBar />
+  
       <Box
         component="main"
         sx={{
           bgcolor: APP_BACKGROUND,
           flexGrow: 1,
-          paddingTop: isPadded ? '60px' : '0px',
+          paddingTop: isPadded ? '90px' : '0px',
         }}>
         {children}
+        <Footer />
       </Box>
-    </Box>
+
+ 
   );
 };
 

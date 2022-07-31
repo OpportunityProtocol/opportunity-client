@@ -17,6 +17,7 @@ import { createTheme } from '@mui/material/styles';
         main: '#d46290',
         dark: '#6a3c55'
       },
+      divider: '#ddd'
     },   
     typography: {
       fontFamily: [
@@ -54,15 +55,6 @@ import { createTheme } from '@mui/material/styles';
           }
         }
       },
-      MuiDivider: {
-        styleOverrides: {
-          root: {
-            color: '#ddd',
-            borderColor: '#ddd',
-            width: '100%'
-          }
-        }
-      },
       MuiTab: {
         styleOverrides: {
           root: {
@@ -77,7 +69,7 @@ import { createTheme } from '@mui/material/styles';
       MuiChip: {
         styleOverrides: {
           outlined: {
-            border: '1px solid #ddd'
+            border: '1px solid #eee'
           }
         }
       },
@@ -105,7 +97,7 @@ import { createTheme } from '@mui/material/styles';
             borderRadius: 0
           },
         }
-      }
+      },
     }
   });
 

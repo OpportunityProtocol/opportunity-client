@@ -46,7 +46,6 @@ const userSlice = createSlice({
     userLensDataStored(state, action) {
         state.lensProfile = action.payload
         state.verified = true
-        console.log(state)
     },
     userWalletDataStored(state, action) {
         return { ...state,  ...action.payload }

@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from 'react';
 
-import { InputBase, styled } from '@mui/material';
+import { alpha, InputBase, Paper, styled } from '@mui/material';
+import { Search } from '@material-ui/icons';
 
 const SearchBarV1StyledInputBase = styled(InputBase)(({ theme }) => ({
   '& .MuiInputBase-input': {
@@ -8,30 +9,30 @@ const SearchBarV1StyledInputBase = styled(InputBase)(({ theme }) => ({
     width: '100%',
     position: 'relative',
     backgroundColor: 'inherit',
-    border: '1px solid #ddd',
+    border: 'none',
     fontSize: 14,
     height: 40,
     padding: '10px 12px',
     marginLeft: 1,
     display: 'flex',
     flex: 1,
-    color: '#212121',
     flexGrow: 1,
-    '&:focus': {
-      border: `2px solid ${theme.palette.primary.main}`
-    },
   },
 }));
 
 const SearchBarV1: FunctionComponent = () => {
   return (
+      <Paper elevation={0} sx={{ backgroundColor: (theme) => alpha(theme.palette.primary.light, 0.25), borderRadius: 2 }}>
       <SearchBarV1StyledInputBase
+      startAdornment={<Search style={{ color: '#9E9E9E', marginLeft: '12px', marginRight: '1px'}} />}
        placeholder="Find gigs, anytime"
+       sx={{ color: (theme) => theme.palette.text.secondary, fontWeight: 'medium' }}
        inputProps={{
         'aria-label': 'search gigs',
         style: { padding: '0px 10px'},
       }}
       />
+            </Paper>
   );
 };
 

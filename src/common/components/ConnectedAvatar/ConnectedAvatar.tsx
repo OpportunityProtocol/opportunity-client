@@ -10,6 +10,7 @@ import {
   Box,
   Popover,
   InputBase,
+  IconButton,
   Grid,
   Badge,
   CardContent,
@@ -20,7 +21,10 @@ import {
   Toolbar,
   Typography,
   Divider,
+  Theme,
 } from "@mui/material";
+
+import { ethers, BigNumber } from 'ethers'
 
 import { styled } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
@@ -48,16 +52,19 @@ import {
 import { hexToDecimal } from "../../helper";
 import { DaiInterface } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
+import { ExitToApp } from "@material-ui/icons";
 
-const StyledBadge = styled(Badge)(({ theme }) => ({
+const StyledBadge = styled(Badge, {
+  shouldForwardProp: prop => prop !== 'connected'
+})(({ theme, connected }: { theme: Theme, connected: boolean }) => ({
   "& .MuiBadge-badge": {
+    display: connected === true ? 'flex' : 'none',
     backgroundColor: "#44b700",
     color: "#44b700",
+    bottom: 13,
+    right: 12,
     boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
     "&::after": {
-      position: "absolute",
-      top: 0,
-      left: 0,
       width: "100%",
       height: "100%",
       borderRadius: "50%",
@@ -100,15 +107,19 @@ const ConnectedAvatar: FC = () => {
   const handlePopoverClose = () => {
     setAnchorEl(null);
   };
-  useContractWrite;
+  
   const dai_mint = useContractWrite(
     {
       addressOrName: DAI_ADDRESS,
       contractInterface: JSON.stringify(DaiInterface),
     },
-    "mint",
+    "mint(uint256)",
     {
-      args: [userAddress, 10000],
+      args: [10000],
+      overrides: {
+        gasLimit: ethers.BigNumber.from("2000000"),
+        gasPrice: 90000000000,
+      }
     }
   );
 
@@ -121,10 +132,14 @@ const ConnectedAvatar: FC = () => {
     {
       enabled: false,
       cacheTime: 50000,
-      watch: false,
+      watch: true,
       chainId: CHAIN_ID,
       args: [userAddress],
+      onSuccess(data) {
+        alert(data)
+      },
       onError: (error: Error) => {
+        alert(error)
         console.log(error);
       },
     }
@@ -136,7 +151,7 @@ const ConnectedAvatar: FC = () => {
 
     dispatch(
       userERC20BalanceChanged({
-        [DAI_ADDRESS]: hexToDecimal(Number(result.data._hex)),
+        [DAI_ADDRESS]: Number(result.data._hex),
       })
     );
   };
@@ -145,24 +160,23 @@ const ConnectedAvatar: FC = () => {
 
   return (
     <StyledBadge
+      connected={connected}
       overlap="circular"
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       variant="dot"
     >
-      <Avatar
-        onMouseEnter={handlePopoverOpen}
-        onMouseLeave={handlePopoverClose}
-        sx={{ cursor: "pointer" }}
-        alt="Remy Sharp"
-        src="/assets/stock/profile_three.jpeg"
-      />
+      <IconButton onClick={handlePopoverOpen}>
+        <Avatar
+          sx={{ cursor: "pointer" }}
+          alt="Remy Sharp"
+          src="/assets/stock/profile_three.jpeg"
+        />
+      </IconButton>
+
       <Popover
-        sx={{
-          pointerEvents: "none",
-        }}
         aria-owns={open ? "mouse-over-connected-avatar-popover" : undefined}
         aria-haspopup="true"
-        style={{ position: "absolute", top: 55 }}
+        style={{ position: "absolute" }}
         id="mouse-over-connected-avatar-popover"
         open={open}
         anchorEl={anchorEl}
@@ -174,19 +188,25 @@ const ConnectedAvatar: FC = () => {
         disableRestoreFocus
       >
         <CardContent>
-          <Box sx={{ p: 1 }}>
-            <Typography component="div">
-              <Box sx={{ fontWeight: "bold" }}>Welcome to GigEarth</Box>
-              <Box
-                sx={{
-                  fontSize: 16,
-                  fontWeight: "medium",
-                  color: "rgb(94, 94, 94)",
-                }}
-              >
-                Permissionless labor markets powered by unstoppable networks
-              </Box>
-            </Typography>
+          <Box>
+            <Stack direction="row" alignItems="flex-start">
+              <Typography component="div">
+                <Box sx={{ fontWeight: "bold" }}>Welcome to Lens Talent</Box>
+                <Box
+                  sx={{
+                    fontSize: 16,
+                    fontWeight: "medium",
+                    color: "rgb(94, 94, 94)",
+                  }}
+                >
+                  Permissionless labor markets powered by unstoppable networks
+                </Box>
+              </Typography>
+
+              <IconButton onClick={handlePopoverClose}>
+                <ExitToApp />
+              </IconButton>
+            </Stack>
           </Box>
           <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
             <Avatar
@@ -230,7 +250,7 @@ const ConnectedAvatar: FC = () => {
 
           <Grid
             my={3}
-            sx={{ border: "1px solid #ddd" }}
+            sx={{ border: "1px solid #eee" }}
             flexWrap="nowrap"
             container
             direction="column"

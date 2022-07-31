@@ -91,9 +91,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     "createService",
     {
       onError(error, variables, context) {
-        console.log("createService")
         console.log(error);
-        console.log(variables);
       },
       onSuccess(data, variables, context) {},
       args: [
@@ -134,8 +132,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         setMarketsLoading(false);
       },
       onError: (error) => {
-        console.log("getMarkets");
-        console.log(error);
+
         setMarketsLoading(false);
       },
     }
@@ -191,8 +188,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
       router.push('/')
     } catch (error) {
-      console.log("handleOnPublish");
-      console.log(error);
+
     }
   };
 
@@ -303,7 +299,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       spacing={5}
       maxWidth="lg"
       sx={{
-        border: "1px solid #ddd",
+        border: "1px solid #eee",
         bgcolor: "#fff",
         padding: "2% 4% !important",
       }}

@@ -2,7 +2,7 @@ import Head from 'next/head';
 
 const Header = () => (
     <Head>
-    <title>GigEarth</title>
+    <title>Lens Talent</title>
     <meta name="description" content="Permissionless labor markets" />
     <link rel="icon" href="/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

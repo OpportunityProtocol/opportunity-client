@@ -7,10 +7,8 @@ const useStyles = makeStyles((theme: Theme) => {
            // marginBottom: theme.spacing(2),
             padding: '8px 4px',
             display: 'flex',
-            flex: 1,
-            
+            flex: 1,  
             alignItems: 'center',
-            backgroundColor: 'transparent !important',
         },
         iconButton: {
             padding: '10px'

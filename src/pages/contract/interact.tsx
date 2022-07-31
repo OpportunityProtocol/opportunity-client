@@ -48,7 +48,7 @@ const Contract: React.FunctionComponent<any> = () => {
     >
       <Grid direction="column" container item xs={12}>
         <Grid mb={2} item flex={1}>
-          <Box sx={{ border: '1px solid #ddd' }}>
+          <Box sx={{ border: '1px solid #eee' }}>
             <JobDisplay hasButton={false} />
           </Box>
         </Grid>

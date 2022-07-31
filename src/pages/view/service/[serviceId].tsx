@@ -54,10 +54,7 @@ import {
 import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../../common/helper";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  selectUserAddress,
-  userLensDataStored,
-} from "../../../modules/user/userReduxSlice";
+import { selectUserAddress, userLensDataStored } from "../../../modules/user/userReduxSlice";
 import { create } from "ipfs-http-client";
 import fleek from "../../../fleek";
 import { PaymentProcessingDataStruct } from "../../../typechain-types/ServiceCollectModule";
@@ -125,8 +122,8 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const [serviceMetadata, setServiceMetadata] = useState({});
   const [user, setUser] = useState([]);
   const [displayImg, setDisplayImg] = useState();
-  const [collectSig, setCollectSig] = useState({});
-  const [userNonce, setUserNonce] = useState(0);
+  const [collectSig, setCollectSig] = useState({})
+  const [userNonce, setUserNonce] = useState(0)
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
   const [serviceOnwerLensProfile, setSeriviceOwnerLensProfile] =
@@ -138,18 +135,19 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     setReviews(users.results);
     setUser(users.results);
   };
-  const [tokenTransactionDialogOpen, setTokenTransactionDialogOpen] =
-    useState<boolean>(false);
+  const [tokenTransactionDialogOpen, setTokenTransactionDialogOpen] = useState<boolean>(false)
 
-  const userAddress = useSelector(selectUserAddress);
+  const userAddress = useSelector(selectUserAddress)
 
   const renderPackageInformation = (idx: number) => {
-    try {
-      return `${Number(serviceData.offers[idx])} DAI`;
-    } catch (error) {
-      return "0 DAI";
-    }
-  };
+   try {
+    return `${Number(serviceData.offers[idx])} DAI`
+   } catch(error) {
+    return '0 DAI'
+   }
+  }
+
+
 
   //get user lens profile id
   const networkManager_getLensProfileIdFromAddress = useContractRead(
@@ -165,7 +163,9 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       onSuccess: (data: Result) => {
         setServiceOwnerLensProfileId(hexToDecimal(data._hex));
       },
-      onError: (error) => {},
+      onError: (error) => {
+
+      },
     }
   );
 
@@ -202,7 +202,9 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       onSuccess(data: Result) {
         setServicePubId(hexToDecimal(data._hex));
       },
-      onError(error) {},
+      onError(error) {
+     
+      },
     }
   );
 
@@ -220,7 +222,9 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       onSuccess(data: Result) {
         setServicePublicationData(data);
       },
-      onError(error) {},
+      onError(error) {
+ 
+      },
     }
   );
 
@@ -238,7 +242,9 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       onSuccess(data: Result) {
         setServicePaymentProcessingData(data);
       },
-      onError(error) {},
+      onError(error) {
+
+      },
     }
   );
 
@@ -306,17 +312,20 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     },
     "purchaseServiceOffering",
     {
-      onSuccess(data, variables, context) {},
-      onError(error, variables, context) {},
+      onSuccess(data, variables, context) {
+      },
+      onError(error, variables, context) {
 
+      },
+      
       args: [serviceData.id, ZERO_ADDRESS, 0, collectSig],
       overrides: {
         gasLimit: ethers.BigNumber.from("2000000"),
         gasPrice: 90000000000,
-      },
+      }
     }
-  );
-
+  )
+  
   const networkManager_purchaseServicePackageTwo = useContractWrite(
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -325,13 +334,19 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     "purchaseServiceOffering",
     {
       args: [serviceData.id, ZERO_ADDRESS, 1, collectSig],
-      onSuccess(data, variables, context) {},
-      onError(error, variables, context) {},
-      overrides: {
-        gasLimit: ethers.BigNumber.from("900000"),
+      onSuccess(data, variables, context) {
+
       },
+      onError(error, variables, context) {
+
+      },
+      overrides: {
+        gasLimit: ethers.BigNumber.from('900000')
+      }
     }
-  );
+  )
+
+
 
   const networkManager_purchaseServicePackageThree = useContractWrite(
     {
@@ -341,101 +356,103 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     "purchaseServiceOffering",
     {
       args: [serviceData.id, ZERO_ADDRESS, 2, collectSig],
-      onSuccess(data, variables, context) {},
-      onError(error, variables, context) {},
-      overrides: {
-        gasLimit: ethers.BigNumber.from("900000"),
+      onSuccess(data, variables, context) {
+    
       },
+      onError(error, variables, context) {
+      
+      },
+      overrides: {
+        gasLimit: ethers.BigNumber.from('900000')
+      }
     }
-  );
+  )
 
   const dai_approve = useContractWrite(
     {
       addressOrName: DAI_ADDRESS,
-      contractInterface: DaiInterface,
+      contractInterface: DaiInterface
     },
     "approve",
     {
-      args: [SERVICE_COLLECT_MODULE, 100000],
+      args: [SERVICE_COLLECT_MODULE, 100000]
     }
-  );
+  )
 
   const { data, isError, isLoading, isSuccess, error, signTypedData } =
     useSignTypedData({
-      onSettled(data, error, variables, context) {},
-      onError(error, variables, context) {},
-    });
+      onSettled(data, error, variables, context) {
 
-  const getDomain = () => {
-    return {
-      name: "Lens Protocol Profiles",
-      version: "1",
-      chainId: CHAIN_ID,
-      verifyingContract: LENS_HUB_PROXY,
-    };
-  };
+      },
+      onError(error, variables, context) {
+      },
+    })
 
-  const getTypes = () => {
-    return {
-      CollectWithSig: [
-        { name: "profileId", type: "uint256" },
-        { name: "pubId", type: "uint256" },
-        { name: "data", type: "bytes" },
-        { name: "nonce", type: "uint256" },
-        { name: "deadline", type: "uint256" },
-      ],
-    };
-  };
+    const getDomain = () => {
+      return {
+        name: 'Lens Protocol Profiles',
+        version: '1',
+        chainId: CHAIN_ID,
+        verifyingContract: LENS_HUB_PROXY
+      }
+    }
 
-  const getValues = async () => {
-    const nonce =
-      await new ethers.providers.JsonRpcProvider().getTransactionCount(
-        userAddress
-      );
-    return {
-      profileId: serviceOwnerLensProfileId,
-      pubId: servicePubId,
-      data: [],
-      nonce,
-      deadline: 0,
-    };
-  };
+    const getTypes = () => {
+      return {
+        CollectWithSig: [
+          { name: 'profileId', type: 'uint256' },
+          { name: 'pubId', type: 'uint256' },
+          { name: 'data', type: 'bytes' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      }
+    }
+
+    const getValues = async () => {
+      const nonce = await new ethers.providers.JsonRpcProvider().getTransactionCount(userAddress)
+      return  {
+        profileId: serviceOwnerLensProfileId,
+        pubId: servicePubId,
+        data: [],
+        nonce,
+        deadline: 0
+        }
+        
+    }
 
   const onApprove = async () => {
-    await dai_approve.write();
-  };
+    await dai_approve.write()
+  }
 
   const onSign = async () => {
-    const domain = getDomain();
-    const types = getTypes();
-    const value = await getValues();
+    const domain = getDomain()
+    const types = getTypes()
+    const value = await getValues()
 
-    await signTypedData({ domain, types, value });
+
+
+    await signTypedData({ domain, types, value })
 
     if (isError) {
+
     }
-  };
+  }
 
   const onPurchaseServicePackage = async () => {
     if (isSuccess) {
-      const splitSignature: ethers.Signature =
-        await ethers.utils.splitSignature(data);
+      const splitSignature: ethers.Signature = await ethers.utils.splitSignature(data)
 
       await networkManager_purchaseServicePackageOne.write({
-        args: [
-          serviceData.id,
-          ZERO_ADDRESS,
-          BigNumber.from("0"),
-          {
-            v: splitSignature.v,
-            r: splitSignature.r,
-            s: splitSignature.s,
-            deadline: 0,
-          },
-        ],
-      });
+        args: [serviceData.id, ZERO_ADDRESS, BigNumber.from('0'), {
+          v: splitSignature.v,
+          r: splitSignature.r,
+          s: splitSignature.s,
+          deadline: 0
+        }],
+      })
     }
-  };
+  }
 
   const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
     size: 50,
@@ -473,7 +490,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     }}
                     className={styles.root}
                   >
-                    <VerifiedAvatar src={user[0]?.picture?.thumbnail} />
+                    <VerifiedAvatar  src={user[0]?.picture?.thumbnail} />
                   </div>
                   <Typography fontSize={16} color="primary" fontWeight="bold">
                     {serviceOnwerLensProfile.handle}
@@ -678,27 +695,21 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                       </Typography>
                     </Box>
 
-                    <Stack direction="row">
-                      <Button
-                        variant="outlined"
-                        fullWidth
-                        size="large"
-                        onClick={onApprove}
-                      >
-                        Get started
-                      </Button>
+<Stack direction='row'>
+<Button variant="outlined" fullWidth size="large" onClick={onApprove}>
+                      Get started
+                    </Button>
 
-                      <Button onClick={onSign}>Sign</Button>
+                    <Button onClick={onSign}>
+                      Sign
+                    </Button>
 
-                      <Button
-                        variant="outlined"
-                        fullWidth
-                        size="large"
-                        onClick={onPurchaseServicePackage}
-                      >
-                        Pay
-                      </Button>
-                    </Stack>
+                    <Button variant="outlined" fullWidth size="large" onClick={onPurchaseServicePackage}>
+                      Pay
+                    </Button>
+</Stack>
+                 
+
                   </Stack>
                 </CardContent>
               </Card>
@@ -719,7 +730,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     alignItems="center"
                   >
                     <Typography fontWeight="medium" fontSize={25}>
-                      {renderPackageInformation(1)}
+                    {renderPackageInformation(1)}
                     </Typography>
 
                     <Chip
@@ -799,7 +810,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     alignItems="center"
                   >
                     <Typography fontWeight="medium" fontSize={25}>
-                      {renderPackageInformation(2)}
+                    {renderPackageInformation(2)}
                     </Typography>
 
                     <Chip
@@ -888,14 +899,10 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         </Grid>
       </Grid>
 
-      <TransactionTokenDialog
-        open={tokenTransactionDialogOpen}
-        handleClose={() => setTokenTransactionDialogOpen(false)}
-        serviceId={serviceData.id}
-      />
+      <TransactionTokenDialog open={tokenTransactionDialogOpen} handleClose={() => setTokenTransactionDialogOpen(false)} serviceId={serviceData.id} />
     </Container>
   );
 };
 
-export { type IViewContractPage };
+export { type IViewContractPage }
 export default withRouter(ViewContractPage);

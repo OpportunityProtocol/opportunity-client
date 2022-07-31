@@ -77,7 +77,7 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
         border: (theme) =>
           selected
             ? `2px solid ${theme.palette.primary.main}`
-            : "1px solid #ddd",
+            : "1px solid #eee",
       }}
       variant="outlined"
       onClick={selectable ? () => handleOnSelect() : () => router.push("/jobs")}

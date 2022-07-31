@@ -1,33 +1,51 @@
-import { Box, Typography, Button, Avatar } from '@mui/material'
-import { NextRouter, useRouter } from 'next/router'
-import { GradientAvatarClassKey } from '@mui-treasury/styles/avatar/gradient/gradientAvatar.styles';
-import { useGradientAvatarStyles } from '@mui-treasury/styles/avatar/gradient';
-import { ClassNameMap } from '@mui/material';
-import { useState, useEffect, FC } from 'react'
-import { LENS_HUB_PROXY, NETWORK_MANAGER_ADDRESS } from '../../../../constant';
-import { LensHubInterface, NetworkManagerInterface } from '../../../../abis';
-import { CHAIN_ID } from '../../../../constant/provider';
-import { hexToDecimal } from '../../../../common/helper';
-import { useContractRead } from 'wagmi';
-import { Result } from 'ethers/lib/utils';
+import { Box, Typography, Button, Avatar } from "@mui/material";
+import { NextRouter, useRouter } from "next/router";
+import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
+import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
+import { ClassNameMap } from "@mui/material";
+import { useState, useEffect, FC } from "react";
+import {
+  LENS_HUB_PROXY,
+  NETWORK_MANAGER_ADDRESS,
+  ZERO_ADDRESS,
+} from "../../../../constant";
+import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
+import { CHAIN_ID } from "../../../../constant/provider";
+import { hexToDecimal } from "../../../../common/helper";
+import { useContractRead } from "wagmi";
+import { Result } from "ethers/lib/utils";
+import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
+import { ProfileStructStruct } from "../../../../typechain-types/ILensHub";
 
 interface IVerifiedAvatarProps {
   avatarSize?: number;
   address: string;
-  src: string;
+  lensProfileId: number;
+  lensProfile: ProfileStructStruct;
+  showValue?: boolean;
+  showHandle?: boolean;
 }
 
-const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({ avatarSize=80, address, src }) => {
-  const [lensProfileId, setLensProfileId] = useState<any>(0);
-  const [lensProfile, setLensProfile] = useState<any>({});
-  const router: NextRouter = useRouter()
+const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
+  avatarSize = 80,
+  address = ZERO_ADDRESS,
+  lensProfileId = 0,
+  lensProfile,
+  showValue = true,
+  showHandle = true
+}) => {
+  const [displayImg, setDisplayImg] = useState<Buffer | string>("");
+  const router: NextRouter = useRouter();
   const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
     size: avatarSize,
     gap: 3,
     thickness: 3,
-    gapColor: '#f4f7fa',
-    color: 'linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)',
+    gapColor: "#f4f7fa",
+    color: "linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)",
   });
+
+  const [fallbackLensProfileId, setFallbackLensProfileId] = useState<number>(0)
+  const [fallbackLensProfile, setFallbackLensProfile] = useState<ProfileStructStruct>({})
 
   const lensHub_getProfile = useContractRead(
     {
@@ -39,21 +57,21 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({ avatarSize=80, address, src 
       enabled: false,
       watch: false,
       chainId: CHAIN_ID,
-      args: [lensProfileId],
+      args: [fallbackLensProfileId],
       onSuccess: (data) => {
-        setLensProfile(data);
+        setFallbackLensProfile(data);
       },
       onError: (error) => console.log(error),
     }
   );
 
   useEffect(() => {
-    if (lensProfileId !== 0) {
+    if (fallbackLensProfileId !== 0) {
       lensHub_getProfile.refetch({
         throwOnError: true,
       });
     }
-  }, [lensProfileId]);
+  }, [fallbackLensProfileId]);
 
   const networkManager_getLensProfileIdFromAddress = useContractRead(
     {
@@ -66,7 +84,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({ avatarSize=80, address, src 
       chainId: CHAIN_ID,
       args: [address],
       onSuccess: (data: Result) => {
-        setLensProfileId(hexToDecimal(data._hex));
+        setFallbackLensProfileId(hexToDecimal(data._hex));
       },
       onError: (error) => {
         console.log(error);
@@ -75,49 +93,82 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({ avatarSize=80, address, src 
   );
 
   useEffect(() => {
-    networkManager_getLensProfileIdFromAddress.refetch()
+    if (address) {
+      networkManager_getLensProfileIdFromAddress.refetch()
+    }
   }, [address])
 
-    return (
-        <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="flex-start"
-          alignItems="center"
-          component={Button}
-          mx={4}
-          onClick={() => router.push('/profile')}
-        >
-          <div
-            style={{
-              margin: '5px 0px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-            className={styles.root}
-          >
-            <Avatar
-              src={src}
-            />
-          </div>
-          <Box textAlign="center">
-            <Typography
-              fontWeight="medium"
-              variant="body2"
-              color="#616161"
-              width="auto"
-              noWrap
-            >
-              {lensProfile?.handle}
-            </Typography>
-            <Typography variant="caption" color="text.primary" width="auto" noWrap>
-              ${Math.floor(Math.random() * 101).toFixed(2)} Value
-            </Typography>
-          </Box>
-        </Box>
-    )
-}
+  const renderHandle = (): string => {
+    if (lensProfile && lensProfile.handle) {
+      return lensProfile.handle
+    } else if (fallbackLensProfile && fallbackLensProfile.handle) {
+      return fallbackLensProfile.handle
+    } else {
+      return "Unknown Handle"
+    }
+  }
 
-export { type IVerifiedAvatarProps }
-export default VerifiedAvatar
+  return (
+    <Box
+      display="flex"
+      flexDirection="column"
+      justifyContent="flex-start"
+      alignItems="center"
+      component={Button}
+      disableElevation
+      disableRipple
+      disableFocusRipple
+      disableTouchRipple
+      onClick={() => router.push("/profile")}
+    >
+      <div
+        style={{
+          margin: "5px 0px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+        className={styles.root}
+      >
+        {!displayImg ? (
+          <Jazzicon
+            diameter={avatarSize}
+            seed={jsNumberForAddress(String(address))}
+          />
+        ) : (
+          <Avatar src={src} />
+        )}
+      </div>
+
+      <Box textAlign="center">
+        {
+          showHandle && (
+            <Typography
+            fontWeight="medium"
+            variant="body2"
+            color="#616161"
+            width="auto"
+            noWrap
+          >
+            {renderHandle()}
+          </Typography>
+          )
+        }
+       
+        {showValue ? (
+          <Typography
+            variant="caption"
+            color="text.primary"
+            width="auto"
+            noWrap
+          >
+            ${Math.floor(Math.random() * 101).toFixed(2)} Value
+          </Typography>
+        ) : null}
+      </Box>
+    </Box>
+  );
+};
+
+export { type IVerifiedAvatarProps };
+export default VerifiedAvatar;

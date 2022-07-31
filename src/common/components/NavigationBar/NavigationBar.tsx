@@ -2,6 +2,7 @@ import React, { Fragment, useState, FC, useEffect } from "react";
 import clsx from "clsx";
 
 import {
+  alpha,
   Paper,
   Box,
   Container,
@@ -12,11 +13,17 @@ import {
   Avatar,
   Button,
   Stack,
+  Menu,
+  ListItemIcon,
+  MenuItem,
+  MenuList,
+  ListItemText,
   AppBar,
   Toolbar,
   Typography,
   Divider,
   CardContent,
+  darken,
 } from "@mui/material";
 
 import router, { useRouter } from "next/router";
@@ -58,6 +65,8 @@ import {
 } from "../../../modules/user/userReduxSlice";
 import { BigNumber } from "ethers";
 import { RootState } from "../../../store";
+import { LocalGasStation } from "@mui/icons-material";
+import { Work, GroupWork } from "@material-ui/icons";
 
 const NavigationBar: FC = () => {
   const classes = useStyles();
@@ -123,7 +132,6 @@ const NavigationBar: FC = () => {
       });
     }
 
-    console.log(lensProfileId);
   }, [lensProfileId]);
 
   const networkManager_getLensProfileIdFromAddress = useContractRead(
@@ -154,7 +162,7 @@ const NavigationBar: FC = () => {
     {
       enabled: false,
       cacheTime: 50000,
-      watch: false,
+      watch: true,
       chainId: CHAIN_ID,
       args: [userAddress],
       onError: (error: Error) => {
@@ -167,7 +175,17 @@ const NavigationBar: FC = () => {
     addressOrName: accountData ? accountData?.data?.address : String(0),
   });
 
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   const onFetchLensProfileId = () => {
+    if (accountData.data.address && accountData.data.address != ZERO_ADDRESS) {
     networkManager_getLensProfileIdFromAddress
       .refetch({
         throwOnError: true,
@@ -180,8 +198,9 @@ const NavigationBar: FC = () => {
         }
       })
       .catch((error) => {
-        console.log(error);
+     
       });
+    }
   };
 
   useEffect(() => {
@@ -222,7 +241,7 @@ const NavigationBar: FC = () => {
         })
       );
     }
-    handleOnIsConnected();
+
     if (isConnected) {
       handleOnIsConnected();
     } else {
@@ -241,23 +260,53 @@ const NavigationBar: FC = () => {
   return (
     <React.Fragment>
       <AppBar
-        position="fixed"
         variant="elevation"
         elevation={0}
         sx={{
           width: { sm: `100%` },
           ml: { sm: `100%` },
           bgcolor: "#fff",
-          height: "65px",
+          height: "95px",
           border: "none !important",
-          borderBottom: "1px solid #ddd !important",
+          borderBottom: "1px solid #eee !important",
         }}
       >
-        <Container
-          maxWidth="lg"
-          sx={{ display: "flex", flexDirection: "column", bgcolor: "#fff" }}
-        >
-          <Toolbar className={classes.toolbar}>
+        <Box>
+          <Container
+            maxWidth="lg"
+            sx={{ padding: '5px 0px', display: "flex", flexDirection: "column", bgcolor: "#fff" }}
+          >
+            <Stack spacing={5} direction="row" alignItems="center">
+              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
+                Labor Markets: <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>1</Typography>
+              </Typography>
+
+              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
+                Total Services Available: <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>20</Typography>
+              </Typography>
+
+              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
+                Total Contracts Available: <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>55</Typography>
+              </Typography>
+
+              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
+                <span>
+                  <Stack spacing={0.2} direction='row' alignItems='center'>
+                  <LocalGasStation fontSize='small' sx={{ mr: 0.5 }} />
+                   Polygon Gas: 
+                  <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>55</Typography>
+                  </Stack>
+                  </span>
+              </Typography>
+            </Stack>
+          </Container>
+        </Box>
+        <Divider />
+        <Toolbar className={classes.toolbar}>
+          <Container
+            maxWidth="lg"
+            sx={{ display: "flex", flexDirection: "column", bgcolor: "#fff" }}
+          >
             <Grid
               width="100%"
               container
@@ -283,7 +332,7 @@ const NavigationBar: FC = () => {
                     fontSize={18}
                     color="#212121"
                   >
-                    GigEarth
+                    Lens Talent
                   </Typography>
                 </Link>
               </Grid>
@@ -299,10 +348,27 @@ const NavigationBar: FC = () => {
                       mx={2}
                       fontSize={14}
                       variant="button"
-                      color={router.pathname == "/" ? "primary" : "#212121"}
-                      fontWeight={router.pathname === "/" ? "bold" : "500"}
+                      color={
+                        router.pathname == "/" ? "primary" : "text.secondary"
+                      }
+                      fontWeight="bold"
                     >
                       Explore
+                    </Typography>
+                  </Link>
+
+                  <Link href="/">
+                    <Typography
+                      component={Button}
+                      mx={2}
+                      fontSize={14}
+                      variant="button"
+                      color={
+                        router.pathname.includes("/explore") ? "primary" : "text.secondary"
+                      }
+                      fontWeight="bold"
+                    >
+                      Community
                     </Typography>
                   </Link>
 
@@ -312,8 +378,20 @@ const NavigationBar: FC = () => {
                       mx={2}
                       fontSize={14}
                       variant="button"
-                      color={router.pathname == "/work" ? "primary" : "#212121"}
-                      fontWeight={router.pathname === "/work" ? "bold" : "500"}
+                      color={
+                        router.pathname == "/work"
+                          ? "primary"
+                          : "text.secondary"
+                      }
+                      fontWeight="bold"
+                      disableFocusRipple
+                      disableElevation
+                      disableRipple
+                      disableTouchRipple
+                      aria-controls={open ? 'basic-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={handleClick}
                     >
                       Work
                     </Typography>
@@ -326,11 +404,11 @@ const NavigationBar: FC = () => {
                       fontSize={14}
                       variant="button"
                       color={
-                        router.pathname == "/messenger" ? "primary" : "#212121"
+                        router.pathname == "/messenger"
+                          ? "primary"
+                          : "text.secondary"
                       }
-                      fontWeight={
-                        router.pathname === "/messenger" ? "bold" : "500"
-                      }
+                      fontWeight="bold"
                     >
                       Messenger
                     </Typography>
@@ -345,11 +423,9 @@ const NavigationBar: FC = () => {
                       color={
                         router.pathname.includes("/contract")
                           ? "primary"
-                          : "#212121"
+                          : "text.secondary"
                       }
-                      fontWeight={
-                        router.pathname.includes("/contract") ? "bold" : "500"
-                      }
+                      fontWeight="bold"
                     >
                       Contracts
                     </Typography>
@@ -374,8 +450,8 @@ const NavigationBar: FC = () => {
                 )}
               </Grid>
             </Grid>
-          </Toolbar>
-        </Container>
+          </Container>
+        </Toolbar>
 
         <div>
           {connectors.map((connector) => (
@@ -390,12 +466,11 @@ const NavigationBar: FC = () => {
                 connector.id === pendingConnector?.id &&
                 " (connecting)"}
             </button>
-          ))}
+              ))}
 
           {error && <div>{error.message}</div>}
         </div>
       </AppBar>
-
       <VerificationDialog
         open={verificationDialogOpen}
         handleClose={() => setVerificationDialogOpen(false)}

@@ -191,7 +191,7 @@ const ProfilePage: NextPage = () => {
   }, []);
 
   return (
-    <Container maxWidth="lg" sx={{ height: COLUMN_HEIGHT }}>
+    <Container maxWidth="lg" sx={{  }}>
       <Typography py={2} fontWeight="bold" color="rgba(33, 33, 33, .85)" fontSize={30}>
         Dashboard
       </Typography>
@@ -250,11 +250,13 @@ const ProfilePage: NextPage = () => {
         </Grid>
       </Grid>
 
+      
+
       <Grid container direction="row" alignItems="flex-start" justifyContent="space-between">
         <Grid item xs={7.5}>
           <Stack direction="column">
             <Box>
-              <Typography py={2} fontSize={20} fontWeight="medium">
+              <Typography pb={2} fontSize={20} fontWeight="medium">
                 Endorsements
               </Typography>
               <Box component={Grid} container direction="row" alignItems="center" spacing={3}>
@@ -284,7 +286,7 @@ const ProfilePage: NextPage = () => {
         </Grid>
 
         <Grid item xs={4}>
-          <Typography py={2} fontSize={20} fontWeight="medium">
+          <Typography  fontSize={20} fontWeight="medium">
             About
           </Typography>
           <Card variant="outlined" className={classes.marginBottom}>
@@ -385,57 +387,6 @@ const ProfilePage: NextPage = () => {
         </Grid>
       </Box>
 
-      <Box my={3}>
-        <Typography py={2} fontSize={20} fontWeight="medium">
-          Reviews
-        </Typography>
-        <Card variant="outlined">
-          <CardContent>
-            {reviews.length === 0 ? (
-              <Typography variant="caption">
-                No reviews has been written for this employer
-              </Typography>
-            ) : (
-              reviews.slice(4, 9).map(
-                (
-                  review: {
-                    picture: { large: string | undefined };
-                    name: { first: string; last: string };
-                    login: {
-                      username:
-                        | boolean
-                        | React.ReactChild
-                        | React.ReactFragment
-                        | React.ReactPortal
-                        | null
-                        | undefined;
-                    };
-                  },
-                  idx: React.Key | null | undefined
-                ) => {
-                  return (
-                    <Box key={idx} component={Stack} spacing={2} direction="row" my={1}>
-                      <Avatar src={review?.picture.large} />
-                      <Stack>
-                        <Typography fontSize={13}>
-                          {review?.name.first + ' ' + review.name.last}
-                        </Typography>
-                        <Typography fontSize={14} fontWeight="medium">
-                          {review?.login.username}
-                        </Typography>
-                        <Typography paragraph fontSize={14}>
-                          No hassle and no extra work apart from the contract description. I will
-                          definitiely be looking to work with him again!
-                        </Typography>
-                      </Stack>
-                    </Box>
-                  );
-                }
-              )
-            )}
-          </CardContent>
-        </Card>
-      </Box>
     </Container>
   );
 };

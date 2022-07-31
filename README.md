@@ -13,7 +13,7 @@
   <a href="https://github.com/elijahhampton/opportunity-client">
     <img src="public/assets/logo.svg" alt="Logo" width="150" height="150">
   </a>
-<h3 align="center">LensTalent</h3>
+<h3 align="center">Lens Talent</h3>
   <p align="center">
     <br />
     <a href="https://opportunity-website.vercel.app/"><strong>Explore the docs »</strong></a>
@@ -75,7 +75,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 <div align="left">
-      LensTalent is a decentralized and permission-less freelancing network built with LensProtocol. LensTalent allows freelancers and employers to find work or create contracts regardless of geographical location. Employers are able to create one time contracts that freelancers may accept, while freelancers are able to create long term services in which employers can invest in in order to bet on their success and quality of work. Through this method freelancers are incentivized to always provide the best quality work as it means a higher chance of passive income. Contracts and services created on LensTalent have the ability to gain exposure across any networking application that interfaces with LensProtocol. Other important features of LensTalent include one time identity creation which is persistent along  with self statistics, the ability to leverage your network through content referrals, decentralized dispute services and decentralized payouts. We imagine a world where freelancers can instantly find work at any moment and carry their services across any network based application. Welcome to the cooperation layer of the internet.
+      Lens Talent is a decentralized and permission-less freelancing network built with LensProtocol. Lens Talent allows freelancers and employers to find work or create contracts regardless of geographical location. Employers are able to create one time contracts that freelancers may accept, while freelancers are able to create long term services in which employers can invest in in order to bet on their success and quality of work. Through this method freelancers are incentivized to always provide the best quality work as it means a higher chance of passive income. Contracts and services created on Lens Talent have the ability to gain exposure across any networking application that interfaces with LensProtocol. Other important features of Lens Talent include one time identity creation which is persistent along  with self statistics, the ability to leverage your network through content referrals, decentralized dispute services and decentralized payouts. We imagine a world where freelancers can instantly find work at any moment and carry their services across any network based application. Welcome to the cooperation layer of the internet.
   </div>
 
 
