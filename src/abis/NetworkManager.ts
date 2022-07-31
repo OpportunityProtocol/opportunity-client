@@ -119,6 +119,12 @@ const NetworkManagerInterface = [
         "internalType": "address",
         "name": "worker",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amt",
+        "type": "uint256"
       }
     ],
     "name": "ContractOwnershipUpdate",
@@ -184,25 +190,6 @@ const NetworkManagerInterface = [
       }
     ],
     "name": "Evidence",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "string",
-        "name": "marketName",
-        "type": "string"
-      }
-    ],
-    "name": "MarketCreated",
     "type": "event"
   },
   {
@@ -330,6 +317,12 @@ const NetworkManagerInterface = [
         "internalType": "address",
         "name": "referral",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "offer",
+        "type": "uint256"
       }
     ],
     "name": "ServicePurchased",
@@ -385,6 +378,18 @@ const NetworkManagerInterface = [
         "indexed": true,
         "internalType": "string",
         "name": "lensHandle",
+        "type": "string"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "profileId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "imageURI",
         "type": "string"
       }
     ],
@@ -801,7 +806,7 @@ const NetworkManagerInterface = [
           },
           {
             "internalType": "address",
-            "name": "owner",
+            "name": "creator",
             "type": "address"
           },
           {
@@ -871,6 +876,11 @@ const NetworkManagerInterface = [
             "type": "address"
           },
           {
+            "internalType": "address",
+            "name": "creator",
+            "type": "address"
+          },
+          {
             "internalType": "bool",
             "name": "exist",
             "type": "bool"
@@ -917,7 +927,7 @@ const NetworkManagerInterface = [
           },
           {
             "internalType": "address",
-            "name": "owner",
+            "name": "creator",
             "type": "address"
           },
           {
@@ -1175,6 +1185,11 @@ const NetworkManagerInterface = [
       {
         "internalType": "address",
         "name": "client",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "creator",
         "type": "address"
       },
       {
@@ -1582,7 +1597,7 @@ const NetworkManagerInterface = [
       },
       {
         "internalType": "address",
-        "name": "owner",
+        "name": "creator",
         "type": "address"
       },
       {
@@ -1636,7 +1651,7 @@ const NetworkManagerInterface = [
       },
       {
         "internalType": "address",
-        "name": "owner",
+        "name": "creator",
         "type": "address"
       },
       {
@@ -1781,5 +1796,4 @@ const NetworkManagerInterface = [
     "type": "function"
   }
 ]
-
 export { NetworkManagerInterface }

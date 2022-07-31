@@ -52,6 +52,7 @@ import {
   activePublishedServiceDataAdded,
   purchasedServiceDataAdded,
 } from "../../contractReduxSlice";
+import  { ethers } from 'ethers'
 import { GET_PURCHASED_SERVICE } from "../../ContractGQLQueries";
 
 interface IServiceCardProps {
@@ -88,9 +89,10 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
     },
     "resolveService",
     {
-      args: [loadedData?.id, purchaseData?.purchaseId],
+      args: [Number(loadedData?.id), Number(purchaseData?.purchaseId)],
       onSuccess: async (data) => {
-        if (userAddress === loadedData?.owner) {
+        if (userAddress === loadedData?.creator) {
+
           dispatch(
             activePublishedServiceDataAdded({
               ...loadedData,
@@ -109,9 +111,13 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
         }
       },
       onError: (error) => {
-        console.log("networkManager_resolveService");
-        console.log(error);
+
       },
+      overrides: {
+        from: userAddress,
+        gasLimit: ethers.BigNumber.from("2000000"),
+        gasPrice: 90000000000,
+      }
     }
   );
 
@@ -142,7 +148,7 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
     {
       enabled: false,
       chainId: CHAIN_ID,
-      args: [loadedData?.owner ? loadedData?.owner : ZERO_ADDRESS],
+      args: [loadedData?.creator ? loadedData?.creator : ZERO_ADDRESS],
       onSuccess: (data: Result) => {
         setServiceOwnerLensProfileId(hexToDecimal(data._hex));
       },
@@ -192,10 +198,8 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
   };
 
   const handleOnNavigateToServicePage = () => {
-    console.log('@@@@@@@@@@@')
-    console.log(loadedData)
     router.push({
-      pathname: "/contract/view/service",
+      pathname: "/view/service/1",
       query: {
         ...loadedData,
         id: Number(loadedData.id),
@@ -218,7 +222,7 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
 
   useEffect(() => {
     networkManager_getLensProfileIdFromAddress.refetch();
-  }, [loadedData?.owner]);
+  }, [loadedData?.creator]);
 
   useEffect(() => {
     //if data doesnt exist get it from contract
@@ -251,7 +255,8 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
     }
 
     // owner is viewing
-    if (loadedData?.owner === userAddress) {
+
+    if (String(loadedData?.creator).toLowerCase() === String(userAddress).toLowerCase()) {
       if (purchaseData) {
         switch (purchaseData.status) {
           case 0:
@@ -373,7 +378,7 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
             <VerifiedAvatar
               lensProfile={serviceOwnerLensData}
               lensProfileId={serviceOwnerLensProfileId}
-              address={loadedData?.owner}
+              address={loadedData?.creator}
               showValue={false}
               avatarSize={30}
             />

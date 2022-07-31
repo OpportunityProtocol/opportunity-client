@@ -94,8 +94,6 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         setMarketsLoading(false);
       },
       onError: (error) => {
-        console.log("getMarkets");
-        console.log(error);
         setMarketsLoading(false);
       },
     }
@@ -211,6 +209,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
 
 
         retVal = await (await ipfs.add(JSON.stringify(createContractForm))).path
+     
       } else {
         retVal = await fleek.uploadService(
           String(accountData.data.address) +
@@ -222,18 +221,15 @@ const CreateContractPage: NextPage = (): JSX.Element => {
 
       setContractMetadataURI(retVal);
 
-      console.log(retVal)
-      console.log(createContractForm)
-
-      if (retVal) {
+      if (String(retVal)) {
         await networkManager_createContract.write({
-          args: [createContractForm.contract_market_id, retVal]
+          args: [createContractForm.contract_market_id, String(retVal)]
         })
       } else {
         throw new Error('Error retrieving ipfs metadata hash')
       }
 
-      //router.push("/jobs");
+      router.push("/view/");
     } catch (error) {
       console.log(error);
     }
@@ -288,7 +284,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
             return (
               <Grid item xs={2.9}>
                 <MarketDisplay
-                  marketId={marketId + 1}
+                  marketId={marketId}
                   isShowingStats={false}
                   selected={marketId === createContractForm.contract_market_id}
                   selectable

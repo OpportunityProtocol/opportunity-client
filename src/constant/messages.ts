@@ -6,4 +6,8 @@ const MARKET_DESCRIPTION_MAPPING = {
     "Accounting and Finance": "Accounting and Finance Description"
 }
 
-export { MARKET_DESCRIPTION_MAPPING }
+const MARKET_ID_MAPPING = {
+    1: "Writing and Translation"
+}
+
+export { MARKET_DESCRIPTION_MAPPING, MARKET_ID_MAPPING } 

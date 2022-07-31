@@ -13,7 +13,7 @@ const GET_CONTRACTS = gql`
   }
 `;
 
-const GET_CONTRACT = gql`
+const GET_CONTRACT_BY_ID = gql`
   query GetContract($contractId: ID!) {
     contract(id: $contractId) {
         id
@@ -22,13 +22,28 @@ const GET_CONTRACT = gql`
         metadata
         worker
         ownership
+        acceptanceTimestamp
+        resolutionTimestamp
     }
   }
 `
 
 const GET_CONTRACTS_BY_EMPLOYER = gql`
   query GetContractsByEmployer($employer: Bytes!) {
-    contracts(employer: $employer) {
+    contracts(where: { employer: $employer } ) {
+      id
+      employer
+      marketId
+      metadata
+      worker
+      ownership
+    }
+  }
+`
+
+const GET_CONTRACTS_BY_WORKER = gql`
+  query GetContractsByWorker($worker: Bytes!) {
+    contracts(where: { worker: $worker } ) {
       id
       employer
       marketId
@@ -86,6 +101,7 @@ const GET_PURCHASED_SERVICE = gql`
   query GetPurchasedService($purchaseId: ID!) {
     purchasedService(id: $purchaseId) {
         id
+        creator
         client
         referral
         datePurchased
@@ -99,10 +115,28 @@ const GET_PURCHASED_SERVICE = gql`
   }
 `
 
+const GET_ACTIVE_SERVICES_BY_CREATOR = gql`
+  query GetActiveServices($creator: ID!) {
+    purchasedServices(where: { creator: $creator } ) {
+        id
+        creator
+        client
+        referral
+        datePurchased
+        purchaseId
+        offer
+        status
+        pubId
+        serviceId
+    }
+  }
+`
+
 const GET_PURCHASED_SERVICES_BY_CLIENT = gql`
   query GetPurchasedServices($client: ID!) {
-    purchasedServices(client: $client) {
+    purchasedServices(where: { client: $client } ) {
         id
+        creator
         client
         referral
         datePurchased
@@ -117,15 +151,15 @@ const GET_PURCHASED_SERVICES_BY_CLIENT = gql`
 
 const GET_SERVICES_BY_CREATOR = gql`
   query GetServicesByCreator($creator: Bytes!) {
-    services(creator: $creator) {
+    services(where: { creator: $creator } ) {
       id
-      employer
       marketId
-      metadata
-      worker
-      ownership
+      creator
+      metadataPtr
+      pubId
+      offers
     }
   }
 `
 
-export { GET_CONTRACTS_BY_EMPLOYER, GET_PURCHASED_SERVICES_BY_CLIENT, GET_SERVICES_BY_CREATOR, GET_CONTRACTS, GET_PURCHASED_SERVICES, GET_SERVICES, GET_CONTRACT, GET_SERVICE_BY_ID, GET_PURCHASED_SERVICE }
+export { GET_CONTRACTS_BY_EMPLOYER, GET_CONTRACTS_BY_WORKER ,GET_ACTIVE_SERVICES_BY_CREATOR, GET_PURCHASED_SERVICES_BY_CLIENT, GET_SERVICES_BY_CREATOR, GET_CONTRACTS, GET_PURCHASED_SERVICES, GET_SERVICES, GET_CONTRACT_BY_ID, GET_SERVICE_BY_ID, GET_PURCHASED_SERVICE }

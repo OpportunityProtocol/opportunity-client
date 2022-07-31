@@ -149,8 +149,6 @@ const ConnectedAvatar: FC = () => {
     await dai_mint.write();
     const result = await dai_balanceOf.refetch();
 
-    console.log(result)
-
     dispatch(
       userERC20BalanceChanged({
         [DAI_ADDRESS]: Number(result.data._hex),

@@ -132,7 +132,6 @@ const NavigationBar: FC = () => {
       });
     }
 
-    console.log(lensProfileId);
   }, [lensProfileId]);
 
   const networkManager_getLensProfileIdFromAddress = useContractRead(
@@ -199,7 +198,7 @@ const NavigationBar: FC = () => {
         }
       })
       .catch((error) => {
-        console.log(error);
+     
       });
     }
   };

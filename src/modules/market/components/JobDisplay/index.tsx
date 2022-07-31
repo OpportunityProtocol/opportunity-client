@@ -39,7 +39,14 @@ import { hexToDecimal } from "../../../../common/helper";
 import { create } from "ipfs-http-client";
 import fleek from "../../../../fleek";
 
-const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ data }) => {
+/**
+ * @author Elijah Hampton
+ * @param IJobDisplayProps See interface
+ * @returns React Functional Component
+ * @dev This component temporarily fetches contract data from the blockchain instead of graphql to obtain the contract
+ * metadata due to issues with graphql returning a different encoded format
+ */
+const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
   const classes = useStyles();
   const router = useRouter();
 
@@ -47,10 +54,29 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ data }) => {
   const [contractOwnerData, setContractOwnerData] = useState<any>({
     lensProfileId: -1,
   });
-
   const [contractMetadata, setContractMetadata] = useState({});
+  const [metadataString, setMetadataString] = useState('')
 
   const accountData = useAccount();
+
+  const networkManager_getContractData = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    "getContractData",
+    {
+      enabled: false,
+      chainId: CHAIN_ID,
+      args: [data?.id],
+      onSuccess: (data: Result) => {
+        setMetadataString(data.taskMetadataPtr)
+      },
+      onError: (error) => {
+        setMetadataString('')
+      },
+    }
+  );
 
   const networkManager_getLensProfileIdFromAddress = useContractRead(
     {
@@ -65,7 +91,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ data }) => {
       onSuccess: (data: Result) => {
         setContractOwnerData({
           ...contractOwnerData,
-          lensProfileId: hexToDecimal(data._hex),
+          lensProfileId: hexToDecimal(data?._hex),
         });
       },
       onError: (error) => {
@@ -84,7 +110,7 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ data }) => {
       enabled: false,
       watch: false,
       chainId: CHAIN_ID,
-      args: [contractOwnerData.lensProfileId],
+      args: [contractOwnerData?.lensProfileId],
       onSuccess: (data: Result) => {
         setContractOwnerData(data);
       },
@@ -93,28 +119,35 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ data }) => {
   );
 
   useEffect(() => {
-    if (contractOwnerData.lensProfileId != -1) {
+    if (data?.id) {
+      networkManager_getContractData.refetch()
+    }
+  }, [data?.id])
+
+  useEffect(() => {
+    if (contractOwnerData?.lensProfileId != -1) {
       lensHub_getProfile.refetch();
     }
-  }, [contractOwnerData.lensProfileId]);
+  }, [contractOwnerData?.lensProfileId]);
 
   useEffect(() => {
     networkManager_getLensProfileIdFromAddress.refetch();
-  }, [data.employer]);
+  }, [data?.employer]);
 
   useEffect(() => {
     let retVal: any = {};
 
     async function getMetadata() {
       try {
+
         if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
           const ipfs = create({
             url: "/ip4/127.0.0.1/tcp/8080",
           });
 
-          retVal = await ipfs.get(`/ipfs/${data.metadata}`).next();
+          retVal = await ipfs.get(`/ipfs/${metadataString}`).next();
         } else {
-          retVal = await fleek.getService(data.metadata);
+          retVal = await fleek.getService(metadataString);
         }
 
         if (!retVal) {
@@ -130,17 +163,20 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ data }) => {
           setContractMetadata(parsedData);
         }
       } catch (error) {
-        console.log(error);
+        
       }
     }
 
-    getMetadata();
-  }, [data.metadata]);
+    if (metadataString) {
+      getMetadata();
+    }
+
+  }, [metadataString]);
 
   return (
     <Card
       square
-      onClick={() => router.push("/contract/view/contract")}
+      onClick={() => router.push(`/view/contract/${data?.id}`)}
       key={Math.random()}
       variant="outlined"
       sx={{ "&:hover": { cursor: "pointer" } }}
@@ -149,8 +185,8 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ data }) => {
         <Typography color="text.secondary" fontWeight="medium" fontSize={13}>
           August 1, 2022 - 1:59 PM
         </Typography>
-        {contractMetadata?.title ? (
-          <Typography fontWeight="600">{contractMetadata?.title}</Typography>
+        {contractMetadata?.contract_title ? (
+          <Typography fontWeight="600">{contractMetadata?.contract_title}</Typography>
         ) : (
           <Typography fontWeight="600">
             Unable to load contract title
@@ -172,8 +208,8 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ data }) => {
             textOverflow: "ellipsis",
           }}
         >
-          {contractMetadata.description
-            ? contractMetadata.description
+          {contractMetadata?.contract_description
+            ? contractMetadata?.contract_description
             : "Unable to load description"}
         </Box>
 
@@ -210,33 +246,10 @@ const JobDisplay: React.FunctionComponent<IJobDisplayProps> = ({ data }) => {
           alignItems="flex-end"
           justifyContent="space-between"
         >
-
-          <Grid item>
-          <Button
-              onClick={() => router.push('/contract/view/contract')}
-              sx={{ borderRadius: 8 }}
-             variant='contained'
-                size="small"
-              >
-                View Contract
-              </Button>
-          </Grid>
-
-          <Grid item>
-            <Button
-              onClick={() => router.push("/contract/view/contract")}
-              sx={{ borderRadius: 8 }}
-              variant="contained"
-              size="small"
-            >
-              View Contract
-            </Button>
-          </Grid>
-
           <Grid item>
             <Stack>
               <Typography fontSize={13} fontWeight="medium">
-                {contractMetadata?.budget ? contractMetadata?.budget : 0} DAI
+                {contractMetadata?.contract_budget ? contractMetadata?.contract_budget : 0} DAI
                 Budget
               </Typography>
 

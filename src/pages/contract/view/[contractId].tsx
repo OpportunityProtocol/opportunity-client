@@ -43,6 +43,8 @@ import { timelineButtons } from '../../../modules/market/MarketConstants';
 import JobDisplay from '../../../modules/market/components/JobDisplay';
 import { useGradientAvatarStyles } from '@mui-treasury/styles/avatar/gradient';
 import moment from 'moment';
+import { useRouter } from 'next/router';
+import { useAccount } from 'wagmi';
 
 const data = [
   {
@@ -137,7 +139,11 @@ const contractDetailsSecondaryTypographyProps = {
 const isService = false;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-const ViewContract: React.FunctionComponent<any> = () => {
+const ViewContract: NextPage<any> = () => {
+  const router = useRouter()
+  const { data: { address, connector } } = useAccount()
+  const { contractId } = router.query
+
   const classes = useStyles();
   const [reviews, setReviews] = useState<any>([]);
   const [page, setPage] = React.useState(0);
@@ -180,6 +186,151 @@ const ViewContract: React.FunctionComponent<any> = () => {
     const users = await a.json();
     setReviews(users.results);
   };
+
+  const renderPrimaryButtonState = () => {
+    if (address == contractData?.employer) {
+      switch(contractData?.ownership) {
+        case 0: //unclaimed
+          return (
+            <Button
+            variant="contained"
+            size="large"
+            sx={{ mb: 2 }}
+            fullWidth
+            color="error"
+            disableElevation
+            disableRipple
+          >
+            Cancel Contract
+          </Button>
+          )
+        case 1: //claimed
+          return (
+            <Button
+            variant="contained"
+            size="large"
+            sx={{ mb: 2 }}
+            fullWidth
+            color="primary"
+            disabled
+            disableElevation
+            disableRipple
+          >
+            Contract Claimed
+          </Button>
+          )
+        case 2: //resolved
+          return (
+            <Button
+            variant="contained"
+            size="large"
+            sx={{ mb: 2 }}
+            fullWidth
+            color="error"
+            disabled
+            disableElevation
+            disableRipple
+          >
+            Resolved
+          </Button>
+          )
+        case 3: //reclaimed
+          return (
+            <Button
+            variant="contained"
+            size="large"
+            sx={{ mb: 2 }}
+            fullWidth
+            color="error"
+            disableElevation
+            disableRipple
+          >
+            Open Dispute Center
+          </Button>
+          )
+        case 4: //disputed
+          return (
+            <Button
+            variant="contained"
+            size="large"
+            sx={{ mb: 2 }}
+            fullWidth
+            color="error"
+            disableElevation
+            disableRipple
+          >
+            Open Dispute Center
+          </Button>
+          )
+        default:
+      }
+    }
+
+    if (address == contractData?.worker) {
+      switch(contractData?.ownership) {
+        case 0: //unclaimed
+          return (
+            <Button
+            variant="contained"
+            size="large"
+            sx={{ mb: 2 }}
+            fullWidth
+            color='primary'
+            disableElevation
+            disableRipple
+          >
+            Submit Proposal
+          </Button>
+          )
+        case 1: //claimed
+          return
+        case 2: //resolved
+        return (
+          <Button
+          variant="contained"
+          size="large"
+          sx={{ mb: 2 }}
+          fullWidth
+          color="error"
+          disabled
+          disableElevation
+          disableRipple
+        >
+          Resolved
+        </Button>
+        )
+        case 3: //reclaimed
+        return (
+          <Button
+          variant="contained"
+          size="large"
+          sx={{ mb: 2 }}
+          fullWidth
+          color="error"
+          disableElevation
+          disableRipple
+        >
+          Open Dispute Center
+        </Button>
+        )
+        case 4: //disputed
+        return (
+          <Button
+          variant="contained"
+          size="large"
+          sx={{ mb: 2 }}
+          fullWidth
+          color="error"
+          disableElevation
+          disableRipple
+        >
+          Open Dispute Center
+        </Button>
+        )
+        default:
+      }
+    }
+  }
 
   return (
     <>
@@ -387,17 +538,19 @@ const ViewContract: React.FunctionComponent<any> = () => {
               </Card>
             ) : null}
 
+            {renderPrimaryButtonState()}
             <Button
-              variant="contained"
-              size="large"
-              sx={{ mb: 2 }}
-              fullWidth
-              color="primary"
-              disableElevation
-              disableRipple
-            >
-              Submit proposal
-            </Button>
+            variant="contained"
+            size="large"
+            sx={{ mb: 2 }}
+            fullWidth
+            color="primary"
+            disabled
+            disableElevation
+            disableRipple
+          >
+            Contract Claimed
+          </Button>
             <Stack direction="row" alignItems="center" spacing={1} className={classes.marginBottom}>
               <Button
                 variant="outlined"

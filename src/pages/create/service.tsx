@@ -132,8 +132,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         setMarketsLoading(false);
       },
       onError: (error) => {
-        console.log("getMarkets");
-        console.log(error);
+
         setMarketsLoading(false);
       },
     }
@@ -189,8 +188,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
       router.push('/')
     } catch (error) {
-      console.log("handleOnPublish");
-      console.log(error);
+
     }
   };
 
