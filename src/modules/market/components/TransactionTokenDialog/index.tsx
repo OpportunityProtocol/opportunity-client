@@ -22,7 +22,13 @@ import {
 import VerifiedAvatar from "../../../user/components/VerifiedAvatar";
 import TabPanel from "../../../../common/components/TabPanel/TabPanel";
 import { InfoRounded } from "@material-ui/icons";
-import { useContractRead, useContractWrite, useFeeData, useProvider, useSigner } from "wagmi";
+import {
+  useContractRead,
+  useContractWrite,
+  useFeeData,
+  useProvider,
+  useSigner,
+} from "wagmi";
 import {
   DAI_ADDRESS,
   NETWORK_MANAGER_ADDRESS,
@@ -45,10 +51,14 @@ import { Result } from "ethers/lib/utils";
 import { BigNumber, BigNumberish } from "ethers";
 import { hexToDecimal } from "../../../../common/helper";
 import { CHAIN_ID } from "../../../../constant/provider";
-import { useQuery } from "@apollo/client";
+import { QueryResult, useQuery } from "@apollo/client";
 import { GET_SERVICE_BY_ID } from "../../../contract/ContractGQLQueries";
 import { a11yProps } from "../../../../common/components/TabPanel/helper";
-import { ethers } from 'ethers'
+import { ethers } from "ethers";
+import {
+  GET_MARKET_DETAILS_BY_ID,
+  GET_TOKEN_INFO_BY_SERVICE_ID,
+} from "../../MarketGQLQueries";
 interface ITransactionDialogProps {
   open: boolean;
   handleClose: () => void;
@@ -81,27 +91,7 @@ const TransactionTokenDialog: FC<
   const [tokenSupply, setTokenSupply] = useState<any>(0);
   const feeData = useFeeData();
 
-  const signer = useSigner()
-
-  // const erc20_totalSupply = useContractRead(
-  //   {
-  //     addressOrName: tokenInfo?.serviceToken,
-  //     contractInterface: ERC20Interface
-  //   },
-  //   "totalSupply",
-  //   {
-  //     args: [],
-  //     onSuccess(data) {
-  //       console.log("DATA")
-  //       console.log(data)
-  //     },
-  //     onError(err) {
-  //       console.log(err)
-  //     }
-  //   }
-  // )
-
-
+  const signer = useSigner();
 
   const [tokenInfo, setTokenInfo] = useState<TokenInfoStruct>({
     exists: false,
@@ -138,11 +128,14 @@ const TransactionTokenDialog: FC<
 
   useEffect(() => {
     if (serviceId != -1) {
-      tokenFactory_getTokenInfo.refetch();
+      tokenInfoQuery.refetch();
     }
 
     if (Number(serviceData?.marketId) && serviceId != -1) {
-      console.log('FETCH NOW::  ', "    " + serviceData?.marketId + '  ' + Number(serviceData.marketId))
+      console.log(
+        "FETCH NOW::  ",
+        "    " + serviceData?.marketId + "  " + Number(serviceData.marketId)
+      );
       tokenFactory_getMarketsDetailsById.refetch();
     }
   }, [serviceData?.marketId, serviceId]);
@@ -164,35 +157,7 @@ const TransactionTokenDialog: FC<
     }
   );
 
-  const provider = useProvider()
-  const tokenFactory_getTokenInfo = useContractRead(
-    {
-      addressOrName: TOKEN_FACTORY_ADDRESS,
-      contractInterface: TokenFactoryInterface,
-    },
-    "getTokenInfo",
-    {
-      enabled: false,
-      watch: true,
-      chainId: CHAIN_ID,
-      args: [Number(serviceData?.marketId), serviceId],
-      async onSuccess(data: Result) {
-        const ERC20TokenContract = new ethers.Contract(data?.serviceToken, ERC20Interface, provider);
-        const totalSupply = await ERC20TokenContract.totalSupply()
-        const balanceOf = await ERC20TokenContract.balanceOf(userAddress)
-        console.log('balanceOf')
-        console.log(hexToDecimal(balanceOf._hex))
-        console.log("HI")
-        console.log(totalSupply)
-        setTokenSupply(hexToDecimal(totalSupply._hex))
-
-        setTokenInfo(data);
-      },
-      onError(err) {
-        console.log('Get token info fail')
-      },
-    }
-  );
+  const provider = useProvider();
 
   const tokenExchange_buyTokens = useContractWrite(
     {
@@ -203,7 +168,7 @@ const TransactionTokenDialog: FC<
 
     {
       args: [
-        tokenInfo.serviceToken,
+        tokenInfo?.serviceToken,
         numTokens,
         fallbackAmount,
         desiredCost,
@@ -213,7 +178,7 @@ const TransactionTokenDialog: FC<
         gasLimit: BigNumber.from("900000"),
       },
       onSuccess(data, variables, context) {
-        console.log(data)
+        console.log(data);
       },
     }
   );
@@ -225,12 +190,12 @@ const TransactionTokenDialog: FC<
     },
     "sellTokens",
     {
-      args: [tokenInfo.serviceToken, numTokens, 0, userAddress],
+      args: [tokenInfo?.serviceToken, numTokens, 0, userAddress],
       overrides: {
         gasLimit: BigNumber.from("900000"),
       },
       onError(error, variables, context) {
-        console.log(numTokens)
+        console.log(numTokens);
       },
     }
   );
@@ -242,7 +207,7 @@ const TransactionTokenDialog: FC<
     },
     "getCostForBuyingTokens",
     {
-      args: [tokenInfo.serviceToken, numTokens],
+      args: [tokenInfo?.serviceToken, numTokens],
       enabled: false,
       watch: false,
       cacheTime: 30000,
@@ -251,7 +216,7 @@ const TransactionTokenDialog: FC<
         gasLimit: BigNumber.from("900000"),
       },
       onSuccess(data) {
-        console.log('@@')
+        console.log("@@");
         setCostForBuying(hexToDecimal(data._hex));
       },
       onError(err) {
@@ -261,14 +226,38 @@ const TransactionTokenDialog: FC<
     }
   );
 
-  const tokenExchange_getPricesForSellingTokens = useContractRead(
+  const marketDetailsQuery: QueryResult = useQuery(GET_MARKET_DETAILS_BY_ID, {
+    variables: {
+      id: Number(serviceData?.marketId),
+    },
+  });
+
+  const tokenInfoQuery: QueryResult = useQuery(GET_TOKEN_INFO_BY_SERVICE_ID, {
+    variables: {
+      serviceId: Number(serviceId),
+    },
+  });
+
+  useEffect(() => {
+    if (!tokenInfoQuery.loading && tokenInfoQuery.data) {
+      setTokenInfo(tokenInfoQuery.data.serviceToken);
+    }
+  }, [tokenInfoQuery.loading]);
+
+  useEffect(() => {
+    if (!marketDetailsQuery.loading && marketDetailsQuery.data) {
+      setTokenMarketDetails(marketDetailsQuery.data.market);
+    }
+  }, [marketDetailsQuery.loading]);
+
+  const tokenExchange_getPriceForSellingTokens = useContractRead(
     {
       addressOrName: TOKEN_EXCHANGE_ADDRESS,
       contractInterface: TokenExchangeInterface,
     },
-    "getPricesForSellingTokens",
+    "getPriceForSellingTokens",
     {
-      args: [tokenMarketDetails, tokenSupply, numTokens, false],
+      args: [tokenInfo.serviceToken, numTokens],
       enabled: false,
       watch: false,
       cacheTime: 30000,
@@ -278,10 +267,10 @@ const TransactionTokenDialog: FC<
         gasPrice: 90000000000,
       },
       onSuccess(data) {
-        console.log("BBBBCC")
-        console.log(data)
-        console.log("OOOOH")
-        setCostForSelling(hexToDecimal(data.total._hex));
+        console.log("BBBBCC");
+        console.log(data);
+        console.log("OOOOH");
+        setCostForSelling(hexToDecimal(data._hex));
       },
       onError(err) {
         console.log("tokenExchange_getCostForSellingTokens");
@@ -306,13 +295,13 @@ const TransactionTokenDialog: FC<
         gasLimit: BigNumber.from("900000"),
       },
       onSuccess(data) {
-        console.log('SUCCESS FETCh')
-        console.log(data)
+        console.log("SUCCESS FETCh");
+        console.log(data);
         setTokenMarketDetails(data);
       },
       onError(err) {
-        console.log("FAIL FETCH")
-        console.log(serviceData)
+        console.log("FAIL FETCH");
+        console.log(serviceData);
         console.log("tokenFactory_getMarketsDetailsById");
         console.log(err);
       },
@@ -329,7 +318,7 @@ const TransactionTokenDialog: FC<
     if (event.code === "Enter") {
       event.preventDefault();
 
-      if (tokenInfo.serviceToken != ZERO_ADDRESS && numTokens > 0) {
+      if (tokenInfo?.id != ZERO_ADDRESS && numTokens > 0) {
         tokenExchange_getCostForBuyingTokens.refetch();
       }
     }
@@ -347,13 +336,13 @@ const TransactionTokenDialog: FC<
     if (event.code === "Enter") {
       event.preventDefault();
 
-      if (tokenInfo.serviceToken != ZERO_ADDRESS && numTokens > 0) {
-        tokenExchange_getPricesForSellingTokens.refetch();
+      if (tokenInfo?.serviceToken != ZERO_ADDRESS && numTokens > 0) {
+        tokenExchange_getPriceForSellingTokens.refetch();
       }
     }
   };
 
-  const handleOnChangeTab = (e, newValue: Number) => {
+  const handleOnChangeTab = (e, newValue: number) => {
     setTabValue(newValue);
   };
 
