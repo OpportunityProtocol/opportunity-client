@@ -131,7 +131,6 @@ const NavigationBar: FC = () => {
         throwOnError: true,
       });
     }
-
   }, [lensProfileId]);
 
   const networkManager_getLensProfileIdFromAddress = useContractRead(
@@ -186,20 +185,18 @@ const NavigationBar: FC = () => {
 
   const onFetchLensProfileId = () => {
     if (accountData.data.address && accountData.data.address != ZERO_ADDRESS) {
-    networkManager_getLensProfileIdFromAddress
-      .refetch({
-        throwOnError: true,
-      })
-      .then((updatedResults) => {
-        if (updatedResults.isSuccess) {
-          setLensProfileId(updatedResults.data._hex);
-        } else {
-          setLensProfileId(0);
-        }
-      })
-      .catch((error) => {
-     
-      });
+      networkManager_getLensProfileIdFromAddress
+        .refetch({
+          throwOnError: true,
+        })
+        .then((updatedResults) => {
+          if (updatedResults.isSuccess) {
+            setLensProfileId(updatedResults.data._hex);
+          } else {
+            setLensProfileId(0);
+          }
+        })
+        .catch((error) => {});
     }
   };
 
@@ -274,29 +271,81 @@ const NavigationBar: FC = () => {
         <Box>
           <Container
             maxWidth="lg"
-            sx={{ padding: '5px 0px', display: "flex", flexDirection: "column", bgcolor: "#fff" }}
+            sx={{
+              padding: "5px 0px",
+              display: "flex",
+              flexDirection: "column",
+              bgcolor: "#fff",
+            }}
           >
             <Stack spacing={5} direction="row" alignItems="center">
-              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
-                Labor Markets: <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>1</Typography>
+              <Typography
+                color="text.secondary"
+                fontSize={10.5}
+                fontWeight="medium"
+              >
+                Labor Markets:{" "}
+                <Typography
+                  fontSize={11.5}
+                  fontWeight="medium"
+                  component="span"
+                  color="primary"
+                >
+                  1
+                </Typography>
               </Typography>
 
-              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
-                Total Services Available: <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>20</Typography>
+              <Typography
+                color="text.secondary"
+                fontSize={10.5}
+                fontWeight="medium"
+              >
+                Total Services Available:{" "}
+                <Typography
+                  fontSize={11.5}
+                  fontWeight="medium"
+                  component="span"
+                  color="primary"
+                >
+                  20
+                </Typography>
               </Typography>
 
-              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
-                Total Contracts Available: <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>55</Typography>
+              <Typography
+                color="text.secondary"
+                fontSize={10.5}
+                fontWeight="medium"
+              >
+                Total Contracts Available:{" "}
+                <Typography
+                  fontSize={11.5}
+                  fontWeight="medium"
+                  component="span"
+                  color="primary"
+                >
+                  55
+                </Typography>
               </Typography>
 
-              <Typography color='text.secondary' fontSize={10.5} fontWeight='medium'>
+              <Typography
+                color="text.secondary"
+                fontSize={10.5}
+                fontWeight="medium"
+              >
                 <span>
-                  <Stack spacing={0.2} direction='row' alignItems='center'>
-                  <LocalGasStation fontSize='small' sx={{ mr: 0.5 }} />
-                   Polygon Gas: 
-                  <Typography fontSize={11.5} fontWeight='medium' component='span' color='primary'>55</Typography>
+                  <Stack spacing={0.2} direction="row" alignItems="center">
+                    <LocalGasStation fontSize="small" sx={{ mr: 0.5 }} />
+                    Polygon Gas:
+                    <Typography
+                      fontSize={11.5}
+                      fontWeight="medium"
+                      component="span"
+                      color="primary"
+                    >
+                      55
+                    </Typography>
                   </Stack>
-                  </span>
+                </span>
               </Typography>
             </Stack>
           </Container>
@@ -364,7 +413,9 @@ const NavigationBar: FC = () => {
                       fontSize={14}
                       variant="button"
                       color={
-                        router.pathname.includes("/explore") ? "primary" : "text.secondary"
+                        router.pathname.includes("/explore")
+                          ? "primary"
+                          : "text.secondary"
                       }
                       fontWeight="bold"
                     >
@@ -388,48 +439,52 @@ const NavigationBar: FC = () => {
                       disableElevation
                       disableRipple
                       disableTouchRipple
-                      aria-controls={open ? 'basic-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        onClick={handleClick}
+                      aria-controls={open ? "basic-menu" : undefined}
+                      aria-haspopup="true"
+                      aria-expanded={open ? "true" : undefined}
+                      onClick={handleClick}
                     >
                       Work
                     </Typography>
                   </Link>
 
-                  <Link href="/messenger">
-                    <Typography
-                      component={Button}
-                      mx={2}
-                      fontSize={14}
-                      variant="button"
-                      color={
-                        router.pathname == "/messenger"
-                          ? "primary"
-                          : "text.secondary"
-                      }
-                      fontWeight="bold"
-                    >
-                      Messenger
-                    </Typography>
-                  </Link>
+                  {isConnected && (
+                    <Link href="/messenger">
+                      <Typography
+                        component={Button}
+                        mx={2}
+                        fontSize={14}
+                        variant="button"
+                        color={
+                          router.pathname == "/messenger"
+                            ? "primary"
+                            : "text.secondary"
+                        }
+                        fontWeight="bold"
+                      >
+                        Messenger
+                      </Typography>
+                    </Link>
+                  )}
 
-                  <Link href="/contract">
-                    <Typography
-                      component={Button}
-                      mx={2}
-                      fontSize={14}
-                      variant="button"
-                      color={
-                        router.pathname.includes("/contract")
-                          ? "primary"
-                          : "text.secondary"
-                      }
-                      fontWeight="bold"
-                    >
-                      Contracts
-                    </Typography>
-                  </Link>
+                  {isConnected && (
+                    <Link href="/contract">
+                      <Typography
+                        component={Button}
+                        mx={2}
+                        fontSize={14}
+                        variant="button"
+                        color={
+                          router.pathname.includes("/contract")
+                            ? "primary"
+                            : "text.secondary"
+                        }
+                        fontWeight="bold"
+                      >
+                        Contracts
+                      </Typography>
+                    </Link>
+                  )}
                 </div>
               </Grid>
 
@@ -466,7 +521,7 @@ const NavigationBar: FC = () => {
                 connector.id === pendingConnector?.id &&
                 " (connecting)"}
             </button>
-              ))}
+          ))}
 
           {error && <div>{error.message}</div>}
         </div>

@@ -38,11 +38,13 @@ import { ServiceStruct } from "../typechain-types/NetworkManager";
 import SearchBarV2 from "../common/components/SearchBarV2/SearchBarV2";
 import Dropdown from "../common/components/Dropdown";
 import TransactionTokenDialog from "../modules/market/components/TransactionTokenDialog";
-import { useQuery } from "@apollo/client";
+import { QueryResult, useQuery } from "@apollo/client";
 import {
   GET_CONTRACTS,
   GET_SERVICES,
 } from "../modules/contract/ContractGQLQueries";
+import { GET_MARKETS } from "../modules/market/MarketGQLQueries";
+import { GET_VERIFIED_FREELANCERS } from "../modules/user/UserGQLQueries";
 
 const HEIGHT = "600px";
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
@@ -102,20 +104,18 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
 
 const ExplorePage: NextPage = () => {
   const classes = useStyles();
-
-  const [marketsLoading, setMarketsLoading] = useState<boolean>(false);
-  const [verifiedFreelancersLoading, setVerifiedFreelancersLoading] =
-    useState<boolean>(false);
   const [verifiedFreelancers, setVerifiedFreelancers] = useState<Array<any>>(
     []
   );
-  const [numMarkets, setNumMarkets] = useState<any>([]);
+  const [featuredMarkets, setFeaturedMarkets] = useState<Array<any>>([])
   const [services, setServices] = useState([]);
   const [featuredContracts, setFeaturedContracts] = useState([]);
-  const [contractsLoading, setContractsLoading] = useState(false);
 
-  const getServices = useQuery(GET_SERVICES);
-  const contractsQuery = useQuery(GET_CONTRACTS);
+  const getServices: QueryResult = useQuery(GET_SERVICES);
+  const contractsQuery: QueryResult = useQuery(GET_CONTRACTS);
+  const marketsQuery: QueryResult = useQuery(GET_MARKETS)
+  const verifiedFreelancersQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCERS)
+
 
   useEffect(() => {
     if (!contractsQuery.loading && contractsQuery.data) {
@@ -123,99 +123,31 @@ const ExplorePage: NextPage = () => {
     }
   }, [contractsQuery.loading]);
 
-  const networkManager_getMarkets = useContractRead(
-    {
-      addressOrName: TOKEN_FACTORY_ADDRESS,
-      contractInterface: TokenFactoryInterface,
-    },
-    "getNumMarkets",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      onSuccess: (data: Result) => {
-        const total = hexToDecimal(data._hex);
-        let list = [];
-        for (let i = 0; i < total; i++) {
-          list.push(Number(i) + 1);
-        }
-        setNumMarkets(list);
-        // setMarketsDetails(data)
-        setMarketsLoading(false);
-      },
-      onError: (error) => {
-        setMarketsLoading(false);
-      },
-    }
-  );
-
-  const networkManager_getContracts = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "getContracts",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      onSuccess(data: Result) {
-        setContracts(data);
-      },
-      onError(error) {
-        console.log(error);
-      },
-      onSettled(data, error) {
-        setContractsLoading(false);
-      },
-    }
-  );
-
-  const networkManager_getVerifiedFreelancers = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "getVerifiedFreelancers",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      onSuccess: (data: Result) => {
-        setVerifiedFreelancers(data as Array<any>);
-        setVerifiedFreelancersLoading(false);
-      },
-      onError: (error) => {
-        setVerifiedFreelancersLoading(false);
-      },
-    }
-  );
-
-  const renderFreelancers = () => {
-    const freelancers = verifiedFreelancers.slice();
-    return freelancers.splice(0, 6).map((address) => {
-      return <VerifiedAvatar address={address} />;
-    });
-  };
-
-  //prepare explore page
   useEffect(() => {
-    setMarketsLoading(true);
-    setVerifiedFreelancersLoading(true);
-    setContractsLoading(true);
-    //networkManager_getMarkets.refetch()
-    //networkManager_getVerifiedFreelancers.refetch()
-    //networkManager_getContracts.refetch()
-  }, []);
+    if (!marketsQuery.loading && marketsQuery.data) {
+      setFeaturedMarkets(marketsQuery.data.markets)
+    }
+  }, [marketsQuery.loading])
+
+  useEffect(() => {
+    if (!verifiedFreelancersQuery.loading && verifiedFreelancersQuery.data) {
+      setVerifiedFreelancers(verifiedFreelancersQuery.data.verifiedFreelancers)
+    }
+  }, [verifiedFreelancersQuery.loading])
 
   useEffect(() => {
     if (!getServices.loading && getServices.data) {
-      const serviceData = getServices.data.services;
-      setServices(serviceData);
-    } else {
-      setServices([]);
+      setServices(getServices.data.services);
     }
   }, [getServices.loading]);
+
+  //prepare explore page
+  useEffect(() => {
+    contractsQuery.refetch()
+    marketsQuery.refetch()
+    verifiedFreelancersQuery.refetch()
+    getServices.refetch()
+  }, []);
 
   return (
     <Box>
@@ -266,7 +198,9 @@ const ExplorePage: NextPage = () => {
               alignItems="center"
               spacing={5}
             >
-              {renderFreelancers()}
+              {verifiedFreelancers.map(({ address }) => {
+                return <VerifiedAvatar address={address} />
+              })}
             </Stack>
           </Box>
 
@@ -356,10 +290,10 @@ const ExplorePage: NextPage = () => {
             alignItems="center"
             spacing={2}
           >
-            {numMarkets.slice(0, 6).map((marketId) => {
+            {featuredMarkets.slice(0, 6).map((details: any) => {
               return (
                 <Grid item sm={4}>
-                  <MarketDisplay marketId={marketId} isShowingStats />
+                  <MarketDisplay marketDetails={details} isShowingStats />
                 </Grid>
               );
             })}

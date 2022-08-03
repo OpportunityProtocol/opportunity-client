@@ -53,6 +53,7 @@ import { hexToDecimal } from "../../helper";
 import { DaiInterface } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
 import { ExitToApp } from "@material-ui/icons";
+import { NextRouter, useRouter } from "next/router";
 
 const StyledBadge = styled(Badge, {
   shouldForwardProp: prop => prop !== 'connected'
@@ -86,6 +87,7 @@ const StyledBadge = styled(Badge, {
 }));
 
 const ConnectedAvatar: FC = () => {
+  const router: NextRouter = useRouter()
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [verificationDialogOpen, setVerificationDialogOpen] =
     useState<boolean>(false);
@@ -309,7 +311,7 @@ const ConnectedAvatar: FC = () => {
               fullWidth
               variant="contained"
               color="primary"
-              onClick={() => router.push("/profile")}
+              onClick={() => router.push(`/view/profile/${userAddress}`)}
             >
               View Profile
             </Button>

@@ -1,0 +1,1 @@
+export const InteractionLogicInterface = [{"inputs":[],"name":"ArrayMismatch","type":"error"},{"inputs":[],"name":"PublicationDoesNotExist","type":"error"},{"inputs":[],"name":"TokenDoesNotExist","type":"error"}]

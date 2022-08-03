@@ -22,7 +22,7 @@ interface IMarketDisplayProps {
   selectable?: boolean;
   selected?: boolean;
   onSelect?: (marketData: object) => void;
-  marketId: number;
+  marketDetails: any;
 }
 
 const MarketDisplay: FC<IMarketDisplayProps> = ({
@@ -32,36 +32,13 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
   selectable,
   selected = false,
   onSelect,
-  marketId
+  marketDetails
 }) => {
   const classes: ClassNameMap<"marketTitle" | "primaryContentContainer"> =
     useStyles();
   const router: NextRouter = useRouter();
-  const [marketDetails, setMarketDetails] = useState<MarketDetailsStruct>({})
-  const [marketInfo, setMarketInfo] = useState<any>([])
-  const tokenFactory_getMarketDetails = useContractRead(
-    {
-      addressOrName: TOKEN_FACTORY_ADDRESS,
-      contractInterface: TokenFactoryInterface
-    },
-    "getMarketDetailsByID",
-    {
-      args: [marketId],
-      enabled: false,
-      watch: false,
-      onSuccess: (data: Result) => {
-        setMarketDetails(data)
-      },
-      onError: error => {
-        console.log(error)
-        console.log("getMarketDetailsByID")
-      }
-    }
-  )
 
-  useEffect(() => {
-    tokenFactory_getMarketDetails.refetch()
-  }, [marketId])
+  const [marketInfo, setMarketInfo] = useState<any>([])
 
   const handleOnSelect = (): void => {
     // internal
@@ -69,7 +46,6 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
     // external
     onSelect();
   };
-
 
   return (
     <ClickableCard
@@ -96,7 +72,7 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
                 fontWeight: (theme) => theme.typography.fontWeightBold,
               }}
             >
-            {marketDetails.name}
+            {marketDetails?.name}
             </Typography>
           </Grid>
 
@@ -116,11 +92,11 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
             color="text.secondary"
           >
 
-             {MARKET_DESCRIPTION_MAPPING[marketDetails.name]} 
+             {MARKET_DESCRIPTION_MAPPING[marketDetails?.name]} 
           </Typography>
         )}
 
-        {showStats && (
+        {isShowingStats && (
           <Typography
             color="#49A882"
             pt={2}
