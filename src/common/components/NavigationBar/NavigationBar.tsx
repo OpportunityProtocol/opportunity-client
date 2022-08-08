@@ -6,24 +6,16 @@ import {
   Paper,
   Box,
   Container,
-  Popover,
-  InputBase,
   Grid,
-  Badge,
-  Avatar,
   Button,
   Stack,
-  Menu,
-  ListItemIcon,
-  MenuItem,
-  MenuList,
-  ListItemText,
   AppBar,
   Toolbar,
   Typography,
   Divider,
   CardContent,
   darken,
+  IconButton,
 } from "@mui/material";
 
 import router, { useRouter } from "next/router";
@@ -39,6 +31,7 @@ import {
   useConnect,
   useContractRead,
   useDisconnect,
+  useFeeData,
 } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import {
@@ -65,7 +58,7 @@ import {
 } from "../../../modules/user/userReduxSlice";
 import { BigNumber } from "ethers";
 import { RootState } from "../../../store";
-import { LocalGasStation } from "@mui/icons-material";
+import { AddCircle, LocalGasStation, Search } from "@mui/icons-material";
 import { Work, GroupWork } from "@material-ui/icons";
 
 const NavigationBar: FC = () => {
@@ -254,6 +247,19 @@ const NavigationBar: FC = () => {
     }
   }, [isConnected]);
 
+  const feeData = useFeeData();
+  const [gasPrice, setGasPrice] = useState<string>("0");
+
+  useEffect(() => {
+    if (!feeData.isLoading && feeData.data) {
+      setGasPrice(feeData.data.formatted.gasPrice);
+    }
+  }, [feeData.isLoading]);
+
+  useEffect(() => {
+    feeData.refetch();
+  }, []);
+
   return (
     <React.Fragment>
       <AppBar
@@ -323,7 +329,7 @@ const NavigationBar: FC = () => {
                   component="span"
                   color="primary"
                 >
-                  55
+                  0
                 </Typography>
               </Typography>
 
@@ -342,7 +348,7 @@ const NavigationBar: FC = () => {
                       component="span"
                       color="primary"
                     >
-                      55
+                      {gasPrice}
                     </Typography>
                   </Stack>
                 </span>
@@ -365,31 +371,28 @@ const NavigationBar: FC = () => {
               alignItems="center"
               justifyContent="space-between"
             >
-              <Grid item display="flex">
-                <Link href="/">
-                  <img
-                    className={classes.clickableBrand}
-                    src="/assets/logo.svg"
-                    style={{ width: 35, height: 35 }}
-                  />
-                </Link>
+              <Grid item sx={{ display: "flex", alignItems: "center" }}>
+                <Box display="flex" alignItems="center">
+                  <Link href="/">
+                    <img
+                      className={classes.clickableBrand}
+                      src="/assets/logo.svg"
+                      style={{ width: 35, height: 35 }}
+                    />
+                  </Link>
 
-                <Link href="/">
-                  <Typography
-                    className={classes.clickableBrand}
-                    fontWeight="bold"
-                    fontSize={18}
-                    color="#212121"
-                  >
-                    Lens Talent
-                  </Typography>
-                </Link>
-              </Grid>
-              <Grid item>
-                <SearchBarV1 />
-              </Grid>
+                  <Link href="/">
+                    <Typography
+                      className={classes.clickableBrand}
+                      fontWeight="bold"
+                      fontSize={18}
+                      color="#212121"
+                    >
+                      Lens Talent
+                    </Typography>
+                  </Link>
+                </Box>
 
-              <Grid item>
                 <div>
                   <Link href="/">
                     <Typography
@@ -403,23 +406,6 @@ const NavigationBar: FC = () => {
                       fontWeight="bold"
                     >
                       Explore
-                    </Typography>
-                  </Link>
-
-                  <Link href="/">
-                    <Typography
-                      component={Button}
-                      mx={2}
-                      fontSize={14}
-                      variant="button"
-                      color={
-                        router.pathname.includes("/explore")
-                          ? "primary"
-                          : "text.secondary"
-                      }
-                      fontWeight="bold"
-                    >
-                      Community
                     </Typography>
                   </Link>
 
@@ -496,13 +482,25 @@ const NavigationBar: FC = () => {
                   justifyContent: "flex-end",
                 }}
               >
-                {connected === true ? (
-                  <ConnectedAvatar />
-                ) : (
-                  <Button variant="contained" onClick={() => connect()}>
-                    Connect Wallet
-                  </Button>
-                )}
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <IconButton>
+                    <Search sx={{ color: "rgb(158, 158, 166)" }} />
+                  </IconButton>
+                  <IconButton>
+                    <AddCircle sx={{ color: "rgb(158, 158, 166)" }} />
+                  </IconButton>
+                  {connected === true ? (
+                    <ConnectedAvatar />
+                  ) : (
+                    <Button
+                      variant="contained"
+                      sx={{ borderRadius: 8 }}
+                      onClick={() => connect()}
+                    >
+                      Connect Wallet
+                    </Button>
+                  )}
+                </Stack>
               </Grid>
             </Grid>
           </Container>

@@ -5,17 +5,15 @@ import { alpha, Box } from "@mui/material";
 import { NextRouter, useRouter } from "next/router";
 
 import { IOpportunityProps } from "./OpportunityInterfaces";
-import NavigationBar from "./common/components/NavigationBar/NavigationBar";
-import MarketToolbar from "./modules/market/components/MarketToolbar";
 import Footer from "./common/components/Footer";
 
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
 
-  const APP_BACKGROUND: string = "#fafafa";
+  const APP_BACKGROUND: string = 'rgb(247, 247, 250)' //"#fafafa";
 
   const isPadded: boolean =
-    router.pathname === "/jobs" ||
+    router.pathname === "/work" ||
     router.pathname.includes("/view/profile") ||
     router.pathname === "/contract/view/contract" ||
     router.pathname === "/contract/view/service" ||

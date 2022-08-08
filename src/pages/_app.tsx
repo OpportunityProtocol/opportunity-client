@@ -119,7 +119,7 @@ function MyApp({ Component, pageProps }: AppProps) {
               <ApolloProvider client={apolloClient}>
                 <Opportunity>
                   <NavigationBar />
-                  <NavigationBreadcrumbs />
+                {/*  <NavigationBreadcrumbs /> */}
                   <Component {...pageProps} />
                 </Opportunity>
               </ApolloProvider>

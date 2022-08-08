@@ -32,7 +32,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
   lensProfileId = 0,
   lensProfile,
   showValue = true,
-  showHandle = true
+  showHandle = true,
 }) => {
   const [displayImg, setDisplayImg] = useState<Buffer | string>("");
   const router: NextRouter = useRouter();
@@ -44,8 +44,9 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
     color: "linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)",
   });
 
-  const [fallbackLensProfileId, setFallbackLensProfileId] = useState<number>(0)
-  const [fallbackLensProfile, setFallbackLensProfile] = useState<ProfileStructStruct>({})
+  const [fallbackLensProfileId, setFallbackLensProfileId] = useState<number>(0);
+  const [fallbackLensProfile, setFallbackLensProfile] =
+    useState<ProfileStructStruct>({});
 
   const lensHub_getProfile = useContractRead(
     {
@@ -94,31 +95,32 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
 
   useEffect(() => {
     if (address) {
-      networkManager_getLensProfileIdFromAddress.refetch()
+      networkManager_getLensProfileIdFromAddress.refetch();
     }
-  }, [address])
+  }, [address]);
 
   const renderHandle = (): string => {
     if (lensProfile && lensProfile.handle) {
-      return lensProfile.handle
+      return lensProfile.handle;
     } else if (fallbackLensProfile && fallbackLensProfile.handle) {
-      return fallbackLensProfile.handle
+      return fallbackLensProfile.handle;
     } else {
-      return "Unknown Handle"
+      return "Unknown Handle";
     }
-  }
+  };
 
   return (
     <Box
       display="flex"
       flexDirection="column"
       justifyContent="flex-start"
-      alignItems="center"
+      alignItems="flex-start"
       component={Button}
       disableElevation
       disableRipple
       disableFocusRipple
       disableTouchRipple
+      sx={{ width: "fit-content" }}
       onClick={() => router.push("/profile")}
     >
       <div
@@ -141,9 +143,8 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
       </div>
 
       <Box textAlign="center">
-        {
-          showHandle && (
-            <Typography
+        {showHandle && (
+          <Typography
             fontWeight="medium"
             variant="body2"
             color="#616161"
@@ -152,9 +153,8 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
           >
             {renderHandle()}
           </Typography>
-          )
-        }
-       
+        )}
+
         {showValue ? (
           <Typography
             variant="caption"

@@ -17,18 +17,16 @@ import {
   ListItemText,
   Button,
   Divider,
+  DialogContentText,
+  IconButton,
 } from "@mui/material";
 import { useStyles } from "../../../modules/contract/ContractStyles";
 import Paper from "@mui/material/Paper";
 
 import {
-  CalendarTodayOutlined,
-  KeyboardArrowLeft,
-  Reviews,
+  AccountCircleOutlined,
+  ShareOutlined,
 } from "@mui/icons-material";
-import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
-import { ClassNameMap } from "@material-ui/core/styles/withStyles";
-import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
 import { NextPage } from "next";
 import { NextRouter, useRouter, withRouter } from "next/router";
 import { ServiceStruct } from "../../../typechain-types/NetworkManager";
@@ -54,55 +52,18 @@ import {
 import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../../common/helper";
 import { useDispatch, useSelector } from "react-redux";
-import { selectUserAddress, userLensDataStored } from "../../../modules/user/userReduxSlice";
+import {
+  selectUserAddress,
+  userLensDataStored,
+} from "../../../modules/user/userReduxSlice";
 import { create } from "ipfs-http-client";
 import fleek from "../../../fleek";
 import { PaymentProcessingDataStruct } from "../../../typechain-types/ServiceCollectModule";
 import VerifiedAvatar from "../../../modules/user/components/VerifiedAvatar";
 import { BigNumber, ethers } from "ethers";
 import TransactionTokenDialog from "../../../modules/market/components/TransactionTokenDialog";
-
-interface IDeliverable {
-  type: string;
-  deliverables: Array<string>;
-  price: number;
-}
-
-const tempDeliverables: Array<IDeliverable> = [
-  {
-    type: "Standard",
-    deliverables: [
-      "Functional Website",
-      "5 Pages",
-      "Design Customization",
-      "Content Upload",
-      "Responsive Design",
-    ],
-    price: 59.99,
-  },
-  {
-    type: "Premium",
-    deliverables: [
-      "Functional Website",
-      "5 Pages",
-      "Design Customization",
-      "Content Upload",
-      "Responsive Design",
-    ],
-    price: 89.99,
-  },
-  {
-    type: "Business",
-    deliverables: [
-      "Functional Website",
-      "5 Pages",
-      "Design Customization",
-      "Content Upload",
-      "Responsive Design",
-    ],
-    price: 119.99,
-  },
-];
+import { ConfirmationDialog } from "../../../common/components/ConfirmationDialog";
+import { MailOutline, Refresh } from "@material-ui/icons";
 
 interface IViewContractPage {
   router: NextRouter;
@@ -110,44 +71,48 @@ interface IViewContractPage {
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
-  const classes = useStyles();
-  const dispatch = useDispatch();
-  const [reviews, setReviews] = useState<any>([]);
-  const [serviceData, setServiceData] = useState<ServiceStruct>({});
+  const [successfulPaymentAlertVisible, setSuccessfulPaymentAlertVisible] =
+    useState<boolean>(false);
+  const [purchaseIndex, setPurchaseIndex] = useState(0);
+  const [serviceData, setServiceData] = useState<any>({});
   const [servicePubId, setServicePubId] = useState<number>(0);
   const [servicePublicationData, setServicePublicationData] =
     useState<PublicationStructStruct>({});
-  const [paymentProcessingData, setServicePaymentProcessingData] =
-    useState<PaymentProcessingDataStruct>({});
   const [serviceMetadata, setServiceMetadata] = useState({});
-  const [user, setUser] = useState([]);
   const [displayImg, setDisplayImg] = useState();
-  const [collectSig, setCollectSig] = useState({})
-  const [userNonce, setUserNonce] = useState(0)
+  const [collectSig, setCollectSig] = useState({});
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
   const [serviceOnwerLensProfile, setSeriviceOwnerLensProfile] =
     useState<ProfileStructStruct>({});
-  const isReferral = true;
-  const renderUsers = async () => {
-    const a = await fetch("https://randomuser.me/api/?results=20", {});
-    const users = await a.json();
-    setReviews(users.results);
-    setUser(users.results);
-  };
-  const [tokenTransactionDialogOpen, setTokenTransactionDialogOpen] = useState<boolean>(false)
+  const [purchaseDialogIsOpen, setPurchaseDialogIsOpen] =
+    useState<boolean>(false);
 
-  const userAddress = useSelector(selectUserAddress)
+  const [tokenTransactionDialogOpen, setTokenTransactionDialogOpen] =
+    useState<boolean>(false);
+
+  const userAddress = useSelector(selectUserAddress);
 
   const renderPackageInformation = (idx: number) => {
-   try {
-    return `${Number(serviceData.offers[idx])} DAI`
-   } catch(error) {
-    return '0 DAI'
-   }
-  }
-
-
+    try {
+      return (
+        <Box display="flex" alignItems="center">
+          {" "}
+          (
+          <img
+            style={{ width: 25, height: 25, padding: "5px 0px" }}
+            src="/assets/images/dai.svg"
+          />{" "}
+          <Typography pr={0.5}>DAI</Typography>){" "}
+          <Typography px={1} fontWeight="medium" fontSize={25}>
+            {Number(serviceData.offers[idx])}
+          </Typography>{" "}
+        </Box>
+      );
+    } catch (error) {
+      return "0 DAI";
+    }
+  };
 
   //get user lens profile id
   const networkManager_getLensProfileIdFromAddress = useContractRead(
@@ -159,15 +124,22 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     {
       enabled: false,
       chainId: CHAIN_ID,
-      args: router.query.owner,
+      args: router.query.creator,
       onSuccess: (data: Result) => {
+        console.log(data);
+        console.log(router.query);
         setServiceOwnerLensProfileId(hexToDecimal(data._hex));
       },
       onError: (error) => {
-
+        console.log(router.query);
+        console.log("BOOOOOOOOOO");
       },
     }
   );
+
+  useEffect(() => {
+    lensHub_getProfile.refetch();
+  }, []);
 
   //get user lens profile
   const lensHub_getProfile = useContractRead(
@@ -182,9 +154,14 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       chainId: CHAIN_ID,
       args: [serviceOwnerLensProfileId],
       onSuccess: (data: Result) => {
+        console.log("@@@@@@@@@@@@@@@");
+        console.log(data);
         setSeriviceOwnerLensProfile(data);
       },
-      onError: (error) => console.log(error),
+      onError: (error) => {
+        console.log(error);
+        console.log(serviceOwnerLensProfileId);
+      },
     }
   );
 
@@ -202,9 +179,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       onSuccess(data: Result) {
         setServicePubId(hexToDecimal(data._hex));
       },
-      onError(error) {
-     
-      },
+      onError(error) {},
     }
   );
 
@@ -222,29 +197,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       onSuccess(data: Result) {
         setServicePublicationData(data);
       },
-      onError(error) {
- 
-      },
-    }
-  );
-
-  //get collect module data
-  const serviceCollectModule_getPaymentProcessingData = useContractRead(
-    {
-      addressOrName: SERVICE_COLLECT_MODULE,
-      contractInterface: ServiceCollectModuleInterface,
-    },
-    "getPaymentProcessingData",
-    {
-      enabled: true,
-      watch: false,
-      args: [serviceOwnerLensProfileId, servicePubId],
-      onSuccess(data: Result) {
-        setServicePaymentProcessingData(data);
-      },
-      onError(error) {
-
-      },
+      onError(error) {},
     }
   );
 
@@ -279,21 +232,14 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
 
   useEffect(() => {
     lensHub_getPub.refetch();
-    serviceCollectModule_getPaymentProcessingData.refetch();
   }, [serviceOwnerLensProfileId, servicePubId]);
 
   //fetch lens profile among  lens profile id change
   useEffect(() => {
-    if (serviceOwnerLensProfileId !== 0) {
-      lensHub_getProfile.refetch({
-        throwOnError: true,
-      });
-    }
+    lensHub_getProfile.refetch({
+      throwOnError: true,
+    });
   }, [serviceOwnerLensProfileId]);
-
-  useEffect(() => {
-    renderUsers();
-  }, []);
 
   useEffect(() => {
     if (router.query.metadataPtr) {
@@ -305,7 +251,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     networkManager_getPubIdFromServiceId.refetch();
   }, [router.query.id]);
 
-  const networkManager_purchaseServicePackageOne = useContractWrite(
+  const networkManager_purchaseService = useContractWrite(
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
       contractInterface: NetworkManagerInterface,
@@ -313,157 +259,149 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     "purchaseServiceOffering",
     {
       onSuccess(data, variables, context) {
+        setSuccessfulPaymentAlertVisible(true);
       },
-      onError(error, variables, context) {
-
-      },
-      
-      args: [serviceData.id, ZERO_ADDRESS, 0, collectSig],
+      onError(error, variables, context) {},
+      args: [serviceData.id, ZERO_ADDRESS, purchaseIndex, collectSig],
       overrides: {
         gasLimit: ethers.BigNumber.from("2000000"),
         gasPrice: 90000000000,
-      }
+      },
     }
-  )
-  
-  const networkManager_purchaseServicePackageTwo = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "purchaseServiceOffering",
-    {
-      args: [serviceData.id, ZERO_ADDRESS, 1, collectSig],
-      onSuccess(data, variables, context) {
-
-      },
-      onError(error, variables, context) {
-
-      },
-      overrides: {
-        gasLimit: ethers.BigNumber.from('900000')
-      }
-    }
-  )
-
-
-
-  const networkManager_purchaseServicePackageThree = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "purchaseServiceOffering",
-    {
-      args: [serviceData.id, ZERO_ADDRESS, 2, collectSig],
-      onSuccess(data, variables, context) {
-    
-      },
-      onError(error, variables, context) {
-      
-      },
-      overrides: {
-        gasLimit: ethers.BigNumber.from('900000')
-      }
-    }
-  )
+  );
 
   const dai_approve = useContractWrite(
     {
       addressOrName: DAI_ADDRESS,
-      contractInterface: DaiInterface
+      contractInterface: DaiInterface,
     },
     "approve",
     {
-      args: [SERVICE_COLLECT_MODULE, 100000]
+      args: [SERVICE_COLLECT_MODULE, 100000],
     }
-  )
+  );
 
   const { data, isError, isLoading, isSuccess, error, signTypedData } =
     useSignTypedData({
-      onSettled(data, error, variables, context) {
+      onSettled(data, error, variables, context) {},
+      onError(error, variables, context) {},
+    });
 
-      },
-      onError(error, variables, context) {
-      },
-    })
+  const getDomain = () => {
+    return {
+      name: "Lens Protocol Profiles",
+      version: "1",
+      chainId: CHAIN_ID,
+      verifyingContract: LENS_HUB_PROXY,
+    };
+  };
 
-    const getDomain = () => {
-      return {
-        name: 'Lens Protocol Profiles',
-        version: '1',
-        chainId: CHAIN_ID,
-        verifyingContract: LENS_HUB_PROXY
-      }
-    }
+  const getTypes = () => {
+    return {
+      CollectWithSig: [
+        { name: "profileId", type: "uint256" },
+        { name: "pubId", type: "uint256" },
+        { name: "data", type: "bytes" },
+        { name: "nonce", type: "uint256" },
+        { name: "deadline", type: "uint256" },
+      ],
+    };
+  };
 
-    const getTypes = () => {
-      return {
-        CollectWithSig: [
-          { name: 'profileId', type: 'uint256' },
-          { name: 'pubId', type: 'uint256' },
-          { name: 'data', type: 'bytes' },
-          { name: 'nonce', type: 'uint256' },
-          { name: 'deadline', type: 'uint256' },
-        ],
-      }
-    }
-
-    const getValues = async () => {
-      const nonce = await new ethers.providers.JsonRpcProvider().getTransactionCount(userAddress)
-      return  {
-        profileId: serviceOwnerLensProfileId,
-        pubId: servicePubId,
-        data: [],
-        nonce,
-        deadline: 0
-        }
-        
-    }
+  const getValues = async () => {
+    const nonce =
+      await new ethers.providers.JsonRpcProvider().getTransactionCount(
+        userAddress
+      );
+    return {
+      profileId: serviceOwnerLensProfileId,
+      pubId: servicePubId,
+      data: [],
+      nonce,
+      deadline: 0,
+    };
+  };
 
   const onApprove = async () => {
-    await dai_approve.write()
-  }
+    await dai_approve.writeAsync();
+  };
+
+  const onPurchase = async () => {
+    onApprove().then(async () => {
+      if (isSuccess) {
+        const splitSignature: ethers.Signature =
+          await ethers.utils.splitSignature(data);
+        await networkManager_purchaseService.writeAsync({
+          args: [
+            serviceData.id,
+            ZERO_ADDRESS,
+            BigNumber.from("0"),
+            {
+              v: splitSignature.v,
+              r: splitSignature.r,
+              s: splitSignature.s,
+              deadline: 0,
+            },
+          ],
+        });
+      }
+    });
+  };
 
   const onSign = async () => {
-    const domain = getDomain()
-    const types = getTypes()
-    const value = await getValues()
+    const domain = getDomain();
+    const types = getTypes();
+    const value = await getValues();
+    await signTypedData({ domain, types, value });
+  };
 
+  const confirmationDialogContent = [
+    <DialogContentText id="alert-dialog-description">
+      <Typography fontSize={20} fontWeight="bold" py={1}>
+        {" "}
+        You are about to purchase a service which will require three actions:
+      </Typography>
 
+      <ul>
+        <li>
+          {" "}
+          <Typography>Signing a transaction</Typography>
+        </li>
+        <li>
+          {" "}
+          <Typography>Approving the funds</Typography>
+        </li>
+        <li>
+          <Typography>Executing the transaction</Typography>
+        </li>
+      </ul>
+    </DialogContentText>,
+    <DialogContentText id="alert-dialog-description">
+      <Box py={2}>
+        <Typography fontSize={20} fontWeight="bold" py={1}>
+          Sign the transaction
+        </Typography>
+        <Typography variant="subtitle2">
+          Your wallet will prompt you to sign the transaction.
+        </Typography>
+      </Box>
+    </DialogContentText>,
 
-    await signTypedData({ domain, types, value })
-
-    if (isError) {
-
-    }
-  }
-
-  const onPurchaseServicePackage = async () => {
-    if (isSuccess) {
-      const splitSignature: ethers.Signature = await ethers.utils.splitSignature(data)
-
-      await networkManager_purchaseServicePackageOne.write({
-        args: [serviceData.id, ZERO_ADDRESS, BigNumber.from('0'), {
-          v: splitSignature.v,
-          r: splitSignature.r,
-          s: splitSignature.s,
-          deadline: 0
-        }],
-      })
-    }
-  }
-
-  const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
-    size: 50,
-    gap: 3,
-    thickness: 3,
-    gapColor: "#f4f7fa",
-    color: "linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)",
-  });
+    <DialogContentText id="alert-dialog-description">
+      <Box py={2}>
+        <Typography fontSize={20} fontWeight="bold" py={1}>
+          Confirm purchase
+        </Typography>
+        <Typography variant="subtitle2">
+          Your wallet will prompt you to sign the transaction. Only accept
+          transaction from addresses you trust.
+        </Typography>
+      </Box>
+    </DialogContentText>,
+  ];
 
   return (
-    <Container maxWidth="lg" sx={{ height: "calc(100vh - 70px)" }}>
+    <Container maxWidth="lg">
       <Grid
         justifyContent="space-between"
         container
@@ -472,155 +410,198 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       >
         {/* Start of first grid */}
         <Grid item xs={12}>
-          <Button variant="text" startIcon={<KeyboardArrowLeft />}>
-            {" "}
-            Back to results{" "}
-          </Button>
+          <Stack
+            direction="row"
+            alignItems="flex-start"
+            justifyContent="space-between"
+          >
+            <Card
+              variant="elevated"
+              elevation={0}
+              sx={{
+                width: "100%",
+                py: 2,
+                bgcolor: "transparent !important",
+                flexDirection: "column",
+              }}
+            >
+              <Stack spacing={2}>
+                <Stack>
+                  <VerifiedAvatar
+                    address={serviceData?.creator}
+                    lensProfile={serviceOnwerLensProfile}
+                    lensProfileId={serviceOwnerLensProfileId}
+                    showHandle={false}
+                    showValue={false}
+                  />
 
-          <Card variant="outlined">
-            <CardContent>
-              <Box my={2}>
-                <Stack py={1} direction="row" alignItems="center" spacing={1.5}>
-                  <div
-                    style={{
-                      margin: "5px 0px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                    className={styles.root}
+                  <Box>
+                    <Typography fontSize={25} fontWeight="bold">
+                      {serviceOnwerLensProfile?.handle}
+                    </Typography>
+                  </Box>
+                </Stack>
+
+                <Stack spacing={0.3}>
+                  <Typography fontWeight="bold" fontSize={25}>
+                    {serviceMetadata?.serviceTitle
+                      ? serviceMetadata?.serviceTitle
+                      : "Unable to load title"}
+                  </Typography>
+                  <Typography
+                    paragraph
+                    fontSize={16}
+                    fontWeight="normal"
+                    color="rgb(0, 0, 0, 0.52)"
                   >
-                    <VerifiedAvatar  src={user[0]?.picture?.thumbnail} />
-                  </div>
-                  <Typography fontSize={16} color="primary" fontWeight="bold">
-                    {serviceOnwerLensProfile.handle}
+                    {serviceMetadata?.serviceDescription
+                      ? serviceMetadata?.serviceDescription
+                      : "Unable to load description"}
+                  </Typography>
+                </Stack>
+              </Stack>
+            </Card>
+
+            <Stack direction="row" alignItems="center" my={3}>
+              <IconButton fontSize="large">
+                <MailOutline />
+              </IconButton>
+
+              <IconButton fontSize="large">
+                <AccountCircleOutlined />
+              </IconButton>
+
+              <IconButton fontSize="large">
+                <ShareOutlined />
+              </IconButton>
+            </Stack>
+          </Stack>
+
+          <Stack>
+            <Stack
+              my={2}
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ width: "100%" }}
+            >
+              <Box textAlign="center">
+                <Typography
+                  pb={1}
+                  fontWeight="bold"
+                  fontSize={13}
+                  color="rgba(0,0,0,.56)"
+                >
+                  Confidence
+                </Typography>
+
+                <Stack spacing={1} direction="row" alignItems="center">
+                  <img
+                    src="/assets/images/dai.svg"
+                    style={{ width: 20, height: 25 }}
+                  />
+                  <Typography fontWeight="medium" fontSize={13} color="primary">
+                    $12,434 value locked{" "}
+                    <span>
+                      {" "}
+                      <Typography
+                        component="span"
+                        fontSize={12}
+                        color="secondary.main"
+                      >
+                        {" "}
+                        +5.4%{" "}
+                      </Typography>
+                    </span>
                   </Typography>
                 </Stack>
               </Box>
 
-              <Typography fontWeight="bold" fontSize={22} pb={2}>
-                {serviceMetadata.serviceTitle}
-              </Typography>
-              <Typography
-                paragraph
-                fontSize={14}
-                fontWeight="medium"
-                color="rgb(0, 0, 0, 0.52)"
-              >
-                {serviceMetadata.serviceDescription}
-              </Typography>
-
-              <Stack
-                direction="row"
-                alignItems="flex-end"
-                justifyContent="space-between"
-              >
-                <Box
-                  my={2}
-                  component={Stack}
-                  spacing={2}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                  }}
+              <Box textAlign="center">
+                <Typography
+                  pb={1}
+                  fontWeight="bold"
+                  fontSize={13}
+                  color="rgba(0,0,0,.56)"
                 >
-                  <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <CalendarTodayOutlined
-                      sx={{ color: "rgb(0, 0, 0, 0.52)" }}
-                      fontSize="small"
-                    />
-                    <Typography
-                      fontWeight="medium"
-                      fontSize={13}
-                      color="rgb(0, 0, 0, 0.52)"
-                    >
-                      Recently posted
-                    </Typography>
-                  </Stack>
+                  Date Posted
+                </Typography>
 
-                  <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <Reviews
-                      sx={{ color: "rgb(0, 0, 0, 0.52)" }}
-                      fontSize="small"
-                    />
-                    <Typography
-                      fontWeight="medium"
-                      fontSize={13}
-                      color="rgb(0, 0, 0, 0.52)"
-                    >
-                      224 reviews
-                    </Typography>
-                  </Stack>
+                <Typography fontWeight="bold" fontSize={13} color="primary">
+                  {new Date().toDateString()}
+                </Typography>
+              </Box>
 
-                  <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <img
-                      src="/assets/images/dai.svg"
-                      style={{ width: 20, height: 25 }}
-                    />
-                    <Typography
-                      fontWeight="medium"
-                      fontSize={13}
-                      color="primary"
-                    >
-                      $12,434 value locked{" "}
-                      <span>
-                        {" "}
-                        <Typography
-                          component="span"
-                          fontSize={12}
-                          color="secondary.main"
-                        >
-                          {" "}
-                          +5.4%{" "}
-                        </Typography>
-                      </span>
-                    </Typography>
-                  </Stack>
-                </Box>
+              <Box textAlign="center">
+                <Typography
+                  pb={1}
+                  fontWeight="bold"
+                  fontSize={13}
+                  color="rgba(0,0,0,.56)"
+                >
+                  Reviews
+                </Typography>
 
-                <Box display="flex">
-                  <Button
-                    sx={{
-                      mx: 1,
-                      width: 200,
-                      height: 50,
-                      borderRadius: 0,
-                      bgcolor: "#f8f8f8",
-                    }}
-                    size="large"
-                    disableElevation
-                    disableRipple
-                    variant="outlined"
-                    color="primary"
-                  >
-                    Contact this seller
-                  </Button>
-                  <Button
-                    onClick={() => setTokenTransactionDialogOpen(true)}
-                    sx={{ mx: 1, width: 200, height: 50, borderRadius: 0 }}
-                    size="large"
-                    disableElevation
-                    disableRipple
-                    variant="contained"
-                    color="primary"
-                  >
-                    Invest
-                  </Button>
-                </Box>
+                <Typography fontWeight="bold" fontSize={13} color="primary">
+                  0
+                </Typography>
+              </Box>
+            </Stack>
+          </Stack>
+
+          <Divider />
+
+          <Box my={5}>
+            <Box py={2} component={Alert} severity="success">
+              <Box>
+                <AlertTitle>Earn as babys8 earns. </AlertTitle>
+                Buy a stake in this service and earn as babys8 earns. Stake is
+                long term confidence of this service based on quality.{" "}
+                <Typography variant="button">How it works</Typography>
+              </Box>
+              <Stack py={2} spacing={3} direction="row" alignItems="center">
+                <Button disabled variant="contained" sx={{}}>
+                  Invest
+                </Button>
+                <Button variant="outlined" sx={{}}>
+                  Learn more about investing
+                </Button>
               </Stack>
-            </CardContent>
-          </Card>
+            </Box>
+          </Box>
 
-          <Typography
-            mt={6}
-            pb={2}
-            fontWeight="bold"
-            color="rgba(33,33,33,.85)"
-            fontSize={22}
-          >
-            Purchase service
-          </Typography>
+          <Box my={5}>
+            {successfulPaymentAlertVisible && (
+              <Alert severity="success">
+                <AlertTitle>Successful Purchase</AlertTitle>
+                Your funds have been stored in an escrow until the task is
+                completed. Head over to{" "}
+                <Typography
+                  variant="button"
+                  onClick={() => router.push("/view")}
+                >
+                  {" "}
+                  <strong>contracts</strong>{" "}
+                </Typography>{" "}
+                for more details.
+              </Alert>
+            )}
+          </Box>
+
+          <Box>
+            <Typography
+              fontWeight="bold"
+              color="rgba(33,33,33,.85)"
+              fontSize={22}
+            >
+              Offers
+            </Typography>
+
+            <Typography color="text.secondary" paragraph>
+              Choose an offer
+            </Typography>
+          </Box>
+
           <Grid spacing={3} container item direction="row" alignItems="center">
             <Grid item xs={4}>
               <Card
@@ -637,9 +618,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     sx={{ height: "100%" }}
                     alignItems="center"
                   >
-                    <Typography fontWeight="medium" fontSize={25}>
-                      {renderPackageInformation(0)}
-                    </Typography>
+                    {renderPackageInformation(0)}
 
                     <Chip
                       component={Paper}
@@ -695,21 +674,17 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                       </Typography>
                     </Box>
 
-<Stack direction='row'>
-<Button variant="outlined" fullWidth size="large" onClick={onApprove}>
-                      Get started
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      size="large"
+                      onClick={() => {
+                        setPurchaseDialogIsOpen(true);
+                        setPurchaseIndex(0);
+                      }}
+                    >
+                      Purchase
                     </Button>
-
-                    <Button onClick={onSign}>
-                      Sign
-                    </Button>
-
-                    <Button variant="outlined" fullWidth size="large" onClick={onPurchaseServicePackage}>
-                      Pay
-                    </Button>
-</Stack>
-                 
-
                   </Stack>
                 </CardContent>
               </Card>
@@ -729,9 +704,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     sx={{ height: "100%" }}
                     alignItems="center"
                   >
-                    <Typography fontWeight="medium" fontSize={25}>
                     {renderPackageInformation(1)}
-                    </Typography>
 
                     <Chip
                       component={Paper}
@@ -787,8 +760,16 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                       </Typography>
                     </Box>
 
-                    <Button variant="outlined" fullWidth size="large">
-                      Get started
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      size="large"
+                      onClick={() => {
+                        setPurchaseDialogIsOpen(true);
+                        setPurchaseIndex(1);
+                      }}
+                    >
+                      Purchase
                     </Button>
                   </Stack>
                 </CardContent>
@@ -809,9 +790,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     sx={{ height: "100%" }}
                     alignItems="center"
                   >
-                    <Typography fontWeight="medium" fontSize={25}>
                     {renderPackageInformation(2)}
-                    </Typography>
 
                     <Chip
                       component={Paper}
@@ -867,8 +846,16 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                       </Typography>
                     </Box>
 
-                    <Button variant="outlined" fullWidth size="large">
-                      Get started
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      size="large"
+                      onClick={() => {
+                        setPurchaseDialogIsOpen(true);
+                        setPurchaseIndex(2);
+                      }}
+                    >
+                      Purchase
                     </Button>
                   </Stack>
                 </CardContent>
@@ -877,10 +864,15 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
           </Grid>
 
           <Box my={5}>
-            <Typography fontWeight="bold">
+            <Typography
+              fontSize={22}
+              fontWeight="bold"
+              color="rgba(33,33,33,.85)"
+              py={1}
+            >
               Other services provided by @janicecoleman007
             </Typography>
-            <Typography variant="caption">
+            <Typography color="text.secondary" paragraph>
               @janicecoleman007 has not posted other services.
             </Typography>
           </Box>
@@ -891,18 +883,43 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Typography fontWeight="bold">0 Comments</Typography>
+              <Typography
+                fontWeight="bold"
+                fontSize={22}
+                color="rgba(33,33,33,.85)"
+              >
+                Reviews
+              </Typography>
 
               <Button variant="text">Leave a comment</Button>
             </Stack>
+            <Typography color="text.secondary" paragraph>
+              0 reviews for @janicecoleman007's services
+            </Typography>
           </Box>
         </Grid>
       </Grid>
 
-      <TransactionTokenDialog open={tokenTransactionDialogOpen} handleClose={() => setTokenTransactionDialogOpen(false)} serviceId={serviceData.id} />
+      <TransactionTokenDialog
+        open={tokenTransactionDialogOpen}
+        handleClose={() => setTokenTransactionDialogOpen(false)}
+        serviceId={serviceData.id}
+      />
+      <ConfirmationDialog
+        open={purchaseDialogIsOpen}
+        onOpen={() => {}}
+        onClose={() => {
+          setPurchaseDialogIsOpen(false);
+        }}
+        signAction={onSign}
+        primaryAction={onPurchase}
+        primaryActionTitle={"Purchase"}
+        hasSigningStep
+        content={confirmationDialogContent}
+      />
     </Container>
   );
 };
 
-export { type IViewContractPage }
+export { type IViewContractPage };
 export default withRouter(ViewContractPage);

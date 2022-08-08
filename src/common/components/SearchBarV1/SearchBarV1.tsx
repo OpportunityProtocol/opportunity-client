@@ -8,6 +8,7 @@ const SearchBarV1StyledInputBase = styled(InputBase)(({ theme }) => ({
     borderRadius: 10,
     width: '100%',
     position: 'relative',
+
     backgroundColor: 'inherit',
     border: 'none',
     fontSize: 14,
@@ -20,16 +21,16 @@ const SearchBarV1StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const SearchBarV1: FunctionComponent = () => {
+const SearchBarV1: FunctionComponent<any> = ({ width }) => {
   return (
-      <Paper elevation={0} sx={{ backgroundColor: (theme) => alpha(theme.palette.primary.light, 0.25), borderRadius: 2 }}>
+      <Paper elevation={0} sx={{ width: width ? width : 'auto', minWidth: '200px', backgroundColor: '#F2F4F8', borderRadius: 10 }}>
       <SearchBarV1StyledInputBase
       startAdornment={<Search style={{ color: '#9E9E9E', marginLeft: '12px', marginRight: '1px'}} />}
        placeholder="Find gigs, anytime"
        sx={{ color: (theme) => theme.palette.text.secondary, fontWeight: 'medium' }}
        inputProps={{
         'aria-label': 'search gigs',
-        style: { padding: '0px 10px'},
+        style: { padding: '8px 10px',},
       }}
       />
             </Paper>

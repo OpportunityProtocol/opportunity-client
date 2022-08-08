@@ -71,42 +71,6 @@ interface IDeliverable {
   price: number;
 }
 
-const tempDeliverables: Array<IDeliverable> = [
-  {
-    type: "Standard",
-    deliverables: [
-      "Functional Website",
-      "5 Pages",
-      "Design Customization",
-      "Content Upload",
-      "Responsive Design",
-    ],
-    price: 59.99,
-  },
-  {
-    type: "Premium",
-    deliverables: [
-      "Functional Website",
-      "5 Pages",
-      "Design Customization",
-      "Content Upload",
-      "Responsive Design",
-    ],
-    price: 89.99,
-  },
-  {
-    type: "Business",
-    deliverables: [
-      "Functional Website",
-      "5 Pages",
-      "Design Customization",
-      "Content Upload",
-      "Responsive Design",
-    ],
-    price: 119.99,
-  },
-];
-
 interface IViewContractPage {
   router: NextRouter;
 }
@@ -126,12 +90,10 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const [user, setUser] = useState([]);
   const [displayImg, setDisplayImg] = useState();
   const [collectSig, setCollectSig] = useState({});
-  const [userNonce, setUserNonce] = useState(0);
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
   const [serviceOnwerLensProfile, setSeriviceOwnerLensProfile] =
     useState<ProfileStructStruct>({});
-  const isReferral = true;
   const renderUsers = async () => {
     const a = await fetch("https://randomuser.me/api/?results=20", {});
     const users = await a.json();
@@ -313,38 +275,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       overrides: {
         gasLimit: ethers.BigNumber.from("2000000"),
         gasPrice: 90000000000,
-      },
-    }
-  );
-
-  const networkManager_purchaseServicePackageTwo = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "purchaseServiceOffering",
-    {
-      args: [serviceData.id, ZERO_ADDRESS, 1, collectSig],
-      onSuccess(data, variables, context) {},
-      onError(error, variables, context) {},
-      overrides: {
-        gasLimit: ethers.BigNumber.from("900000"),
-      },
-    }
-  );
-
-  const networkManager_purchaseServicePackageThree = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "purchaseServiceOffering",
-    {
-      args: [serviceData.id, ZERO_ADDRESS, 2, collectSig],
-      onSuccess(data, variables, context) {},
-      onError(error, variables, context) {},
-      overrides: {
-        gasLimit: ethers.BigNumber.from("900000"),
       },
     }
   );

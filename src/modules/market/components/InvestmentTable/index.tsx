@@ -1,40 +1,39 @@
-import * as React from 'react';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
+import * as React from "react";
+import Paper from "@mui/material/Paper";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TablePagination from "@mui/material/TablePagination";
+import TableRow from "@mui/material/TableRow";
 
 interface Column {
-  id: 'service' | 'publicationId' | 'creator' | 'description' | 'rate',
+  id: "service" | "publicationId" | "creator" | "description" | "rate";
   label: string;
   minWidth?: number;
-  align?: 'right';
+  align?: "right";
   format?: (value: number) => string;
 }
 
 const columns: readonly Column[] = [
-  { id: 'service', label: 'Service', minWidth: 170 },
-  { id: 'publicationId', label: 'Publication ID', minWidth: 50, align: 'right' },
+  { id: "service", label: "Service", minWidth: 170 },
+  { id: "publicationId", label: "Pub ID", minWidth: 50, align: "right" },
   {
-    id: 'creator',
-    label: 'Creator',
+    id: "creator",
+    label: "Creator",
     minWidth: 120,
   },
   {
-    id: 'description',
-    label: 'Description',
+    id: "description",
+    label: "Description",
     minWidth: 200,
-
   },
   {
-    id: 'rate',
-    label: 'Price Change',
+    id: "rate",
+    label: "Price Change",
     minWidth: 170,
-    align: 'right',
+    align: "right",
     format: (value: number) => value.toFixed(2),
   },
 ];
@@ -45,21 +44,26 @@ interface Data {
   publicationId: number;
   description: string;
   rate: number;
-
 }
 
 function createData(
-    service: string,
-    creator: string,
-    publicationId: number,
-    description: string,
-    rate: number
+  service: string,
+  creator: string,
+  publicationId: number,
+  description: string,
+  rate: number
 ): Data {
   return { service, creator, publicationId, description, rate };
 }
 
 const rows = [
-  createData('I will create a complete UI/UX design for your website.', '@lens.talent.creator', 4, "I will create a UI/UX experience for your website. This includes full Figma mockups as well as downloadable components.", 20),
+  createData(
+    "I will create a complete UI/UX design for your website.",
+    "@lens.talent.creator",
+    4,
+    "I will create a UI/UX experience for your website. This includes full Figma mockups as well as downloadable components.",
+    20
+  ),
 ];
 
 export default function HighlightedInvestments() {
@@ -70,14 +74,19 @@ export default function HighlightedInvestments() {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden', bgcolor: 'inherit' }} elevation={0}>
-      <TableContainer sx={{ maxHeight: 440 }}>
+    <Paper
+      sx={{ width: "100%", overflow: "hidden", bgcolor: "inherit" }}
+      elevation={0}
+    >
+      <TableContainer sx={{}}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
@@ -102,7 +111,7 @@ export default function HighlightedInvestments() {
                       const value = row[column.id];
                       return (
                         <TableCell key={column.id} align={column.align}>
-                          {column.format && typeof value === 'number'
+                          {column.format && typeof value === "number"
                             ? column.format(value)
                             : value}
                         </TableCell>

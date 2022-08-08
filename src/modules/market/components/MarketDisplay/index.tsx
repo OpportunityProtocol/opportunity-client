@@ -5,16 +5,13 @@ import {
   Typography,
   CardContent,
   Grid,
+  Divider,
 } from "@mui/material";
 import ClickableCard from "../../../../common/components/ClickableCard/ClickableCard";
 import { NextRouter, useRouter } from "next/router";
 import { ClassNameMap } from "@material-ui/core/styles/withStyles";
-import { MarketDetailsStruct } from "../../../../typechain-types/ITokenFactory";
-import { useContractRead } from "wagmi";
 import { MARKET_DESCRIPTION_MAPPING, TOKEN_FACTORY_ADDRESS } from "../../../../constant";
-import { TokenFactoryInterface } from "../../../../abis";
-import { Result } from "ethers/lib/utils";
-import ethers from 'ethers'
+import { Box } from "@mui/system";
 interface IMarketDisplayProps {
   isShowingStats?: boolean;
   showDescription?: boolean;
@@ -54,10 +51,15 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
           selected
             ? `2px solid ${theme.palette.primary.main}`
             : "1px solid #eee",
+            borderRadius: 4
       }}
       variant="outlined"
       onClick={selectable ? () => handleOnSelect() : () => router.push("/jobs")}
     >
+      <Box sx={{ width: '100%', height: 200 }}>
+          <img style={{ width: '100%', height: '100%' }} src='/assets/images/carousel_two.jpeg' /> 
+      </Box>
+      <Divider />
       <CardContent className={classes.primaryContentContainer}>
         <Grid
           container

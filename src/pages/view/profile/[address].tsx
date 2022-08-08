@@ -12,7 +12,11 @@ import {
   Stack,
   Paper,
   Avatar,
+  Alert,
   CardContent,
+  Tabs,
+  Tab,
+  DialogContentText,
 } from "@mui/material";
 import Link from "next/link";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
@@ -27,8 +31,11 @@ import {
   useContract,
   useContractEvent,
   useContractRead,
+  useContractWrite,
   useSigner,
+  useSignTypedData,
 } from "wagmi";
+
 import {
   LENS_HUB_PROXY,
   LENS_INTERACTION_LOGIC_ADDRESS,
@@ -36,17 +43,18 @@ import {
   ZERO_ADDRESS,
 } from "../../../constant";
 import {
+  FollowNFT,
   InteractionLogicInterface,
   LensHubInterface,
   NetworkManagerInterface,
 } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
 import { hexToDecimal } from "../../../common/helper";
-import { Result } from "ethers/lib/utils";
+import { Result, splitSignature } from "ethers/lib/utils";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../../modules/user/UserGQLQueries";
 import InvestmentTable from "../../../modules/market/components/InvestmentTable";
-import { Event } from "ethers";
+import { ethers, Event } from "ethers";
 import {
   GET_CONTRACTS_BY_EMPLOYER,
   GET_CONTRACTS_BY_WORKER,
@@ -54,6 +62,13 @@ import {
   GET_SERVICES_BY_CREATOR,
 } from "../../../modules/contract/ContractGQLQueries";
 import JobDisplay from "../../../modules/market/components/JobDisplay";
+import { EditOutlined } from "@mui/icons-material";
+import { create } from "ipfs-http-client";
+import fleek from "../../../fleek";
+import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
+import { ConfirmationDialog } from "../../../common/components/ConfirmationDialog";
+import { useSelector } from "react-redux";
+import { selectUserAddress } from "../../../modules/user/userReduxSlice";
 
 const data = [
   {
@@ -100,6 +115,39 @@ const data = [
   },
 ];
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  };
+}
+
 /**
  * @author Elijah Hampton
  * ProfilePage
@@ -112,9 +160,11 @@ const ProfilePage: NextPage = () => {
   const classes = useStyles();
   const router = useRouter();
   const accountData = useAccount();
-  const signer = useSigner()
+  const signer = useSigner();
+  const userAddress = useSelector(selectUserAddress);
 
   const [profileState, setProfileState] = useState<any>({
+    general: {},
     lensProfileId: 0,
     lensProfile: {},
     verifiedFreelancerData: {},
@@ -135,7 +185,7 @@ const ProfilePage: NextPage = () => {
     GET_VERIFIED_FREELANCER_BY_ADDRESS,
     {
       variables: {
-        address,
+        userAddress: address,
       },
     }
   );
@@ -255,27 +305,34 @@ const ProfilePage: NextPage = () => {
     if (!servicesCreated.loading && servicesCreated.data) {
       setProfileState({
         ...profileState,
-        servicesCreated: servicesPurchased.data.services,
+        servicesCreated: servicesPurchased.data.purchasedServices,
       });
     }
   }, [servicesCreated.loading]);
 
   useEffect(() => {
-    verifiedUserQuery.refetch();
     contractsByEmployerQuery.refetch();
     contractsByWorkerQuery.refetch();
     servicesPurchased.refetch();
   }, [address]);
 
   useEffect(() => {
+    verifiedUserQuery.refetch();
+  }, []);
+
+  useEffect(() => {
     if (!verifiedUserQuery.loading && verifiedUserQuery.data) {
       setProfileState({
         ...profileState,
-        verifiedFreelancerData: profileState?.verifiedFreelancerData.data.verifiedUser,
+        verifiedFreelancerData: verifiedUserQuery.data.verifiedUsers[0],
       });
 
       //only fetch profile id and created services if the user is a verified freelancers
-      if (String(profileState?.verifiedFreelancerData.data.verifiedUser?.address).toLowerCase() === String(address).toLowerCase()) {
+      if (
+        String(
+          verifiedUserQuery.data.verifiedUsers[0]?.address
+        ).toLowerCase() === String(address).toLowerCase()
+      ) {
         networkManager_getLensProfileIdFromAddress.refetch();
         servicesCreated.refetch();
       }
@@ -289,13 +346,13 @@ const ProfilePage: NextPage = () => {
   }, [profileState.lensProfileId]);
 
   useEffect(() => {
-    if (profileState?.lensProfile?.followNFT && profileState?.lensProfile?.followNFT != ZERO_ADDRESS) {
+    if (
+      profileState?.lensProfile?.followNFT &&
+      profileState?.lensProfile?.followNFT != ZERO_ADDRESS
+    ) {
       fetchAddressFollowerState();
     }
-
   }, [profileState?.lensProfile?.followNFT]);
-
-  
 
   //get following
   useContractEvent(
@@ -343,7 +400,7 @@ const ProfilePage: NextPage = () => {
       const timestamp: number = event.args[3];
 
       //set a list of all profile ids this address is following
-      if (follower === address) {
+      if (String(follower).toLowerCase() === String(address).toLowerCase()) {
         setProfileState((prevState) => {
           return {
             ...profileState,
@@ -371,7 +428,7 @@ const ProfilePage: NextPage = () => {
         try {
           const erc721ContractFollowNFT = useContract({
             addressOrName: profileState?.lensProfile?.followNFT,
-            contractInterface: "",
+            contractInterface: FollowNFT,
           });
 
           const numFollowers = await erc721ContractFollowNFT.totalSupply();
@@ -379,7 +436,7 @@ const ProfilePage: NextPage = () => {
             ...profileState,
             interactions: {
               ...profileState.interactions,
-              followers: numFollowers,
+              followers: new Array(numFollowers).fill(-1),
             },
           });
         } catch (error) {
@@ -395,18 +452,186 @@ const ProfilePage: NextPage = () => {
     }
   };
 
-  const handleOnFollow = () => {}
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
+  const [connectDialogIsOpen, setConnectDialogIsOpen] = useState(false);
+
+  const { data, isError, isLoading, isSuccess, error, signTypedData } =
+    useSignTypedData({
+      onSettled(data, error, variables, context) {},
+      onError(error, variables, context) {},
+    });
+
+  const onSign = async () => {
+    const domain = getDomain();
+    const types = getTypes();
+    const value = await getValues([address], [], 0);
+    await signTypedData({ domain, types, value });
+  };
+
+  const getDomain = () => {
+    return {
+      name: "Lens Protocol Profiles",
+      version: "1",
+      chainId: CHAIN_ID,
+      verifyingContract: LENS_HUB_PROXY,
+    };
+  };
+
+  const getTypes = () => {
+    return {
+      FollowWithSig: [
+        { name: "profileIds", type: "uint256[]" },
+        { name: "datas", type: "bytes[]" },
+        { name: "nonce", type: "uint256" },
+        { name: "deadline", type: "uint256" },
+      ],
+    };
+  };
+
+  const getValues = async (
+    profileIds: Array<any>,
+    datas: Array<any>,
+    deadline
+  ) => {
+    const nonce =
+      await new ethers.providers.JsonRpcProvider().getTransactionCount(address);
+
+    return {
+      profileIds,
+      datas,
+      nonce,
+      deadline,
+    };
+  };
+
+  const lensProtocol_followWithSig = useContractWrite(
+    {
+      addressOrName: LENS_HUB_PROXY,
+      contractInterface: LensHubInterface,
+    },
+    "followWithSig",
+    {
+      args: [
+        {
+          follower: address,
+          profileIds: [address],
+          datas: [],
+          sig: { v: 0, r: 0, s: 0 },
+        },
+      ],
+      overrides: {
+        gasLimit: ethers.BigNumber.from("2000000"),
+        gasPrice: 90000000000,
+        value: 2000,
+      },
+      onSettled(data, error, variables, context) {
+        fetchAddressFollowerState();
+      },
+      onError(error, variables, context) {
+        console.log(error);
+      },
+    }
+  );
+
+  const onConnect = async () => {
+    console.log(data);
+    console.log(address);
+    console.log(splitSignature);
+    if (isSuccess) {
+      const splitSignature: ethers.Signature =
+        await ethers.utils.splitSignature(data);
+      console.log("@@@@@@@@@@@@@@@@@@@@@@@");
+      console.log(splitSignature);
+
+      await lensProtocol_followWithSig.writeAsync({
+        args: [
+          {
+            follower: address,
+            profileIds: [profileState?.lensProfileId],
+            datas: [[]],
+            sig: {
+              v: splitSignature.v,
+              r: splitSignature.r,
+              s: splitSignature.s,
+              deadline: "0",
+            },
+          },
+        ],
+      });
+    }
+  };
+
+  console.log(profileState?.verifiedFreelancerData?.address);
+  console.log(address);
+
+  const connectDialogContent = [
+    <DialogContentText id="alert-dialog-description">
+      <Typography fontSize={20} fontWeight="bold" py={1}>
+        {" "}
+        You are about to follow another user which will require two actions:
+      </Typography>
+
+      <ul>
+        <li>
+          {" "}
+          <Typography>Signing a transaction</Typography>
+        </li>
+        <li>
+          <Typography>Executing the transaction</Typography>
+        </li>
+      </ul>
+    </DialogContentText>,
+    <DialogContentText id="alert-dialog-description">
+      <Box py={2}>
+        <Typography fontSize={20} fontWeight="bold" py={1}>
+          Sign the transaction
+        </Typography>
+        <Typography variant="subtitle2">
+          Your wallet will prompt you to sign the transaction.
+        </Typography>
+      </Box>
+    </DialogContentText>,
+
+    <DialogContentText id="alert-dialog-description">
+      <Box py={2}>
+        <Typography fontSize={20} fontWeight="bold" py={1}>
+          Confirm Connect
+        </Typography>
+        <Typography variant="subtitle2">Accept the transaction</Typography>
+      </Box>
+    </DialogContentText>,
+  ];
 
   return (
-    <Container maxWidth="lg" sx={{}}>
-      <Typography
-        py={2}
-        fontWeight="bold"
-        color="rgba(33, 33, 33, .85)"
-        fontSize={30}
-      >
-        Profile
-      </Typography>
+    <Container maxWidth="lg" sx={{ minHeight: "100vh" }}>
+      <Box py={6}>
+        <Typography
+          fontWeight="bold"
+          color="rgba(33, 33, 33, .85)"
+          fontSize={30}
+        >
+          John Dismuke
+        </Typography>
+        <Stack direction="row" alignItems="center">
+          {String(
+            profileState.verifiedFreelancerData?.address
+          ).toLowerCase() === String(address).toLowerCase() ? (
+            <Alert sx={{ width: "100%" }} severity="success">
+              Verified Freelancer
+            </Alert>
+          ) : (
+            <Alert sx={{ width: "100%" }} severity="info">
+              General User
+            </Alert>
+          )}
+        </Stack>
+      </Box>
+
       {profileState?.verifiedFreelancerData?.address == address ? (
         <Grid
           mt={2}
@@ -484,11 +709,29 @@ const ProfilePage: NextPage = () => {
         justifyContent="space-between"
       >
         <Grid item xs={7.5}>
-          <Stack direction="column" spacing={5}>
-            <Box>
-              <Typography pb={2} fontSize={20} fontWeight="medium">
-                Services
-              </Typography>
+          <Box sx={{ width: "100%" }}>
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <Tabs
+                value={value}
+                onChange={handleChange}
+                aria-label="basic tabs example"
+              >
+                <Tab
+                  label="Posts"
+                  {...a11yProps(0)}
+                  icon={<EditOutlined fontSize="small" />}
+                  iconPosition="start"
+                />
+                <Tab label="Services (0)" {...a11yProps(1)} />
+                <Tab label="Contracts (0)" {...a11yProps(2)} />
+                <Tab label="Endorsements (0)" {...a11yProps(3)} />
+                <Tab label="Reviews (0)" {...a11yProps(4)} />
+              </Tabs>
+            </Box>
+            <TabPanel value={value} index={0}>
+              <Typography>No publications</Typography>
+            </TabPanel>
+            <TabPanel value={value} index={1}>
               <Box
                 component={Grid}
                 container
@@ -497,7 +740,7 @@ const ProfilePage: NextPage = () => {
                 spacing={/*3*/ 0}
               >
                 {profileState?.servicesCreated &&
-                profileState?.servicesCreated.length > 0 ? (
+                profileState?.servicesCreated?.length > 0 ? (
                   profileState?.servicesCreated.map((service) => {
                     return (
                       <ServiceCard id={service?.serviceId} data={service} />
@@ -509,12 +752,8 @@ const ProfilePage: NextPage = () => {
                   </Typography>
                 )}
               </Box>
-            </Box>
-
-            <Box>
-              <Typography pb={2} fontSize={20} fontWeight="medium">
-                Contracts
-              </Typography>
+            </TabPanel>
+            <TabPanel value={value} index={2}>
               <Box
                 component={Grid}
                 container
@@ -533,25 +772,14 @@ const ProfilePage: NextPage = () => {
                   </Typography>
                 )}
               </Box>
-            </Box>
-
-            <Box>
-              <Typography pb={2} fontSize={20} fontWeight="medium">
-                Endorsements
-              </Typography>
-              <Box
-                component={Grid}
-                container
-                direction="row"
-                alignItems="center"
-                spacing={/*3*/ 0}
-              >
-                <Typography>
-                  John Dismukes hasn't received any endorsements.
-                </Typography>
-              </Box>
-            </Box>
-          </Stack>
+            </TabPanel>
+            <TabPanel value={value} index={3}>
+              <InvestmentTable />
+            </TabPanel>
+            <TabPanel value={value} index={4}>
+              <InvestmentTable />
+            </TabPanel>
+          </Box>
         </Grid>
 
         <Grid item xs={4}>
@@ -560,9 +788,12 @@ const ProfilePage: NextPage = () => {
           </Typography>
           <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
-              <Stack alignItems="center">
-                <Avatar style={{ width: 80, height: 80 }} />
-                <Box py={0.5}>
+              <Stack spacing={1.5} alignItems="center">
+                <Jazzicon
+                  diameter={70}
+                  seed={jsNumberForAddress(String(address))}
+                />
+                <Box py={0.5} textAlign="center">
                   <Typography fontWeight="medium">John Dismuke</Typography>
                   <Typography
                     variant="body2"
@@ -573,19 +804,13 @@ const ProfilePage: NextPage = () => {
                   </Typography>
                 </Box>
 
-                <Typography textAlign="center" py={1} variant="caption">
-                  {" "}
-                  Get suggestions on John's latest services and contracts by
-                  connecting.{" "}
-                </Typography>
-                <Divider sx={{ width: "100%", mt: 2 }} />
-
                 <Box
                   sx={{ width: "100%", height: 50, pt: 1 }}
                   component={Stack}
-                  alignItems="flex-start"
+                  alignItems="center"
                   direction="row"
-                  justifyContent="space-between"
+                  justifyContent="space-evenly"
+                  spacing={5}
                 >
                   <Box>
                     <Stack alignItems="center">
@@ -616,110 +841,40 @@ const ProfilePage: NextPage = () => {
                       </Typography>
                     </Stack>
                   </Box>
-
-                  <Box>
-                    <Stack alignItems="center">
-                      <Typography
-                        textAlign="center"
-                        fontWeight="medium"
-                        fontSize={12}
-                      >
-                        ?
-                      </Typography>
-                      <Typography fontWeight="bold">{0}</Typography>
-                    </Stack>
-                  </Box>
-
-                  <Box>
-                    <Stack alignItems="center">
-                      <Typography
-                        textAlign="center"
-                        fontWeight="medium"
-                        fontSize={12}
-                      >
-                        Reviews
-                      </Typography>
-                      <Typography fontWeight="bold">{0}</Typography>
-                    </Stack>
-                  </Box>
                 </Box>
-
-                <Box
-                  sx={{ width: "100%", height: "auto", pt: 3 }}
-                  component={Stack}
-                  alignItems="flex-start"
-                  direction="row"
-                  justifyContent="space-between"
-                >
-                  <Box>
-                    <Stack alignItems="center">
-                      <Typography
-                        textAlign="center"
-                        fontWeight="medium"
-                        fontSize={12}
-                      >
-                        Contracts Worked
+                {String(
+                  profileState.verifiedFreelancerData?.address
+                ).toLowerCase() === String(address).toLowerCase() ? (
+                  <>
+                    <Divider sx={{ my: 2, width: "100%" }} />
+                    <Button
+                      sx={{ mt: 2 }}
+                      fullWidth
+                      disabled={profileState.interactions.followers.includes(
+                        userAddress
+                      )}
+                      variant="contained"
+                      onClick={() => setConnectDialogIsOpen(true)}
+                    >
+                      Connect
+                    </Button>
+                    {process.env.NEXT_PUBLIC_CHAIN_ENV === "development" ? (
+                      <Typography color="red" fontSize={12}>
+                        Warning: No follow verification in development.
                       </Typography>
-                      <Typography fontWeight="bold">
-                        {profileState?.contractsCompleted.length}
-                      </Typography>
-                    </Stack>
-                  </Box>
-
-                  <Box>
-                    <Stack alignItems="center">
-                      <Typography
-                        textAlign="center"
-                        fontWeight="medium"
-                        fontSize={12}
-                      >
-                        Contracts Created
-                      </Typography>
-                      <Typography fontWeight="bold">
-                        {profileState?.contractsCreated.length}
-                      </Typography>
-                    </Stack>
-                  </Box>
-
-                  <Box>
-                    <Stack alignItems="center">
-                      <Typography
-                        textAlign="center"
-                        fontWeight="medium"
-                        fontSize={12}
-                      >
-                        Services Created
-                      </Typography>
-                      <Typography fontWeight="bold">
-                        {profileState?.servicesCreated.length}
-                      </Typography>
-                    </Stack>
-                  </Box>
-
-                  <Box>
-                    <Stack alignItems="center">
-                      <Typography
-                        textAlign="center"
-                        fontWeight="medium"
-                        fontSize={12}
-                      >
-                        Services Purchased
-                      </Typography>
-                      <Typography fontWeight="bold">
-                        {profileState?.servicesPurchased.length}
-                      </Typography>
-                    </Stack>
-                  </Box>
-                </Box>
-
-                <Button sx={{ mt: 2 }} fullWidth variant="contained" onClick={handleOnFollow}>
-                  Connect
-                </Button>
+                    ) : null}
+                    <Typography textAlign="flex-start" py={1} variant="caption">
+                      {" "}
+                      Get suggestions on John's latest services and contracts by
+                      connecting.{" "}
+                    </Typography>
+                  </>
+                ) : null}
               </Stack>
             </CardContent>
           </Card>
 
-          <Card variant="outlined" className={classes.marginBottom}>
+          {/*  <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
               <Stack
                 direction="row"
@@ -736,9 +891,9 @@ const ProfilePage: NextPage = () => {
                 No description
               </Typography>
             </CardContent>
-          </Card>
+                </Card>*/}
 
-          <Card variant="outlined" className={classes.marginBottom}>
+          {/* <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
               <Stack
                 direction="row"
@@ -755,9 +910,9 @@ const ProfilePage: NextPage = () => {
                 No certifications
               </Typography>
             </CardContent>
-          </Card>
+                </Card>*/}
 
-          <Card variant="outlined" className={classes.marginBottom}>
+          {/* <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
               <Stack
                 direction="row"
@@ -774,9 +929,9 @@ const ProfilePage: NextPage = () => {
                 No skills
               </Typography>
             </CardContent>
-          </Card>
+              </Card> */}
 
-          <Card variant="outlined" className={classes.marginBottom}>
+          {/*  <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
               <Stack
                 direction="row"
@@ -793,27 +948,21 @@ const ProfilePage: NextPage = () => {
                 No languages
               </Typography>
             </CardContent>
-          </Card>
+            </Card> */}
         </Grid>
       </Grid>
-
-      <Paper
-        sx={{
-          overflowY: "hidden",
-          p: 2,
-          bgcolor: "rgb(233, 234, 238)",
-          my: 3,
-          width: "100%",
-          height: 500,
+      <ConfirmationDialog
+        open={connectDialogIsOpen}
+        onOpen={() => {}}
+        onClose={() => {
+          setConnectDialogIsOpen(false);
         }}
-        variant="elevation"
-        elevation={0}
-      >
-        <Typography fontWeight="bold" fontSize={20} pb={2}>
-          Highlighted Investments
-        </Typography>
-        <InvestmentTable />
-      </Paper>
+        signAction={onSign}
+        primaryAction={onConnect}
+        primaryActionTitle={"Connect"}
+        hasSigningStep
+        content={connectDialogContent}
+      />
     </Container>
   );
 };

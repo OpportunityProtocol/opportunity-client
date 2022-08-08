@@ -59,7 +59,7 @@ const GET_TOKEN_INFOS = gql`
 
 const GET_TOKEN_INFO_BY_SERVICE_ID = gql`
   query GetTokenInfoById($serviceId: ID!) {
-    serviceToken(where: { id: $serviceId }) {
+    serviceTokens(where: { id: $serviceId } ) {
       id
       marketID
       name

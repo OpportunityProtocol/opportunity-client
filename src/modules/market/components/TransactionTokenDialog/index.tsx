@@ -6,6 +6,7 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  Table,
   FormControl,
   Typography,
   Divider,
@@ -18,6 +19,12 @@ import {
   Stack,
   styled,
   Paper,
+  IconButton,
+  Menu,
+  InputBase,
+  Theme,
+  CardContent,
+  CircularProgress,
 } from "@mui/material";
 import VerifiedAvatar from "../../../user/components/VerifiedAvatar";
 import TabPanel from "../../../../common/components/TabPanel/TabPanel";
@@ -59,6 +66,12 @@ import {
   GET_MARKET_DETAILS_BY_ID,
   GET_TOKEN_INFO_BY_SERVICE_ID,
 } from "../../MarketGQLQueries";
+import Countdown from "react-countdown";
+import { Directions, Refresh, Search, SwapVert } from "@mui/icons-material";
+import { FaChevronDown, FaEthereum } from "react-icons/fa";
+
+import TokenSelectInput from "../TokenSelectionInput";
+
 interface ITransactionDialogProps {
   open: boolean;
   handleClose: () => void;
@@ -68,37 +81,33 @@ interface ITransactionDialogInfoProps {
   serviceId: BigNumberish;
 }
 
-const FlatTextField = styled(TextField)`
-  & .MuiTextField-root {
-    border: 'none !important',
-    borderBottom: 'none'
-  }
-`;
-
 const TransactionTokenDialog: FC<
   ITransactionDialogProps & ITransactionDialogInfoProps
 > = ({ open = true, handleClose, serviceId = -1 }) => {
   const [tokenPriceRefreshCounter, setTokenPriceRefreshCounter] =
     useState("0.00");
   const [tabValue, setTabValue] = useState<number>(0);
-  const [numTokens, setNumTokensToPurchase] = useState<any>(500);
+  const [numTokens, setNumTokensToPurchase] = useState<any>(0);
   const [costForBuying, setCostForBuying] = useState<any>(0);
-  const [costForSelling, setCostForSelling] = useState<any>(0);
+  const [returnFromSelling, setCostForSelling] = useState<any>(0);
   const [fallbackAmount, setFallbackAmount] = useState<number>(300);
   const [desiredCost, setDesiredCost] = useState<number>(500);
   const [protocolFee, setProtocolFee] = useState<number>(0);
+  const [countdown, setCountdown] = useState<number>(Date.now() + 30000);
   const [tokenMarketDetails, setTokenMarketDetails] = useState<any>({});
   const [tokenSupply, setTokenSupply] = useState<any>(0);
   const feeData = useFeeData();
 
   const signer = useSigner();
 
-  const [tokenInfo, setTokenInfo] = useState<TokenInfoStruct>({
+  const [tokenInfo, setTokenInfo] = useState<any>({
     exists: false,
     id: -1,
     name: "",
     serviceToken: ZERO_ADDRESS,
+    address: ZERO_ADDRESS
   });
+
 
   const [serviceData, setServiceData] = useState<any>({});
 
@@ -107,6 +116,9 @@ const TransactionTokenDialog: FC<
       serviceId: serviceId,
     },
   });
+
+  const tokenAddress = tokenInfo?.address
+  console.log(tokenAddress)
 
   useEffect(() => {
     if (!serviceDataQuery.loading && serviceDataQuery.data) {
@@ -123,19 +135,12 @@ const TransactionTokenDialog: FC<
   useEffect(() => {
     if (serviceId >= 0) {
       serviceDataQuery.refetch();
+      tokenInfoQuery.refetch();
     }
   }, [serviceId]);
 
   useEffect(() => {
-    if (serviceId != -1) {
-      tokenInfoQuery.refetch();
-    }
-
     if (Number(serviceData?.marketId) && serviceId != -1) {
-      console.log(
-        "FETCH NOW::  ",
-        "    " + serviceData?.marketId + "  " + Number(serviceData.marketId)
-      );
       tokenFactory_getMarketsDetailsById.refetch();
     }
   }, [serviceData?.marketId, serviceId]);
@@ -168,7 +173,7 @@ const TransactionTokenDialog: FC<
 
     {
       args: [
-        tokenInfo?.serviceToken,
+        tokenInfo?.serviceTokens,
         numTokens,
         fallbackAmount,
         desiredCost,
@@ -190,7 +195,7 @@ const TransactionTokenDialog: FC<
     },
     "sellTokens",
     {
-      args: [tokenInfo?.serviceToken, numTokens, 0, userAddress],
+      args: [tokenInfo?.serviceTokens, numTokens, 0, userAddress],
       overrides: {
         gasLimit: BigNumber.from("900000"),
       },
@@ -207,7 +212,7 @@ const TransactionTokenDialog: FC<
     },
     "getCostForBuyingTokens",
     {
-      args: [tokenInfo?.serviceToken, numTokens],
+      args: [tokenAddress, numTokens],
       enabled: false,
       watch: false,
       cacheTime: 30000,
@@ -232,17 +237,23 @@ const TransactionTokenDialog: FC<
     },
   });
 
+  console.log('@@@@@@@@@@@@')
+  console.log(Number(serviceId))
+
   const tokenInfoQuery: QueryResult = useQuery(GET_TOKEN_INFO_BY_SERVICE_ID, {
     variables: {
       serviceId: Number(serviceId),
+      id: Number(serviceId),
     },
   });
 
   useEffect(() => {
     if (!tokenInfoQuery.loading && tokenInfoQuery.data) {
-      setTokenInfo(tokenInfoQuery.data.serviceToken);
+      setTokenInfo(tokenInfoQuery.data.serviceTokens[0]);
+      getBalance()
     }
   }, [tokenInfoQuery.loading]);
+
 
   useEffect(() => {
     if (!marketDetailsQuery.loading && marketDetailsQuery.data) {
@@ -257,7 +268,7 @@ const TransactionTokenDialog: FC<
     },
     "getPriceForSellingTokens",
     {
-      args: [tokenInfo.serviceToken, numTokens],
+      args: [tokenAddress, numTokens],
       enabled: false,
       watch: false,
       cacheTime: 30000,
@@ -267,9 +278,7 @@ const TransactionTokenDialog: FC<
         gasPrice: 90000000000,
       },
       onSuccess(data) {
-        console.log("BBBBCC");
         console.log(data);
-        console.log("OOOOH");
         setCostForSelling(hexToDecimal(data._hex));
       },
       onError(err) {
@@ -295,16 +304,23 @@ const TransactionTokenDialog: FC<
         gasLimit: BigNumber.from("900000"),
       },
       onSuccess(data) {
-        console.log("SUCCESS FETCh");
-        console.log(data);
         setTokenMarketDetails(data);
       },
       onError(err) {
-        console.log("FAIL FETCH");
-        console.log(serviceData);
         console.log("tokenFactory_getMarketsDetailsById");
         console.log(err);
       },
+    }
+  );
+
+  const dai_approve = useContractWrite(
+    {
+      addressOrName: DAI_ADDRESS,
+      contractInterface: DaiInterface,
+    },
+    "approve",
+    {
+      args: [TOKEN_EXCHANGE_ADDRESS, costForBuying + 100],
     }
   );
 
@@ -318,16 +334,10 @@ const TransactionTokenDialog: FC<
     if (event.code === "Enter") {
       event.preventDefault();
 
-      if (tokenInfo?.id != ZERO_ADDRESS && numTokens > 0) {
+      if (tokenAddress != ZERO_ADDRESS && numTokens > 0) {
         tokenExchange_getCostForBuyingTokens.refetch();
       }
     }
-  };
-
-  const handleOnChangeNumTokensToSell = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setNumTokensToPurchase(e.target.value);
   };
 
   const onKeyDownSellHandler = (
@@ -336,7 +346,12 @@ const TransactionTokenDialog: FC<
     if (event.code === "Enter") {
       event.preventDefault();
 
-      if (tokenInfo?.serviceToken != ZERO_ADDRESS && numTokens > 0) {
+      if (numTokens > balanceOf) {
+        alert('Insufficient balance')
+        return
+      }
+
+      if (tokenAddress != ZERO_ADDRESS && numTokens > 0) {
         tokenExchange_getPriceForSellingTokens.refetch();
       }
     }
@@ -346,16 +361,31 @@ const TransactionTokenDialog: FC<
     setTabValue(newValue);
   };
 
-  const dai_approve = useContractWrite(
-    {
-      addressOrName: DAI_ADDRESS,
-      contractInterface: DaiInterface,
-    },
-    "approve",
-    {
-      args: [TOKEN_EXCHANGE_ADDRESS, costForBuying + 100],
+  const renderer = ({ hours, minutes, seconds, completed }) => {
+    if (completed) {
+      // Render a completed state
+      return (
+        <span>
+          {hours}:{minutes}:{seconds}
+        </span>
+      )
+    } else {
+      // Render a countdown
+      return (
+        <span>
+          {hours}:{minutes}:{seconds}
+        </span>
+      );
     }
-  );
+  };
+
+  const [balanceOf, setBalance] = useState<number>(0)
+  const getBalance = async () => {
+    if (tokenAddress != ZERO_ADDRESS) {
+    setBalance(await new ethers.Contract(tokenAddress, DaiInterface).balanceOf(userAddress))
+    }
+  }
+  
 
   return (
     <Dialog maxWidth="sm" open={open} onClose={handleClose} sx={{}}>
@@ -370,7 +400,7 @@ const TransactionTokenDialog: FC<
       >
         <DialogTitle> Earn passive income from quality freelancers</DialogTitle>
         <DialogContent>
-          <DialogContentText fontWeight="bold" maxWidth={400}>
+          <DialogContentText fontWeight="medium" maxWidth={450}>
             Invest in high quality services from verified freelancers. Earn as
             the quality of their service goes up.
           </DialogContentText>
@@ -380,7 +410,7 @@ const TransactionTokenDialog: FC<
       </Box>
 
       <DialogContent>
-        <Box sx={{ width: "100%", mt: 1, mb: 3 }}>
+        <Box sx={{ width: "100%" }}>
           <Tabs
             value={tabValue}
             onChange={handleOnChangeTab}
@@ -394,27 +424,60 @@ const TransactionTokenDialog: FC<
         </Box>
         <TabPanel index={0} value={tabValue}>
           <Stack spacing={2}>
-            <Box>
-              <Typography pb={1.5} fontWeight="medium" fontSize={15}>
-                Enter an amount of tokens to buy
+            <Stack alignItems="center" spacing={1}>
+              <Box>
+                <TokenSelectInput
+                  instruction="Enter an amount and submit to get cost"
+                  onChange={handleOnChangeNumTokensToBuy}
+                  value={numTokens}
+                  placeholder="0"
+                  onKeyDownHandler={onKeyDownHandler}
+                />
+              </Box>
+
+              <Paper
+                sx={{
+                  zIndex: 100,
+                  width: 35,
+                  height: 35,
+                  borderRadius: 50,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <IconButton disabled>
+                  <SwapVert color="primary" />
+                </IconButton>
+              </Paper>
+
+              <Box>
+                <TokenSelectInput
+                  instruction={`${numTokens} X token will cost`}
+                  placeholder="0"
+                  disabled
+                  value={costForBuying}
+                />
+              </Box>
+            </Stack>
+
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Typography fontSize={14} fontWeight="700">
+                Slippage Tollerance
               </Typography>
-              <FlatTextField
-                onKeyDown={onKeyDownHandler}
-                onChange={(e) => handleOnChangeNumTokensToBuy(e)}
-                label="I want to buy"
-                fullWidth
-              />
-            </Box>
+              <Typography fontSize={14} fontWeight="bold">
+                4.0
+              </Typography>
+            </Stack>
+
+            <Divider />
 
             <Box>
-              <Typography pb={1.5} fontWeight="medium" fontSize={15}>
-                {numTokens} will cost
-              </Typography>
-              <FlatTextField disabled fullWidth value={costForBuying} />
-            </Box>
-
-            <Box>
-              <Typography pb={1.5} fontWeight="medium" fontSize={12}>
+              <Typography variant="subtitle2" pb={1.5}>
                 Purchase Summary
               </Typography>
 
@@ -422,120 +485,137 @@ const TransactionTokenDialog: FC<
                 elevation={0}
                 sx={{
                   p: 1,
-                  height: 120,
+                  height: "auto",
                   borderRadius: 2,
-                  bgcolor: "#f7f7f7",
+                  bgcolor: "rgb(246, 247, 249)",
+                  border: "1px solid #eee",
                   width: "100%",
                 }}
               >
-                <Typography fontSize={15} pb={1} fontWeight="medium">
-                  You will get{" "}
-                  <Typography fontWeight="bold" component="span">
-                    {numTokens}
-                  </Typography>{" "}
-                  for{" "}
-                  <Typography component="span" fontWeight="bold">
+                <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                    Cost
+                  </Typography>
+
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
                     {costForBuying} DAI
-                  </Typography>
-                  .
-                </Typography>
-                <Divider />
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Typography
-                    sx={{ display: "flex", alignItems: "center" }}
-                    fontWeight="medium"
-                    fontSize={14}
-                    py={0.5}
-                  >
-                    Protocol Fee:{" "}
-                    <Box component="span">
-                      <InfoRounded fontSize="small" />
-                    </Box>
-                  </Typography>
-                  <Typography fontWeight="medium" fontSize={14} py={0.5}>
-                    {protocolFee}
                   </Typography>
                 </Stack>
 
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Typography
-                    sx={{ display: "flex", alignItems: "center" }}
-                    fontWeight="medium"
-                    fontSize={14}
-                    py={0.5}
-                  >
-                    Network Fee:
-                    <Box component="span">
-                      <InfoRounded fontSize="small" />
-                    </Box>
+                <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
+                <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                    Protocol Fee
                   </Typography>
-                  <Typography fontWeight="medium" fontSize={14} py={0.5}>
-                    {feeData.isLoading ? (
-                      <Typography>...</Typography>
-                    ) : (
-                      <Typography>{feeData.data.formatted.gasPrice}</Typography>
-                    )}
+
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                    {protocolFee} DAI
+                  </Typography>
+                </Stack>
+
+                <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
+                <Typography fontSize={12} fontWeight='bold' color='#212121'>
+                    Total Cost
+                  </Typography>
+
+                  <Typography fontSize={12} fontWeight='bold' color='#212121'>
+                  {costForBuying + protocolFee} DAI
+                  </Typography>
+                </Stack>
+
+                <Divider />
+
+                <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
+                <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                    Gas fee
+                  </Typography>
+
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                    ~{feeData?.data?.formatted?.gasPrice}
                   </Typography>
                 </Stack>
               </Paper>
               <Typography variant="caption">
-                Token price will refresh in {tokenPriceRefreshCounter} seconds
+                Prices, fees and balance will refresh in {" "}
+                <Countdown
+                  onComplete={() => {
+                    getBalance()
+                    networkManager_getProtocolFee.refetch();
+                    tokenExchange_getPriceForSellingTokens.refetch();
+                    setCountdown(Date.now() + 30000);
+                  }}
+                  date={countdown}
+                  renderer={renderer}
+                />{" "}
+                seconds
               </Typography>
             </Box>
 
-            <Stack>
-              <Button
-                variant="contained"
-                onClick={async () => {
-                  await dai_approve.write();
-                }}
-              >
-                Approve
-              </Button>
-
-              <Button
-                variant="contained"
-                onClick={async () => {
-                  await tokenExchange_buyTokens.write();
-                }}
-              >
-                Purchase
-              </Button>
-            </Stack>
+            <Button
+              variant="contained"
+              onClick={async () => {
+                await tokenExchange_buyTokens.write();
+              }}
+            >
+              Purchase {numTokens} tokens
+            </Button>
           </Stack>
         </TabPanel>
 
         <TabPanel index={1} value={tabValue}>
           <Stack spacing={2}>
-            <Box>
-              <Typography pb={1.5} fontWeight="medium" fontSize={15}>
-                Enter an amount of tokens to sell
+            <Stack alignItems="center" spacing={1}>
+              <Box>
+                <TokenSelectInput
+                  instruction={`Enter an amount of tokens to sell (Max: ${balanceOf})`}
+                  placeholder="0"
+                  onChange={handleOnChangeNumTokensToBuy}
+                  onKeyDownHandler={onKeyDownSellHandler}
+                  value={numTokens}
+                />
+              </Box>
+
+              <Paper
+                sx={{
+                  zIndex: 100,
+                  width: 35,
+                  height: 35,
+                  borderRadius: 50,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <IconButton disabled>
+                  <SwapVert color='primary' />
+                </IconButton>
+              </Paper>
+
+              <Box>
+                <TokenSelectInput
+                  instruction={`${numTokens} will return`}
+                  placeholder="0"
+                  disabled
+                />
+              </Box>
+            </Stack>
+
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Typography fontSize={14} fontWeight="700">
+                Slippage Tollerance
               </Typography>
-              <FlatTextField
-                onKeyDown={onKeyDownSellHandler}
-                onChange={(e) => handleOnChangeNumTokensToSell(e)}
-                label="I want to sell"
-                fullWidth
-              />
-            </Box>
+              <Typography fontSize={14} fontWeight="bold">
+                4.0
+              </Typography>
+            </Stack>
+
+            <Divider />
 
             <Box>
-              <Typography pb={1.5} fontWeight="medium" fontSize={15}>
-                {costForSelling} will return
-              </Typography>
-              <FlatTextField disabled fullWidth value={costForSelling} />
-            </Box>
-
-            <Box>
-              <Typography pb={1.5} fontWeight="medium" fontSize={12}>
+            <Typography variant="subtitle2" pb={1.5}>
                 Purchase Summary
               </Typography>
 
@@ -543,101 +623,84 @@ const TransactionTokenDialog: FC<
                 elevation={0}
                 sx={{
                   p: 1,
-                  height: 120,
+                  height: "auto",
                   borderRadius: 2,
-                  bgcolor: "#f7f7f7",
+                  bgcolor: "rgb(246, 247, 249)",
+                  border: "1px solid #eee",
                   width: "100%",
                 }}
               >
-                <Typography fontSize={15} pb={1} fontWeight="medium">
-                  You will get{" "}
-                  <Typography fontWeight="bold" component="span">
-                    {numTokens}
-                  </Typography>{" "}
-                  for{" "}
-                  <Typography component="span" fontWeight="bold">
-                    {costForSelling} DAI
+                <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                    Earnings:  
                   </Typography>
-                  .
-                </Typography>
-                <Divider />
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Typography
-                    sx={{ display: "flex", alignItems: "center" }}
-                    fontWeight="medium"
-                    fontSize={14}
-                    py={0.5}
-                  >
-                    Protocol Fee:{" "}
-                    <Box component="span">
-                      <InfoRounded fontSize="small" />
-                    </Box>
-                  </Typography>
-                  <Typography fontWeight="medium" fontSize={14} py={0.5}>
-                    {protocolFee}
+
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                  {returnFromSelling} DAI
                   </Typography>
                 </Stack>
 
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Typography
-                    sx={{ display: "flex", alignItems: "center" }}
-                    fontWeight="medium"
-                    fontSize={14}
-                    py={0.5}
-                  >
-                    Network Fee:
-                    <Box component="span">
-                      <InfoRounded fontSize="small" />
-                    </Box>
+                <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
+                <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                    Protocol Fee
                   </Typography>
-                  <Typography fontWeight="medium" fontSize={14} py={0.5}>
-                    {feeData.isLoading ? (
-                      <Typography>...</Typography>
-                    ) : (
-                      <Typography>{feeData.data.formatted.gasPrice}</Typography>
-                    )}
+
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                    {protocolFee} DAI
+                  </Typography>
+                </Stack>
+
+                <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
+                <Typography fontSize={12} fontWeight='bold' color='#212121'>
+                    Total Earned
+                  </Typography>
+
+                  <Typography fontSize={12} fontWeight='bold' color='#212121'>
+                  {returnFromSelling - protocolFee} DAI
+                  </Typography>
+                </Stack>
+
+                <Divider />
+
+                <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
+                <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                    Gas fee
+                  </Typography>
+
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                    ~{feeData?.data?.formatted?.gasPrice}
                   </Typography>
                 </Stack>
               </Paper>
+
               <Typography variant="caption">
-                Token price will refresh in {tokenPriceRefreshCounter} seconds
+                Prices, fees and balance will refresh in{" "}
+                <Countdown
+                  onComplete={() => {
+                    getBalance()
+                    networkManager_getProtocolFee.refetch();
+                    tokenExchange_getPriceForSellingTokens.refetch();
+                    setCountdown(Date.now() + 30000);
+                  }}
+                  date={countdown}
+                  renderer={renderer}
+                />{" "}
+                seconds
               </Typography>
             </Box>
 
-            <Stack>
-              <Button
-                variant="contained"
-                onClick={async () => {
-                  await dai_approve.write();
-                }}
-              >
-                Approve
-              </Button>
-
-              <Button
-                variant="contained"
-                onClick={async () => {
-                  await tokenExchange_sellTokens.write();
-                }}
-              >
-                Purchase
-              </Button>
-            </Stack>
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={async () => {
+                await tokenExchange_sellTokens.write();
+              }}
+            >
+              Sell {numTokens} tokens
+            </Button>
           </Stack>
         </TabPanel>
       </DialogContent>
-
-      <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
-      </DialogActions>
     </Dialog>
   );
 };

@@ -55,7 +55,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
     lensProfileId: -1,
   });
   const [contractMetadata, setContractMetadata] = useState({});
-  const [metadataString, setMetadataString] = useState('')
+  const [metadataString, setMetadataString] = useState("");
 
   const accountData = useAccount();
 
@@ -70,10 +70,10 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
       chainId: CHAIN_ID,
       args: [data?.id],
       onSuccess: (data: Result) => {
-        setMetadataString(data.taskMetadataPtr)
+        setMetadataString(data.taskMetadataPtr);
       },
       onError: (error) => {
-        setMetadataString('')
+        setMetadataString("");
       },
     }
   );
@@ -120,9 +120,9 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
 
   useEffect(() => {
     if (data?.id) {
-      networkManager_getContractData.refetch()
+      networkManager_getContractData.refetch();
     }
-  }, [data?.id])
+  }, [data?.id]);
 
   useEffect(() => {
     if (contractOwnerData?.lensProfileId != -1) {
@@ -139,7 +139,6 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
 
     async function getMetadata() {
       try {
-
         if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
           const ipfs = create({
             url: "/ip4/127.0.0.1/tcp/8080",
@@ -162,20 +161,16 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
 
           setContractMetadata(parsedData);
         }
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     }
 
     if (metadataString) {
       getMetadata();
     }
-
   }, [metadataString]);
 
   return (
     <Card
-      square
       onClick={() => router.push(`/view/contract/${data?.id}`)}
       key={Math.random()}
       variant="outlined"
@@ -186,7 +181,9 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
           August 1, 2022 - 1:59 PM
         </Typography>
         {contractMetadata?.contract_title ? (
-          <Typography fontWeight="600">{contractMetadata?.contract_title}</Typography>
+          <Typography fontWeight="600">
+            {contractMetadata?.contract_title}
+          </Typography>
         ) : (
           <Typography fontWeight="600">
             Unable to load contract title
@@ -249,8 +246,10 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
           <Grid item>
             <Stack>
               <Typography fontSize={13} fontWeight="medium">
-                {contractMetadata?.contract_budget ? contractMetadata?.contract_budget : 0} DAI
-                Budget
+                {contractMetadata?.contract_budget
+                  ? contractMetadata?.contract_budget
+                  : 0}{" "}
+                DAI Budget
               </Typography>
 
               <Typography
@@ -266,23 +265,26 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
           </Grid>
         </Grid>
       </CardContent>
-      <Divider />
+
       {router.pathname.includes("/contract/view/contract") && (
-        <CardContent>
-          <Box display="flex" alignItems="center" justifyContent="center">
-            <Typography fontSize={13} color="text.secondary">
-              Status:{" "}
-              <Typography
-                fontSize={13}
-                fontWeight="medium"
-                component="span"
-                color="green"
-              >
-                Resolved
+        <>
+          <Divider />
+          <CardContent>
+            <Box display="flex" alignItems="center" justifyContent="center">
+              <Typography fontSize={13} color="text.secondary">
+                Status:{" "}
+                <Typography
+                  fontSize={13}
+                  fontWeight="medium"
+                  component="span"
+                  color="green"
+                >
+                  Resolved
+                </Typography>
               </Typography>
-            </Typography>
-          </Box>
-        </CardContent>
+            </Box>
+          </CardContent>
+        </>
       )}
     </Card>
   );

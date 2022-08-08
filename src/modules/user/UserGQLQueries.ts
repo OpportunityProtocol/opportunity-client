@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 
 const GET_VERIFIED_FREELANCER_BY_ADDRESS = gql`
   query GetVerifiedFreelancerByAddress($userAddress: Bytes!) {
-    verifiedUser(where: { address: $userAddress }) {
+    verifiedUsers(where: { address: $userAddress }) {
         id
         address
         handle
