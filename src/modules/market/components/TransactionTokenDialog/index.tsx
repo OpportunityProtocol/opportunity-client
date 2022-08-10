@@ -39,6 +39,7 @@ import {
 import {
   DAI_ADDRESS,
   NETWORK_MANAGER_ADDRESS,
+  SERVICE_COLLECT_MODULE,
   TOKEN_EXCHANGE_ADDRESS,
   TOKEN_FACTORY_ADDRESS,
   ZERO_ADDRESS,
@@ -47,6 +48,7 @@ import {
   DaiInterface,
   ERC20Interface,
   NetworkManagerInterface,
+  ServiceCollectModuleInterface,
   TokenExchangeInterface,
   TokenFactoryInterface,
 } from "../../../../abis";
@@ -96,9 +98,9 @@ const TransactionTokenDialog: FC<
   const [countdown, setCountdown] = useState<number>(Date.now() + 30000);
   const [tokenMarketDetails, setTokenMarketDetails] = useState<any>({});
   const [tokenSupply, setTokenSupply] = useState<any>(0);
-  const feeData = useFeeData();
 
-  const signer = useSigner();
+  const [buyingEnabled, setBuyingEnabled] = useState<boolean>(false)
+  const feeData = useFeeData();
 
   const [tokenInfo, setTokenInfo] = useState<any>({
     exists: false,
@@ -118,7 +120,6 @@ const TransactionTokenDialog: FC<
   });
 
   const tokenAddress = tokenInfo?.address
-  console.log(tokenAddress)
 
   useEffect(() => {
     if (!serviceDataQuery.loading && serviceDataQuery.data) {
@@ -136,11 +137,12 @@ const TransactionTokenDialog: FC<
     if (serviceId >= 0) {
       serviceDataQuery.refetch();
       tokenInfoQuery.refetch();
+      serviceCollectModule_isFamiliar.refetch()
     }
   }, [serviceId]);
 
   useEffect(() => {
-    if (Number(serviceData?.marketId) && serviceId != -1) {
+    if (Number(serviceData?.marketId) && serviceId >= -1) {
       tokenFactory_getMarketsDetailsById.refetch();
     }
   }, [serviceData?.marketId, serviceId]);
@@ -221,7 +223,6 @@ const TransactionTokenDialog: FC<
         gasLimit: BigNumber.from("900000"),
       },
       onSuccess(data) {
-        console.log("@@");
         setCostForBuying(hexToDecimal(data._hex));
       },
       onError(err) {
@@ -231,14 +232,37 @@ const TransactionTokenDialog: FC<
     }
   );
 
+  const serviceCollectModule_isFamiliar = useContractRead(
+    {
+      addressOrName: SERVICE_COLLECT_MODULE,
+      contractInterface: ServiceCollectModuleInterface
+    },
+    "isFamiliar",
+    {
+      args: [userAddress, serviceId],
+      enabled: true,
+      watch: true,
+      cacheTime: 30000,
+      chainId: CHAIN_ID,
+      overrides: {
+        gasLimit: BigNumber.from("900000"),
+      },
+      onSuccess(data) {
+        setBuyingEnabled(true)
+      },
+      onError(err) {
+        setBuyingEnabled(false)
+        console.log("tokenExchange_getCostForBuyingTokens");
+        console.log(err);
+      },
+    }
+  )
+
   const marketDetailsQuery: QueryResult = useQuery(GET_MARKET_DETAILS_BY_ID, {
     variables: {
       id: Number(serviceData?.marketId),
     },
   });
-
-  console.log('@@@@@@@@@@@@')
-  console.log(Number(serviceId))
 
   const tokenInfoQuery: QueryResult = useQuery(GET_TOKEN_INFO_BY_SERVICE_ID, {
     variables: {
@@ -551,6 +575,7 @@ const TransactionTokenDialog: FC<
             </Box>
 
             <Button
+              disabled={!buyingEnabled}
               variant="contained"
               onClick={async () => {
                 await tokenExchange_buyTokens.write();

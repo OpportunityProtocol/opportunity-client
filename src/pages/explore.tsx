@@ -157,7 +157,7 @@ const ExplorePage: NextPage = () => {
             paragraph
             color="text.secondary"
           >
-            Lens Talent allows anyone to find work in a decentralized and
+            Lens Talent is a decentralized protocol allowing anyone to find work and earn income in a
             permissionless manner.{" "}
             <Typography fontSize={20} component="span">
               🌍

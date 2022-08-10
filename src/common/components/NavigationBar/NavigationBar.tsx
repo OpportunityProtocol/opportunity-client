@@ -372,7 +372,7 @@ const NavigationBar: FC = () => {
               justifyContent="space-between"
             >
               <Grid item sx={{ display: "flex", alignItems: "center" }}>
-                <Box display="flex" alignItems="center">
+                <Box display="flex" alignItems="center" sx={{ mr: 2 }}>
                   <Link href="/">
                     <img
                       className={classes.clickableBrand}
@@ -393,11 +393,10 @@ const NavigationBar: FC = () => {
                   </Link>
                 </Box>
 
-                <div>
+                <Stack direction='row' spacing={1.5}>
                   <Link href="/">
                     <Typography
                       component={Button}
-                      mx={2}
                       fontSize={14}
                       variant="button"
                       color={
@@ -412,7 +411,6 @@ const NavigationBar: FC = () => {
                   <Link href="/work">
                     <Typography
                       component={Button}
-                      mx={2}
                       fontSize={14}
                       variant="button"
                       color={
@@ -438,7 +436,6 @@ const NavigationBar: FC = () => {
                     <Link href="/messenger">
                       <Typography
                         component={Button}
-                        mx={2}
                         fontSize={14}
                         variant="button"
                         color={
@@ -457,7 +454,6 @@ const NavigationBar: FC = () => {
                     <Link href="/contract">
                       <Typography
                         component={Button}
-                        mx={2}
                         fontSize={14}
                         variant="button"
                         color={
@@ -471,7 +467,7 @@ const NavigationBar: FC = () => {
                       </Typography>
                     </Link>
                   )}
-                </div>
+                </Stack>
               </Grid>
 
               <Grid

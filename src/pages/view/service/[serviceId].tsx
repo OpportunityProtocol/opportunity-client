@@ -19,14 +19,19 @@ import {
   Divider,
   DialogContentText,
   IconButton,
+  Dialog,
+  Rating,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  InputBase,
+  FormHelperText,
+  LinearProgress,
 } from "@mui/material";
 import { useStyles } from "../../../modules/contract/ContractStyles";
 import Paper from "@mui/material/Paper";
 
-import {
-  AccountCircleOutlined,
-  ShareOutlined,
-} from "@mui/icons-material";
+import { AccountCircleOutlined, ShareOutlined } from "@mui/icons-material";
 import { NextPage } from "next";
 import { NextRouter, useRouter, withRouter } from "next/router";
 import { ServiceStruct } from "../../../typechain-types/NetworkManager";
@@ -90,6 +95,12 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
 
   const [tokenTransactionDialogOpen, setTokenTransactionDialogOpen] =
     useState<boolean>(false);
+    const [loadingReviewTx, setLoadingReviewTx] = useState<boolean>(false)
+  const [reviewRating, setReviewRating] = useState<number>(0);
+  const [review, setReview] = useState<string>('')
+  const [reviewError, setReviewError] = useState<boolean>(false)
+  const [reviewDialogVisible, setReviewDialogVisible] = useState<boolean>(false)
+  
 
   const userAddress = useSelector(selectUserAddress);
 
@@ -354,6 +365,47 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     const value = await getValues();
     await signTypedData({ domain, types, value });
   };
+
+  const lensHub_comment = useContractWrite(
+    {
+      addressOrName: LENS_HUB_PROXY,
+      contractInterface: LensHubInterface
+    },
+    "comment",
+    {
+      args: [],
+      overrides: {
+        gasLimit: ethers.BigNumber.from("2000000"),
+        gasPrice: 90000000000,
+      },
+      onError(error, variables, context) {
+        console.log('lensHub_comment')
+        console.log(variables)
+          console.log(error)
+      },
+      onSuccess(data, variables, context) {
+        console.log('@@@@@@@@@@@@@@@@@@')
+        console.log('lensHub_comment')
+        console.log(data)
+      },
+      onSettled(data, error, variables, context) {
+        console.log('Settled @@@')
+        console.log('lensHub_comment')
+        setLoadingReviewTx(false)
+      },
+    }
+  )
+
+  const onSubmitReview = async () => {
+    setLoadingReviewTx(true)
+    await lensHub_comment.writeAsync()
+    .catch(error => {
+      setReviewError(true)
+    })
+    .finally(() => {
+      setLoadingReviewTx(false)
+    })
+  }
 
   const confirmationDialogContent = [
     <DialogContentText id="alert-dialog-description">
@@ -891,7 +943,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                 Reviews
               </Typography>
 
-              <Button variant="text">Leave a comment</Button>
+              <Button variant="text" onClick={() => setReviewDialogVisible(true)}>Leave a comment</Button>
             </Stack>
             <Typography color="text.secondary" paragraph>
               0 reviews for @janicecoleman007's services
@@ -917,6 +969,51 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         hasSigningStep
         content={confirmationDialogContent}
       />
+
+      <Dialog fullWidth maxWidth="md" open={reviewDialogVisible} onClose={() => setReviewDialogVisible(false)}>
+        <Box sx={{ bgcolor: "rgb(247, 247, 250)" }}>
+          <DialogTitle>Submit a review</DialogTitle>
+        </Box>
+        <Divider />
+        {loadingReviewTx && <LinearProgress />}
+
+        <DialogContent>
+          <DialogContentText pb={3} fontWeight='medium'>
+            Provide a rating for the quality of work provided by @babys8. You can only submit one review per rating.
+          </DialogContentText>
+          <Stack spacing={2}>
+            <Rating
+              name="review-dialog-controlled-rating"
+              value={reviewRating}
+              onChange={(event, newValue) => {
+                setReviewRating(newValue);
+              }}
+            />
+            <Paper elevation={0} sx={{ width: "100%" }}>
+              <InputBase
+                placeholder="Leave a review for @babys8"
+                sx={{ width: "100%", p: 2, bgcolor: "rgb(247, 247, 250)" }}
+                error={reviewError}          
+              />
+              {
+                reviewError && (
+                  <FormHelperText>
+                    Something went wrong. Please check your wallet and try again.
+                  </FormHelperText>
+                )
+              }
+            </Paper>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setReview('')
+            setReviewError(false)
+            setReviewDialogVisible(false)
+          }}>Cancel</Button>
+          <Button onClick={onSubmitReview} disabled={review.length < 25}>Submit Review</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
