@@ -7,6 +7,7 @@ const GET_VERIFIED_FREELANCER_BY_ADDRESS = gql`
         address
         handle
         imageURI
+        metadata
     }
   }
 `;
@@ -18,6 +19,7 @@ const GET_VERIFIED_FREELANCERS = gql`
         address
         handle
         imageURI
+        metadata
     }
   }
 `;

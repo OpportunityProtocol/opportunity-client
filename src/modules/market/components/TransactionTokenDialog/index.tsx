@@ -25,6 +25,7 @@ import {
   Theme,
   CardContent,
   CircularProgress,
+  Chip,
 } from "@mui/material";
 import VerifiedAvatar from "../../../user/components/VerifiedAvatar";
 import TabPanel from "../../../../common/components/TabPanel/TabPanel";
@@ -166,6 +167,7 @@ const TransactionTokenDialog: FC<
 
   const provider = useProvider();
 
+
   const tokenExchange_buyTokens = useContractWrite(
     {
       addressOrName: TOKEN_EXCHANGE_ADDRESS,
@@ -175,7 +177,7 @@ const TransactionTokenDialog: FC<
 
     {
       args: [
-        tokenInfo?.serviceTokens,
+        tokenAddress,
         numTokens,
         fallbackAmount,
         desiredCost,
@@ -185,10 +187,19 @@ const TransactionTokenDialog: FC<
         gasLimit: BigNumber.from("900000"),
       },
       onSuccess(data, variables, context) {
-        console.log(data);
+  
       },
+      onError(err) {
+
+      }
     }
   );
+
+  const onBuy = async () => {
+    await dai_approve.writeAsync().then(() => {
+      tokenExchange_buyTokens.write();
+    })
+  }
 
   const tokenExchange_sellTokens = useContractWrite(
     {
@@ -197,12 +208,12 @@ const TransactionTokenDialog: FC<
     },
     "sellTokens",
     {
-      args: [tokenInfo?.serviceTokens, numTokens, 0, userAddress],
+      args: [tokenAddress, numTokens, 0, userAddress],
       overrides: {
         gasLimit: BigNumber.from("900000"),
       },
       onError(error, variables, context) {
-        console.log(numTokens);
+        console.log(variables)
       },
     }
   );
@@ -226,16 +237,15 @@ const TransactionTokenDialog: FC<
         setCostForBuying(hexToDecimal(data._hex));
       },
       onError(err) {
-        console.log("tokenExchange_getCostForBuyingTokens");
-        console.log(err);
+  
       },
     }
   );
 
   const serviceCollectModule_isFamiliar = useContractRead(
     {
-      addressOrName: SERVICE_COLLECT_MODULE,
-      contractInterface: ServiceCollectModuleInterface
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
     },
     "isFamiliar",
     {
@@ -251,9 +261,7 @@ const TransactionTokenDialog: FC<
         setBuyingEnabled(true)
       },
       onError(err) {
-        setBuyingEnabled(false)
-        console.log("tokenExchange_getCostForBuyingTokens");
-        console.log(err);
+        setBuyingEnabled(true)
       },
     }
   )
@@ -302,12 +310,10 @@ const TransactionTokenDialog: FC<
         gasPrice: 90000000000,
       },
       onSuccess(data) {
-        console.log(data);
         setCostForSelling(hexToDecimal(data._hex));
       },
       onError(err) {
-        console.log("tokenExchange_getCostForSellingTokens");
-        console.log(err);
+     
       },
     }
   );
@@ -331,8 +337,7 @@ const TransactionTokenDialog: FC<
         setTokenMarketDetails(data);
       },
       onError(err) {
-        console.log("tokenFactory_getMarketsDetailsById");
-        console.log(err);
+
       },
     }
   );
@@ -403,10 +408,13 @@ const TransactionTokenDialog: FC<
     }
   };
 
+const signer = useSigner()
   const [balanceOf, setBalance] = useState<number>(0)
   const getBalance = async () => {
+    console.log(tokenAddress)
+    console.log(ZERO_ADDRESS)
     if (tokenAddress != ZERO_ADDRESS) {
-    setBalance(await new ethers.Contract(tokenAddress, DaiInterface).balanceOf(userAddress))
+    setBalance(await new ethers.Contract(tokenAddress, DaiInterface, signer.data.provider).balanceOf(userAddress))
     }
   }
   
@@ -446,6 +454,9 @@ const TransactionTokenDialog: FC<
           </Tabs>
           <Divider sx={{ borderBottom: "1px solid #ddd" }} />
         </Box>
+        <Stack mt={1}>
+          <Chip onClick={() => getBalance()} sx={{ width: '100px' }} icon={<Refresh />} size='small' label='Refresh' />
+        </Stack>
         <TabPanel index={0} value={tabValue}>
           <Stack spacing={2}>
             <Stack alignItems="center" spacing={1}>
@@ -577,9 +588,7 @@ const TransactionTokenDialog: FC<
             <Button
               disabled={!buyingEnabled}
               variant="contained"
-              onClick={async () => {
-                await tokenExchange_buyTokens.write();
-              }}
+              onClick={onBuy}
             >
               Purchase {numTokens} tokens
             </Button>

@@ -416,7 +416,7 @@ const ViewContract: NextPage<any> = () => {
             <Card variant="outlined" className={classes.marginBottom}>
               <CardContent>
                 <Typography pb={2} fontWeight="medium" fontSize={20} color="rgba(33, 33, 33, .85)">
-                  Reviews for this user
+                  Reviews
                 </Typography>
                 {reviews.length === 0 ? (
                   <Typography variant="caption">
@@ -561,9 +561,7 @@ const ViewContract: NextPage<any> = () => {
                 Save Contract
               </Button>
 
-              <Button variant="outlined" size="large" fullWidth endIcon={<EmailOutlined />}>
-                Refer a friend
-              </Button>
+
             </Stack>
 
             <Alert

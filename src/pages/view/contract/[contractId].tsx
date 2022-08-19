@@ -21,28 +21,12 @@ import {
 } from "@mui/material";
 import { useStyles } from "../../../modules/contract/ContractStyles";
 import {
-  ContentCopy,
-  Email,
-  EmailOutlined,
-  Favorite,
   FavoriteBorderOutlined,
 } from "@mui/icons-material";
 
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-
-import clsx from "clsx";
-
-import { LineChart, Line, ResponsiveContainer } from "recharts";
-import { timelineButtons } from "../../../modules/market/MarketConstants";
 import JobDisplay from "../../../modules/market/components/JobDisplay";
 import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
-import moment from "moment";
+
 import { useRouter } from "next/router";
 import { NextPage } from "next/types";
 import { QueryResult, useQuery } from "@apollo/client";
@@ -64,84 +48,6 @@ import { Result } from "ethers/lib/utils";
 import { create } from "ipfs-http-client";
 import fleek from "../../../fleek";
 import { ethers } from "ethers";
-const data = [
-  {
-    name: "Page A",
-    uv: 4000,
-    pv: 2400,
-    amt: 2400,
-  },
-  {
-    name: "Page B",
-    uv: 3000,
-    pv: 1398,
-    amt: 2210,
-  },
-  {
-    name: "Page C",
-    uv: 2000,
-    pv: 9800,
-    amt: 2290,
-  },
-  {
-    name: "Page D",
-    uv: 2780,
-    pv: 3908,
-    amt: 2000,
-  },
-  {
-    name: "Page E",
-    uv: 1890,
-    pv: 4800,
-    amt: 2181,
-  },
-  {
-    name: "Page F",
-    uv: 2390,
-    pv: 3800,
-    amt: 2500,
-  },
-  {
-    name: "Page G",
-    uv: 3490,
-    pv: 4300,
-    amt: 2100,
-  },
-];
-
-function createData(action: string, user: string, timestamp: string) {
-  return { action, user, timestamp };
-}
-
-const rows = [
-  /* createData('Created', '@janicecoleman007', moment().format('LL').toString()),
-  createData(
-    'Assigned',
-    '@janicecoleman007',
-    moment().add(2, 'days').add(4, 'hours').format('LL').toString()
-  ),
-  createData(
-    'Accepted',
-    '@iwriteforfun12',
-    moment().add(2, 'days').add(6, 'hours').format('LL').toString()
-  ),*/
-];
-
-const TableToolbar = () => {
-  return (
-    <Toolbar>
-      <Typography
-        color="rgb(33, 33, 33, .85)"
-        fontWeight="medium"
-        variant="h6"
-        id="contract-history-table-title"
-        component="div"
-      >
-        Contract History
-      </Typography>
-    </Toolbar>
-  );
-};
 
 const contractDetailsPrimaryTypographyProps = {
   fontSize: 14,
@@ -153,8 +59,6 @@ const contractDetailsSecondaryTypographyProps = {
   color: "#808080",
   fontSize: 12,
 };
-
-const isService = false;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 /**
@@ -595,78 +499,6 @@ const ViewContract: NextPage<any> = () => {
             <JobDisplay data={contractData} />
           </Box>
 
-          <Card variant="outlined" className={classes.marginBottom}>
-            <TableToolbar />
-            <TableContainer>
-              <Table aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      <Typography
-                        fontWeight="bold"
-                        fontSize={15}
-                        color="rgba(33, 33, 33, .85)"
-                      >
-                        Status
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        fontWeight="bold"
-                        fontSize={15}
-                        color="rgba(33, 33, 33, .85)"
-                      >
-                        User
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography
-                        fontWeight="bold"
-                        fontSize={15}
-                        color="rgba(33, 33, 33, .85)"
-                      >
-                        Timestamp
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row.action}>
-                      <TableCell component="th" scope="row">
-                        <Typography fontWeight="medium" fontSize={14}>
-                          {row.action}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          color="primary"
-                          fontWeight="medium"
-                          variant="body2"
-                        >
-                          {row.user}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography color="text.secondary" variant="body2">
-                          {row.timestamp}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </Card>
 
           <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
@@ -676,11 +508,11 @@ const ViewContract: NextPage<any> = () => {
                 fontSize={20}
                 color="rgba(33, 33, 33, .85)"
               >
-                Reviews for this user
+                Reviews
               </Typography>
               {reviews.length === 0 ? (
                 <Typography variant="caption">
-                  No reviews has been written for this employer
+                  No reviews
                 </Typography>
               ) : (
                 reviews.slice(4, 9).map(
@@ -776,14 +608,6 @@ const ViewContract: NextPage<any> = () => {
               Save Contract
             </Button>
 
-            <Button
-              variant="outlined"
-              size="large"
-              fullWidth
-              endIcon={<EmailOutlined />}
-            >
-              Refer a friend
-            </Button>
           </Stack>
 
           <Alert
@@ -793,7 +617,7 @@ const ViewContract: NextPage<any> = () => {
             className={classes.marginBottom}
           >
             <Typography fontSize={20} fontWeight="bold">
-              Completion Details
+              Requirements
             </Typography>
             <Box>
               <ListItem>
@@ -807,17 +631,10 @@ const ViewContract: NextPage<any> = () => {
 
           <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
-              <Typography
-                fontSize={20}
-                fontWeight="medium"
-                color="rgba(33, 33, 33, .85)"
-              >
-                Metadata
-              </Typography>
               <List>
                 <ListItem>
                   <ListItemText
-                    primary="Market Name"
+                    primary="Writing and Translation"
                     secondary={MARKET_ID_MAPPING[contractData["marketId"]]}
                     primaryTypographyProps={
                       contractDetailsPrimaryTypographyProps
@@ -828,26 +645,6 @@ const ViewContract: NextPage<any> = () => {
                   />
                 </ListItem>
 
-                <ListItem>
-                  <ListItemText
-                    primary="Metadata"
-                    secondary={String(metadataString)}
-                    primaryTypographyProps={
-                      contractDetailsPrimaryTypographyProps
-                    }
-                    secondaryTypographyProps={{
-                      color: "#808080",
-                      fontSize: 12,
-                      textOverflow: "ellipsis",
-                      overflow: "hidden",
-                    }}
-                  />
-                  <ListItemIcon>
-                    <IconButton>
-                      <ContentCopy fontSize="small" />
-                    </IconButton>
-                  </ListItemIcon>
-                </ListItem>
               </List>
             </CardContent>
           </Card>

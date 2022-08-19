@@ -6,9 +6,15 @@ import {
   InputAdornment,
   Paper,
   InputBase,
+  Card,
+  CardContent,
   Divider,
   IconButton,
   Chip,
+  FormControlLabel,
+  Checkbox,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { NextPage } from "next";
 import { Fragment, ChangeEvent, createRef, useEffect, useState } from "react";
@@ -44,6 +50,8 @@ import { CHAIN_ID } from "../../constant/provider";
 import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../common/helper";
 import { NextRouter, useRouter } from "next/router";
+import BootstrapInput from "../../common/components/BootstrapInput/BootstrapInput";
+import { SERVICE_REFERENCE_MODULE } from "../../constant/contracts";
 const Buffer = require("buffer").Buffer;
 
 const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
@@ -78,10 +86,13 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       },
     },
   });
-  const router: NextRouter = useRouter()
+  const router: NextRouter = useRouter();
   const fileRef = createRef();
 
   const accountData = useAccount();
+
+  console.log(NETWORK_MANAGER_ADDRESS);
+  console.log(SERVICE_COLLECT_MODULE);
 
   const networkManager_createService = useContractWrite(
     {
@@ -90,9 +101,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     },
     "createService",
     {
-      onError(error, variables, context) {
-        console.log(error);
-      },
+      onError(error, variables, context) {},
       onSuccess(data, variables, context) {},
       args: [
         1,
@@ -102,11 +111,17 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           Number(createServiceForm.offers.business.price),
           Number(createServiceForm.offers.enterprise.price),
         ],
-        0,
         SERVICE_COLLECT_MODULE,
+        "0xC2b99a6D91963a39CCdBeF193A2BF3377E63825c" //SERVICE_REFERENCE_MODULE
       ],
       overrides: {
         gasLimit: BigNumber.from("11643163"),
+      },
+      onSettled(data, error, variables, context) {
+        console.log('@@@@@@@@@@@@@@@@@@@@@@')
+        console.log(data)
+        console.log(error)
+        console.log(variables)
       },
     }
   );
@@ -132,7 +147,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         setMarketsLoading(false);
       },
       onError: (error) => {
-
         setMarketsLoading(false);
       },
     }
@@ -157,8 +171,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           url: "/ip4/0.0.0.0/tcp/5001",
         });
 
-
-        retVal = await (await ipfs.add(JSON.stringify(createServiceForm))).path
+        retVal = await (await ipfs.add(JSON.stringify(createServiceForm))).path;
       } else {
         retVal = await fleek.uploadService(
           String(accountData.data.address) +
@@ -178,18 +191,18 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             Number(createServiceForm.offers.business.price),
             Number(createServiceForm.offers.enterprise.price),
           ],
-          0,
           SERVICE_COLLECT_MODULE,
+          "0xC2b99a6D91963a39CCdBeF193A2BF3377E63825c"
         ],
         overrides: {
           gasLimit: BigNumber.from("11643163"),
         },
       });
 
-      router.push('/')
-    } catch (error) {
+      console.log(createServiceForm);
 
-    }
+      router.push("/");
+    } catch (error) {}
   };
 
   const handleOnChangeOffer = (
@@ -242,6 +255,11 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const handleOnChangeCreateServiceForm = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
+
+    if (e.target.name === '' && String(e.target.value).length >= 55) {
+      return
+    }
+
     setCreateServiceForm({
       ...createServiceForm,
       [e.target.name]: e.target.value,
@@ -281,17 +299,29 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   };
 
   const handleOnChangeFile = (e) => {
-    let reader = new FileReader()
+    let reader = new FileReader();
     reader.onloadend = () => {
-      const buffer = Buffer.from(reader.result)
+      const buffer = Buffer.from(reader.result);
       setSelectedImage(e.target.files[0]);
       setCreateServiceForm({
         ...createServiceForm,
         serviceThumbnail: buffer,
       });
-    }
-    reader.readAsArrayBuffer(e.target.files[0])
+    };
+    reader.readAsArrayBuffer(e.target.files[0]);
   };
+
+  const [offers, setOffers] = useState<Array<string>>(new Array(6));
+
+  const handleOnChangeOffers = (e, idx: number) => {
+    const updatedArr = [...offers];
+    updatedArr[idx] = e.target.value;
+    setOffers(updatedArr);
+  };
+
+  const [checkboxes, setCheckboxes] = useState<Array<boolean>>([]);
+
+  const handleOnChangeCheckbox = (e, idx: number) => {};
 
   return (
     <Container
@@ -299,17 +329,15 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       spacing={5}
       maxWidth="lg"
       sx={{
-        border: "1px solid #eee",
-        bgcolor: "#fff",
-        padding: "2% 4% !important",
+        width: "100%",
+        padding: "2% 4%",
       }}
     >
-      <StepperComponent steps={steps} activeStep={activeStep} />
-      <Box pt={3}>
-        <Typography fontWeight="bold" fontSize={25}>
+      <Box>
+        <Typography fontWeight="600" fontSize={25}>
           Create a service
         </Typography>
-        <Typography color="text.secondary">
+        <Typography color="text.secondary" variant="body2">
           Create a service to share across lens social networks.{" "}
           <Typography variant="button" color="primary">
             Learn more
@@ -317,97 +345,208 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         </Typography>
       </Box>
 
-      <Box>
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Typography
-            width={600}
-            fontWeight="700"
-            fontSize={18}
-            color="text.primary"
-          >
+      <Box display="flex" alignItems="flex-start">
+        <Box width={600} maxWidth={600}>
+          <Typography fontWeight="700" fontSize={18} color="text.primary">
             Select a market
           </Typography>
-
-          <SearchBarV2 />
-        </Stack>
-
-        <Grid
-          container
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          {numMarkets.slice(0, 6).map((marketId) => {
-            return (
-              <Grid item xs={2.9}>
-                <MarketDisplay
-                  marketId={marketId + 1}
-                  isShowingStats={false}
-                  selected={marketId === selectedMarketId}
-                  selectable
-                  onSelect={() => setSelectedMarketId(marketId)}
-                  showDescription={false}
-                  showStats={false}
-                />
-              </Grid>
-            );
-          })}
-        </Grid>
-      </Box>
-
-      <Box>
-        <Box mt={6}>
-          <Typography fontWeight="700" fontSize={18} color="text.primary">
-            Basic Information
+          <Typography color="text.secondary" fontWeight="500" fontSize={14}>
+            Select or search for the appropriate market to deploy your contract.
           </Typography>
-          <Typography fontSize={15} color="text.secondary">
-            Create a service to share across lens social networks
+          <Typography variant="caption">
+            Can't find a market?{" "}
+            <Typography component="span" color="primary" variant="button">
+              Learn about market proposals.
+            </Typography>
           </Typography>
         </Box>
 
-        <Stack spacing={2}>
-          <TextField
-            margin="normal"
-            sx={{ width: 600 }}
-            variant="outlined"
-            label="Service Title"
-            aria-label="Pick a title for your service"
-            name="serviceTitle"
-            type="text"
-            onChange={handleOnChangeCreateServiceForm}
-          />
+        <Card sx={{ width: "100%" }} variant="outlined">
+          <CardContent>
+            <Grid
+              container
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              {numMarkets.slice(0, 6).map((marketId) => {
+                return (
+                  <Grid item xs={2.9}>
+                    <MarketDisplay
+                      small
+                      marketId={marketId + 1}
+                      isShowingStats={false}
+                      selected={marketId === selectedMarketId}
+                      selectable
+                      onSelect={() => setSelectedMarketId(marketId)}
+                      showDescription={false}
+                      showStats={false}
+                    />
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </CardContent>
+        </Card>
+      </Box>
 
-          <TextField
-            margin="normal"
-            rows={6}
-            multiline
-            sx={{ width: 600 }}
-            variant="outlined"
-            label="Service Description"
-            aria-label="Pick a title for your service"
-            name="serviceDescription"
-            type="text"
-            onChange={handleOnChangeCreateServiceForm}
-          />
-        </Stack>
+      <Divider />
 
-        <Box mt={3}>
+      <Box display="flex" alignItems="flex-start">
+        <Box py={1} width={600} maxWidth={600}>
           <Typography
-            width={400}
-            pb={1}
-            variant="subtitle2"
-            color="text.secondary"
+            fontWeight="700"
+            fontWeight="700"
+            color="text.primary"
+            fontSize={18}
           >
-            Become more recognizable with tags (max 5). Begin typing and add a
-            tab using the space button
+            Basic Information
           </Typography>
+          <Typography color="text.secondary" fontWeight="500" fontSize={14}>
+            Fill out basic information that will help readers better understand
+            the contract.
+          </Typography>
+        </Box>
+
+        <Card variant="outlined" sx={{ width: "100%" }}>
+          <CardContent>
+            <Stack spacing={2}>
+              <TextField
+                margin="normal"
+                sx={{ width: "100%" }}
+                variant="outlined"
+                label="Service Title"
+                aria-label="Pick a title for your service"
+                name="serviceTitle"
+                type="text"
+                onChange={handleOnChangeCreateServiceForm}
+              />
+
+              <TextField
+                margin="normal"
+                rows={6}
+                multiline
+                sx={{ width: "100%" }}
+                variant="outlined"
+                label="Service Description"
+                aria-label="Pick a title for your service"
+                name="serviceDescription"
+                type="text"
+                onChange={handleOnChangeCreateServiceForm}
+              />
+            </Stack>
+          </CardContent>
+        </Card>
+      </Box>
+
+      <Divider />
+
+      <Box display="flex" alignItems="flex-start">
+        <Box py={1} width={600} maxWidth={600}>
+          <Typography
+            fontWeight="700"
+            fontSize={18}
+            py={1}
+            color="text.primary"
+          >
+            Add a thumbnail
+          </Typography>
+        </Box>
+
+        <Card variant="outlined" sx={{ width: "100%" }}>
+          <CardContent>
+            <Box
+              sx={{
+                width: "100%",
+                border: "dashed 1px #B3B3B3",
+
+                height: 400,
+              }}
+            >
+              {selectedImage === null ? (
+                <Fragment>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    onChange={handleOnChangeFile}
+                    style={{ display: "none" }}
+                  />
+                  <Stack alignItems="center">
+                    <ImageIcon
+                      fontSize="large"
+                      sx={{ color: "#aaa", width: 80, height: 80 }}
+                    />
+                    <Box
+                      py={2}
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="center"
+                    >
+                      <Typography
+                        py={1}
+                        fontSize={25}
+                        variant="button"
+                        color="primary"
+                        onClick={() => fileRef.current.click()}
+                      >
+                        Select a thumbnail to represent your service
+                      </Typography>
+                      <Typography
+                        fontSize={22}
+                        fontWeight="medium"
+                        color="text.secondary"
+                      >
+                        Max 6MB each (12mb for videos)
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Fragment>
+              ) : (
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    style={{ width: "100%", height: "100%" }}
+                    src={URL.createObjectURL(selectedImage)}
+                  />
+                </Box>
+              )}
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+
+      <Divider />
+
+      <Card variant="outlined">
+        <CardContent>
+          <Typography fontWeight="700" fontSize={18} color="text.primary">
+            Add tags
+          </Typography>
+          <Typography color="text.secondary" fontWeight="500" fontSize={14}>
+            Increase the relevancy of your contract with tags. Try (budget:low,
+            quick-job)
+          </Typography>
+          <Typography
+            variant="caption"
+            fontWeight="500"
+            color="#757575"
+            width={350}
+          >
+            Tags are separated by spaces
+          </Typography>
+
           <Paper
             component="form"
+            variant="outlined"
             sx={{
+              mt: 2,
               p: "10px 4px",
               display: "flex",
               alignItems: "center",
@@ -443,213 +582,109 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
               }
             />
           </Paper>
-        </Box>
-      </Box>
+        </CardContent>
+      </Card>
 
-      <Box>
-        <Typography fontWeight="700" fontSize={18} py={1} color="text.primary">
-          Add a thumbnail
-        </Typography>
-        <Box
-          sx={{
-            width: "100%",
-            border: "dashed 1px #B3B3B3",
-            padding: 10,
-            height: 400,
-          }}
-        >
-          {selectedImage === null ? (
-            <Fragment>
-              <input
-                ref={fileRef}
-                type="file"
-                onChange={handleOnChangeFile}
-                style={{ display: "none" }}
-              />
-              <Stack alignItems="center">
-                <ImageIcon
-                  fontSize="large"
-                  sx={{ color: "#aaa", width: 80, height: 80 }}
-                />
-                <Box
-                  py={2}
-                  display="flex"
-                  flexDirection="column"
-                  alignItems="center"
-                >
-                  <Typography
-                    py={1}
-                    fontSize={25}
-                    variant="button"
-                    color="primary"
-                    onClick={() => fileRef.current.click()}
-                  >
-                    Select a thumbnail to represent your service
-                  </Typography>
-                  <Typography
-                    fontSize={22}
-                    fontWeight="medium"
-                    color="text.secondary"
-                  >
-                    Max 6MB each (12mb for videos)
-                  </Typography>
-                </Box>
-              </Stack>
-            </Fragment>
-          ) : (
-            <Box
-              sx={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <img
-                style={{ width: 200, height: 200 }}
-                src={URL.createObjectURL(selectedImage)}
-              />
-            </Box>
-          )}
-        </Box>
-      </Box>
-
-      <Box sx={{ width: "100%" }}>
-        <Typography fontWeight="700" fontSize={18} py={1} color="text.primary">
-          Offers (Max 6)
-        </Typography>
-        <Box sx={{ width: "100%", borderBottom: 1, borderColor: "divider" }}>
-          <Tabs
-            value={tabIndex}
-            onChange={handleOnChangeTabIndex}
-            aria-label="basic tabs example"
+      <Card sx={{ width: "100%" }} variant="outlined">
+        <CardContent>
+          <Typography
+            fontWeight="700"
+            fontSize={18}
+            py={1}
+            color="text.primary"
           >
-            <Tab label="Beginner" {...a11yProps(0)} />
-            <Tab label="Business" {...a11yProps(1)} />
-            <Tab label="Enterprise" {...a11yProps(2)} />
-          </Tabs>
-        </Box>
-        <Box sx={{ width: "100%" }}>
-          <TabPanel value={tabIndex} index={0} sx={{ width: "100%" }}>
-            <TextField
-              onChange={handleOnChangePrice}
-              id="beginner"
-              placeholder="19.99"
-              label="Beginner Price"
-              name="service-beginner-price-input"
-              margin="normal"
-              value={createServiceForm.offers.beginner.price}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">$</InputAdornment>
-                ),
-              }}
-              sx={{ width: "auto" }}
-            />
-            <Grid
-              justifyContent="space-between"
-              container
-              direction="row"
-              sx={{ width: "100%" }}
-              flexWrap="wrap"
-            >
-              {createServiceForm.offers.beginner.values.map((offer, idx) => {
-                return (
-                  <Grid item xs={5.8} key={idx}>
-                    <TextField
-                      label={`Offer ${idx + 1}`}
-                      margin="dense"
-                      variant="filled"
-                      fullWidth
-                      value={offer}
-                      onChange={(e) => handleOnChangeOffer(e, idx)}
+            Offers (Max 6)
+          </Typography>
+          <Typography
+            color="text.secondary"
+            fontWeight="500"
+            maxWidth={600}
+            fontSize={14}
+          >
+            Fill out your offers and the associated packages they will be
+            included in. If a package (i.e. enterprise) has no checkboxes
+            checked it will not be included.
+          </Typography>
+          <Box pt={2}>
+            {new Array(6).fill(1).map((value, idx, arr) => {
+              return (
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <TextField
+                    sx={{ width: 600 }}
+                    label={`Offer ${idx + 1}`}
+                    name="service-beginner-price-input"
+                    margin="normal"
+                    value={offers[idx]}
+                    onChange={(e) => handleOnChangeOffers(e, idx)}
+                  />
+
+                  <Stack spacing={2} direction="row" alignItems="center">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          defaultChecked
+                          onChange={(e) => handleOnChangeCheckbox(e, idx)}
+                        />
+                      }
+                      label="Beginner"
                     />
-                  </Grid>
-                );
-              })}
-            </Grid>
-          </TabPanel>
-          <TabPanel value={tabIndex} index={1}>
-            <TextField
-              onChange={handleOnChangePrice}
-              id="business"
-              placeholder="59.99"
-              label="Business Price"
-              name="service-business-price-input"
-              margin="normal"
-              value={createServiceForm.offers.business.price}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">$</InputAdornment>
-                ),
-              }}
-              sx={{ width: "auto" }}
-            />
-            <Grid
-              justifyContent="space-between"
-              container
-              direction="row"
-              sx={{ width: "100%" }}
-              flexWrap="wrap"
-            >
-              {createServiceForm.offers.business.values.map((offer, idx) => {
-                return (
-                  <Grid item xs={5.8} key={idx}>
-                    <TextField
-                      label={`Offer ${idx + 1}`}
-                      margin="dense"
-                      variant="filled"
-                      fullWidth
-                      value={offer}
-                      onChange={(e) => handleOnChangeOffer(e, idx)}
+                    <FormControlLabel
+                      control={<Checkbox defaultChecked />}
+                      label="Business"
                     />
-                  </Grid>
-                );
-              })}
-            </Grid>
-          </TabPanel>
-          <TabPanel value={tabIndex} index={2}>
-            <TextField
-              onChange={handleOnChangePrice}
-              id="enterprise"
-              placeholder="99.99"
-              label="Enterprise Price"
-              margin="normal"
-              value={createServiceForm.offers.enterprise.price}
-              name="service-enterprise-price-input"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">$</InputAdornment>
-                ),
-              }}
-              sx={{ width: "auto" }}
-            />
-            <Grid
-              justifyContent="space-between"
-              container
-              direction="row"
-              sx={{ width: "100%" }}
-              flexWrap="wrap"
-            >
-              {createServiceForm.offers.enterprise.values.map((offer, idx) => {
-                return (
-                  <Grid item xs={5.8} key={idx}>
-                    <TextField
-                      label={`Offer ${idx + 1}`}
-                      margin="dense"
-                      variant="filled"
-                      fullWidth
-                      value={offer}
-                      onChange={(e) => handleOnChangeOffer(e, idx)}
+                    <FormControlLabel
+                      control={<Checkbox defaultChecked />}
+                      label="Enterprise"
                     />
-                  </Grid>
-                );
-              })}
-            </Grid>
-          </TabPanel>
-        </Box>
-      </Box>
+                  </Stack>
+                </Stack>
+              );
+            })}
+          </Box>
+        </CardContent>
+        <Divider />
+        <CardContent>
+          <Stack
+            sx={{ display: "flex" }}
+            spacing={2}
+            direction="row"
+            alignItems="center"
+            justifyContent="space-evenly"
+          >
+            <FormControl sx={{ flexGrow: 1 }}>
+              <InputLabel>Beginner Price</InputLabel>
+              <BootstrapInput
+                id="beginner"
+                type="numeric"
+                onChange={handleOnChangePrice}
+                value={`${createServiceForm.offers.beginner.price}`}
+              />
+            </FormControl>
+
+            <FormControl sx={{ flexGrow: 1 }}>
+              <InputLabel>Business Price</InputLabel>
+              <BootstrapInput
+                id="business"
+                onChange={handleOnChangePrice}
+                value={`${createServiceForm.offers.business.price}`}
+              />
+            </FormControl>
+
+            <FormControl sx={{ flexGrow: 1 }}>
+              <InputLabel>Enterprise Price</InputLabel>
+              <BootstrapInput
+                id="enterprise"
+                onChange={handleOnChangePrice}
+                value={`${createServiceForm.offers.enterprise.price}`}
+              />
+            </FormControl>
+          </Stack>
+        </CardContent>
+      </Card>
 
       <Stack direction="row" alignItems="center" justifyContent="flex-end">
         <Button

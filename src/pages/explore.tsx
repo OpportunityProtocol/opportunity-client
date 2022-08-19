@@ -1,12 +1,12 @@
-import React, { useEffect, useState, FunctionComponent } from "react";
+import React, { useEffect, useState, FunctionComponent, useContext, ChangeEvent } from "react";
 import { useStyles } from "../modules/market/MarketStyles";
-import { Grid, Container, Typography, Button, Box, Stack } from "@mui/material";
+import { Grid, Container, Typography, Button, Box, Stack, Alert, TextField, FormControlLabel, Checkbox, MenuItem, Card, alpha } from "@mui/material";
 
 import MarketDisplay from "../modules/market/components/MarketDisplay";
 import { ICarouselItemProps } from "../modules/market/MarketInterface";
 import JobDisplay from "../modules/market/components/JobDisplay";
 import ServiceCard from "../modules/contract/components/ServiceCard/ServiceCard";
-import { KeyboardArrowRight, NorthEast } from "@mui/icons-material";
+import { CheckBox, KeyboardArrowRight, NorthEast } from "@mui/icons-material";
 import { NextPage } from "next";
 import { hexToDecimal } from "../common/helper";
 import VerifiedAvatar from "../modules/user/components/VerifiedAvatar";
@@ -20,6 +20,9 @@ import { GET_MARKETS } from "../modules/market/MarketGQLQueries";
 import { GET_VERIFIED_FREELANCERS } from "../modules/user/UserGQLQueries";
 import { ConfirmationDialog } from "../common/components/ConfirmationDialog";
 import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
+import Carousel from "react-material-ui-carousel";
+import { loggedOutHeroCarouselItems } from "../modules/market/MarketConstants";
+import SearchContext from "../context/SearchContext";
 
 const HEIGHT = "600px";
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
@@ -84,7 +87,7 @@ const ExplorePage: NextPage = () => {
   );
   const [featuredMarkets, setFeaturedMarkets] = useState<Array<any>>([]);
   const [services, setServices] = useState([]);
-  const [featuredContracts, setFeaturedContracts] = useState([]);
+  const [featuredContracts, setFeaturedContracts] = useState<Array<any>>([]);
 
   const getServices: QueryResult = useQuery(GET_SERVICES);
   const contractsQuery: QueryResult = useQuery(GET_CONTRACTS);
@@ -106,7 +109,6 @@ const ExplorePage: NextPage = () => {
   }, [marketsQuery.loading]);
 
   useEffect(() => {
-    console.log(verifiedFreelancersQuery);
     if (!verifiedFreelancersQuery.loading && verifiedFreelancersQuery.data) {
       setVerifiedFreelancers(verifiedFreelancersQuery.data.verifiedUsers);
     }
@@ -128,81 +130,124 @@ const ExplorePage: NextPage = () => {
 
   return (
     <Box>
-      <Box
-        sx={{
-          height: 400,
-          bgcolor: "#fff",
-          width: "100%",
-          borderBottom: "1px solid #ddd",
-        }}
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Box my={1}>
-          <Typography
-            fontWeight="bold"
-            fontSize={35}
-            textAlign="center"
-            color="text.primary"
-          >
-            Welcome to Lens Talent
-          </Typography>
-          <Typography
-            fontWeight="medium"
-            py={1}
-            maxWidth={550}
-            textAlign="center"
-            paragraph
-            color="text.secondary"
-          >
-            Lens Talent is a decentralized protocol allowing anyone to find work and earn income in a
-            permissionless manner.{" "}
-            <Typography fontSize={20} component="span">
-              🌍
-            </Typography>
-          </Typography>
-        </Box>
-        <SearchBarV1 width={500} />
-      </Box>
+
       <Container maxWidth="lg" className={classes.root}>
+
+      <Carousel
+          animation="slide"
+          fullHeightHover={true}
+          indicators={false}
+          autoPlay
+          interval={8000}
+        >
+          {loggedOutHeroCarouselItems.map((item, i, arr) => (
+            <CarouselItem
+              key={i}
+              item={item}
+              itemLength={arr.length}
+              index={i}
+            />
+          ))}
+        </Carousel>
+      
         <Box my={2}>
+          <Box>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Typography
+                variant="h5"
+                py={2}
+                fontWeight="bold"
+                color="rgba(33, 33, 33, .85)"
+              >
+                Jobs and Services
+              </Typography>
+
+              <Button
+                endIcon={<KeyboardArrowRight />}
+                variant="text"
+                size="large"
+              >
+                See all
+              </Button>
+            </Stack>
+          </Box>
+          <Grid
+            sx={{ mb: 2 }}
+            container
+            direction="row"
+            overflow="scroll"
+            flexWrap="wrap"
+            spacing={2}
+          >
+            {
+              featuredContracts.map((item, idx: number, arr: Array<any>) => {
+                return (
+                  <Grid item xs={6}>
+                    {item?.__typename == 'Contract' ? <JobDisplay data={item} /> : <ServiceCard id={item?.id} data={item} /> }
+                  </Grid>
+                )
+              })
+            }
+          </Grid>
+        </Box>
+
+        <Box
+          sx={{
+            my: 4,
+            mt: 6,
+            p: 3,
+            width: "100%",
+            bgcolor: (theme) => alpha(theme.palette.primary.light, 0.4),
+            border: "1px solid #ddd",
+          }}
+        >
           <Stack
+            justifyContent="space-between"
             direction="row"
             alignItems="center"
-            justifyContent="space-between"
           >
-            <Typography
-              variant="h5"
-              py={2}
-              fontWeight="bold"
-              color="rgba(33, 33, 33, .85)"
-            >
-              Expand your network
-            </Typography>
-
-            <Button
-              endIcon={<KeyboardArrowRight />}
-              variant="text"
-              size="large"
-            >
-              Explore freelancers
-            </Button>
+            <Box pb={2}>
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                color="rgba(33, 33, 33, .85)"
+              >
+                Featured Services
+              </Typography>
+              <Typography color="primary" variant="button" component="span" onClick={() => searchContext?.actionable?.search('sdfsdf')}>
+                Learn more about creating services{" "}
+                <NorthEast fontSize="small" />
+              </Typography>
+            </Box>
           </Stack>
-          <Stack
+
+          <Grid
+          sx={{ width: '100%' }}
+            container
+            alignItems="center"
             direction="row"
             flexWrap="nowrap"
-            alignItems="center"
-            justifyContent="flex-start"
-            spacing={5}
+            spacing={3}
           >
-            {verifiedFreelancers.map(({ address }) => {
-              return <VerifiedAvatar address={address} />;
+            {services.slice(0, 3).map((serviceData: ServiceStruct) => {
+              return (
+                <Grid item xs={4} key={serviceData?.id?._hex}> 
+                  <ServiceCard
+                  //  outlined={false}
+                    id={hexToDecimal(serviceData.id._hex)}
+                    data={serviceData}
+                  />
+                </Grid>
+              );
             })}
-          </Stack>
+          </Grid>
         </Box>
 
+        <Box sx={{ mb: 4 }}>
         <Grid
           container
           direction="column"
@@ -260,101 +305,51 @@ const ExplorePage: NextPage = () => {
             );
           })}
         </Grid>
+        </Box>
 
-        <Box
-          sx={{
-            mt: 8,
-            p: 3,
-            width: "100%",
-            bgcolor: "#fff",
-            border: "1px solid #ddd",
-          }}
-        >
+        <Box mb={4}>
           <Stack
-            justifyContent="space-between"
             direction="row"
             alignItems="center"
+            justifyContent="space-between"
           >
-            <Box pb={2}>
-              <Typography
-                variant="h5"
-                fontWeight="bold"
-                color="rgba(33, 33, 33, .85)"
-              >
-                Featured Services
-              </Typography>
-              <Typography color="primary" variant="button" component="span">
-                Learn more about creating services{" "}
-                <NorthEast fontSize="small" />
-              </Typography>
-            </Box>
-          </Stack>
+            <Typography
+              variant="h5"
+              py={2}
+              fontWeight="bold"
+              color="rgba(33, 33, 33, .85)"
+            >
+              Expand your network
+            </Typography>
 
-          <Grid
-            container
-            alignItems="center"
+            <Button
+              endIcon={<KeyboardArrowRight />}
+              variant="text"
+              size="large"
+            >
+              Explore freelancers
+            </Button>
+          </Stack>
+          <Stack
             direction="row"
             flexWrap="nowrap"
-            spacing={3}
+            alignItems="center"
+            justifyContent="flex-start"
+            spacing={5}
           >
-            {services.slice(0, 3).map((serviceData: ServiceStruct) => {
-              return (
-                <Grid item xs={4}>
-                  <ServiceCard
-                    id={hexToDecimal(serviceData.id._hex)}
-                    data={serviceData}
-                  />
-                </Grid>
-              );
+            {verifiedFreelancers.map(({ address }) => {
+              return <VerifiedAvatar address={address} />;
             })}
-          </Grid>
-        </Box>
-
-        <Box my={6}>
-          <Box>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Typography
-                variant="h5"
-                py={2}
-                fontWeight="bold"
-                color="rgba(33, 33, 33, .85)"
-              >
-                Featured contracts
-              </Typography>
-
-              <Button
-                endIcon={<KeyboardArrowRight />}
-                variant="text"
-                size="large"
-              >
-                See all
-              </Button>
-            </Stack>
+          </Stack>
           </Box>
-          <Grid
-            sx={{ mb: 2 }}
-            container
-            direction="row"
-            overflow="scroll"
-            flexWrap="wrap"
-            spacing={2}
-          >
-            {featuredContracts.map((contract: any) => {
-              return (
-                <Grid item xs={4}>
-                  <JobDisplay data={contract} />
-                </Grid>
-              );
-            })}
-          </Grid>
-        </Box>
       </Container>
     </Box>
   );
 };
 
 export default ExplorePage;
+
+
+    {/*   */}
+
+      {/*  */}

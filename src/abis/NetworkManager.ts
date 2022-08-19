@@ -314,12 +314,6 @@ const NetworkManagerInterface = [
       },
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "referral",
-        "type": "address"
-      },
-      {
-        "indexed": false,
         "internalType": "uint256",
         "name": "offer",
         "type": "uint256"
@@ -369,6 +363,31 @@ const NetworkManagerInterface = [
     "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "lensProfileId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "metadataPtr",
+        "type": "string"
+      }
+    ],
+    "name": "UpdateUserMetadata",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": true,
         "internalType": "address",
         "name": "registeredAddress",
@@ -390,6 +409,12 @@ const NetworkManagerInterface = [
         "indexed": false,
         "internalType": "string",
         "name": "imageURI",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "metadata",
         "type": "string"
       }
     ],
@@ -535,13 +560,13 @@ const NetworkManagerInterface = [
         "type": "uint256[]"
       },
       {
-        "internalType": "uint256",
-        "name": "referralSharePayout",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "lensTalentServiceCollectModule",
+        "type": "address"
       },
       {
         "internalType": "address",
-        "name": "lensTalentServiceCollectModule",
+        "name": "lensTalentReferenceModule",
         "type": "address"
       }
     ],
@@ -820,11 +845,6 @@ const NetworkManagerInterface = [
             "type": "uint256[]"
           },
           {
-            "internalType": "uint256",
-            "name": "referralShare",
-            "type": "uint256"
-          },
-          {
             "internalType": "bool",
             "name": "exist",
             "type": "bool"
@@ -837,6 +857,11 @@ const NetworkManagerInterface = [
           {
             "internalType": "address",
             "name": "collectModule",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "referenceModule",
             "type": "address"
           },
           {
@@ -891,11 +916,6 @@ const NetworkManagerInterface = [
             "type": "uint256"
           },
           {
-            "internalType": "address",
-            "name": "referral",
-            "type": "address"
-          },
-          {
             "internalType": "uint8",
             "name": "offer",
             "type": "uint8"
@@ -941,11 +961,6 @@ const NetworkManagerInterface = [
             "type": "uint256[]"
           },
           {
-            "internalType": "uint256",
-            "name": "referralShare",
-            "type": "uint256"
-          },
-          {
             "internalType": "bool",
             "name": "exist",
             "type": "bool"
@@ -958,6 +973,11 @@ const NetworkManagerInterface = [
           {
             "internalType": "address",
             "name": "collectModule",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "referenceModule",
             "type": "address"
           },
           {
@@ -1070,6 +1090,30 @@ const NetworkManagerInterface = [
     "inputs": [
       {
         "internalType": "address",
+        "name": "employer",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "serviceId",
+        "type": "uint256"
+      }
+    ],
+    "name": "isFamiliar",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "account",
         "type": "address"
       }
@@ -1117,11 +1161,6 @@ const NetworkManagerInterface = [
         "internalType": "uint256",
         "name": "serviceId",
         "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "referral",
-        "type": "address"
       },
       {
         "internalType": "uint8",
@@ -1203,11 +1242,6 @@ const NetworkManagerInterface = [
         "type": "uint256"
       },
       {
-        "internalType": "address",
-        "name": "referral",
-        "type": "address"
-      },
-      {
         "internalType": "uint8",
         "name": "offer",
         "type": "uint8"
@@ -1259,9 +1293,14 @@ const NetworkManagerInterface = [
         "internalType": "struct DataTypes.CreateProfileData",
         "name": "vars",
         "type": "tuple"
+      },
+      {
+        "internalType": "string",
+        "name": "metadata",
+        "type": "string"
       }
     ],
-    "name": "registerWorker",
+    "name": "register",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1606,11 +1645,6 @@ const NetworkManagerInterface = [
         "type": "string"
       },
       {
-        "internalType": "uint256",
-        "name": "referralShare",
-        "type": "uint256"
-      },
-      {
         "internalType": "bool",
         "name": "exist",
         "type": "bool"
@@ -1623,6 +1657,11 @@ const NetworkManagerInterface = [
       {
         "internalType": "address",
         "name": "collectModule",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "referenceModule",
         "type": "address"
       },
       {
@@ -1660,11 +1699,6 @@ const NetworkManagerInterface = [
         "type": "string"
       },
       {
-        "internalType": "uint256",
-        "name": "referralShare",
-        "type": "uint256"
-      },
-      {
         "internalType": "bool",
         "name": "exist",
         "type": "bool"
@@ -1677,6 +1711,11 @@ const NetworkManagerInterface = [
       {
         "internalType": "address",
         "name": "collectModule",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "referenceModule",
         "type": "address"
       },
       {
@@ -1761,6 +1800,19 @@ const NetworkManagerInterface = [
   {
     "inputs": [
       {
+        "internalType": "string",
+        "name": "metadataPtr",
+        "type": "string"
+      }
+    ],
+    "name": "updateMetadata",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "contractId",
         "type": "uint256"
@@ -1794,6 +1846,31 @@ const NetworkManagerInterface = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "workRelationshipToStatus",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ]
+
 export { NetworkManagerInterface }

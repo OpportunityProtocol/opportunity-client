@@ -32,16 +32,6 @@ const NavigationBreadcrumbs: FunctionComponent = () => {
         <StyledBreadcrumb component="a" href="#" label="Catalog" />
         <StyledBreadcrumb label="Accessories" />
       </Breadcrumbs>
-
-      <Stack direction='row' justifyContent='flex-end' spacing={2}>
-      <Button  onClick={() => router.push('/create/contract')} size='small' variant='contained' sx={{width: 'auto', height: 25}}>
-              Create Contract
-            </Button>
-
-            <Button onClick={() => router.push('/create/service')} size='small' variant='contained' sx={{width: 'auto', height: 25}} disabled={isVerifiedFreelancer === false}>
-              Create Service
-            </Button>
-      </Stack>
     </Container>
   );
 };

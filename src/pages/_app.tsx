@@ -38,6 +38,7 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { LocalizationProvider } from "@mui/lab";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import apolloClient from "../apollo";
+import { SearchProvider } from "../context/SearchContext";
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat],
   [
@@ -117,11 +118,13 @@ function MyApp({ Component, pageProps }: AppProps) {
             <ThemeProvider theme={theme}>
               <CssBaseline />
               <ApolloProvider client={apolloClient}>
+                <SearchProvider>
                 <Opportunity>
                   <NavigationBar />
-                {/*  <NavigationBreadcrumbs /> */}
+                  <NavigationBreadcrumbs /> 
                   <Component {...pageProps} />
                 </Opportunity>
+                </SearchProvider>
               </ApolloProvider>
             </ThemeProvider>
           </ReduxProvider>

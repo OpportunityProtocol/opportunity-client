@@ -69,6 +69,10 @@ import { BigNumber, ethers } from "ethers";
 import TransactionTokenDialog from "../../../modules/market/components/TransactionTokenDialog";
 import { ConfirmationDialog } from "../../../common/components/ConfirmationDialog";
 import { MailOutline, Refresh } from "@material-ui/icons";
+import { QueryResult, useQuery } from "@apollo/client";
+import { GET_SERVICE_BY_ID } from "../../../modules/contract/ContractGQLQueries";
+import { maxWidth } from "@mui/system";
+import { getMetadata } from '../../../common/ipfs-helper'
 
 interface IViewContractPage {
   router: NextRouter;
@@ -104,6 +108,12 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
 
   const userAddress = useSelector(selectUserAddress);
 
+  const serviceQueryById: QueryResult = useQuery(GET_SERVICE_BY_ID, {
+    variables: {
+      serviceId: router.query.serviceId
+    }
+  })
+
   const renderPackageInformation = (idx: number) => {
     try {
       return (
@@ -135,22 +145,15 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     {
       enabled: false,
       chainId: CHAIN_ID,
-      args: router.query.creator,
+      args: serviceData?.creator,
       onSuccess: (data: Result) => {
-        console.log(data);
-        console.log(router.query);
         setServiceOwnerLensProfileId(hexToDecimal(data._hex));
       },
       onError: (error) => {
-        console.log(router.query);
-        console.log("BOOOOOOOOOO");
+
       },
     }
   );
-
-  useEffect(() => {
-    lensHub_getProfile.refetch();
-  }, []);
 
   //get user lens profile
   const lensHub_getProfile = useContractRead(
@@ -165,13 +168,10 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       chainId: CHAIN_ID,
       args: [serviceOwnerLensProfileId],
       onSuccess: (data: Result) => {
-        console.log("@@@@@@@@@@@@@@@");
-        console.log(data);
         setSeriviceOwnerLensProfile(data);
       },
       onError: (error) => {
-        console.log(error);
-        console.log(serviceOwnerLensProfileId);
+
       },
     }
   );
@@ -186,7 +186,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     {
       enabled: true,
       watch: false,
-      args: router.query.id,
+      args: router.query?.serviceId,
       onSuccess(data: Result) {
         setServicePubId(hexToDecimal(data._hex));
       },
@@ -212,34 +212,17 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     }
   );
 
-  const getServiceMetadata = async (ptr) => {
-    let retVal: any = {};
+  useEffect(() => {
+    serviceQueryById.refetch()
+    networkManager_getLensProfileIdFromAddress.refetch();
+    networkManager_getPubIdFromServiceId.refetch();
+  }, [router.query.serviceId])
 
-    if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
-      const ipfs = create({
-        url: "/ip4/127.0.0.1/tcp/8080",
-      });
-
-      retVal = await ipfs.get(`/ipfs/${ptr}`).next();
-    } else {
-      retVal = await fleek.getService(serviceData.metadataPtr);
+  useEffect(() => {
+    if (!serviceQueryById.loading && serviceQueryById.data) {
+      setServiceData(serviceQueryById.data.service)
     }
-
-    if (!retVal) {
-      throw new Error("Unable to retrieve service metadata data");
-    } else {
-      const jsonString = Buffer.from(retVal.value).toString("utf8");
-      const parsedString = jsonString.slice(
-        jsonString.indexOf("{"),
-        jsonString.lastIndexOf("}") + 1
-      );
-      const parsedData = JSON.parse(parsedString);
-      const updatedImg = Buffer.from(parsedData.serviceThumbnail.data);
-
-      setDisplayImg(updatedImg);
-      setServiceMetadata(parsedData);
-    }
-  };
+  })
 
   useEffect(() => {
     lensHub_getPub.refetch();
@@ -252,15 +235,24 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     });
   }, [serviceOwnerLensProfileId]);
 
+
   useEffect(() => {
-    if (router.query.metadataPtr) {
-      getServiceMetadata(router.query.metadataPtr);
+    async function loadMetadata() {
+      if (serviceData?.metadataPtr) {
+        const parsedData = await getMetadata(serviceData?.metadataPtr)
+        //@ts-ignore
+        if (parsedData?.serviceThumbnail && parsedData?.serviceThumbnail?.data) {
+          const buffer: Buffer = parsedData?.serviceThumbnail?.data
+          const updatedImg: any = Buffer.from(buffer);
+          
+          setDisplayImg(updatedImg);
+          setServiceMetadata(parsedData);
+        }
+      }
     }
 
-    setServiceData(router.query);
-    networkManager_getLensProfileIdFromAddress.refetch();
-    networkManager_getPubIdFromServiceId.refetch();
-  }, [router.query.id]);
+    loadMetadata()
+  }, [serviceData?.metadataPtr]);
 
   const networkManager_purchaseService = useContractWrite(
     {
@@ -333,37 +325,33 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     };
   };
 
-  const onApprove = async () => {
-    await dai_approve.writeAsync();
-  };
-
   const onPurchase = async () => {
-    onApprove().then(async () => {
+    dai_approve.writeAsync().then(async () => {
       if (isSuccess) {
         const splitSignature: ethers.Signature =
-          await ethers.utils.splitSignature(data);
-        await networkManager_purchaseService.writeAsync({
-          args: [
-            serviceData.id,
-            ZERO_ADDRESS,
-            BigNumber.from("0"),
-            {
-              v: splitSignature.v,
-              r: splitSignature.r,
-              s: splitSignature.s,
-              deadline: 0,
-            },
-          ],
-        });
+        await ethers.utils.splitSignature(data);
+      await networkManager_purchaseService.writeAsync({
+        args: [
+          serviceData.id,
+          BigNumber.from("0"),
+          {
+            v: splitSignature.v,
+            r: splitSignature.r,
+            s: splitSignature.s,
+            deadline: 0,
+          },
+        ],
+      });
       }
     });
+
   };
 
   const onSign = async () => {
     const domain = getDomain();
     const types = getTypes();
     const value = await getValues();
-    await signTypedData({ domain, types, value });
+    await signTypedData({ domain, types, value })
   };
 
   const lensHub_comment = useContractWrite(
@@ -379,18 +367,13 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         gasPrice: 90000000000,
       },
       onError(error, variables, context) {
-        console.log('lensHub_comment')
-        console.log(variables)
-          console.log(error)
+  
       },
       onSuccess(data, variables, context) {
-        console.log('@@@@@@@@@@@@@@@@@@')
-        console.log('lensHub_comment')
-        console.log(data)
+
       },
       onSettled(data, error, variables, context) {
-        console.log('Settled @@@')
-        console.log('lensHub_comment')
+    
         setLoadingReviewTx(false)
       },
     }
@@ -406,6 +389,34 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       setLoadingReviewTx(false)
     })
   }
+
+  const [buyingEnabled, setBuyingEnabled] = useState<boolean>(false)
+
+  const serviceCollectModule_isFamiliar = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface
+    },
+    "isFamiliar",
+    {
+      args: [userAddress, serviceData?.id],
+      enabled: true,
+      watch: true,
+      cacheTime: 30000,
+      chainId: CHAIN_ID,
+      
+      overrides: {
+        gasLimit: BigNumber.from("900000"),
+      },
+      onSuccess(data) {
+        setBuyingEnabled(true)
+      },
+      onError(err) {
+        setBuyingEnabled(true)
+      },
+    }
+  )
+
 
   const confirmationDialogContent = [
     <DialogContentText id="alert-dialog-description">
@@ -468,16 +479,19 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
             justifyContent="space-between"
           >
             <Card
-              variant="elevated"
-              elevation={0}
+            elevation={0}
               sx={{
+               //border: '1px solid #ddd',
                 width: "100%",
                 py: 2,
-                bgcolor: "transparent !important",
-                flexDirection: "column",
+              //  bgcolor: "transparent !important",
+              //  flexDirection: "column",
               }}
             >
-              <Stack spacing={2}>
+              <CardContent sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between'}}>
+
+
+              <Stack spacing={3}>
                 <Stack>
                   <VerifiedAvatar
                     address={serviceData?.creator}
@@ -487,15 +501,12 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                     showValue={false}
                   />
 
-                  <Box>
-                    <Typography fontSize={25} fontWeight="bold">
-                      {serviceOnwerLensProfile?.handle}
-                    </Typography>
-                  </Box>
                 </Stack>
 
+    
+
                 <Stack spacing={0.3}>
-                  <Typography fontWeight="bold" fontSize={25}>
+                  <Typography fontWeight="bold" fontSize={20} maxWidth={60}>
                     {serviceMetadata?.serviceTitle
                       ? serviceMetadata?.serviceTitle
                       : "Unable to load title"}
@@ -511,33 +522,15 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                       : "Unable to load description"}
                   </Typography>
                 </Stack>
-              </Stack>
-            </Card>
 
-            <Stack direction="row" alignItems="center" my={3}>
-              <IconButton fontSize="large">
-                <MailOutline />
-              </IconButton>
-
-              <IconButton fontSize="large">
-                <AccountCircleOutlined />
-              </IconButton>
-
-              <IconButton fontSize="large">
-                <ShareOutlined />
-              </IconButton>
-            </Stack>
-          </Stack>
-
-          <Stack>
-            <Stack
+                <Stack
               my={2}
               direction="row"
               alignItems="center"
-              justifyContent="space-between"
+              spacing={5}
               sx={{ width: "100%" }}
             >
-              <Box textAlign="center">
+              <Box textAlign="start">
                 <Typography
                   pb={1}
                   fontWeight="bold"
@@ -569,7 +562,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                 </Stack>
               </Box>
 
-              <Box textAlign="center">
+              <Box textAlign="start">
                 <Typography
                   pb={1}
                   fontWeight="bold"
@@ -584,26 +577,31 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                 </Typography>
               </Box>
 
-              <Box textAlign="center">
-                <Typography
-                  pb={1}
-                  fontWeight="bold"
-                  fontSize={13}
-                  color="rgba(0,0,0,.56)"
-                >
-                  Reviews
-                </Typography>
-
-                <Typography fontWeight="bold" fontSize={13} color="primary">
-                  0
-                </Typography>
-              </Box>
+             
             </Stack>
+              </Stack>
+
+              <Stack direction="row" alignItems="center" my={3}>
+              <IconButton fontSize="large">
+                <MailOutline />
+              </IconButton>
+
+              <IconButton fontSize="large">
+                <AccountCircleOutlined />
+              </IconButton>
+
+              <IconButton fontSize="large">
+                <ShareOutlined />
+              </IconButton>
+            </Stack>
+              </CardContent>
+              
+            </Card>
+
+
           </Stack>
 
-          <Divider />
-
-          <Box my={5}>
+          <Box my={1.5}>
             <Box py={2} component={Alert} severity="success">
               <Box>
                 <AlertTitle>Earn as babys8 earns. </AlertTitle>
@@ -612,7 +610,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                 <Typography variant="button">How it works</Typography>
               </Box>
               <Stack py={2} spacing={3} direction="row" alignItems="center">
-                <Button disabled variant="contained" sx={{}}>
+                <Button disabled={false} variant="contained" onClick={() => setTokenTransactionDialogOpen(true)}>
                   Invest
                 </Button>
                 <Button variant="outlined" sx={{}}>

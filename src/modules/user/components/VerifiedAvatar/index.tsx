@@ -1,4 +1,15 @@
-import { Box, Typography, Button, Avatar } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Avatar,
+  Card,
+  CardContent,
+  Stack,
+  Divider,
+  Chip,
+  alpha,
+} from "@mui/material";
 import { NextRouter, useRouter } from "next/router";
 import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
 import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
@@ -16,6 +27,10 @@ import { useContractRead } from "wagmi";
 import { Result } from "ethers/lib/utils";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import { ProfileStructStruct } from "../../../../typechain-types/ILensHub";
+import { QueryResult, useQuery } from "@apollo/client";
+import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../UserGQLQueries";
+import fleek from "../../../../fleek";
+import { create } from "ipfs-http-client";
 
 interface IVerifiedAvatarProps {
   avatarSize?: number;
@@ -44,6 +59,8 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
     color: "linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)",
   });
 
+  const [state, setState] = useState<any>({})
+
   const [fallbackLensProfileId, setFallbackLensProfileId] = useState<number>(0);
   const [fallbackLensProfile, setFallbackLensProfile] =
     useState<ProfileStructStruct>({});
@@ -62,7 +79,6 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
       onSuccess: (data) => {
         setFallbackLensProfile(data);
       },
-      onError: (error) => console.log(error),
     }
   );
 
@@ -87,15 +103,65 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
       onSuccess: (data: Result) => {
         setFallbackLensProfileId(hexToDecimal(data._hex));
       },
-      onError: (error) => {
-        console.log(error);
+      onError: (error) => {},
+    }
+  );
+
+  const downloadMetadata = async (ptr: string) => {
+    let retVal: any = {};
+
+    try {
+      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+        const ipfs = create({
+          url: "/ip4/127.0.0.1/tcp/8080",
+        });
+
+        retVal = await ipfs.get(`/ipfs/${ptr}`).next();
+      } else {
+        retVal = await fleek.getUser(ptr);
+      }
+
+      if (!retVal) {
+        throw new Error("Unable to retrieve user metadata");
+      } else {
+        const jsonString = Buffer.from(retVal.value).toString("utf8");
+        const parsedString = jsonString.slice(
+          jsonString.indexOf("{"),
+          jsonString.lastIndexOf("}") + 1
+        );
+        const parsedData = JSON.parse(parsedString);
+    console.log(parsedData)
+   console.log('@@@@@@@@@@@@@@@@@@')
+        setState({
+          ...state,
+          ...parsedData
+        })
+      }
+
+    } catch (error) {
+      console.log("Error downloading metadata from profile")
+    }
+}
+
+  const verifiedUserQuery: QueryResult = useQuery(
+    GET_VERIFIED_FREELANCER_BY_ADDRESS,
+    {
+      variables: {
+        userAddress: address,
       },
     }
   );
 
   useEffect(() => {
+    if (!verifiedUserQuery.loading && verifiedUserQuery.data) {
+      downloadMetadata(verifiedUserQuery.data?.verifiedUsers[0]?.metadata)
+    }
+  }, [verifiedUserQuery.loading]);
+
+  useEffect(() => {
     if (address) {
       networkManager_getLensProfileIdFromAddress.refetch();
+      verifiedUserQuery.refetch()
     }
   }, [address]);
 
@@ -110,63 +176,89 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
   };
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      justifyContent="flex-start"
-      alignItems="flex-start"
-      component={Button}
-      disableElevation
-      disableRipple
-      disableFocusRipple
-      disableTouchRipple
-      sx={{ width: "fit-content" }}
+    <Card
       onClick={() => router.push("/profile")}
+      variant="outlined"
+      sx={{ cursor: 'pointer', borderRadius: 2, width: "100%", maxWidth: 400 }}
     >
-      <div
-        style={{
-          margin: "5px 0px",
+      <CardContent
+        sx={{
+          position: "relative",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
+          flexDirection: "column",
         }}
-        className={styles.root}
       >
-        {!displayImg ? (
+        <Box mt={1} mb={1}>
           <Jazzicon
             diameter={avatarSize}
             seed={jsNumberForAddress(String(address))}
           />
-        ) : (
-          <Avatar src={src} />
-        )}
-      </div>
+        </Box>
 
-      <Box textAlign="center">
-        {showHandle && (
-          <Typography
-            fontWeight="medium"
-            variant="body2"
-            color="#616161"
-            width="auto"
-            noWrap
-          >
-            {renderHandle()}
-          </Typography>
-        )}
+<Box>
+<Typography textAlign="center" pb={1}>
+          {state?.display_name}
+        </Typography>
+        <Typography textAlign="center" pb={1} variant='subtitle2' fontWeight="bold">
+          {renderHandle()}
+        </Typography>
+</Box>
+      
+<Typography
+          fontSize={15}
+          color="rgb(90, 104,119)"
+          textAlign="center"
+          paragraph
+          fontWeight="500"
+        >
+          {state?.description ? <Typography>{state?.description}</Typography> : <Typography> No description </Typography> }
+        </Typography>
+
+  
+        {/*
+
+       Replace with avatar border
+       
+       <Typography color='primary' variant='subtitle2'>
+            Available for hire
+        </Typography> */}
 
         {showValue ? (
           <Typography
+            position="absolute"
+            top={15}
+            right={15}
             variant="caption"
             color="text.primary"
+            fontWeight="medium"
             width="auto"
             noWrap
           >
             ${Math.floor(Math.random() * 101).toFixed(2)} Value
           </Typography>
         ) : null}
-      </Box>
-    </Box>
+      </CardContent>
+      <Divider />
+      <CardContent>
+      <Stack
+          textAlign="center"
+          direction="row"
+          alignItems="center"
+          spacing={1}
+        >
+          {
+            state?.skills?.map((skill) => {
+              return (
+                <Chip label={skill} key={skill} size='small' />
+              )
+            })
+          }
+        </Stack>
+        
+      
+      </CardContent>
+    </Card>
   );
 };
 

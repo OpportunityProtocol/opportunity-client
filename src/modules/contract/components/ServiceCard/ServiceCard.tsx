@@ -52,7 +52,7 @@ import {
   activePublishedServiceDataAdded,
   purchasedServiceDataAdded,
 } from "../../contractReduxSlice";
-import  { ethers } from 'ethers'
+import { ethers } from "ethers";
 import { GET_PURCHASED_SERVICE } from "../../ContractGQLQueries";
 
 interface IServiceCardProps {
@@ -60,14 +60,19 @@ interface IServiceCardProps {
   purchaseData?: PurchasedServiceMetadataStruct;
   data?: ServiceStruct;
   purchase?: boolean;
+  outlined: string;
 }
 
-const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardProps) => {
+const ServiceCard = ({
+  id,
+  data,
+  purchaseData,
+  purchase = false,
+  outlined = true
+}: IServiceCardProps) => {
   const cardStyles = useStyles();
   const router: NextRouter = useRouter();
-  const [loadedData, setLoadedData] = useState<
-    ServiceStruct
-  >(data);
+  const [loadedData, setLoadedData] = useState<ServiceStruct>(data);
 
   const [serviceOwnerLensData, setServiceOwnerLensData] =
     useState<ProfileStructStruct>({});
@@ -92,7 +97,6 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
       args: [Number(loadedData?.id), Number(purchaseData?.purchaseId)],
       onSuccess: async (data) => {
         if (userAddress === loadedData?.creator) {
-
           dispatch(
             activePublishedServiceDataAdded({
               ...loadedData,
@@ -110,14 +114,12 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
           );
         }
       },
-      onError: (error) => {
-
-      },
+      onError: (error) => {},
       overrides: {
         from: userAddress,
         gasLimit: ethers.BigNumber.from("2000000"),
         gasPrice: 90000000000,
-      }
+      },
     }
   );
 
@@ -135,7 +137,6 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
       onSuccess: (data) => {
         setServiceOwnerLensData(data);
       },
-      onError: (error) => console.log(error),
     }
   );
 
@@ -153,7 +154,7 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
         setServiceOwnerLensProfileId(hexToDecimal(data._hex));
       },
       onError: (error) => {
-        console.log(error);
+    
       },
     }
   );
@@ -236,7 +237,6 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
     }
   }, [id, loadedData.id]);
 
-
   const renderButtonState = () => {
     if (!purchase) {
       return (
@@ -256,7 +256,10 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
 
     // owner is viewing
 
-    if (String(loadedData?.creator).toLowerCase() === String(userAddress).toLowerCase()) {
+    if (
+      String(loadedData?.creator).toLowerCase() ===
+      String(userAddress).toLowerCase()
+    ) {
       if (purchaseData) {
         switch (purchaseData.status) {
           case 0:
@@ -339,79 +342,43 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
   };
 
   return (
-    <Card variant="outlined" className={cx(cardStyles.root)}>
-      <CardActionArea
-        onClick={handleOnNavigateToServicePage}
-        sx={{ height: 250, width: "100%" }}
-      >
-        {errors.metadataError ? (
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            sx={{ width: "100%", height: "100%" }}
-          >
-            <BrokenImageIcon
-              sx={{ color: "#dbdbdb", width: 100, height: 100 }}
-              fontSize="large"
-            />
-          </Box>
-        ) : (
-          <CardMedia
-            image={URL.createObjectURL(new Blob([displayImg]))}
-            sx={{ height: "100%", width: "100%" }}
-          />
-        )}
-      </CardActionArea>
-
-      <CardContent>
-        <Box
-          display="flex"
-          alignItems="flex-start"
+    <Card variant={outlined ? "outlined" : "elevation"} elevation={0} sx={{ width: "100%", height: 'auto', cursor: userAddress ? 'pointer' : 'auto' }} onClick={userAddress ? () => router.push(`/view/service/${data?.id}`) : () => {}}>
+      <CardContent sx={{  '&:hover': { color: (theme) => theme.palette.primary.main }, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly'}}>
+        <Stack
+          direction="row"
+          alignItems="center"
           justifyContent="space-between"
         >
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="flex-start"
-          >
-            <VerifiedAvatar
-              lensProfile={serviceOwnerLensData}
-              lensProfileId={serviceOwnerLensProfileId}
-              address={loadedData?.creator}
-              showValue={false}
-              avatarSize={30}
+          {errors.metadataError ? (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+   
+            >
+              <BrokenImageIcon
+                sx={{ color: "#dbdbdb", width: 50, height: 50 }}
+                fontSize="large"
+              />
+            </Box>
+          ) : (
+            <CardMedia
+              image={URL.createObjectURL(new Blob([displayImg]))}
+              sx={{ height: "100%", width: "100%" }}
             />
-          </Stack>
-        </Box>
+          )}
 
-        <Typography
-          paragraph
-          fontWeight="medium"
-          fontSize={14}
-          color="#616161"
-          style={{
-            paddingTop: "10px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          I will manage your social media account on any platform. I have over
-          10 years of exp
-        </Typography>
-
-        <Typography variant="caption">
-          Collected by 20 people in your network
-        </Typography>
-
-        <Stack direction="row" alignItems="center" spacing={0.5}>
-          <Typography fontWeight="medium" fontSize={13} color="rgb(94, 94, 94)">
-            Price:
+          <Typography
+            fontWeight="600"
+      
+            sx={{ px: 1 }}
+          >
+            I will manage your social media account on any platform. I have over
+            10 years of experience
           </Typography>
+        </Stack>
 
+        <Box display='flex' alignItems='center' justifyContent='space-between'>
           <Stack direction="row" alignItems="center" spacing={0.5}>
             <img
               src="/assets/images/dai.svg"
@@ -421,7 +388,31 @@ const ServiceCard = ({ id, data, purchaseData, purchase = false }: IServiceCardP
               {Math.random().toPrecision(2)}{" "}
             </Typography>
           </Stack>
+
+          <Typography color='text.primary' variant="caption">
+            Collected by 20 people
+          </Typography>
+
+        </Box>
+
+        <Stack direction="row" alignItems="center">
+          {serviceMetadata?.tags &&
+          serviceMetadata?.service_tags?.length > 0 ? (
+            serviceMetadata?.service_tags?.map((tag) => {
+              return (
+                <Chip
+                  variant="filled"
+                  sx={{ fontSize: 12, padding: 1, backgroundColor: "#eee" }}
+                  label={tag}
+                  size="small"
+                />
+              );
+            })
+          ) : (
+            <Typography color='text.secondary' variant="caption">Unable to load tags</Typography>
+          )}
         </Stack>
+
       </CardContent>
       {renderButtonState()}
     </Card>

@@ -4,13 +4,8 @@
  */
 
 import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import { useStyles } from "./JobDisplayStyles";
-
 import {
   Box,
-  Avatar,
-  Button,
   Chip,
   Card,
   CardContent,
@@ -20,12 +15,8 @@ import {
   Divider,
 } from "@mui/material";
 
-import { AccessTime, KeyboardArrowDown } from "@mui/icons-material";
 import { useRouter } from "next/router";
 import { IJobDisplayProps } from "../../MarketInterface";
-import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
-import VerifiedAvatar from "../../../user/components/VerifiedAvatar";
-import { RelationshipStruct } from "../../../../typechain-types/IGigEarth";
 import { useAccount, useContractRead } from "wagmi";
 import {
   LENS_HUB_PROXY,
@@ -36,8 +27,7 @@ import { CHAIN_ID } from "../../../../constant/provider";
 import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
 import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../../../common/helper";
-import { create } from "ipfs-http-client";
-import fleek from "../../../../fleek";
+import { getMetadata } from "../../../../common/ipfs-helper";
 
 /**
  * @author Elijah Hampton
@@ -47,17 +37,14 @@ import fleek from "../../../../fleek";
  * metadata due to issues with graphql returning a different encoded format
  */
 const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
-  const classes = useStyles();
   const router = useRouter();
+  const accountData = useAccount();
 
-  const [loading, setLoading] = useState<boolean>(false);
   const [contractOwnerData, setContractOwnerData] = useState<any>({
     lensProfileId: -1,
   });
   const [contractMetadata, setContractMetadata] = useState({});
   const [metadataString, setMetadataString] = useState("");
-
-  const accountData = useAccount();
 
   const networkManager_getContractData = useContractRead(
     {
@@ -94,9 +81,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
           lensProfileId: hexToDecimal(data?._hex),
         });
       },
-      onError: (error) => {
-        console.log(error);
-      },
+      onError: (error) => {},
     }
   );
 
@@ -114,7 +99,6 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
       onSuccess: (data: Result) => {
         setContractOwnerData(data);
       },
-      onError: (error) => console.log(error),
     }
   );
 
@@ -135,51 +119,45 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
   }, [data?.employer]);
 
   useEffect(() => {
-    let retVal: any = {};
-
-    async function getMetadata() {
-      try {
-        if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
-          const ipfs = create({
-            url: "/ip4/127.0.0.1/tcp/8080",
-          });
-
-          retVal = await ipfs.get(`/ipfs/${metadataString}`).next();
-        } else {
-          retVal = await fleek.getService(metadataString);
-        }
-
-        if (!retVal) {
-          throw new Error("Unable to retrieve service metadata data");
-        } else {
-          const jsonString = Buffer.from(retVal.value).toString("utf8");
-          const parsedString = jsonString.slice(
-            jsonString.indexOf("{"),
-            jsonString.lastIndexOf("}") + 1
-          );
-          const parsedData = JSON.parse(parsedString);
-
-          setContractMetadata(parsedData);
-        }
-      } catch (error) {}
+    async function loadMetadata() {
+      const metadata = await getMetadata(metadataString);
+      setContractMetadata(metadata);
     }
 
     if (metadataString) {
-      getMetadata();
+      loadMetadata();
     }
   }, [metadataString]);
 
   return (
     <Card
-      onClick={() => router.push(`/view/contract/${data?.id}`)}
+      onClick={
+        accountData?.data?.address
+          ? () => router.push(`/view/contract/${data?.id}`)
+          : () => {}
+      }
       key={Math.random()}
       variant="outlined"
-      sx={{ "&:hover": { cursor: "pointer" } }}
+      sx={{
+        cursor: accountData?.data?.address ? "pointer" : "auto",
+        width: "100%",
+        height: 210,
+        '&:hover': {
+          color: (theme) => theme.palette.primary.main
+        }
+      }}
     >
-      <CardContent>
-        <Typography color="text.secondary" fontWeight="medium" fontSize={13}>
+      <CardContent
+        sx={{
+          display: "flex",
+          height: "100%",
+          flexDirection: "column",
+          justifyContent: "space-evenly",
+        }}
+      >
+        {/* <Typography color="text.secondary" fontWeight="medium" fontSize={13}>
           August 1, 2022 - 1:59 PM
-        </Typography>
+        </Typography> */}
         {contractMetadata?.contract_title ? (
           <Typography fontWeight="600">
             {contractMetadata?.contract_title}
@@ -193,7 +171,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
         <Box
           component={Typography}
           paragraph
-          color="rgb(94, 94, 94)"
+          color="rgb(90, 104,119)"
           fontSize={13}
           pt={1.5}
           fontWeight="medium"
@@ -201,7 +179,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
             display: "-webkit-box",
             overflow: "hidden",
             WebkitBoxOrient: "vertical",
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 2,
             textOverflow: "ellipsis",
           }}
         >
@@ -237,31 +215,25 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
         </Grid>
 
         <Grid
+          sx={{ width: "100%" }}
           container
           item
           direction="row"
-          alignItems="flex-end"
+          alignItems="center"
           justifyContent="space-between"
         >
           <Grid item>
-            <Stack>
-              <Typography fontSize={13} fontWeight="medium">
-                {contractMetadata?.contract_budget
-                  ? contractMetadata?.contract_budget
-                  : 0}{" "}
-                DAI Budget
-              </Typography>
-
-              <Typography
-                variant="caption"
-                fontWeight="medium"
-                color="text.secondary"
-              >
-                {contractMetadata?.meta?.duration
-                  ? contractMetadata?.meta?.duration
-                  : "Undefined"}
-              </Typography>
-            </Stack>
+            <Typography fontSize={13} fontWeight="medium">
+              {contractMetadata?.contract_budget
+                ? contractMetadata?.contract_budget
+                : 0}{" "}
+              DAI Budget
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Chip variant='outlined' size='small' label={contractMetadata?.meta?.duration
+                ? contractMetadata?.meta?.duration
+                : "Undefined"} />
           </Grid>
         </Grid>
       </CardContent>
@@ -290,44 +262,8 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
   );
 };
 
-export default JobDisplay;
+function areEqual(prevProps: IJobDisplayProps, nextProps: IJobDisplayProps) {
+  return prevProps.data.id === nextProps.data.id;
+}
 
-/*
-
-        <Grid
-          pb={3}
-          container
-          alignItems="center"
-          flexWrap="nowrap"
-          direction="row"
-        >
-          <Grid item pr={2}>
-            <VerifiedAvatar showHandle={false} showValue={false} avatarSize={70} />
-          </Grid>
-
-          <Grid container item flexGrow={1}>
-            <Grid container item direction="column" alignItems="flex-start">
-              <Grid item>
-
-
-              </Grid>
-
-              <Grid
-                item
-                fontWeight="medium"
-                fontSize={15}
-                color="text.secondary"
-              >
-                <Typography
-                  py={1}
-                  fontSize={13}
-                  fontWeight="bold"
-                  color={(theme) => theme.palette.primary.main}
-                >
-                  @janicecoleman007
-                </Typography>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-        */
+export default React.memo(JobDisplay, areEqual);

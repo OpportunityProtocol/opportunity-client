@@ -27,7 +27,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     <Box
       component="main"
       sx={{
-        bgcolor: APP_BACKGROUND,
+background: 'linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 41%, rgba(247,247,250,1) 100%)',
         flexGrow: 1,
         paddingTop: isPadded ? "90px" : "0px",
       }}

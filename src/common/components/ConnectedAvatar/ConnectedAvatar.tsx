@@ -138,11 +138,11 @@ const ConnectedAvatar: FC = () => {
       chainId: CHAIN_ID,
       args: [userAddress],
       onSuccess(data) {
-        alert(data)
+       
       },
       onError: (error: Error) => {
-        alert(error)
-        console.log(error);
+     
+
       },
     }
   );

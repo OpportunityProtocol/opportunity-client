@@ -85,7 +85,6 @@ const GET_PURCHASED_SERVICES = gql`
     purchasedService {
       id
       client
-      referral
       datePurchased
       purchaseId
       offer
@@ -103,7 +102,6 @@ const GET_PURCHASED_SERVICE = gql`
         id
         creator
         client
-        referral
         datePurchased
         purchaseId
         offer
@@ -121,7 +119,6 @@ const GET_ACTIVE_SERVICES_BY_CREATOR = gql`
         id
         creator
         client
-        referral
         datePurchased
         purchaseId
         offer
@@ -138,7 +135,6 @@ const GET_PURCHASED_SERVICES_BY_CLIENT = gql`
         id
         creator
         client
-        referral
         datePurchased
         purchaseId
         offer

@@ -1,12 +1,20 @@
-import React, { Fragment, useState, FC, useEffect } from "react";
+import React, {
+  Fragment,
+  useState,
+  FC,
+  useEffect,
+  useContext,
+  ChangeEvent,
+} from "react";
 import clsx from "clsx";
-
+import Popper from "@mui/material/Popper";
 import {
   alpha,
   Paper,
   Box,
   Container,
   Grid,
+  Tooltip,
   Button,
   Stack,
   AppBar,
@@ -16,6 +24,10 @@ import {
   CardContent,
   darken,
   IconButton,
+  MenuItem,
+  Menu,
+  Avatar,
+  ListItemIcon,
 } from "@mui/material";
 
 import router, { useRouter } from "next/router";
@@ -58,8 +70,9 @@ import {
 } from "../../../modules/user/userReduxSlice";
 import { BigNumber } from "ethers";
 import { RootState } from "../../../store";
-import { AddCircle, LocalGasStation, Search } from "@mui/icons-material";
+import { AddCircle, LocalGasStation, Logout, PersonAdd, Search, Settings } from "@mui/icons-material";
 import { Work, GroupWork } from "@material-ui/icons";
+import SearchContext from "../../../context/SearchContext";
 
 const NavigationBar: FC = () => {
   const classes = useStyles();
@@ -114,7 +127,6 @@ const NavigationBar: FC = () => {
           })
         );
       },
-      onError: (error) => console.log(error),
     }
   );
 
@@ -139,9 +151,7 @@ const NavigationBar: FC = () => {
       onSuccess: (data: Result) => {
         setLensProfileId(hexToDecimal(data._hex));
       },
-      onError: (error) => {
-        console.log(error);
-      },
+      onError: (error) => {},
     }
   );
 
@@ -157,9 +167,7 @@ const NavigationBar: FC = () => {
       watch: true,
       chainId: CHAIN_ID,
       args: [userAddress],
-      onError: (error: Error) => {
-        console.log(error);
-      },
+      onError: (error: Error) => {},
     }
   );
 
@@ -259,6 +267,31 @@ const NavigationBar: FC = () => {
   useEffect(() => {
     feeData.refetch();
   }, []);
+
+  const searchContext = useContext(SearchContext);
+
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const onChangeSearchQuery = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const onSearch = (e, query: string) => {
+    if (e.key === "Enter") {
+      searchContext.actionable.search(query);
+    }
+  };
+
+  const [createMenuAnchorEl, setCreateMenuAnchorEl] = React.useState<null | HTMLElement>(null);
+  const createMenuIsOpen = Boolean(createMenuAnchorEl);
+  const handleOnClickCreateIcon = (event: React.MouseEvent<HTMLElement>) => {
+    setCreateMenuAnchorEl(event.currentTarget);
+  };
+  const handleOnCloseCreateMenu = () => {
+    setCreateMenuAnchorEl(null);
+  };
 
   return (
     <React.Fragment>
@@ -393,7 +426,7 @@ const NavigationBar: FC = () => {
                   </Link>
                 </Box>
 
-                <Stack direction='row' spacing={1.5}>
+                <Stack direction="row" spacing={1.5}>
                   <Link href="/">
                     <Typography
                       component={Button}
@@ -479,18 +512,84 @@ const NavigationBar: FC = () => {
                 }}
               >
                 <Stack direction="row" alignItems="center" spacing={1}>
-                  <IconButton>
-                    <Search sx={{ color: "rgb(158, 158, 166)" }} />
+                  <SearchBarV1
+                    width="100%"
+                    placeholder="Find work"
+                    value={searchQuery}
+                    onChange={onChangeSearchQuery}
+                    onKeyDown={onSearch}
+                  />
+
+                  <>
+                  <Tooltip title='Create'>
+
+         
+                  <IconButton
+                    onClick={handleOnClickCreateIcon}
+                    aria-controls={createMenuIsOpen ? 'create-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={createMenuIsOpen ? 'true' : undefined} 
+                    >
+                         <AddCircle sx={{ color: "rgb(158, 158, 166)" }} />
                   </IconButton>
-                  <IconButton>
-                    <AddCircle sx={{ color: "rgb(158, 158, 166)" }} />
-                  </IconButton>
+                  </Tooltip>
+
+                  <Menu
+                  
+        anchorEl={createMenuAnchorEl}
+        id="create-menu"
+        open={createMenuIsOpen}
+        onClose={handleOnCloseCreateMenu}
+        onClick={handleOnCloseCreateMenu}
+        
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: 'visible',
+            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            mt: 1.5,
+            '& .MuiAvatar-root': {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+            '&:before': {
+              content: '""',
+              display: 'block',
+              position: 'absolute',
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: 'background.paper',
+              transform: 'translateY(-50%) rotate(45deg)',
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      
+      >
+        <MenuItem onClick={() => router.push('/create/contract')}>
+        <Button  sx={{width: 300}} variant='text' fontSize={13}>Create Contract</Button>
+        </MenuItem>
+
+        
+        <MenuItem onClick={() => router.push('/create/service')}>
+          <Button  sx={{width: 300}} variant='contained' fontSize={13}>Post Service</Button>
+        </MenuItem>
+      </Menu>
+                  </>
+             
+                 
                   {connected === true ? (
                     <ConnectedAvatar />
                   ) : (
                     <Button
                       variant="contained"
-                      sx={{ borderRadius: 8 }}
+                      sx={{ minWidth: '150px', borderRadius: 8 }}
                       onClick={() => connect()}
                     >
                       Connect Wallet

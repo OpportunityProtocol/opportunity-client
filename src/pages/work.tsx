@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { ChangeEvent, Fragment, useContext, useState } from "react";
 import JobDisplay from "../modules/market/components/JobDisplay";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -26,213 +26,206 @@ import SearchBarV2 from "../common/components/SearchBarV2/SearchBarV2";
 import ServiceCard from "../modules/contract/components/ServiceCard/ServiceCard";
 import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
 import { TrendingUp } from "@material-ui/icons";
-import { WorkOffRounded } from "@mui/icons-material";
-
-/**** Temporary Placeholders *****/
-const marketName = [{ id: 1, name: "Writing & Translation" }];
-
-const serviceName = [
-  { id: 7, name: "Service 1" },
-  {
-    id: 8,
-    name: " Design & Creative",
-  },
-  {
-    id: 9,
-    name: "Development & IT",
-  },
-  {
-    id: 10,
-    name: "Engineering & Architecture",
-  },
-  {
-    id: 11,
-    name: "Accounting & Finance",
-  },
-  {
-    id: 12,
-    name: "Sales & Marketing",
-  },
-];
-/**** Temporary Placeholders End *****/
+import { CheckBox, WorkOffRounded } from "@mui/icons-material";
+import SearchContext from "../context/SearchContext";
 
 /**
  * @author Nathan Farley
  */
 function Work() {
-  const [value, setValue] = React.useState(0);
-  const [open, setOpen] = React.useState({});
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const searchContext = useContext(SearchContext);
+
+  const onChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    console.log(e.target.value);
+    e.preventDefault();
+    setSearchQuery(e.target.value);
   };
-  const handleClick = (e, id) => {
-    setOpen((prevState) => ({ ...prevState, [id]: !prevState[id] }));
+
+  const onSearch = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      searchContext.actionable.search(searchQuery);
+    }
+  };
+
+  const [contractsChecked, setContractsChecked] = useState<boolean>(false)
+  const [servicesChecked, setServicesChecked] = useState<boolean>(false)
+
+  const handleOnChangeContractsChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setContractsChecked(event.target.checked);
+  };
+
+  const handleChangeServicesChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setServicesChecked(event.target.checked);
   };
 
   return (
     <Grid
       component={Container}
-      maxWidth="xl"
+      maxWidth="lg"
       container
       direction="column"
-      /*sx={{ bgcolor: 'background.paper' }}*/
+      // sx={{ bgcolor: 'background.paper' }}
     >
       <Grid container item>
-        <Box sx={{ width: "100%" }}>
-          <Box mt={8} sx={{ borderBottom: 1, borderColor: "divider" }}>
-            <Tabs value={value} onChange={handleChange}>
-              <Tab
-                sx={{ borderBottom: "1px solid #212121" }}
-                label="Contracts"
-              />
-              <Tab sx={{ fontSize: "14px" }} label="Services" />
-            </Tabs>
-          </Box>
-          <TabPanel value={value} index={0}>
-            <Grid container spacing={5} direction="row" alignItems="flex-start">
-              <Grid item xs={8}>
-                <Stack
-                  py={2}
-                  display="flex"
-                  direction="row"
-                  alignItems="center"
-                >
-                  <Typography
-                    width="100%"
-                    fontSize={13}
-                    color={(theme) => theme.palette.primary.dark}
-                    fontWeight="bold"
-                  >
-                    123,233,000 contracts
-                  </Typography>
-                  <SearchBarV1 width="100%" />
-                </Stack>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          spacing={2}
+          my={3}
+          width="100%"
+        >
+          <Stack direction="row" spacing={2}>
+            <Card
+              elevation={0}
+              variant="outlined"
+              sx={{ height: 55 }}
+            >
+              <CardContent
+                component={Stack}
+                direction="row"
+                spacing={2}
+                sx={{ display: "flex", alignItems: "center" }}
+              >
+                <Typography variant="body2" fontWeight="500">
+                  Contracts
+                </Typography>
+                <Checkbox onChange={handleOnChangeContractsChecked} />
+              </CardContent>
+            </Card>
 
-                {new Array(10).fill(-1).map((item) => {
+            <Card
+              elevation={0}
+              variant="outlined"
+              sx={{ height: 55 }}
+            >
+              <CardContent
+                component={Stack}
+                direction="row"
+                spacing={2}
+                sx={{ display: "flex", alignItems: "center" }}
+              >
+                <Typography variant="body2" fontWeight="500">
+                  Services
+                </Typography>
+                <Checkbox onChange={handleChangeServicesChecked}   />
+              </CardContent>
+            </Card>
+          </Stack>
+          <SearchBarV2
+            placeholder="Search contracts and services"
+            width="50%"
+            onKeyDown={onSearch}
+            onChange={onChange}
+            value={searchQuery}
+            onClickPrimaryButton={onSearch}
+          />
+        </Stack>
+
+        <Box sx={{ width: "100%" }}>
+          <Grid container spacing={5} direction="row" alignItems="flex-start">
+            <Grid item xs={8}>
+              <Typography
+                pb={2}
+                width="100%"
+                color={(theme) => theme.palette.primary.dark}
+                variant="subtitle2"
+              >
+                A decentralized protocol for cooperation
+              </Typography>
+              <Divider sx={{ mb: 3 }} />
+
+              {searchContext.results.all &&
+              searchContext.results.all.length === 0 ? (
+                <Stack
+                  sx={{
+                    width: "100%",
+                    height: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    src="/assets/images/regular_man_one.svg"
+                    style={{ height: 200 }}
+                  />
+                  <Typography
+                    py={1}
+                    fontSize={20}
+                    variant="body2"
+                    textAlign="center"
+                  >
+                    No results found for {searchQuery}
+                  </Typography>
+                  <Typography
+                    width={500}
+                    textAlign="center"
+                    fontSize={15}
+                    paragraph
+                  >
+                    Thank you for using Lens Talent. We are activaly working on
+                    onboarding new users to the platform.{" "}
+                    <Typography
+                      color="primary"
+                      component="span"
+                      variant="button"
+                    >
+                      Help us by sharing.
+                    </Typography>
+                  </Typography>
+                </Stack>
+              ) : (
+                searchContext.results.all.map((item) => {
                   return (
                     <Grid mb={1.5} xs={12} item sx={{ width: "100%" }}>
-                      <JobDisplay />
+                      {item?.__typename === "Contract" ? (
+                        <JobDisplay data={item} />
+                      ) : (
+                        <ServiceCard id={item?.id} data={item} />
+                      )}
                     </Grid>
                   );
-                })}
-              </Grid>
-
-              <Grid item xs={4}>
-                <Card
-                  variant="outlined"
-                  sx={{ mb: 1, bgcolor: "#fff", height: 500, width: "100%" }}
-                >
-                  <Box p={2} display="flex" alignItems="center">
-                    <Typography pr={1} fontWeight="medium">
-                      Most Valuable Verified Freelancers
-                    </Typography>
-                    <TrendingUp fontSize="small" color="primary" />
-                  </Box>
-                  <Divider />
-                  <CardContent>Could not load freelancers</CardContent>
-                </Card>
-
-                <Card
-                  variant="outlined"
-                  sx={{ mb: 1, bgcolor: "#fff", height: 500, width: "100%" }}
-                >
-                  <Box p={2} display="flex" alignItems="center">
-                    <Typography pr={1} fontWeight="medium">
-                      Most Work Completed
-                    </Typography>
-                    <WorkOffRounded fontSize="small" color="primary" />
-                  </Box>
-                  <Divider />
-                  <CardContent>Could not load freelancers</CardContent>
-                </Card>
-              </Grid>
+                })
+              )}
             </Grid>
-          </TabPanel>
-          <TabPanel value={value} index={1}>
-            <Grid container justifyContent="space-between">
-              <Grid item xs={3} sx={{}}>
-                <Box>
-                  <Typography pt={2} fontWeight="bold">
-                    Filter Markets
-                  </Typography>
-                  <List component="nav">
-                    {marketName.map((item, idx) => (
-                      <Fragment key={item.id}>
-                        <ListItem
-                          secondaryAction={
-                            <Checkbox
-                              edge="end"
-                              onChange={(e) => handleClick(e, idx)}
-                              checked={open[idx] === true}
-                            />
-                          }
-                        >
-                          <ListItemText
-                            primary={item.name}
-                            primaryTypographyProps={{
-                              fontSize: 13,
-                              fontWeight: "medium",
-                            }}
-                          />
-                        </ListItem>
-                      </Fragment>
-                    ))}
-                  </List>
-                </Box>
-              </Grid>
-              <Grid
-                container
-                flexDirection="column"
-                direction="column"
-                flexWrap="nowrap"
-                alignItems="flex-start"
-                justifyContent="flex-start"
-                item
-                xs={9}
-                sx={{
-                  pt: 0,
-                  width: "100%",
-                  bgcolor: "#fafafa",
-                  px: 2,
-                  minHeight: "calc(100vh - 70px - 80px)",
-                  overflow: "auto",
-                }}
+
+            <Grid item xs={4}>
+              <Card
+                variant="outlined"
+                sx={{ mb: 1, bgcolor: "#fff", height: 500, width: "100%" }}
               >
-                <Grid sx={{ width: "100%" }} item height="auto" pt={1} pb={1.5}>
-                  <Stack display="flex" direction="row" alignItems="center">
-                    <Typography
-                      width="100%"
-                      fontSize={13}
-                      color={(theme) => theme.palette.primary.dark}
-                      fontWeight="bold"
-                    >
-                      123,233,000 contracts
-                    </Typography>
-                    <SearchBarV2 placeholder="Search for your next gig" />
-                  </Stack>
-                </Grid>
+                <Box p={2} display="flex" alignItems="center">
+                  <Typography pr={1} fontWeight="medium">
+                    Most Valuable Verified Freelancers
+                  </Typography>
+                  <TrendingUp fontSize="small" color="primary" />
+                </Box>
+                <Divider />
+                <CardContent>Could not load freelancers</CardContent>
+              </Card>
 
-                <Grid
-                  container
-                  item
-                  direction="row"
-                  justifyContent="space-between"
-                >
-                  {new Array(10).fill(-1).map((item) => {
-                    return (
-                      <Grid mb={1.5} xs={3.8} item sx={{ width: "100%" }}>
-                        <ServiceCard />
-                      </Grid>
-                    );
-                  })}
-                </Grid>
-              </Grid>
+              <Card
+                variant="outlined"
+                sx={{ mb: 1, bgcolor: "#fff", height: 500, width: "100%" }}
+              >
+                <Box p={2} display="flex" alignItems="center">
+                  <Typography pr={1} fontWeight="medium">
+                    Most Work Completed
+                  </Typography>
+                  <WorkOffRounded fontSize="small" color="primary" />
+                </Box>
+                <Divider />
+                <CardContent>Could not load freelancers</CardContent>
+              </Card>
             </Grid>
-          </TabPanel>
+          </Grid>
         </Box>
       </Grid>
     </Grid>
   );
 }
 
-export default Work;
+export default React.memo(Work);

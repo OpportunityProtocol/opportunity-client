@@ -17,6 +17,7 @@ import {
   Tabs,
   Tab,
   DialogContentText,
+  Chip,
 } from "@mui/material";
 import Link from "next/link";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
@@ -62,7 +63,7 @@ import {
   GET_SERVICES_BY_CREATOR,
 } from "../../../modules/contract/ContractGQLQueries";
 import JobDisplay from "../../../modules/market/components/JobDisplay";
-import { EditOutlined } from "@mui/icons-material";
+import { EditOutlined, Settings } from "@mui/icons-material";
 import { create } from "ipfs-http-client";
 import fleek from "../../../fleek";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
@@ -156,7 +157,7 @@ function a11yProps(index: number) {
  * TODO: Add metadata uploads and edits for profile information
  * @returns NextPage A page type by NextJS
  */
-const ProfilePage: NextPage = () => {
+const ProfilePage: NextPage<any> = () => {
   const classes = useStyles();
   const router = useRouter();
   const accountData = useAccount();
@@ -181,6 +182,8 @@ const ProfilePage: NextPage = () => {
 
   const { address } = router.query;
 
+  console.log(router.query)
+
   const verifiedUserQuery: QueryResult = useQuery(
     GET_VERIFIED_FREELANCER_BY_ADDRESS,
     {
@@ -189,6 +192,8 @@ const ProfilePage: NextPage = () => {
       },
     }
   );
+
+  console.log(verifiedUserQuery)
 
   //contracts created
   const contractsByEmployerQuery: QueryResult = useQuery(
@@ -244,7 +249,7 @@ const ProfilePage: NextPage = () => {
         });
       },
       onError: (error) => {
-        console.log(error);
+      
       },
     }
   );
@@ -267,7 +272,6 @@ const ProfilePage: NextPage = () => {
           lensProfile: data,
         });
       },
-      onError: (error) => console.log(error),
     }
   );
 
@@ -328,14 +332,14 @@ const ProfilePage: NextPage = () => {
       });
 
       //only fetch profile id and created services if the user is a verified freelancers
-      if (
-        String(
-          verifiedUserQuery.data.verifiedUsers[0]?.address
-        ).toLowerCase() === String(address).toLowerCase()
-      ) {
+console.log('OOOOOO')
+        if (verifiedUserQuery.data?.verifiedUsers[0]?.metadata) {
+          console.log('PPPPPPPPPPPPPPP')
+          downloadMetadata(verifiedUserQuery.data?.verifiedUsers[0]?.metadata)
+        }
         networkManager_getLensProfileIdFromAddress.refetch();
         servicesCreated.refetch();
-      }
+      
     }
   }, [verifiedUserQuery.loading]);
 
@@ -533,20 +537,15 @@ const ProfilePage: NextPage = () => {
         fetchAddressFollowerState();
       },
       onError(error, variables, context) {
-        console.log(error);
+
       },
     }
   );
 
   const onConnect = async () => {
-    console.log(data);
-    console.log(address);
-    console.log(splitSignature);
     if (isSuccess) {
       const splitSignature: ethers.Signature =
         await ethers.utils.splitSignature(data);
-      console.log("@@@@@@@@@@@@@@@@@@@@@@@");
-      console.log(splitSignature);
 
       await lensProtocol_followWithSig.writeAsync({
         args: [
@@ -566,8 +565,46 @@ const ProfilePage: NextPage = () => {
     }
   };
 
-  console.log(profileState?.verifiedFreelancerData?.address);
-  console.log(address);
+
+
+  const downloadMetadata = async (ptr: string) => {
+      let retVal: any = {};
+  
+      try {
+        if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+          const ipfs = create({
+            url: "/ip4/127.0.0.1/tcp/8080",
+          });
+  
+          retVal = await ipfs.get(`/ipfs/${ptr}`).next();
+        } else {
+          retVal = await fleek.getUser(ptr);
+        }
+  
+        if (!retVal) {
+          throw new Error("Unable to retrieve user metadata");
+        } else {
+          const jsonString = Buffer.from(retVal.value).toString("utf8");
+          const parsedString = jsonString.slice(
+            jsonString.indexOf("{"),
+            jsonString.lastIndexOf("}") + 1
+          );
+          const parsedData = JSON.parse(parsedString);
+      
+     
+          setProfileState({
+            ...profileState,
+            general: {
+              ...profileState.general,
+              ...parsedData
+            }
+          })
+        }
+
+      } catch (error) {
+        console.log("Error downloading metadata from profile")
+      }
+  }
 
   const connectDialogContent = [
     <DialogContentText id="alert-dialog-description">
@@ -608,31 +645,18 @@ const ProfilePage: NextPage = () => {
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ minHeight: "100vh" }}>
+    <Container maxWidth="lg">
       <Box py={6}>
         <Typography
           fontWeight="bold"
           color="rgba(33, 33, 33, .85)"
           fontSize={30}
         >
-          John Dismuke
+          {profileState?.general?.display_name}
         </Typography>
-        <Stack direction="row" alignItems="center">
-          {String(
-            profileState.verifiedFreelancerData?.address
-          ).toLowerCase() === String(address).toLowerCase() ? (
-            <Alert sx={{ width: "100%" }} severity="success">
-              Verified Freelancer
-            </Alert>
-          ) : (
-            <Alert sx={{ width: "100%" }} severity="info">
-              General User
-            </Alert>
-          )}
-        </Stack>
       </Box>
 
-      {profileState?.verifiedFreelancerData?.address == address ? (
+      {profileState?.general?.display_freelancer_metrics ? (
         <Grid
           mt={2}
           mb={5}
@@ -743,12 +767,12 @@ const ProfilePage: NextPage = () => {
                 profileState?.servicesCreated?.length > 0 ? (
                   profileState?.servicesCreated.map((service) => {
                     return (
-                      <ServiceCard id={service?.serviceId} data={service} />
+                      <ServiceCard outlined={true} id={service?.serviceId} data={service} />
                     );
                   })
                 ) : (
                   <Typography>
-                    John Dismukes hasn't created any services.
+                    {profileState?.general?.display_name}s hasn't created any services.
                   </Typography>
                 )}
               </Box>
@@ -768,7 +792,7 @@ const ProfilePage: NextPage = () => {
                   })
                 ) : (
                   <Typography>
-                    John Dismukes hasn't created any contracts.
+                    {profileState?.general?.display_name}s hasn't created any contracts.
                   </Typography>
                 )}
               </Box>
@@ -783,18 +807,31 @@ const ProfilePage: NextPage = () => {
         </Grid>
 
         <Grid item xs={4}>
-          <Typography pb={2} fontSize={20} fontWeight="medium">
+          <Stack pb={2} direction='row' alignItems='center' justifyContent='space-between'>
+          <Typography fontSize={20} fontWeight="medium">
             Overview
           </Typography>
+
+          <Button startIcon={<Settings />} variant="outlined" color="primary" onClick={() => router.push(`/view/profile/${userAddress}/settings?metadata=${verifiedUserQuery?.data?.verifiedUsers[0]?.metadata}`)}>
+                  Settings
+                </Button>
+          </Stack>
+
           <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
               <Stack spacing={1.5} alignItems="center">
-                <Jazzicon
+                {
+                  profileState?.general?.imageURI ?
+                  <img src={profileState?.general?.imageURI} style={{width: 70, height: 70, borderRadius: 70}} />
+                  :
+                  <Jazzicon
                   diameter={70}
                   seed={jsNumberForAddress(String(address))}
                 />
+                }
+              
                 <Box py={0.5} textAlign="center">
-                  <Typography fontWeight="medium">John Dismuke</Typography>
+                  <Typography fontWeight="medium">{profileState?.general?.display_name}</Typography>
                   <Typography
                     variant="body2"
                     color="rgb(94, 94, 94)"
@@ -863,9 +900,9 @@ const ProfilePage: NextPage = () => {
                         Warning: No follow verification in development.
                       </Typography>
                     ) : null}
-                    <Typography textAlign="flex-start" py={1} variant="caption">
+                    <Typography textAlign="start" py={1} variant="caption">
                       {" "}
-                      Get suggestions on John's latest services and contracts by
+                      Get suggestions on {profileState?.general?.display_name} latest services and contracts by
                       connecting.{" "}
                     </Typography>
                   </>
@@ -874,81 +911,105 @@ const ProfilePage: NextPage = () => {
             </CardContent>
           </Card>
 
-          {/*  <Card variant="outlined" className={classes.marginBottom}>
+            <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Typography fontWeight="medium">Description</Typography>
 
-                <Button variant="text" color="secondary">
-                  Edit
-                </Button>
-              </Stack>
-              <Typography variant="caption" color="#9E9E9E">
-                No description
-              </Typography>
+                <Typography fontWeight="medium" py={1}>Description</Typography>
+
+                  {
+                    profileState?.general?.description ?
+                    <Typography variant="caption" color="#9E9E9E">
+                      {profileState?.general?.description}
+                    </Typography>
+                    :
+                    <Typography>
+                      No description
+                    </Typography>
+                  }
+        
             </CardContent>
-                </Card>*/}
+                </Card>
 
-          {/* <Card variant="outlined" className={classes.marginBottom}>
+           <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Typography fontWeight="medium">Certifications</Typography>
 
-                <Button variant="text" color="secondary">
-                  Edit
-                </Button>
-              </Stack>
-              <Typography variant="caption" color="#9E9E9E">
-                No certifications
-              </Typography>
+                <Typography fontWeight="medium" py={1}>Certifications</Typography>
+
+                {
+                    profileState?.general?.certifications &&  profileState?.general?.certifications?.length ?
+                    <Stack direction='row' alignItems='center' spacing={2}>
+                      {
+   profileState?.general?.certifications.map((cert) => {
+    return (
+      <Chip label={cert} size='small' />
+    )
+  })
+                      }
+                    </Stack>
+                 
+                    :
+                    <Typography>
+                      No certifications
+                    </Typography>
+                  }
+
+
             </CardContent>
-                </Card>*/}
+                </Card>
 
-          {/* <Card variant="outlined" className={classes.marginBottom}>
+           <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Typography fontWeight="medium">Skills</Typography>
 
-                <Button variant="text" color="secondary">
-                  Edit
-                </Button>
-              </Stack>
-              <Typography variant="caption" color="#9E9E9E">
-                No skills
-              </Typography>
+                <Typography fontWeight="medium" py={1}>Skills</Typography>
+
+                {
+                    profileState?.general?.skills &&  profileState?.general?.skills?.length ?
+                    <Stack direction='row' alignItems='center' spacing={2}>
+                      {
+      profileState?.general?.skills.map((cert) => {
+        return (
+          <Chip label={cert} size='small' />
+        )
+      })
+                      }
+                    </Stack>
+              
+                    :
+                    <Typography>
+                      No skills
+                    </Typography>
+                  }
+
+  
             </CardContent>
-              </Card> */}
+              </Card>
 
-          {/*  <Card variant="outlined" className={classes.marginBottom}>
+            <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Typography fontWeight="medium">Languages</Typography>
 
-                <Button variant="text" color="secondary">
-                  Edit
-                </Button>
-              </Stack>
-              <Typography variant="caption" color="#9E9E9E">
-                No languages
-              </Typography>
+                <Typography fontWeight="medium" py={1}>Languages</Typography>
+
+                {
+                    profileState?.general?.languages &&  profileState?.general?.languages?.length ?
+                    <Stack direction='row' alignItems='center' spacing={2}>
+{
+   profileState?.general?.languages.map((cert) => {
+    return (
+      <Chip label={cert} size='small' />
+    )
+  })
+}
+                    </Stack>
+                   
+                    :
+                    <Typography>
+                      No languages
+                    </Typography>
+                  }
+
+
             </CardContent>
-            </Card> */}
+            </Card>
         </Grid>
       </Grid>
       <ConfirmationDialog

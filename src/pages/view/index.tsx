@@ -334,11 +334,13 @@ const Contracts: NextPage<any> = () => {
         <TabPanel index={0} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
-              {publishedServices.map((service: ServiceStruct, idx: number) => (
-                <Grid item xs={3} key={service.id}>
+              {publishedServices.map((service: ServiceStruct, idx: number) => {
+                return (
+                     <Grid item xs={4} key={service.id}>
                   <ServiceCard id={Number(service.id)} data={service} />
                 </Grid>
-              ))}
+                )
+              })}
             </Grid>
           </Box>
         </TabPanel>
@@ -346,7 +348,7 @@ const Contracts: NextPage<any> = () => {
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
               {purchasedServices.map((service: any, idx: number) => (
-                <Grid item xs={3} key={service.id}>
+                <Grid item xs={4} key={service.id}>
                   <ServiceCard
                     id={service.serviceData.id}
                     purchase
@@ -367,7 +369,7 @@ const Contracts: NextPage<any> = () => {
               justifyContent="space-between"
             >
               {userActiveServices.map((service: any, idx: number) => (
-                <Grid item xs={3} key={service.id}>
+                <Grid item xs={4} key={service.id}>
                   <ServiceCard
                     purchase
                     id={Number(service["serviceData"].id)}
@@ -388,7 +390,7 @@ const Contracts: NextPage<any> = () => {
               justifyContent="space-between"
             >
               {publishedContracts.map((contract: any, idx: number) => (
-                <Grid item xs={3} key={contract.id}>
+                <Grid item xs={4} key={contract.id}>
                   <JobDisplay data={contract} />
                 </Grid>
               ))}
@@ -404,7 +406,7 @@ const Contracts: NextPage<any> = () => {
               justifyContent="space-between"
             >
               {workingContracts.map((contract: any, idx: number) => (
-                <Grid item xs={3} key={contract.id}>
+                <Grid item xs={4} key={contract.id}>
                   <JobDisplay data={contract} />
                 </Grid>
               ))}
