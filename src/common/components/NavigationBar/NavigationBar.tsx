@@ -28,6 +28,7 @@ import {
   Menu,
   Avatar,
   ListItemIcon,
+  LinearProgress,
 } from "@mui/material";
 
 import router, { useRouter } from "next/router";
@@ -70,7 +71,19 @@ import {
 } from "../../../modules/user/userReduxSlice";
 import { BigNumber } from "ethers";
 import { RootState } from "../../../store";
-import { AddCircle, LocalGasStation, Logout, PersonAdd, Search, Settings } from "@mui/icons-material";
+import {
+  AddCircle,
+  AddCircleOutline,
+  Help,
+  HelpOutline,
+  LocalGasStation,
+  Logout,
+  PersonAdd,
+  QuestionMark,
+  QuestionMarkOutlined,
+  Search,
+  Settings,
+} from "@mui/icons-material";
 import { Work, GroupWork } from "@material-ui/icons";
 import SearchContext from "../../../context/SearchContext";
 
@@ -284,7 +297,8 @@ const NavigationBar: FC = () => {
     }
   };
 
-  const [createMenuAnchorEl, setCreateMenuAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [createMenuAnchorEl, setCreateMenuAnchorEl] =
+    React.useState<null | HTMLElement>(null);
   const createMenuIsOpen = Boolean(createMenuAnchorEl);
   const handleOnClickCreateIcon = (event: React.MouseEvent<HTMLElement>) => {
     setCreateMenuAnchorEl(event.currentTarget);
@@ -297,14 +311,14 @@ const NavigationBar: FC = () => {
     <React.Fragment>
       <AppBar
         variant="elevation"
-        elevation={0}
+        // elevation={0}
         sx={{
           width: { sm: `100%` },
           ml: { sm: `100%` },
           bgcolor: "#fff",
           height: "95px",
           border: "none !important",
-          borderBottom: "1px solid #eee !important",
+          // borderBottom: "1px solid #eee !important",
         }}
       >
         <Box>
@@ -392,7 +406,7 @@ const NavigationBar: FC = () => {
         <Divider />
         <Toolbar className={classes.toolbar}>
           <Container
-            maxWidth="lg"
+            maxWidth="xl"
             sx={{ display: "flex", flexDirection: "column", bgcolor: "#fff" }}
           >
             <Grid
@@ -405,41 +419,33 @@ const NavigationBar: FC = () => {
               justifyContent="space-between"
             >
               <Grid item sx={{ display: "flex", alignItems: "center" }}>
-                <Box display="flex" alignItems="center" sx={{ mr: 2 }}>
-                  <Link href="/">
-                    <img
-                      className={classes.clickableBrand}
-                      src="/assets/logo.svg"
-                      style={{ width: 35, height: 35 }}
-                    />
-                  </Link>
+                <Stack direction="row" alignItems="center" sx={{ mr: 2 }}>
+                  <img
+                    className={classes.clickableBrand}
+                    src="/assets/logo.svg"
+                    style={{ width: 40, height: 40 }}
+                  />
 
-                  <Link href="/">
-                    <Typography
-                      className={classes.clickableBrand}
-                      fontWeight="bold"
-                      fontSize={18}
-                      color="#212121"
-                    >
-                      Lens Talent
-                    </Typography>
-                  </Link>
-                </Box>
+            
+                </Stack>
+                <SearchBarV1
+                  width={300}
+                  placeholder="Find work"
+                  value={searchQuery}
+                  onChange={onChangeSearchQuery}
+                  onKeyDown={onSearch}
+                />
 
-                <Stack direction="row" spacing={1.5}>
-                  <Link href="/">
+                <Stack direction="row" alignItems='center' spacing={1.5} ml={1.7}>
+        
                     <Typography
-                      component={Button}
-                      fontSize={14}
                       variant="button"
-                      color={
-                        router.pathname == "/" ? "primary" : "text.secondary"
-                      }
-                      fontWeight="bold"
+                      color={router.pathname == "/" ? "primary" : "text.secondary"}
+                      sx={{ fontWeight: 'bold' }}
                     >
                       Explore
                     </Typography>
-                  </Link>
+              
 
                   <Link href="/work">
                     <Typography
@@ -512,84 +518,91 @@ const NavigationBar: FC = () => {
                 }}
               >
                 <Stack direction="row" alignItems="center" spacing={1}>
-                  <SearchBarV1
-                    width="100%"
-                    placeholder="Find work"
-                    value={searchQuery}
-                    onChange={onChangeSearchQuery}
-                    onKeyDown={onSearch}
-                  />
-
                   <>
-                  <Tooltip title='Create'>
+                    <Tooltip title="Create">
+                      <IconButton
+                      size='large'
+                        onClick={handleOnClickCreateIcon}
+                        aria-controls={
+                          createMenuIsOpen ? "create-menu" : undefined
+                        }
+                        aria-haspopup="true"
+                        aria-expanded={createMenuIsOpen ? "true" : undefined}
+                      >
+                        <AddCircleOutline fontSize="medium" sx={{ color: "rgb(158, 158, 166)" }} />
+                      </IconButton>
+                    </Tooltip>
 
-         
-                  <IconButton
-                    onClick={handleOnClickCreateIcon}
-                    aria-controls={createMenuIsOpen ? 'create-menu' : undefined}
-                    aria-haspopup="true"
-                    aria-expanded={createMenuIsOpen ? 'true' : undefined} 
+                    <Menu
+                      anchorEl={createMenuAnchorEl}
+                      id="create-menu"
+                      open={createMenuIsOpen}
+                      onClose={handleOnCloseCreateMenu}
+                      onClick={handleOnCloseCreateMenu}
+                      PaperProps={{
+                        elevation: 0,
+                        sx: {
+                          overflow: "visible",
+                          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                          mt: 1.5,
+                          "& .MuiAvatar-root": {
+                            width: 32,
+                            height: 32,
+                            ml: -0.5,
+                            mr: 1,
+                          },
+                          "&:before": {
+                            content: '""',
+                            display: "block",
+                            position: "absolute",
+                            top: 0,
+                            right: 14,
+                            width: 10,
+                            height: 10,
+                            bgcolor: "background.paper",
+                            transform: "translateY(-50%) rotate(45deg)",
+                            zIndex: 0,
+                          },
+                        },
+                      }}
+                      transformOrigin={{ horizontal: "right", vertical: "top" }}
+                      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                     >
-                         <AddCircle sx={{ color: "rgb(158, 158, 166)" }} />
-                  </IconButton>
-                  </Tooltip>
+                      <MenuItem onClick={() => router.push("/create/contract")}>
+                        <Button
+                          sx={{ width: 300 }}
+                          variant="text"
+                          
+                        >
+                          Create Contract
+                        </Button>
+                      </MenuItem>
 
-                  <Menu
-                  
-        anchorEl={createMenuAnchorEl}
-        id="create-menu"
-        open={createMenuIsOpen}
-        onClose={handleOnCloseCreateMenu}
-        onClick={handleOnCloseCreateMenu}
-        
-        PaperProps={{
-          elevation: 0,
-          sx: {
-            overflow: 'visible',
-            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-            mt: 1.5,
-            '& .MuiAvatar-root': {
-              width: 32,
-              height: 32,
-              ml: -0.5,
-              mr: 1,
-            },
-            '&:before': {
-              content: '""',
-              display: 'block',
-              position: 'absolute',
-              top: 0,
-              right: 14,
-              width: 10,
-              height: 10,
-              bgcolor: 'background.paper',
-              transform: 'translateY(-50%) rotate(45deg)',
-              zIndex: 0,
-            },
-          },
-        }}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-      
-      >
-        <MenuItem onClick={() => router.push('/create/contract')}>
-        <Button  sx={{width: 300}} variant='text' fontSize={13}>Create Contract</Button>
-        </MenuItem>
-
-        
-        <MenuItem onClick={() => router.push('/create/service')}>
-          <Button  sx={{width: 300}} variant='contained' fontSize={13}>Post Service</Button>
-        </MenuItem>
-      </Menu>
+                      <MenuItem onClick={() => router.push("/create/service")}>
+                        <Button
+                          sx={{ width: 300 }}
+                          variant="contained"
+                          
+                        >
+                          Post Service
+                        </Button>
+                      </MenuItem>
+                    </Menu>
                   </>
-             
-                 
+
+                  <IconButton
+                      size='large'
+                        onClick={() => {}}
+                      >
+                        <HelpOutline fontSize="medium" sx={{ color: "rgb(158, 158, 166)" }} />
+                      </IconButton>
+
                   {connected === true ? (
                     <ConnectedAvatar />
                   ) : (
                     <Button
                       variant="contained"
-                      sx={{ minWidth: '150px', borderRadius: 8 }}
+                      sx={{ minWidth: "150px", borderRadius: 8 }}
                       onClick={() => connect()}
                     >
                       Connect Wallet
@@ -600,7 +613,6 @@ const NavigationBar: FC = () => {
             </Grid>
           </Container>
         </Toolbar>
-
         <div>
           {connectors.map((connector) => (
             <button

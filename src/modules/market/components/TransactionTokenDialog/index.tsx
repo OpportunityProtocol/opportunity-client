@@ -418,6 +418,19 @@ const signer = useSigner()
     }
   }
   
+  const onRefresh = () => {
+    switch(tabValue) {
+      case 0:
+        getBalance()
+        networkManager_getProtocolFee.refetch();
+      case 1:
+        getBalance()
+        networkManager_getProtocolFee.refetch();
+        tokenExchange_getPriceForSellingTokens.refetch();
+      default:
+        getBalance()
+    }
+  }
 
   return (
     <Dialog maxWidth="sm" open={open} onClose={handleClose} sx={{}}>
@@ -455,7 +468,7 @@ const signer = useSigner()
           <Divider sx={{ borderBottom: "1px solid #ddd" }} />
         </Box>
         <Stack mt={1}>
-          <Chip onClick={() => getBalance()} sx={{ width: '100px' }} icon={<Refresh />} size='small' label='Refresh' />
+          <Chip onClick={onRefresh} sx={{ width: '100px' }} icon={<Refresh />} size='small' label='Refresh' />
         </Stack>
         <TabPanel index={0} value={tabValue}>
           <Stack spacing={2}>

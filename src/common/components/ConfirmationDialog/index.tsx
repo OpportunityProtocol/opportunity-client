@@ -6,17 +6,20 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  LinearProgress,
 } from "@mui/material";
 import StepperComponent from "../Stepper";
 
 interface IConfirmationDialogProps {
   open: boolean;
-  onOpen: () => void;
+  onOpen?: () => void;
   onClose: () => void;
   primaryAction: () => void;
   primaryActionTitle: string;
-  hasSigningStep: boolean;
+  hasSigningStep?: boolean;
   content: Array<ReactNode>;
+  loading?: boolean;
+  success: boolean;
 }
 
 interface ISignConfirmationDialogProps {
@@ -28,11 +31,13 @@ export const ConfirmationDialog: FC<
 > = ({
   content,
   open,
-  onOpen,
+  onOpen = () => {},
   onClose,
   signAction,
-  hasSigningStep,
+  loading = false,
+  hasSigningStep = false,
   primaryAction,
+  success = false,
   primaryActionTitle,
 }) => {
   const [activeStep, setActiveStep] = useState(0);
@@ -65,7 +70,7 @@ export const ConfirmationDialog: FC<
           </Button>
         );
       case 1:
-        return (
+        return hasSigningStep ? (
           <Button
             onClick={() => {
               signAction();
@@ -74,17 +79,35 @@ export const ConfirmationDialog: FC<
           >
             Sign Transaction
           </Button>
+        ) : (
+          <Button
+            disabled={loading}
+            variant="contained"
+            onClick={
+              success
+                ? () => onClose()
+                : () => {
+                    primaryAction();
+                  }
+            }
+          >
+            {success ? "Close" : primaryActionTitle}
+          </Button>
         );
       case 2:
         return (
           <Button
+            disabled={loading}
             variant="contained"
-            onClick={() => {
-              primaryAction();
-              onClose();
-            }}
+            onClick={
+              success
+                ? () => onClose()
+                : () => {
+                    primaryAction();
+                  }
+            }
           >
-            {primaryActionTitle}
+            {success ? "Close" : primaryActionTitle}
           </Button>
         );
       default:
@@ -97,13 +120,13 @@ export const ConfirmationDialog: FC<
         return <Button onClick={handleClose}>Cancel</Button>;
       case 1:
         return (
-          <Button onClick={() => setActiveStep((prevState) => prevState + 1)}>
+          <Button onClick={() => setActiveStep((prevState) => prevState - 1)}>
             Back
           </Button>
         );
       case 2:
         return (
-          <Button onClick={() => setActiveStep((prevState) => prevState + 1)}>
+          <Button onClick={() => setActiveStep((prevState) => prevState - 1)}>
             Back
           </Button>
         );
@@ -123,9 +146,15 @@ export const ConfirmationDialog: FC<
         <StepperComponent steps={steps} activeStep={activeStep} />
       </DialogTitle>
       <Divider />
-      <DialogContent>
-        {content && content.length > 0 ? content[activeStep] : null}
-      </DialogContent>
+      {loading ? <LinearProgress variant="indeterminate" /> : null}
+      {success ? (
+        <DialogContent>Your transaction was successful!</DialogContent>
+      ) : (
+        <DialogContent>
+          {content && content.length > 0 ? content[activeStep] : null}
+        </DialogContent>
+      )}
+
       <DialogActions>
         {getBackButton()}
         {getProgressButton()}

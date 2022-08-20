@@ -10,7 +10,7 @@ const SearchBarV1StyledInputBase = styled(InputBase)(({ theme }) => ({
     width: "100%",
     border: "none",
     fontSize: 14,
-    height: 40,
+    
     padding: "10px 12px",
     marginLeft: 1,
     display: "flex",
@@ -40,6 +40,7 @@ const SearchBarV1: FunctionComponent<any> = ({ width, ...inputProps }) => {
       }} 
     >
       <SearchBarV1StyledInputBase
+      size='small'
         startAdornment={
           <Search
             style={{ color: "#9E9E9E", marginLeft: "12px", marginRight: "1px" }}
@@ -52,7 +53,7 @@ const SearchBarV1: FunctionComponent<any> = ({ width, ...inputProps }) => {
         }}
         inputProps={{
           "aria-label": "search jobs",
-          style: { padding: "4px 10px" },
+          style: { padding: "8px 2px" },
         }}
         {...inputProps}
       />

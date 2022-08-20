@@ -36,7 +36,7 @@ import { getMetadata } from "../../../../common/ipfs-helper";
  * @dev This component temporarily fetches contract data from the blockchain instead of graphql to obtain the contract
  * metadata due to issues with graphql returning a different encoded format
  */
-const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
+const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text=false }) => {
   const router = useRouter();
   const accountData = useAccount();
 
@@ -129,7 +129,52 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data }) => {
     }
   }, [metadataString]);
 
-  return (
+  return text ? 
+  <Box>
+       {contractMetadata?.contract_title ? (
+        <Stack direction='row' alignItems='center' spacing={1}>
+               <Typography fontWeight='normal' fontSize={12} color={(theme) => theme.palette.primary.main}>
+            {contractMetadata?.contract_title}  
+          </Typography>
+
+           <Box display='flex' alignItems='center'>
+
+               <Typography pl={1} fontSize={13}>
+            2.50
+          </Typography>
+          <img
+              src="/assets/images/dai.svg"
+              style={{ width: 15, height: 20 }}
+            />
+           </Box>
+          
+    
+        </Stack>
+ 
+        ) : (
+          <Stack direction='row' alignItems='center' spacing={1}>
+                  <Typography fontWeight='medium' fontSize={13} color={(theme) => theme.palette.primary.main}>
+            Unable to load contract title
+          </Typography>
+
+              <Box display='flex' alignItems='center'>
+              <img
+              src="/assets/images/dai.svg"
+              style={{ width: 15, height: 20 }}
+            />
+
+              <Typography pl={1}  fontSize={12}>
+            2.50
+          </Typography>
+            
+              </Box>
+           
+    
+          </Stack>
+        )}
+  </Box>
+  :
+  (
     <Card
       onClick={
         accountData?.data?.address

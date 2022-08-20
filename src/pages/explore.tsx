@@ -1,28 +1,56 @@
-import React, { useEffect, useState, FunctionComponent, useContext, ChangeEvent } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useStyles } from "../modules/market/MarketStyles";
-import { Grid, Container, Typography, Button, Box, Stack, Alert, TextField, FormControlLabel, Checkbox, MenuItem, Card, alpha } from "@mui/material";
-
+import {
+  Grid,
+  Container,
+  CardContent,
+  Typography,
+  Button,
+  Box,
+  Stack,
+  alpha,
+  Card,
+  CardHeader,
+  Divider,
+  getCardHeaderUtilityClass,
+  Paper,
+  IconButton,
+  Menu,
+  InputBase,
+} from "@mui/material";
 import MarketDisplay from "../modules/market/components/MarketDisplay";
 import { ICarouselItemProps } from "../modules/market/MarketInterface";
 import JobDisplay from "../modules/market/components/JobDisplay";
 import ServiceCard from "../modules/contract/components/ServiceCard/ServiceCard";
-import { CheckBox, KeyboardArrowRight, NorthEast } from "@mui/icons-material";
+import {
+  Directions,
+  KeyboardArrowRight,
+  NorthEast,
+  Search,
+} from "@mui/icons-material";
 import { NextPage } from "next";
 import { hexToDecimal } from "../common/helper";
 import VerifiedAvatar from "../modules/user/components/VerifiedAvatar";
 import { ServiceStruct } from "../typechain-types/NetworkManager";
 import { QueryResult, useQuery } from "@apollo/client";
+import MenuIcon from "@mui/icons-material/Menu";
 import {
   GET_CONTRACTS,
   GET_SERVICES,
 } from "../modules/contract/ContractGQLQueries";
 import { GET_MARKETS } from "../modules/market/MarketGQLQueries";
 import { GET_VERIFIED_FREELANCERS } from "../modules/user/UserGQLQueries";
-import { ConfirmationDialog } from "../common/components/ConfirmationDialog";
-import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
 import Carousel from "react-material-ui-carousel";
 import { loggedOutHeroCarouselItems } from "../modules/market/MarketConstants";
-import SearchContext from "../context/SearchContext";
+import Masonry from "@mui/lab/Masonry";
+import { styled } from "@mui/styles";
+import UserCard from "../modules/user/components/UserCard/UserCard";
+
+import isWeekend from "date-fns/isWeekend";
+import TextField from "@mui/material/TextField";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { StaticDatePicker } from "@mui/x-date-pickers/StaticDatePicker";
 
 const HEIGHT = "600px";
 function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
@@ -80,6 +108,8 @@ function CarouselItem({ item, itemLength, index }: ICarouselItemProps) {
   );
 }
 
+const heights = [340, 320, 400, 320, 360, 400];
+
 const ExplorePage: NextPage = () => {
   const classes = useStyles();
   const [verifiedFreelancers, setVerifiedFreelancers] = useState<Array<any>>(
@@ -128,81 +158,235 @@ const ExplorePage: NextPage = () => {
     getServices.refetch();
   }, []);
 
+  const getCardHeader = (idx: number): ReactNode => {
+    switch (idx) {
+      case 0:
+        return;
+      case 1:
+        return (
+          <Typography
+            p={1.5}
+            fontSize={17}
+            fontWeight="bold"
+            color="rgba(33, 33, 33, .85)"
+          >
+            Markets
+          </Typography>
+        );
+      case 2:
+        return (
+          <Typography
+            p={1.5}
+            fontSize={17}
+            fontWeight="bold"
+            color="rgba(33, 33, 33, .85)"
+          >
+            Jobs
+          </Typography>
+        );
+      case 3:
+        return (
+          <Typography
+            p={1.5}
+            fontSize={17}
+            fontWeight="bold"
+            color="rgba(33, 33, 33, .85)"
+          >
+            Communities
+          </Typography>
+        );
+      case 4:
+        return (
+          <Typography
+            p={1.5}
+            fontSize={17}
+            fontWeight="bold"
+            color="rgba(33, 33, 33, .85)"
+          >
+            Freelancers
+          </Typography>
+        );
+      case 5:
+        return (
+          <Typography
+            p={1.5}
+            fontSize={17}
+            fontWeight="bold"
+            color="rgba(33, 33, 33, .85)"
+          >
+            Services
+          </Typography>
+        );
+      default:
+    }
+  };
+
+  const [value, setValue] = React.useState<Date | null>(new Date());
+  const getCardContent = (idx: number) => {
+    switch (idx) {
+      case 0:
+        return (
+          <Box>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <StaticDatePicker<Date>
+                orientation="portrait"
+                openTo="day"
+                disableOpenPicker
+                readOnly
+                value={value}
+                 showToolbar={false}
+                views={["day"]}
+                onChange={(newValue) => {}}
+              />
+            </LocalizationProvider>
+          </Box>
+        );
+      case 1:
+        return (
+          <Stack p={1.5} spacing={2}>
+            {featuredMarkets.slice(0, 6).map((details: any) => {
+              return <MarketDisplay marketDetails={details} text />;
+            })}
+          </Stack>
+        );
+      case 2:
+        return (
+          <Stack p={1.5} spacing={2}>
+            {featuredContracts.map((item, idx: number, arr: Array<any>) => {
+              return (
+                <Grid item xs={6}>
+                  <JobDisplay data={item} text />
+                </Grid>
+              );
+            })}
+          </Stack>
+        );
+      case 3:
+        return (
+          <Box p={1.5}>
+            <Typography variant="caption" fontSize={13}>
+              Communities are not supported yet. Learn more about our vision for
+              communities{" "}
+              <Typography
+                color="primary"
+                fontSize={13}
+                component="span"
+                variant="button"
+              >
+                here
+              </Typography>
+              .
+            </Typography>
+          </Box>
+        );
+      case 4:
+        return (
+          <Stack>
+            {verifiedFreelancers.map(({ address }, idx, arr) => {
+              return (
+                <>
+                  <UserCard address={address} />
+                </>
+              );
+            })}
+          </Stack>
+        );
+      case 5:
+        return (
+          <Stack p={1.5} spacing={2}>
+            {services.slice(0, 3).map((serviceData: ServiceStruct) => {
+              return (
+                <ServiceCard
+                  id={hexToDecimal(serviceData.id._hex)}
+                  data={serviceData}
+                  text
+                />
+              );
+            })}
+          </Stack>
+        );
+      default:
+    }
+  };
+
   return (
     <Box>
-
-      <Container maxWidth="lg" className={classes.root}>
-
-      <Carousel
-          animation="slide"
-          fullHeightHover={true}
-          indicators={false}
-          autoPlay
-          interval={8000}
-        >
-          {loggedOutHeroCarouselItems.map((item, i, arr) => (
-            <CarouselItem
-              key={i}
-              item={item}
-              itemLength={arr.length}
-              index={i}
-            />
-          ))}
-        </Carousel>
-      
-        <Box my={2}>
-          <Box>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Typography
-                variant="h5"
-                py={2}
-                fontWeight="bold"
-                color="rgba(33, 33, 33, .85)"
-              >
-                Jobs and Services
-              </Typography>
-
-              <Button
-                endIcon={<KeyboardArrowRight />}
-                variant="text"
-                size="large"
-              >
-                See all
-              </Button>
-            </Stack>
-          </Box>
-          <Grid
-            sx={{ mb: 2 }}
-            container
-            direction="row"
-            overflow="scroll"
-            flexWrap="wrap"
-            spacing={2}
-          >
-            {
-              featuredContracts.map((item, idx: number, arr: Array<any>) => {
-                return (
-                  <Grid item xs={6}>
-                    {item?.__typename == 'Contract' ? <JobDisplay data={item} /> : <ServiceCard id={item?.id} data={item} /> }
-                  </Grid>
-                )
-              })
-            }
-          </Grid>
-        </Box>
-
+      <Box
+        sx={{
+          borderBottom: "2px solid #000",
+          width: "100%",
+          height: 300,
+          margin: "auto",
+          position: "relative",
+        }}
+      >
         <Box
           sx={{
-            my: 4,
-            mt: 6,
-            p: 3,
+            position: "absolute",
+            backgroundColor: "rgba(0,0,0,0.8)",
             width: "100%",
-            bgcolor: (theme) => alpha(theme.palette.primary.light, 0.4),
-            border: "1px solid #ddd",
+            height: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+            display: "flex",
+          }}
+        >
+          <Stack>
+            <Typography
+              color="#fff"
+              variant="h6"
+              textAlign="center"
+              fontSize={40}
+              fontWeight="bold"
+            >
+              Welcome to Lens Talent
+            </Typography>
+            <Typography
+              color="#fff"
+              paragraph
+              textAlign="center"
+              fontSize={17}
+              fontWeight="medium"
+            >
+              Lens Talent is a decentralized and permissionless protocol for
+              labor markets
+            </Typography>
+          </Stack>
+        </Box>
+        <img
+          src="/assets/images/india.jpeg"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+
+        <Paper
+          component="form"
+          elevation={8}
+          sx={{
+            position: "absolute",
+            top: 275,
+            left: "28%",
+            p: "2px 4px",
+            display: "flex",
+            alignItems: "center",
+            width: 800,
+          }}
+        >
+          <IconButton disabled sx={{ p: "10px" }} aria-label="menu">
+            <Search />
+          </IconButton>
+          <InputBase
+            sx={{ ml: 1, flex: 1 }}
+            placeholder="Find work anytime"
+            inputProps={{ "aria-label": "search google maps" }}
+          />
+        </Paper>
+      </Box>
+      <Container maxWidth="xl" className={classes.root}>
+        <Box
+          sx={{
+            mt: 12,
+            mb: 12,
+            width: "100%",
           }}
         >
           <Stack
@@ -218,7 +402,12 @@ const ExplorePage: NextPage = () => {
               >
                 Featured Services
               </Typography>
-              <Typography color="primary" variant="button" component="span" onClick={() => searchContext?.actionable?.search('sdfsdf')}>
+              <Typography
+                color="primary"
+                variant="button"
+                component="span"
+                onClick={() => searchContext?.actionable?.search("sdfsdf")}
+              >
                 Learn more about creating services{" "}
                 <NorthEast fontSize="small" />
               </Typography>
@@ -226,7 +415,7 @@ const ExplorePage: NextPage = () => {
           </Stack>
 
           <Grid
-          sx={{ width: '100%' }}
+            sx={{ width: "100%" }}
             container
             alignItems="center"
             direction="row"
@@ -235,9 +424,9 @@ const ExplorePage: NextPage = () => {
           >
             {services.slice(0, 3).map((serviceData: ServiceStruct) => {
               return (
-                <Grid item xs={4} key={serviceData?.id?._hex}> 
+                <Grid item xs={4} key={serviceData?.id?._hex}>
                   <ServiceCard
-                  //  outlined={false}
+                    //  outlined={false}
                     id={hexToDecimal(serviceData.id._hex)}
                     data={serviceData}
                   />
@@ -247,101 +436,37 @@ const ExplorePage: NextPage = () => {
           </Grid>
         </Box>
 
-        <Box sx={{ mb: 4 }}>
-        <Grid
-          container
-          direction="column"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Grid item py={2} width="100%">
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Box>
-                <Typography
-                  variant="h5"
-                  pt={2}
-                  pb={0.5}
-                  fontWeight="bold"
-                  color="rgba(33, 33, 33, .85)"
-                >
-                  Participate in markets
-                </Typography>
-                <Typography variant="body2" maxWidth={600}>
-                  Lens Talent only currently only supports one market.{" "}
-                  <Typography color="primary" variant="button" component="span">
-                    Learn more about market proposals{" "}
-                    <NorthEast fontSize="small" />
-                  </Typography>
-                </Typography>
-              </Box>
-
-              <Button
-                endIcon={<KeyboardArrowRight />}
-                variant="text"
-                size="large"
-              >
-                All Markets
-              </Button>
-            </Stack>
-          </Grid>
-          <Grid item />
-        </Grid>
-        <Grid
-          container
-          direction="row"
-          flexDirection="row"
-          alignItems="center"
+        <Masonry
+          columns={3}
           spacing={2}
+          sx={{
+            display: "flex",
+            alignItems: "stretch",
+            justifyContent: "stretch",
+          }}
         >
-          {featuredMarkets.slice(0, 6).map((details: any) => {
-            return (
-              <Grid item sm={4}>
-                <MarketDisplay marketDetails={details} isShowingStats />
-              </Grid>
-            );
-          })}
-        </Grid>
-        </Box>
-
-        <Box mb={4}>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Typography
-              variant="h5"
-              py={2}
-              fontWeight="bold"
-              color="rgba(33, 33, 33, .85)"
+          {heights.map((height, index) => (
+            <Card
+              square
+              elevation={10}
+              key={index}
+              sx={{ height, boxShadow: "0 19px 38px #aaa, 0 15px 12px #aaa" }}
             >
-              Expand your network
-            </Typography>
+              {index !== 0 ? (
+                <>
+                  <CardContent>
+                    <Box sx={{ width: "100%", height: "100%" }}>
+                      {getCardHeader(index)}
+                    </Box>
+                  </CardContent>
+                  <Divider />
+                </>
+              ) : null}
 
-            <Button
-              endIcon={<KeyboardArrowRight />}
-              variant="text"
-              size="large"
-            >
-              Explore freelancers
-            </Button>
-          </Stack>
-          <Stack
-            direction="row"
-            flexWrap="nowrap"
-            alignItems="center"
-            justifyContent="flex-start"
-            spacing={5}
-          >
-            {verifiedFreelancers.map(({ address }) => {
-              return <VerifiedAvatar address={address} />;
-            })}
-          </Stack>
-          </Box>
+              <CardContent>{getCardContent(index)}</CardContent>
+            </Card>
+          ))}
+        </Masonry>
       </Container>
     </Box>
   );
@@ -349,7 +474,10 @@ const ExplorePage: NextPage = () => {
 
 export default ExplorePage;
 
+{
+  /*   */
+}
 
-    {/*   */}
-
-      {/*  */}
+{
+  /*  */
+}

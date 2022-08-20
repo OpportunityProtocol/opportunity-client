@@ -169,7 +169,8 @@ const ConnectedAvatar: FC = () => {
     >
       <IconButton onClick={handlePopoverOpen}>
         <Avatar
-          sx={{ cursor: "pointer" }}
+         
+          sx={{ cursor: "pointer", width: 35, height: 35 }}
           alt="Remy Sharp"
           src="/assets/stock/profile_three.jpeg"
         />

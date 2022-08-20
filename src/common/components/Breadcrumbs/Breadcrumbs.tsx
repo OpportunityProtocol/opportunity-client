@@ -26,7 +26,7 @@ const NavigationBreadcrumbs: FunctionComponent = () => {
   const isVerifiedFreelancer = useSelector(selectVerificationStatus)
 
   return (
-    <Container maxWidth="lg" sx={{ padding: '1% 0%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Container maxWidth="xl" sx={{ padding: '1% 0%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <Breadcrumbs aria-label="breadcrumb" separator="›">
         <StyledBreadcrumb component="a" href="#" label="Home" />
         <StyledBreadcrumb component="a" href="#" label="Catalog" />

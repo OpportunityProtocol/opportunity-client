@@ -18,6 +18,9 @@ import {
   Grid,
   Typography,
   CardContent,
+  LinearProgress,
+  DialogContent,
+  DialogContentText,
 } from "@mui/material";
 
 import BoltIcon from "@mui/icons-material/Bolt";
@@ -46,6 +49,9 @@ import { hexToDecimal } from "../../common/helper";
 import { CHAIN_ID } from "../../constant/provider";
 import SearchBarV1 from "../../common/components/SearchBarV1/SearchBarV1";
 import { FaBoxTissue } from "react-icons/fa";
+import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
+import { QueryResult, useQuery } from "@apollo/client";
+import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
 
 /**
  *
@@ -69,42 +75,62 @@ const CreateContractPage: NextPage = (): JSX.Element => {
       specific_langauges: [],
     },
   });
+
+  const [createContractFormErrorState, setCreateContractFormErrorState] =
+    useState({
+      contractTitleError: false,
+      contractTitleErrorMessage: "",
+      contractDescriptionError: false,
+      contractDescriptionErrorMessage: "",
+      contractDefinitionOfDoneError: false,
+      contractDefinitionOfDoneErrorMessage: "",
+    });
+
   const router: NextRouter = useRouter();
   const classes = useStyles();
   const accountData = useAccount();
   const [contractMetadataURI, setContractMetadataURI] = useState<string>("");
-  const [numMarkets, setNumMarkets] = useState<any>([]);
   const [marketsLoading, setMarketsLoading] = useState<boolean>(false);
+  const [marketDetails, setMarketDetails] = useState<any>({});
 
-  const networkManager_getMarkets = useContractRead(
-    {
-      addressOrName: TOKEN_FACTORY_ADDRESS,
-      contractInterface: TokenFactoryInterface,
-    },
-    "getNumMarkets",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      onSuccess: (data: Result) => {
-        const total = hexToDecimal(data._hex);
-        let list = [];
-        for (let i = 0; i < total; i++) {
-          list.push(Number(i) + 1);
-        }
-        setNumMarkets(list);
-        // setMarketsDetails(data)
-        setMarketsLoading(false);
-      },
-      onError: (error) => {
-        setMarketsLoading(false);
-      },
-    }
-  );
+  const createContractDialogOnOpen = () => {};
+  const [createContractDialogState, setCreateContractDialogState] = useState({
+    loading: false,
+    open: false,
+    success: false,
+    error: false,
+    errorMessage: "",
+  });
+
+  const createContractDialogContent = [
+    <DialogContent>
+      <DialogContentText>
+        You are about to publish a contract to Lens Talent. This will involve
+        signing a transaction with your wallet.
+      </DialogContentText>
+      <Typography variant="caption">
+        Note: This transaction will cost MATIC.
+      </Typography>
+    </DialogContent>,
+    <DialogContent>
+      <DialogContentText>
+        {createContractDialogState?.loading
+          ? "Waiting for confirmation..."
+          : "After pressing create your wallet provider will prompt you to accept the transaction."}
+      </DialogContentText>
+    </DialogContent>,
+  ];
+
+  const marketsQuery: QueryResult = useQuery(GET_MARKETS);
 
   useEffect(() => {
-    //if is first render
-    networkManager_getMarkets.refetch();
+    if (!marketsQuery.loading && marketsQuery.data) {
+      setMarketDetails(marketsQuery.data?.markets);
+    }
+  }, [marketsQuery.loading]);
+
+  useEffect(() => {
+    marketsQuery.refetch();
   }, []);
 
   const handleOnChangeDeadline = (newValue: Date | null) => {
@@ -200,14 +226,42 @@ const CreateContractPage: NextPage = (): JSX.Element => {
     "createContract",
     {
       args: [createContractForm.contract_market_id, contractMetadataURI],
+      onSettled(data, error, variables, context) {
+        if (error) {
+          setCreateContractDialogState({
+            ...createContractDialogState,
+            loading: false,
+            success: false,
+            error: true,
+            errorMessage: error.message,
+          });
+
+          alert(error.message);
+        } else {
+          setCreateContractDialogState({
+            ...createContractDialogState,
+            loading: false,
+            success: true,
+            error: false,
+            errorMessage: "",
+          });
+
+          setContractMetadataURI("");
+        }
+      },
     }
   );
 
   const handleOnCreate = async () => {
+    let retVal: string = "";
+
+    setCreateContractDialogState({
+      ...createContractDialogState,
+      loading: true,
+    });
+
     try {
-      let retVal;
       if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
-        //https://ipfs.infura.io:5001/api/v0
         const ipfs = create({
           url: "/ip4/0.0.0.0/tcp/5001",
         });
@@ -225,25 +279,55 @@ const CreateContractPage: NextPage = (): JSX.Element => {
       }
 
       setContractMetadataURI(retVal);
+    } catch (error) {
+      setCreateContractDialogState({
+        ...createContractDialogState,
+        loading: false,
+        error: true,
+        success: false,
+        errorMessage: "Error uploading metadata to IPFS",
+      });
 
-      if (String(retVal)) {
-        await networkManager_createContract.write({
-          args: [createContractForm.contract_market_id, String(retVal)],
-        });
-      } else {
-        throw new Error("Error retrieving ipfs metadata hash");
-      }
+      alert("Error uploading metadata to IPFS");
+    }
 
-      router.push("/view/");
-    } catch (error) {}
+    if (String(retVal)) {
+      await networkManager_createContract.writeAsync({
+        args: [createContractForm.contract_market_id, String(retVal)],
+      });
+    } else {
+      setCreateContractDialogState({
+        ...createContractDialogState,
+        loading: false,
+        error: true,
+        success: false,
+        errorMessage: "Error retrieving IPFS metadata hash",
+      });
+
+      alert("Error retrieving ipfs metadata hash");
+    }
+  };
+
+  const onCloseCreateContractDialog = () => {
+    setCreateContractDialogState({
+      open: false,
+      loading: false,
+      error: false,
+      errorMessage: "",
+      success: false,
+    });
+
+    setContractMetadataURI("");
+
+    router.push("/view");
   };
 
   return (
     <Container
-      maxWidth="lg"
+      maxWidth="xl"
       component={Stack}
       spacing={5}
-      sx={{ padding: "2% 4%", width: "100%" }}
+      sx={{ width: "100%" }}
     >
       <Box>
         <Typography fontWeight="600" fontSize={25}>
@@ -257,8 +341,14 @@ const CreateContractPage: NextPage = (): JSX.Element => {
           </Typography>
         </Typography>
       </Box>
-      <Box display="flex" alignItems="flex-start">
-        <Box sx={{ maxWidth: 600, width: 600 }}>
+
+      <Grid
+        container
+        display="flex"
+        alignItems="flex-start"
+        justifyContent="space-between"
+      >
+        <Grid item xs={4} sx={{ maxWidth: 600, width: 600 }}>
           <Typography fontWeight="700" fontSize={18} color="text.primary">
             Select a market
           </Typography>
@@ -271,201 +361,209 @@ const CreateContractPage: NextPage = (): JSX.Element => {
               Learn about market proposals.
             </Typography>
           </Typography>
-        </Box>
-
-        <Grid
-          component={Card}
-          variant="outlined"
-          sx={{ width: "100%", flexGrow: 1 }}
-          container
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <CardContent sx={{ width: "100%", flexGrow: 1 }}>
-            {numMarkets && numMarkets.length > 0 ? (
-              numMarkets.slice(0, 6).map((marketId) => {
-                return (
-                  <Grid item xs={3}>
-                    <MarketDisplay
-                      small
-                      marketId={marketId}
-                      isShowingStats={false}
-                      selected={
-                        marketId === createContractForm.contract_market_id
-                      }
-                      selectable
-                      onSelect={() =>
-                        setCreateContractForm({
-                          ...createContractForm,
-                          contract_market_id: marketId,
-                        })
-                      }
-                      showDescription={false}
-                      showStats={false}
-                    />
-                  </Grid>
-                );
-              })
-            ) : (
-              <Grid item xs={12}>
-                <Typography color="error">
-                  Error occurred while loading marketplaces.{" "}
-                  <Typography component="span" variant="button">
-                    {" "}
-                    Try again
-                  </Typography>
-                </Typography>
-              </Grid>
-            )}
-          </CardContent>
         </Grid>
-      </Box>
+
+        <Grid item xs={6}>
+          <Card variant="outlined">
+            <CardContent sx={{ width: "100%", flexGrow: 1 }}>
+              {marketDetails && marketDetails?.length ? (
+                marketDetails.slice(0, 6).map((details) => {
+                  return (
+                    <Grid item xs={3}>
+                      <MarketDisplay
+                        small
+                        marketDetails={details}
+                        isShowingStats={false}
+                        selected={
+                          details?.id === createContractForm.contract_market_id
+                        }
+                        selectable
+                        onSelect={() =>
+                          setCreateContractForm({
+                            ...createContractForm,
+                            contract_market_id: details?.id,
+                          })
+                        }
+                        showDescription={false}
+                        showStats={false}
+                      />
+                    </Grid>
+                  );
+                })
+              ) : (
+                <Grid item xs={12}>
+                  <Typography color="error">
+                    Error occurred while loading marketplaces.{" "}
+                    <Typography component="span" variant="button">
+                      {" "}
+                      Try again
+                    </Typography>
+                  </Typography>
+                </Grid>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Divider />
 
-      <Box display="flex" alignItems="flex-start" sx={{ width: "100%" }}>
-        <Box py={1} width={600} maxWidth={600}>
-          <Typography
-            fontWeight="700"
-            fontSize={18}
-            color="text.primary"
-            id="contractDuration"
-          >
-            Contract Duration
-          </Typography>
-          <Typography color="text.secondary" fontWeight="500" fontSize={14}>
-            Select an estimated duration of time for this contract.
-          </Typography>
-        </Box>
-
-        <Card variant="outlined" sx={{ flexGrow: 1, width: "100%" }}>
-          <CardContent>
-            <Grid
-              sx={{ width: "100%", flexGrow: 1 }}
-              container
-              spacing={0}
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
+      <Grid
+        container
+        display="flex"
+        alignItems="flex-start"
+        justifyContent="space-between"
+      >
+        <Grid item xs={4}>
+          <Box py={1}>
+            <Typography
+              fontWeight="700"
+              fontSize={18}
+              color="text.primary"
+              id="contractDuration"
             >
-              <Grid item>
-                <ClickableCard
-                  onClick={() =>
-                    setCreateContractForm({
-                      ...createContractForm,
-                      meta: {
-                        ...createContractForm.meta,
-                        duration: "quick",
-                      },
-                    })
-                  }
-                  variant="outlined"
-                  sx={{
-                    border:
+              Contract Duration
+            </Typography>
+            <Typography color="text.secondary" fontWeight="500" fontSize={14}>
+              Select an estimated duration of time for this contract.
+            </Typography>
+          </Box>
+        </Grid>
+
+        <Grid item xs={6}>
+          <Card variant="outlined" sx={{ flexGrow: 1, width: "100%" }}>
+            <CardContent>
+              <Grid
+                sx={{ width: "100%", flexGrow: 1 }}
+                container
+                spacing={0}
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Grid item>
+                  <ClickableCard
+                    onClick={() =>
+                      setCreateContractForm({
+                        ...createContractForm,
+                        meta: {
+                          ...createContractForm.meta,
+                          duration: "quick",
+                        },
+                      })
+                    }
+                    variant="outlined"
+                    sx={{
+                      border:
+                        createContractForm.meta.duration === "quick"
+                          ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
+                          : "none",
+                    }}
+                    className={clsx(
+                      classes.marketTypeCard,
                       createContractForm.meta.duration === "quick"
-                        ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
-                        : "none",
-                  }}
-                  className={clsx(
-                    classes.marketTypeCard,
-                    createContractForm.meta.duration === "quick"
-                      ? classes.selectedCard
-                      : null
-                  )}
-                >
-                  <BoltIcon sx={{ color: "#FFEB3B" }} />
-                  <Box py={2} className={classes.columnCenter}>
-                    <Typography fontWeight="medium" color="text.primary">
-                      Quick
-                    </Typography>
-                    <Typography variant="body2">
-                      Time Range: 30min - 1 Hour
-                    </Typography>
-                  </Box>
-                </ClickableCard>
-              </Grid>
+                        ? classes.selectedCard
+                        : null
+                    )}
+                  >
+                    <BoltIcon sx={{ color: "#FFEB3B" }} />
+                    <Box py={2} className={classes.columnCenter}>
+                      <Typography fontWeight="medium" color="text.primary">
+                        Quick
+                      </Typography>
+                      <Typography variant="body2">
+                        Time Range: 30min - 1 Hour
+                      </Typography>
+                    </Box>
+                  </ClickableCard>
+                </Grid>
 
-              <Grid item>
-                <ClickableCard
-                  onClick={() =>
-                    setCreateContractForm({
-                      ...createContractForm,
-                      meta: {
-                        ...createContractForm.meta,
-                        duration: "short",
-                      },
-                    })
-                  }
-                  variant="outlined"
-                  sx={{
-                    border:
+                <Grid item>
+                  <ClickableCard
+                    onClick={() =>
+                      setCreateContractForm({
+                        ...createContractForm,
+                        meta: {
+                          ...createContractForm.meta,
+                          duration: "short",
+                        },
+                      })
+                    }
+                    variant="outlined"
+                    sx={{
+                      border:
+                        createContractForm.meta.duration === "short"
+                          ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
+                          : "none",
+                    }}
+                    className={clsx(
+                      classes.marketTypeCard,
                       createContractForm.meta.duration === "short"
-                        ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
-                        : "none",
-                  }}
-                  className={clsx(
-                    classes.marketTypeCard,
-                    createContractForm.meta.duration === "short"
-                      ? classes.selectedCard
-                      : null
-                  )}
-                >
-                  <DateRangeIcon sx={{ color: "#2196F3" }} />
-                  <Box py={2} className={classes.columnCenter}>
-                    <Typography fontWeight="medium" color="text.primary">
-                      Short
-                    </Typography>
-                    <Typography variant="body2">
-                      A few days - 1 Month
-                    </Typography>
-                  </Box>
-                </ClickableCard>
-              </Grid>
+                        ? classes.selectedCard
+                        : null
+                    )}
+                  >
+                    <DateRangeIcon sx={{ color: "#2196F3" }} />
+                    <Box py={2} className={classes.columnCenter}>
+                      <Typography fontWeight="medium" color="text.primary">
+                        Short
+                      </Typography>
+                      <Typography variant="body2">
+                        A few days - 1 Month
+                      </Typography>
+                    </Box>
+                  </ClickableCard>
+                </Grid>
 
-              <Grid item>
-                <ClickableCard
-                  onClick={() =>
-                    setCreateContractForm({
-                      ...createContractForm,
-                      meta: {
-                        ...createContractForm.meta,
-                        duration: "long",
-                      },
-                    })
-                  }
-                  variant="outlined"
-                  sx={{
-                    border:
+                <Grid item>
+                  <ClickableCard
+                    onClick={() =>
+                      setCreateContractForm({
+                        ...createContractForm,
+                        meta: {
+                          ...createContractForm.meta,
+                          duration: "long",
+                        },
+                      })
+                    }
+                    variant="outlined"
+                    sx={{
+                      border:
+                        createContractForm.meta.duration === "long"
+                          ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
+                          : "none",
+                    }}
+                    className={clsx(
+                      classes.marketTypeCard,
                       createContractForm.meta.duration === "long"
-                        ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
-                        : "none",
-                  }}
-                  className={clsx(
-                    classes.marketTypeCard,
-                    createContractForm.meta.duration === "long"
-                      ? classes.selectedCard
-                      : null
-                  )}
-                >
-                  <HourglassTopIcon sx={{ color: "#4CAF50" }} />
-                  <Box py={2} className={classes.columnCenter}>
-                    <Typography fontWeight="medium" color="text.primary">
-                      Long
-                    </Typography>
-                    <Typography variant="body2">A Month or Longer</Typography>
-                  </Box>
-                </ClickableCard>
+                        ? classes.selectedCard
+                        : null
+                    )}
+                  >
+                    <HourglassTopIcon sx={{ color: "#4CAF50" }} />
+                    <Box py={2} className={classes.columnCenter}>
+                      <Typography fontWeight="medium" color="text.primary">
+                        Long
+                      </Typography>
+                      <Typography variant="body2">A Month or Longer</Typography>
+                    </Box>
+                  </ClickableCard>
+                </Grid>
               </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Divider />
 
-      <Box display="flex" alignItems="flex-start">
-        <Box width={600} maxWidth={600}>
+      <Grid
+        container
+        justifyContent="space-between"
+        display="flex"
+        alignItems="flex-start"
+      >
+        <Grid item xs={4}>
           <Typography fontWeight="700" color="text.primary" fontSize={18}>
             Basic Information
           </Typography>
@@ -473,119 +571,137 @@ const CreateContractPage: NextPage = (): JSX.Element => {
             Fill out basic information that will help readers better understand
             the contract.
           </Typography>
-        </Box>
+        </Grid>
 
-        <Card sx={{ width: "100%", flexGrow: 1 }} variant="outlined">
-          <CardContent>
-            <TextField
-              margin="normal"
-              sx={{ width: "100%" }}
-              variant="outlined"
-              size="small"
-              label="Title"
-              id="contractTitle"
-              placeholder="Need software developer to..."
-              aria-label="Pick a title for your contract"
-              name="contractTitle"
-              type="text"
-              onChange={handleOnChangeCreateContractForm}
-            />
+        <Grid item xs={6}>
+          <Card sx={{ width: "100%", flexGrow: 1 }} variant="outlined">
+            <CardContent>
+              <TextField
+                margin="normal"
+                sx={{ width: "100%" }}
+                variant="outlined"
+                size="small"
+                label="Title"
+                id="contractTitle"
+                placeholder="Need software developer to..."
+                aria-label="Pick a title for your contract"
+                name="contractTitle"
+                type="text"
+                onChange={handleOnChangeCreateContractForm}
+                error={createContractFormErrorState.contractTitleError}
+                helperText={
+                  createContractFormErrorState.contractTitleErrorMessage
+                }
+                //inputProps={{ maxLength: 81 , minLength: 30 }}
+              />
 
-            <TextField
-              rows={6}
-              multiline
-              margin="normal"
-              sx={{ width: "100%" }}
-              size="small"
-              id="contractDescription"
-              variant="outlined"
-              label="Description"
-              placeholder='"In a maximum of 2-4 weeks I am looking to complete a website based on..."'
-              aria-label="Write a description"
-              name="contractDescription"
-              type="text"
-              onChange={handleOnChangeCreateContractForm}
-            />
+              <TextField
+                rows={6}
+                multiline
+                margin="normal"
+                sx={{ width: "100%" }}
+                size="small"
+                id="contractDescription"
+                variant="outlined"
+                label="Description"
+                placeholder='"In a maximum of 2-4 weeks I am looking to complete a website based on..."'
+                aria-label="Write a description"
+                name="contractDescription"
+                type="text"
+                onChange={handleOnChangeCreateContractForm}
+                error={createContractFormErrorState.contractDescriptionError}
+                helperText={
+                  createContractFormErrorState.contractDescriptionErrorMessage
+                }
+                //inputProps={{ maxLength: 730 , minLength: 30 }}
+              />
 
-            <Grid
-              sx={{ py: 2 }}
-              container
-              direction="row"
-              alignItems="flex-start"
-              justifyContent="space-between"
-              spacing={10}
-            >
-              <Grid item>
-                <Typography fontWeight="medium" color="text.primary">
-                  Budget
-                </Typography>
-                <Typography
-                  variant="caption"
-                  fontWeight="500"
-                  color="#757575"
-                  width={350}
-                >
-                  Your budget will reflect to freelancers how much you are
-                  willing to spend
-                </Typography>
+              <Grid
+                sx={{ py: 2 }}
+                container
+                direction="row"
+                alignItems="flex-start"
+                justifyContent="space-between"
+                spacing={10}
+              >
+                <Grid item>
+                  <Typography fontWeight="medium" color="text.primary">
+                    Budget
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    fontWeight="500"
+                    color="#757575"
+                    width={350}
+                  >
+                    Your budget will reflect to freelancers how much you are
+                    willing to spend
+                  </Typography>
+                </Grid>
+
+                <Grid item>
+                  <TextField
+                    size="small"
+                    value={createContractForm.contract_budget}
+                    placeholder="550.00"
+                    id="contractBudget"
+                    onChange={handleOnChangeCreateContractForm}
+                    sx={{ width: 100 }}
+                    InputProps={{
+                      startAdornment: <Typography>$</Typography>,
+                    }}
+                  />
+                </Grid>
               </Grid>
 
-              <Grid item>
-                <TextField
-                  size="small"
-                  value={createContractForm.contract_budget}
-                  placeholder="550.00"
-                  id="contractBudget"
-                  onChange={handleOnChangeCreateContractForm}
-                  sx={{ width: 100 }}
-                  InputProps={{
-                    startAdornment: <Typography>$</Typography>,
-                  }}
-                />
-              </Grid>
-            </Grid>
+              <Grid
+                sx={{ py: 2 }}
+                container
+                direction="row"
+                alignItems="flex-start"
+                justifyContent="space-between"
+                spacing={10}
+              >
+                <Grid item>
+                  <Typography fontWeight="medium" color="text.primary">
+                    Deadline
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    fontWeight="500"
+                    color="#757575"
+                    width={350}
+                  >
+                    This will be the display for your contract
+                  </Typography>
+                </Grid>
 
-            <Grid
-              sx={{ py: 2 }}
-              container
-              direction="row"
-              alignItems="flex-start"
-              justifyContent="space-between"
-              spacing={10}
-            >
-              <Grid item>
-                <Typography fontWeight="medium" color="text.primary">
-                  Deadline
-                </Typography>
-                <Typography
-                  variant="caption"
-                  fontWeight="500"
-                  color="#757575"
-                  width={350}
-                >
-                  This will be the display for your contract
-                </Typography>
+                <Grid item>
+                  <DesktopDatePicker
+                    label="Date desktop"
+                    inputFormat="MM/dd/yyyy"
+                    value={createContractForm.deadline}
+                    onChange={handleOnChangeDeadline}
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+                </Grid>
               </Grid>
-
-              <Grid item>
-                <DesktopDatePicker
-                  label="Date desktop"
-                  inputFormat="MM/dd/yyyy"
-                  value={createContractForm.deadline}
-                  onChange={handleOnChangeDeadline}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Grid>
 
         {/*  */}
-      </Box>
+      </Grid>
 
       <Divider />
-      <Box display="flex" alignItems="flex-start">
-        <Box maxWidth={600} width={600}>
+
+      <Grid
+        container
+        justifyContent="space-between"
+        display="flex"
+        alignItems="flex-start"
+      >
+        <Grid item xs={4}>
           <Typography fontWeight="700" fontSize={18} color="text.primary">
             Definition of Done
           </Typography>
@@ -596,25 +712,34 @@ const CreateContractPage: NextPage = (): JSX.Element => {
           <Typography variant="caption">
             The more specific the better
           </Typography>
-        </Box>
+        </Grid>
 
-        <Card variant="outlined" sx={{ width: "100%" }}>
-          <CardContent>
-            <TextField
-              label="Definition of done"
-              id="contractDefinitionOfDone"
-              value={createContractForm.contract_definition_of_done}
-              multiline
-              size="small"
-              margin="normal"
-              rows={6}
-              onChange={handleOnChangeCreateContractForm}
-              sx={{ width: "100%" }}
-              placeholder="To complete the job you must..."
-            />
-          </CardContent>
-        </Card>
-      </Box>
+        <Grid item xs={6}>
+          <Card variant="outlined" sx={{ width: "100%" }}>
+            <CardContent>
+              <TextField
+                label="Definition of done"
+                id="contractDefinitionOfDone"
+                value={createContractForm.contract_definition_of_done}
+                multiline
+                size="small"
+                margin="normal"
+                rows={6}
+                onChange={handleOnChangeCreateContractForm}
+                sx={{ width: "100%" }}
+                placeholder="Let freelancers know the requirements for completing this job."
+                error={
+                  createContractFormErrorState.contractDefinitionOfDoneError
+                }
+                helperText={
+                  createContractFormErrorState.contractDefinitionOfDoneErrorMessage
+                }
+                //inputProps={{ maxLength: 500 , minLength: 30 }}
+              />
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Divider />
 
@@ -682,12 +807,12 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         </CardContent>
       </Card>
 
-      <Card variant="outlined">
+      {/*  <Card variant="outlined">
         <CardContent>
           <Box>
             <Box pb={1}>
               <Typography fontWeight="700" fontSize={18} color="text.primary">
-                Optional
+                Only looking for specific languages
               </Typography>
               <Typography
                 color="text.secondary"
@@ -695,8 +820,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                 fontWeight="500"
                 fontSize={14}
               >
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
-                tincidunt ipsum ut maximus malesuada.
+                Checking this will display you are only looking for freelancers who speak specific languages.
               </Typography>
             </Box>
 
@@ -707,7 +831,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                     id="contractLanguageCheckbox"
                     onChange={handleOnChangeCreateContractForm}
                     defaultChecked
-                    checked={createContractForm.meta.specific_langauges}
+                    checked={false}
                   />
                 }
                 label="Only specific languages"
@@ -720,17 +844,35 @@ const CreateContractPage: NextPage = (): JSX.Element => {
             </FormGroup>
           </Box>
         </CardContent>
-      </Card>
+              </Card> */}
 
       <Stack justifyContent="flex-end" direction="row">
         <Button
           sx={{ mx: 1, width: 120, p: 1 }}
           variant="contained"
-          onClick={handleOnCreate}
+          // disabled={createContractForm.contract_definition_of_done.trim().length < 500 || createContractForm.contract_title.trim().length < 81 || createContractForm.contract_description.trim().length < 730}
+          onClick={() => {
+            setCreateContractDialogState({
+              ...createContractDialogState,
+              open: true,
+            });
+          }}
         >
           Create
         </Button>
       </Stack>
+
+      <ConfirmationDialog
+        open={createContractDialogState.open}
+        content={createContractDialogContent}
+        onOpen={createContractDialogOnOpen}
+        onClose={onCloseCreateContractDialog}
+        primaryAction={handleOnCreate}
+        hasSigningStep={false}
+        success={createContractDialogState.success}
+        primaryActionTitle="Create"
+        loading={createContractDialogState?.loading}
+      />
     </Container>
   );
 };

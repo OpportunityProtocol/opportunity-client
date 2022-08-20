@@ -15,6 +15,7 @@ import {
   Checkbox,
   FormControl,
   InputLabel,
+  DialogContentText,
 } from "@mui/material";
 import { NextPage } from "next";
 import { Fragment, ChangeEvent, createRef, useEffect, useState } from "react";
@@ -52,6 +53,7 @@ import { hexToDecimal } from "../../common/helper";
 import { NextRouter, useRouter } from "next/router";
 import BootstrapInput from "../../common/components/BootstrapInput/BootstrapInput";
 import { SERVICE_REFERENCE_MODULE } from "../../constant/contracts";
+import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
 const Buffer = require("buffer").Buffer;
 
 const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
@@ -112,16 +114,16 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           Number(createServiceForm.offers.enterprise.price),
         ],
         SERVICE_COLLECT_MODULE,
-        "0xC2b99a6D91963a39CCdBeF193A2BF3377E63825c" //SERVICE_REFERENCE_MODULE
+        SERVICE_REFERENCE_MODULE,
       ],
       overrides: {
         gasLimit: BigNumber.from("11643163"),
       },
       onSettled(data, error, variables, context) {
-        console.log('@@@@@@@@@@@@@@@@@@@@@@')
-        console.log(data)
-        console.log(error)
-        console.log(variables)
+        console.log("@@@@@@@@@@@@@@@@@@@@@@");
+        console.log(data);
+        console.log(error);
+        console.log(variables);
       },
     }
   );
@@ -192,7 +194,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             Number(createServiceForm.offers.enterprise.price),
           ],
           SERVICE_COLLECT_MODULE,
-          "0xC2b99a6D91963a39CCdBeF193A2BF3377E63825c"
+          SERVICE_REFERENCE_MODULE,
         ],
         overrides: {
           gasLimit: BigNumber.from("11643163"),
@@ -240,24 +242,37 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const handleOnChangePrice = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setCreateServiceForm({
-      ...createServiceForm,
-      offers: {
-        ...createServiceForm.offers,
-        [e.target.id]: {
-          price: e.target.value,
-          values: createServiceForm.offers[e.target.id].values,
+    const value = +Number(e.target.value);
+    if (value < 1) {
+      setCreateServiceForm({
+        ...createServiceForm,
+        offers: {
+          ...createServiceForm.offers,
+          [e.target.id]: {
+            price: createServiceForm.offers[e.target.id].price,
+            values: createServiceForm.offers[e.target.id].values,
+          },
         },
-      },
-    });
+      });
+    } else {
+      setCreateServiceForm({
+        ...createServiceForm,
+        offers: {
+          ...createServiceForm.offers,
+          [e.target.id]: {
+            price: e.target.value,
+            values: createServiceForm.offers[e.target.id].values,
+          },
+        },
+      });
+    }
   };
 
   const handleOnChangeCreateServiceForm = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
-
-    if (e.target.name === '' && String(e.target.value).length >= 55) {
-      return
+    if (e.target.name === "" && String(e.target.value).length >= 55) {
+      return;
     }
 
     setCreateServiceForm({
@@ -322,6 +337,52 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const [checkboxes, setCheckboxes] = useState<Array<boolean>>([]);
 
   const handleOnChangeCheckbox = (e, idx: number) => {};
+
+  const [publishDialogIsOpen, setPublishDialogIsOpen] =
+    useState<boolean>(false);
+  const onOpenPublishDialog = () => {};
+  const [publishDialogIsLoading, setPublishDialogIsLoading] =
+    useState<boolean>(false);
+  const [publishServiceSuccessful, setPublishServiceSuccessful] =
+    useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const lastPublishDialogContent = publishServiceSuccessful ? (
+    <DialogContentText id="alert-dialog-description">
+      <Box py={2}>
+        <Typography fontSize={20} fontWeight="bold" py={1}>
+          Confirm Connect
+        </Typography>
+        <Typography variant="subtitle2">Send Transaction</Typography>
+      </Box>
+    </DialogContentText>
+  ) : (
+    <DialogContentText id="alert-dialog-description">
+      <Box py={2}>
+        <Typography fontSize={20} fontWeight="bold" py={1}>
+          Transaction Complete
+        </Typography>
+        <Typography variant="subtitle2">Send Transaction</Typography>
+      </Box>
+    </DialogContentText>
+  );
+
+  const publishDialogContent = [
+    <DialogContentText id="alert-dialog-description">
+      <Typography fontSize={20} fontWeight="bold" py={1}>
+        {" "}
+        You are about to post a service to Lens Talent which will require one
+        step:
+      </Typography>
+
+      <ul>
+        <li>
+          {" "}
+          <Typography>Sending a transaction</Typography>
+        </li>
+      </ul>
+    </DialogContentText>,
+  ];
 
   return (
     <Container
@@ -658,8 +719,14 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             <FormControl sx={{ flexGrow: 1 }}>
               <InputLabel>Beginner Price</InputLabel>
               <BootstrapInput
+                startAdornment={
+                  <img
+                    src="/assets/images/dai.svg"
+                    style={{ width: 15, height: 20 }}
+                  />
+                }
                 id="beginner"
-                type="numeric"
+                type="number"
                 onChange={handleOnChangePrice}
                 value={`${createServiceForm.offers.beginner.price}`}
               />
@@ -668,7 +735,14 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             <FormControl sx={{ flexGrow: 1 }}>
               <InputLabel>Business Price</InputLabel>
               <BootstrapInput
+                startAdornment={
+                  <img
+                    src="/assets/images/dai.svg"
+                    style={{ width: 15, height: 20 }}
+                  />
+                }
                 id="business"
+                type="number"
                 onChange={handleOnChangePrice}
                 value={`${createServiceForm.offers.business.price}`}
               />
@@ -677,7 +751,14 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             <FormControl sx={{ flexGrow: 1 }}>
               <InputLabel>Enterprise Price</InputLabel>
               <BootstrapInput
+                startAdornment={
+                  <img
+                    src="/assets/images/dai.svg"
+                    style={{ width: 15, height: 20 }}
+                  />
+                }
                 id="enterprise"
+                type="number"
                 onChange={handleOnChangePrice}
                 value={`${createServiceForm.offers.enterprise.price}`}
               />
@@ -690,11 +771,21 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         <Button
           sx={{ mx: 1, width: 120, p: 1 }}
           variant="contained"
-          onClick={handleOnPublish}
+          onClick={() => setPublishDialogIsOpen(true)}
         >
           Publish
         </Button>
       </Stack>
+
+      <ConfirmationDialog
+        open={publishDialogIsOpen}
+        onOpen={onOpenPublishDialog}
+        onClose={() => setPublishDialogIsOpen(false)}
+        primaryAction={handleOnPublish}
+        primaryActionTitle="Publish"
+        content={publishDialogContent}
+        loading={loading}
+      />
     </Container>
   );
 };

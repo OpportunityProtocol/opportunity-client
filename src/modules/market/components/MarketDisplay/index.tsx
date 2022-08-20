@@ -15,9 +15,10 @@ interface IMarketDisplayProps {
   showDescription?: boolean;
   showStats?: boolean;
   selectable?: boolean;
+  text?: boolean;
   small?: boolean;
   selected?: boolean;
-  onSelect?: (marketData: object) => void;
+  onSelect?: () => void;
   marketDetails: any;
 }
 
@@ -28,6 +29,7 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
   small = false,
   selectable,
   selected = false,
+  text = false,
   onSelect,
   marketDetails,
 }) => {
@@ -40,23 +42,34 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
   const handleOnSelect = (): void => {
     // internal
 
-    // external
+    //external
     onSelect();
   };
 
-  return (
+  return text ? (
+    <Box>
+      <Typography
+        fontSize={13}
+        fontWeight="medium"
+        color={(theme) => theme.palette.primary.main}
+      >
+        {marketDetails?.name
+          ? marketDetails?.name
+          : "Unable to load market name"}
+      </Typography>
+    </Box>
+  ) : (
     <ClickableCard
       sx={{
         border: (theme) =>
           selected
             ? `2px solid ${theme.palette.primary.main}`
             : "1px solid #eee",
-
       }}
       variant="outlined"
       onClick={selectable ? () => handleOnSelect() : () => router.push("/jobs")}
     >
-      <Box sx={{ width: "100%", height: small ? 100: 200 }}>
+      <Box sx={{ width: "100%", height: small ? 100 : 200 }}>
         <img
           style={{ width: "100%", height: "100%" }}
           src="/assets/images/carousel_two.jpeg"
@@ -73,13 +86,15 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
           <Grid item>
             <Typography
               sx={{
-                color: 'black',
+                color: "black",
                 height: 25,
                 fontSize: small ? 12 : 16,
                 fontWeight: (theme) => theme.typography.fontWeightBold,
               }}
             >
-              {marketDetails?.name ? marketDetails?.name : 'Unable to load market name'}
+              {marketDetails?.name
+                ? marketDetails?.name
+                : "Unable to load market name"}
             </Typography>
           </Grid>
 

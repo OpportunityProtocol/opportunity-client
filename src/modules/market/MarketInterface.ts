@@ -17,6 +17,7 @@ interface ICarouselItemProp {
 
   interface IJobDisplayProps {
     data: RelationshipStruct;
+    text?: boolean;
   }
 
   export type { ICarouselItemProp, ICarouselItemProps, IJobDisplayProps }

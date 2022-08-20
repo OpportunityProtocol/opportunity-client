@@ -1,57 +1,222 @@
-import React from 'react'
+import {
+  Box,
+  Typography,
+  Button,
+  Avatar,
+  Card,
+  CardContent,
+  Stack,
+  Divider,
+  Chip,
+  alpha,
+} from "@mui/material";
+import { NextRouter, useRouter } from "next/router";
+import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
+import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
+import { ClassNameMap } from "@mui/material";
+import { useState, useEffect, FC } from "react";
+import {
+  LENS_HUB_PROXY,
+  NETWORK_MANAGER_ADDRESS,
+  ZERO_ADDRESS,
+} from "../../../../constant";
+import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
+import { CHAIN_ID } from "../../../../constant/provider";
+import { hexToDecimal } from "../../../../common/helper";
+import { useContractRead } from "wagmi";
+import { Result } from "ethers/lib/utils";
+import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
+import { ProfileStructStruct } from "../../../../typechain-types/ILensHub";
+import { QueryResult, useQuery } from "@apollo/client";
+import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../UserGQLQueries";
+import fleek from "../../../../fleek";
+import { create } from "ipfs-http-client";
 
-import { 
-    Card, 
-    CardContent, 
-    Avatar, 
-    Button, 
-    Box, 
-    Stack, 
-    Typography, 
-    Divider,
-    CardActions 
-} from '@mui/material'
-import { useStyles } from './UserCardStyles'
-import { useRouter } from 'next/router'
-
-interface IUserCardProps {
-    name: string,
-    email: string,
-    avatar: string,
-    address: string
-  }
-
-const UserCard : React.FunctionComponent<IUserCardProps> = ({ name, email, avatar, address }) => {
-    const classes = useStyles()
-    const router = useRouter()
-
-    return (
-        <Card variant='outlined'>
-            <CardContent>
-                <Stack direction='row' alignItems='center' justifyContent='space-between'>
-                    <Box>
-                    <Typography fontSize={15} variant='subtitle2' className={classes.name}>
-                        {name} (232 Connections) - <Typography variant='caption' color='#aaa'> Most active in Writing & Translation </Typography>
-                    </Typography>
-                    <Typography variant='body2' color='#616161'>
-                        {email}
-                    </Typography>
-                    </Box>
-
-                    <Avatar src={avatar} />
-                </Stack>
-                <Typography paragraph color='rgb(94, 94, 94)' variant='body2' pt={2}>
-                My name is Ann Smith. I am a senior in high school. Everyone can agree that I am a good student and that I like to study. My favorite subjects are chemistry and biology. I am going to enter the university because my goal is to study these subjects in future and to become a respected professional in one of the fields.
-                </Typography>
-            </CardContent>
-            <Divider />
-            <CardActions>
-                <Button variant='text' color='secondary' onClick={() => router.push('/profile')}>
-                    See profile
-                </Button>
-            </CardActions>
-        </Card>
-    )
+interface IVerifiedAvatarProps {
+  avatarSize?: number;
+  address: string;
+  lensProfileId: number;
+  lensProfile: ProfileStructStruct;
+  showValue?: boolean;
+  showHandle?: boolean;
 }
 
-export default UserCard
+const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
+  avatarSize = 40,
+  address = ZERO_ADDRESS,
+  lensProfileId = 0,
+  lensProfile,
+  showValue = true,
+  showHandle = true,
+}) => {
+  const [displayImg, setDisplayImg] = useState<Buffer | string>("");
+  const router: NextRouter = useRouter();
+  const [state, setState] = useState<any>({});
+
+  const [fallbackLensProfileId, setFallbackLensProfileId] = useState<number>(0);
+  const [fallbackLensProfile, setFallbackLensProfile] =
+    useState<ProfileStructStruct>({});
+
+  const lensHub_getProfile = useContractRead(
+    {
+      addressOrName: LENS_HUB_PROXY,
+      contractInterface: LensHubInterface,
+    },
+    "getProfile",
+    {
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      args: [fallbackLensProfileId],
+      onSuccess: (data) => {
+        setFallbackLensProfile(data);
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (fallbackLensProfileId !== 0) {
+      lensHub_getProfile.refetch({
+        throwOnError: true,
+      });
+    }
+  }, [fallbackLensProfileId]);
+
+  const networkManager_getLensProfileIdFromAddress = useContractRead(
+    {
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+    },
+    "getLensProfileIdFromAddress",
+    {
+      enabled: false,
+      chainId: CHAIN_ID,
+      args: [address],
+      onSuccess: (data: Result) => {
+        setFallbackLensProfileId(hexToDecimal(data._hex));
+      },
+      onError: (error) => {},
+    }
+  );
+
+  const downloadMetadata = async (ptr: string) => {
+    let retVal: any = {};
+
+    try {
+      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+        const ipfs = create({
+          url: "/ip4/127.0.0.1/tcp/8080",
+        });
+
+        retVal = await ipfs.get(`/ipfs/${ptr}`).next();
+      } else {
+        retVal = await fleek.getUser(ptr);
+      }
+
+      if (!retVal) {
+        throw new Error("Unable to retrieve user metadata");
+      } else {
+        const jsonString = Buffer.from(retVal.value).toString("utf8");
+        const parsedString = jsonString.slice(
+          jsonString.indexOf("{"),
+          jsonString.lastIndexOf("}") + 1
+        );
+        const parsedData = JSON.parse(parsedString);
+        console.log(parsedData);
+        console.log("@@@@@@@@@@@@@@@@@@");
+        setState({
+          ...state,
+          ...parsedData,
+        });
+      }
+    } catch (error) {
+      console.log("Error downloading metadata from profile");
+    }
+  };
+
+  const verifiedUserQuery: QueryResult = useQuery(
+    GET_VERIFIED_FREELANCER_BY_ADDRESS,
+    {
+      variables: {
+        userAddress: address,
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (!verifiedUserQuery.loading && verifiedUserQuery.data) {
+      downloadMetadata(verifiedUserQuery.data?.verifiedUsers[0]?.metadata);
+    }
+  }, [verifiedUserQuery.loading]);
+
+  useEffect(() => {
+    if (address) {
+      networkManager_getLensProfileIdFromAddress.refetch();
+      verifiedUserQuery.refetch();
+    }
+  }, [address]);
+
+  const renderHandle = (): string => {
+    if (lensProfile && lensProfile.handle) {
+      return lensProfile.handle;
+    } else if (fallbackLensProfile && fallbackLensProfile.handle) {
+      return fallbackLensProfile.handle;
+    } else {
+      return "Unknown Handle";
+    }
+  };
+
+  return (
+    <Card
+      onClick={() => router.push(`/view/profile/${address}`)}
+      variant="elevation"
+      elevation={0}
+      sx={{
+        cursor: "pointer",
+        borderRadius: 2,
+        height: 80,
+
+        width: "100%",
+        maxWidth: "100%",
+      }}
+    >
+      <CardContent>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box>
+            <Typography fontSize={12}>
+              {state?.display_name ? state?.display_name : "Unknown"}
+            </Typography>
+            <Typography variant="subtitle2" fontWeight="bold">
+              {renderHandle()}
+            </Typography>
+          </Box>
+
+          <Jazzicon
+            diameter={avatarSize}
+            seed={jsNumberForAddress(String(address))}
+          />
+        </Box>
+
+        {state?.description ? (
+          <Typography fontSize={12} paragraph color="text.secondary">
+            {state?.description}
+          </Typography>
+        ) : (
+          <Typography fontSize={12} paragraph color="text.secondary">
+            {" "}
+            No description{" "}
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export { type IVerifiedAvatarProps };
+export default VerifiedAvatar;

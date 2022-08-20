@@ -61,6 +61,7 @@ interface IServiceCardProps {
   data?: ServiceStruct;
   purchase?: boolean;
   outlined: string;
+  text?: boolean;
 }
 
 const ServiceCard = ({
@@ -68,6 +69,7 @@ const ServiceCard = ({
   data,
   purchaseData,
   purchase = false,
+  text=false,
   outlined = true
 }: IServiceCardProps) => {
   const cardStyles = useStyles();
@@ -174,8 +176,9 @@ const ServiceCard = ({
       }
 
       if (!retVal) {
-        throw new Error("Unable to retrieve service metadata data");
+        alert("Unable to retrieve service metadata data")
       } else {
+  
         const jsonString = Buffer.from(retVal.value).toString("utf8");
         const parsedString = jsonString.slice(
           jsonString.indexOf("{"),
@@ -185,6 +188,7 @@ const ServiceCard = ({
         const updatedImg = Buffer.from(parsedData.serviceThumbnail.data);
 
         setDisplayImg(updatedImg);
+  
         setServiceMetadata(parsedData);
       }
       setErrors({
@@ -341,42 +345,42 @@ const ServiceCard = ({
     }
   };
 
-  return (
-    <Card variant={outlined ? "outlined" : "elevation"} elevation={0} sx={{ width: "100%", height: 'auto', cursor: userAddress ? 'pointer' : 'auto' }} onClick={userAddress ? () => router.push(`/view/service/${data?.id}`) : () => {}}>
-      <CardContent sx={{  '&:hover': { color: (theme) => theme.palette.primary.main }, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly'}}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          {errors.metadataError ? (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-   
-            >
-              <BrokenImageIcon
-                sx={{ color: "#dbdbdb", width: 50, height: 50 }}
-                fontSize="large"
-              />
-            </Box>
-          ) : (
-            <CardMedia
-              image={URL.createObjectURL(new Blob([displayImg]))}
-              sx={{ height: "100%", width: "100%" }}
-            />
-          )}
+  return text ?
+  <Box>
+  {serviceMetadata?.service_title ? (
+
+          <Typography fontWeight='normal' fontSize={12} color={(theme) => theme.palette.primary.main}>
+       {serviceMetadata?.service_title}  
+     </Typography>
+    
+
+   ) : (
+
+             <Typography fontWeight='medium' fontSize={13} color={(theme) => theme.palette.primary.main}>
+       Unable to load service title
+     </Typography>
+   )}
+</Box>
+:
+(
+    <Card square variant="elevation" elevation={10} sx={{ boxShadow: '0 19px 38px #eee, 0 15px 12px #eee', display: 'flex', alignItems: 'center', width: "100%", height: 100, cursor: userAddress ? 'pointer' : 'auto' }} onClick={userAddress ? () => router.push(`/view/service/${data?.id}`) : () => {}}>
+
+           
+       
+          <Box sx={{flex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
+
+  
+      <CardContent sx={{ flex: '1 0 auto', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly'}}>
+    
 
           <Typography
             fontWeight="600"
+            fontSize={12}
       
-            sx={{ px: 1 }}
           >
-            I will manage your social media account on any platform. I have over
-            10 years of experience
+            {serviceMetadata?.service_title ? serviceMetadata?.service_title : 'Unable to load service title'}
           </Typography>
-        </Stack>
+
 
         <Box display='flex' alignItems='center' justifyContent='space-between'>
           <Stack direction="row" alignItems="center" spacing={0.5}>
@@ -384,18 +388,13 @@ const ServiceCard = ({
               src="/assets/images/dai.svg"
               style={{ width: 15, height: 20 }}
             />
-            <Typography fontSize={13}>
+            <Typography fontSize={13} fontWeight='medium' color='text.secondary'>
               {Math.random().toPrecision(2)}{" "}
             </Typography>
           </Stack>
-
-          <Typography color='text.primary' variant="caption">
-            Collected by 20 people
-          </Typography>
-
         </Box>
 
-        <Stack direction="row" alignItems="center">
+     {/*   <Stack direction="row" alignItems="center">
           {serviceMetadata?.tags &&
           serviceMetadata?.service_tags?.length > 0 ? (
             serviceMetadata?.service_tags?.map((tag) => {
@@ -411,10 +410,20 @@ const ServiceCard = ({
           ) : (
             <Typography color='text.secondary' variant="caption">Unable to load tags</Typography>
           )}
-        </Stack>
+          </Stack> */}
 
       </CardContent>
-      {renderButtonState()}
+      </Box>
+      {
+          errors?.metadataError ?
+          <img src='' style={{ height: "100%", width: 110 }} />
+          :
+          <CardMedia
+          image={URL.createObjectURL(new Blob([displayImg]))}
+          sx={{ height: "100%", width: 80 }}
+        />
+         }
+      {/*renderButtonState()*/}
     </Card>
   );
 };
