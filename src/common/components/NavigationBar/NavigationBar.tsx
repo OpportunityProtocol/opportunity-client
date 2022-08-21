@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  FC,
-  useEffect,
-  useContext,
-  ChangeEvent,
-} from "react";
+import React, { useState, FC, useEffect, useContext, ChangeEvent } from "react";
 import {
   Box,
   Container,
@@ -13,12 +7,18 @@ import {
   Button,
   Stack,
   AppBar,
+  List,
+  ListItem,
+  ListItemText,
   Toolbar,
   Typography,
   Divider,
   IconButton,
   MenuItem,
   Menu,
+  ListItemButton,
+  ListItemIcon,
+  Chip,
 } from "@mui/material";
 
 import { useRouter } from "next/router";
@@ -60,8 +60,13 @@ import {
 import { BigNumber } from "ethers";
 import {
   AddCircleOutline,
+  Book,
   HelpOutline,
+  Language,
   LocalGasStation,
+  QuestionAnswer,
+  QuestionMarkOutlined,
+  WebAsset,
 } from "@mui/icons-material";
 import SearchContext from "../../../context/SearchContext";
 import { QueryResult, useQuery } from "@apollo/client";
@@ -93,10 +98,10 @@ const NavigationBar: FC = (): JSX.Element => {
 
   const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     variables: {
-      userAddress
-    }
-  })
-  console.log(userData)
+      userAddress,
+    },
+  });
+  console.log(userData);
 
   //getProfile
   const lensHub_getProfile = useContractRead(
@@ -179,7 +184,18 @@ const NavigationBar: FC = (): JSX.Element => {
     addressOrName: accountData ? accountData?.data?.address : String(0),
   });
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [helpMenuAnchorEl, setHelpMenuAnchorEl] = useState<null | HTMLElement>(null)
+  const helpMenuIsOpen = Boolean(helpMenuAnchorEl)
+
+  const handleOnClickHelpIcon = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setHelpMenuAnchorEl(event.currentTarget)
+  }
+
+  const handleOnCloseHelpMenu = () => {
+    setHelpMenuAnchorEl(null)
+  }
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -301,100 +317,16 @@ const NavigationBar: FC = (): JSX.Element => {
   return (
     <React.Fragment>
       <AppBar
-        variant="elevation"
+        variant="outlined"
         // elevation={0}
         sx={{
           width: { sm: `100%` },
           ml: { sm: `100%` },
           bgcolor: "#fff",
-          height: "95px",
-          border: "none !important",
-          // borderBottom: "1px solid #eee !important",
+        //  height: "95px",
+          border: "1px solid #ddd !important"
         }}
       >
-        <Box>
-          <Container
-            maxWidth="lg"
-            sx={{
-              padding: "5px 0px",
-              display: "flex",
-              flexDirection: "column",
-              bgcolor: "#fff",
-            }}
-          >
-            <Stack spacing={5} direction="row" alignItems="center">
-              <Typography
-                color="text.secondary"
-                fontSize={10.5}
-                fontWeight="medium"
-              >
-                Labor Markets:{" "}
-                <Typography
-                  fontSize={11.5}
-                  fontWeight="medium"
-                  component="span"
-                  color="primary"
-                >
-                  1
-                </Typography>
-              </Typography>
-
-              <Typography
-                color="text.secondary"
-                fontSize={10.5}
-                fontWeight="medium"
-              >
-                Total Services Available:{" "}
-                <Typography
-                  fontSize={11.5}
-                  fontWeight="medium"
-                  component="span"
-                  color="primary"
-                >
-                  20
-                </Typography>
-              </Typography>
-
-              <Typography
-                color="text.secondary"
-                fontSize={10.5}
-                fontWeight="medium"
-              >
-                Total Contracts Available:{" "}
-                <Typography
-                  fontSize={11.5}
-                  fontWeight="medium"
-                  component="span"
-                  color="primary"
-                >
-                  0
-                </Typography>
-              </Typography>
-
-              <Typography
-                color="text.secondary"
-                fontSize={10.5}
-                fontWeight="medium"
-              >
-                <span>
-                  <Stack spacing={0.2} direction="row" alignItems="center">
-                    <LocalGasStation fontSize="small" sx={{ mr: 0.5 }} />
-                    Polygon Gas:
-                    <Typography
-                      fontSize={11.5}
-                      fontWeight="medium"
-                      component="span"
-                      color="primary"
-                    >
-                      {gasPrice}
-                    </Typography>
-                  </Stack>
-                </span>
-              </Typography>
-            </Stack>
-          </Container>
-        </Box>
-        <Divider />
         <Toolbar className={classes.toolbar}>
           <Container
             maxWidth="xl"
@@ -416,8 +348,6 @@ const NavigationBar: FC = (): JSX.Element => {
                     src="/assets/logo.svg"
                     style={{ width: 40, height: 40 }}
                   />
-
-            
                 </Stack>
                 <SearchBarV1
                   width={300}
@@ -427,21 +357,25 @@ const NavigationBar: FC = (): JSX.Element => {
                   onKeyDown={onSearch}
                 />
 
-                <Stack direction="row" alignItems='center' spacing={1.5} ml={1.7}>
-        
-        <Link href='/'>
-        <Typography
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={1.5}
+                  ml={1.7}
+                >
+                  <Link href="/">
+                    <Typography
                       variant="button"
                       fontSize={14}
                       component={Button}
-                      color={router.pathname == "/" ? "primary" : "text.secondary"}
-                      sx={{ fontWeight: 'bold' }}
+                      color={
+                        router.pathname == "/" ? "primary" : "text.secondary"
+                      }
+                      sx={{ fontWeight: "bold" }}
                     >
                       Explore
                     </Typography>
-        </Link>
-                    
-              
+                  </Link>
 
                   <Link href="/work">
                     <Typography
@@ -517,7 +451,7 @@ const NavigationBar: FC = (): JSX.Element => {
                   <>
                     <Tooltip title="Create">
                       <IconButton
-                      size='large'
+                        size="large"
                         onClick={handleOnClickCreateIcon}
                         aria-controls={
                           createMenuIsOpen ? "create-menu" : undefined
@@ -525,7 +459,10 @@ const NavigationBar: FC = (): JSX.Element => {
                         aria-haspopup="true"
                         aria-expanded={createMenuIsOpen ? "true" : undefined}
                       >
-                        <AddCircleOutline fontSize="medium" sx={{ color: "rgb(158, 158, 166)" }} />
+                        <AddCircleOutline
+                          fontSize="medium"
+                          sx={{ color: "rgb(158, 158, 166)" }}
+                        />
                       </IconButton>
                     </Tooltip>
 
@@ -564,75 +501,153 @@ const NavigationBar: FC = (): JSX.Element => {
                       transformOrigin={{ horizontal: "right", vertical: "top" }}
                       anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                     >
-                      <MenuItem onClick={() => router.push("/create/contract")}>
-                        <Button
-                          sx={{ width: 300 }}
-                          variant="text"
-                          
-                        >
-                          Create Contract
-                        </Button>
-                      </MenuItem>
+                      <List>
+                        <ListItemButton onClick={() => router.push("/create/contract")}>
+                          <ListItemText 
+                          primary='Create a contract' 
+                          secondary="Create a contract if you're looking for a one time deal"
+                          primaryTypographyProps={{
+                            fontWeight: 'bold',
+                            fontSize: 14
+                          }} 
+                          secondaryTypographyProps={{
+                            fontSize: 12,
+                            fontWeight: 'medium',
+                            color: '#444'
+                          }}
+                          />
+                        </ListItemButton>
 
-                      <MenuItem onClick={() => router.push("/create/service")} disabled={!userData.data?.verifiedUsers?.length > 0}>
-                        <Button
-                        disabled={!userData.data?.verifiedUsers?.length > 0}
-                          sx={{ width: 300 }}
-                          variant="contained"
-                          
-                        >
-                          Post Service
-                        </Button>
-                      </MenuItem>
+                        <ListItemButton 
+                        onClick={() => router.push("/create/service")}
+                        disabled={!userData.data?.verifiedUsers?.length > 0}>
+                          <ListItemText 
+                          primary='Create a service' 
+                          secondary='Publish a service and allow your peers to invest in its success'
+                          primaryTypographyProps={{
+                            fontWeight: 'bold',
+                            fontSize: 14
+                          }}  
+                          secondaryTypographyProps={{
+                            fontSize: 12,
+                            fontWeight: 'medium',
+                            color: '#444'
+                          }}
+                          />
+                        </ListItemButton>
+                      </List>
                     </Menu>
                   </>
 
-                  <IconButton
-                      size='large'
-                        onClick={() => {}}
-                      >
-                        <HelpOutline fontSize="medium" sx={{ color: "rgb(158, 158, 166)" }} />
-                      </IconButton>
+                  <>
+                  <Tooltip title='Help'>
+                  <IconButton size="large" onClick={handleOnClickHelpIcon}>
+                    <HelpOutline
+                      fontSize="medium"
+                      sx={{ color: "rgb(158, 158, 166)" }}
+                    />
+                  </IconButton>
+                  </Tooltip>
+
+                  <Menu
+                      anchorEl={helpMenuAnchorEl}
+                      id="help-menu"
+                      open={helpMenuIsOpen}
+                      onClose={handleOnCloseHelpMenu}
+                      onClick={handleOnCloseHelpMenu}
+                      PaperProps={{
+
+                        elevation: 0,
+                        sx: {
+                          borderRadius: 0,
+                          overflow: "visible",
+                          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                          mt: 1.5,
+                          "& .MuiAvatar-root": {
+                            width: 32,
+                            height: 32,
+                            ml: -0.5,
+                            mr: 1,
+                          },
+                          "&:before": {
+                            content: '""',
+                            display: "block",
+                            position: "absolute",
+                            top: 0,
+                            right: 14,
+                            width: 10,
+                            height: 10,
+                            bgcolor: "background.paper",
+                            transform: "translateY(-50%) rotate(45deg)",
+                            zIndex: 0,
+                          },
+                        },
+                      }}
+                      transformOrigin={{ horizontal: "right", vertical: "top" }}
+                      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                    >
+                      <List sx={{ width: 250 }}>
+                      
+
+                  
+                        <ListItemButton>
+                        <ListItemIcon>
+                      <QuestionMarkOutlined fontSize='small' />
+                        </ListItemIcon>
+                          <ListItemText primary='Get Help (Discord)' />
+                        </ListItemButton>
+
+
+                      <ListItemButton>
+                      <ListItemIcon>
+                     <Book fontSize='small' />
+                        </ListItemIcon>
+                          <ListItemText primary='Tutorial' />
+                        </ListItemButton>
+
+
+                      <ListItemButton>
+                      <ListItemIcon>
+                      <WebAsset fontSize='small' />
+                        </ListItemIcon>
+                          <ListItemText primary='Blog' />
+                        </ListItemButton>
+                        <ListItemButton>
+                        <ListItemIcon>
+                      <QuestionAnswer fontSize='small' />
+                        </ListItemIcon>
+                          <ListItemText primary='FAQ' />
+                        </ListItemButton>
+                      </List>
+                    </Menu>
+                  </>
+
 
                   {connected === true ? (
                     <ConnectedAvatar />
                   ) : (
-                    <Button
-                      variant="contained"
-                      sx={{ minWidth: "150px", borderRadius: 8 }}
+                    <Chip
+                    color='primary'
+                    icon={<Language fontSize='small' />}
+                    size='medium'
+                    label='Connect'
+                      sx={{ fontWeight: 'bold', color: 'white', fontSize: 12 }}
+
                       onClick={() => connect()}
-                    >
-                      Connect Wallet
-                    </Button>
+                     />
                   )}
                 </Stack>
               </Grid>
             </Grid>
           </Container>
         </Toolbar>
-        <div>
-          {connectors.map((connector) => (
-            <button
-              disabled={!connector.ready}
-              key={connector.id}
-              onClick={() => connect(connector)}
-            >
-              {connector.name}
-              {!connector.ready && " (unsupported)"}
-              {isConnecting &&
-                connector.id === pendingConnector?.id &&
-                " (connecting)"}
-            </button>
-          ))}
-
-          {error && <div>{error.message}</div>}
-        </div>
+  
       </AppBar>
       <VerificationDialog
         open={verificationDialogOpen}
         handleClose={() => {
-          userData.refetch()
-          setVerificationDialogOpen(false)
+          userData.refetch();
+          setVerificationDialogOpen(false);
         }}
       />
     </React.Fragment>

@@ -22,6 +22,10 @@ import {
   Typography,
   Divider,
   Theme,
+  ListItem,
+  ListItemText,
+  List,
+  ListItemIcon,
 } from "@mui/material";
 
 import { ethers, BigNumber } from 'ethers'
@@ -48,6 +52,7 @@ import {
   useContractWrite,
   useDisconnect,
   useContractRead,
+  useFeeData,
 } from "wagmi";
 import { hexToDecimal } from "../../helper";
 import { DaiInterface } from "../../../abis";
@@ -87,6 +92,7 @@ const StyledBadge = styled(Badge, {
 }));
 
 const ConnectedAvatar: FC = () => {
+  const feeData = useFeeData();
   const router: NextRouter = useRouter()
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [verificationDialogOpen, setVerificationDialogOpen] =
@@ -169,7 +175,6 @@ const ConnectedAvatar: FC = () => {
     >
       <IconButton onClick={handlePopoverOpen}>
         <Avatar
-         
           sx={{ cursor: "pointer", width: 35, height: 35 }}
           alt="Remy Sharp"
           src="/assets/stock/profile_three.jpeg"
@@ -190,134 +195,115 @@ const ConnectedAvatar: FC = () => {
         onClose={handlePopoverClose}
         disableRestoreFocus
       >
-        <CardContent>
-          <Box>
-            <Stack direction="row" alignItems="flex-start">
-              <Typography component="div">
-                <Box sx={{ fontWeight: "bold" }}>Welcome to Lens Talent</Box>
-                <Box
-                  sx={{
-                    fontSize: 16,
-                    fontWeight: "medium",
-                    color: "rgb(94, 94, 94)",
-                  }}
-                >
-                  Permissionless labor markets powered by unstoppable networks
-                </Box>
-              </Typography>
-
-              <IconButton onClick={handlePopoverClose}>
-                <ExitToApp />
-              </IconButton>
+          <Box sx={{ width: 380 }}>
+            <Stack spacing={2} m={2} direction='row' alignItems='center' justifyContent='flex-end'>
+              <Button size='small' variant='outlined' onClick={() => router.push(`/view/profile/${userAddress}`)}>
+                Open Profile
+              </Button>
+              <Button  size='small' variant='contained' onClick={handleOnAddFunds}>
+                Add funds
+              </Button>
             </Stack>
-          </Box>
-          <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
-            <Avatar
-              sx={{ width: 40, height: 40 }}
-              src="/assets/stock/profile_main.jpeg"
-            />
-            <Typography component="div" px={2}>
-              <Box
-                sx={{
-                  fontSize: 12,
-                  fontWeight: "bold",
-                  color: "#212121",
-                }}
-              >
-                {!lensProfile.handle ? (
-                  <Button
-                    variant="text"
-                    onClick={() => setVerificationDialogOpen(true)}
-                  >
-                    {" "}
-                    Become a verified freelancer{" "}
-                  </Button>
-                ) : (
-                  <Typography fontWeight="bold">
-                    {" "}
-                    {lensProfile.handle}{" "}
-                  </Typography>
-                )}
-              </Box>
-
-              <Box
-                sx={{
+            <Divider />
+            <List disablePadding>
+            <ListItem divider  sx={{ backgroundColor: '#fafafa'}}>
+              <ListItemIcon>
+              <FaEthereum size={18} />
+</ListItemIcon>
+                <ListItemText 
+                primary='MATIC Balance' 
+                secondary={userBalance}
+                primaryTypographyProps={{
                   fontSize: 10,
-                  color: "rgb(94, 94, 94)",
+                  fontWeight: 'medium'
                 }}
-              >
-                {userAddress}
-              </Box>
-            </Typography>
-          </Box>
+                secondaryTypographyProps={{
+                  fontSize: 12,
+                  fontWeight: 'medium'
+                }}  
+                />
+              </ListItem>
 
-          <Grid
-            my={3}
-            sx={{ border: "1px solid #eee" }}
-            flexWrap="nowrap"
-            container
-            direction="column"
-          >
-            <Grid item sx={{ p: 1, bgcolor: "#fafafa" }}>
-              <Typography
-                color="#212121"
-                noWrap
-                fontWeight="bold"
-                fontSize={12}
-              >
-                <IoWalletSharp size={10} /> Web3/Wallet Provider:{" "}
-              </Typography>
-              <Typography color="#212121" fontWeight="light" fontSize={12}>
-                {userConnector}
-              </Typography>
-            </Grid>
+              <ListItem divider  sx={{ backgroundColor: '#fafafa'}}>
+              <ListItemIcon>
+              <FaEthereum size={18} />
+</ListItemIcon>
+                <ListItemText 
+                primary='DAI Balance' 
+                secondary={daiBalance}
+                primaryTypographyProps={{
+                  fontSize: 10,
+                  fontWeight: 'medium'
+                }}
+                secondaryTypographyProps={{
+                  fontSize: 12,
+                  fontWeight: 'medium'
+                }}  
+                />
+              </ListItem>
 
-            <Grid item sx={{ p: 1, bgcolor: "#fafafa" }}>
-              <Typography color="#212121" fontWeight="bold" fontSize={12}>
-                <FaEthereum size={10} /> MATIC Balance:{" "}
-              </Typography>
-              <Typography color="#212121" fontWeight="light" fontSize={12}>
-                {userBalance}
-              </Typography>
-            </Grid>
+              <ListItem divider>
+                <ListItemText 
+                primary='Web3/Wallet Provider' 
+                secondary={userConnector} 
+                primaryTypographyProps={{
+                  fontSize: 10,
+                  fontWeight: 'medium'
+                }}
+                secondaryTypographyProps={{
+                  fontSize: 12,
+                  fontWeight: 'medium'
+                }} 
+                />
+              </ListItem>
 
-            <Grid item sx={{ p: 1, bgcolor: "#fafafa" }}>
-              <Typography color="#212121" fontWeight="bold" fontSize={12}>
-                <FaEthereum size={10} /> DAI Balance:{" "}
-              </Typography>
-              <Typography color="#212121" fontWeight="light" fontSize={12}>
-                {daiBalance}
-              </Typography>
-            </Grid>
-          </Grid>
+              <ListItem divider>
+                <ListItemText 
+                primary='Network' 
+                secondary='Polygon Mumbai'
+                primaryTypographyProps={{
+                  fontSize: 10,
+                  fontWeight: 'medium'
+                }}
+                secondaryTypographyProps={{
+                  fontSize: 12,
+                  fontWeight: 'medium'
+                }} 
+                />
+              </ListItem>
 
-          <Stack spacing={2}>
+              <ListItem divider>
+                <ListItemText 
+                primary='Gas Fee' 
+                secondary={feeData.data.formatted.gasPrice}
+                primaryTypographyProps={{
+                  fontSize: 10,
+                  fontWeight: 'medium'
+                }}
+                secondaryTypographyProps={{
+                  fontSize: 12,
+                  fontWeight: 'medium'
+                }} 
+                />
+              </ListItem>
+
+
+            </List>
+          <Stack direction='row' justifyContent='flex-end' sx={{ width: '100%' }}>
             <Button
               fullWidth
-              variant="outlined"
+              variant="text"
               color="error"
               onClick={() => disconnect()}
+              
+              sx={{ fontWeight: 'normal', fontSize: 10 }}
             >
               Disconnect
             </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              color="secondary"
-              onClick={handleOnAddFunds}
-            >
-              Add Funds
-            </Button>
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={() => router.push(`/view/profile/${userAddress}`)}
-            >
-              View Profile
-            </Button>
+       
+         
           </Stack>
-        </CardContent>
+          </Box>
       </Popover>
       <VerificationDialog
         open={verificationDialogOpen}

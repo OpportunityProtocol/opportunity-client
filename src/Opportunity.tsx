@@ -17,7 +17,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     router.pathname.includes("/view/profile") ||
     router.pathname === "/contract/view/contract" ||
     router.pathname === "/contract/view/service" ||
-    router.pathname === "/" ||
+   // router.pathname === "/" ||
     router.pathname === "/markets" ||
     router.pathname === "/contract" ||
     router.pathname.includes("/create/contract") ||

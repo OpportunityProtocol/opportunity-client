@@ -28,11 +28,13 @@ import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
 import { TrendingUp } from "@material-ui/icons";
 import { CheckBox, WorkOffRounded } from "@mui/icons-material";
 import SearchContext from "../context/SearchContext";
+import { NextPage } from "next";
 
 /**
  * @author Nathan Farley
+ * returns NextPage The Work page component
  */
-function Work() {
+const Work: NextPage<any> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const searchContext = useContext(SearchContext);
@@ -50,25 +52,23 @@ function Work() {
     }
   };
 
-  const [contractsChecked, setContractsChecked] = useState<boolean>(false)
-  const [servicesChecked, setServicesChecked] = useState<boolean>(false)
+  const [contractsChecked, setContractsChecked] = useState<boolean>(true);
+  const [servicesChecked, setServicesChecked] = useState<boolean>(true);
 
-  const handleOnChangeContractsChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleOnChangeContractsChecked = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setContractsChecked(event.target.checked);
   };
 
-  const handleChangeServicesChecked = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeServicesChecked = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setServicesChecked(event.target.checked);
   };
 
   return (
-    <Grid
-      component={Container}
-      maxWidth="lg"
-      container
-      direction="column"
-      // sx={{ bgcolor: 'background.paper' }}
-    >
+    <Grid component={Container} maxWidth="lg" container direction="column">
       <Grid container item>
         <Stack
           direction="row"
@@ -77,12 +77,17 @@ function Work() {
           my={3}
           width="100%"
         >
+                    <SearchBarV2
+            placeholder="Search contracts and services"
+            width="50%"
+            onKeyDown={onSearch}
+            onChange={onChange}
+            value={searchQuery}
+            onClickPrimaryButton={onSearch}
+          />
+
           <Stack direction="row" spacing={2}>
-            <Card
-              elevation={0}
-              variant="outlined"
-              sx={{ height: 55 }}
-            >
+            <Card elevation={0}>
               <CardContent
                 component={Stack}
                 direction="row"
@@ -92,15 +97,11 @@ function Work() {
                 <Typography variant="body2" fontWeight="500">
                   Contracts
                 </Typography>
-                <Checkbox onChange={handleOnChangeContractsChecked} />
+                <Checkbox checked={contractsChecked} onChange={handleOnChangeContractsChecked} />
               </CardContent>
             </Card>
 
-            <Card
-              elevation={0}
-              variant="outlined"
-              sx={{ height: 55 }}
-            >
+            <Card elevation={0}>
               <CardContent
                 component={Stack}
                 direction="row"
@@ -110,18 +111,10 @@ function Work() {
                 <Typography variant="body2" fontWeight="500">
                   Services
                 </Typography>
-                <Checkbox onChange={handleChangeServicesChecked}   />
+                <Checkbox checked={servicesChecked} onChange={handleChangeServicesChecked} />
               </CardContent>
             </Card>
           </Stack>
-          <SearchBarV2
-            placeholder="Search contracts and services"
-            width="50%"
-            onKeyDown={onSearch}
-            onChange={onChange}
-            value={searchQuery}
-            onClickPrimaryButton={onSearch}
-          />
         </Stack>
 
         <Box sx={{ width: "100%" }}>
@@ -192,40 +185,12 @@ function Work() {
               )}
             </Grid>
 
-            <Grid item xs={4}>
-              <Card
-                variant="outlined"
-                sx={{ mb: 1, bgcolor: "#fff", height: 500, width: "100%" }}
-              >
-                <Box p={2} display="flex" alignItems="center">
-                  <Typography pr={1} fontWeight="medium">
-                    Most Valuable Verified Freelancers
-                  </Typography>
-                  <TrendingUp fontSize="small" color="primary" />
-                </Box>
-                <Divider />
-                <CardContent>Could not load freelancers</CardContent>
-              </Card>
 
-              <Card
-                variant="outlined"
-                sx={{ mb: 1, bgcolor: "#fff", height: 500, width: "100%" }}
-              >
-                <Box p={2} display="flex" alignItems="center">
-                  <Typography pr={1} fontWeight="medium">
-                    Most Work Completed
-                  </Typography>
-                  <WorkOffRounded fontSize="small" color="primary" />
-                </Box>
-                <Divider />
-                <CardContent>Could not load freelancers</CardContent>
-              </Card>
-            </Grid>
           </Grid>
         </Box>
       </Grid>
     </Grid>
   );
-}
+};
 
 export default React.memo(Work);

@@ -5,7 +5,6 @@ import type { AppProps } from "next/app";
 import Opportunity from "../Opportunity";
 import theme from "../../material_theme";
 import { ThemeProvider } from "@mui/material/styles";
-import NavigationBreadcrumbs from "../common/components/Breadcrumbs/Breadcrumbs";
 import Header from "../common/components/Head";
 import { CssBaseline } from "@mui/material";
 import {
@@ -121,7 +120,6 @@ function MyApp({ Component, pageProps }: AppProps) {
                 <SearchProvider>
                 <Opportunity>
                   <NavigationBar />
-                  <NavigationBreadcrumbs /> 
                   <Component {...pageProps} />
                 </Opportunity>
                 </SearchProvider>

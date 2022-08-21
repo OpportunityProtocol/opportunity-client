@@ -182,8 +182,10 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text=false }) => {
           : () => {}
       }
       key={Math.random()}
-      variant="outlined"
+      square 
+      variant="elevation"
       sx={{
+        boxShadow: '0 19px 38px #eee, 0 15px 12px #eee',
         cursor: accountData?.data?.address ? "pointer" : "auto",
         width: "100%",
         height: 210,
