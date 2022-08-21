@@ -16,6 +16,8 @@ import {
   FormControl,
   InputLabel,
   DialogContentText,
+  DialogContent,
+  FormHelperText,
 } from "@mui/material";
 import { NextPage } from "next";
 import { Fragment, ChangeEvent, createRef, useEffect, useState } from "react";
@@ -23,15 +25,6 @@ import Stack from "@mui/material/Stack";
 import { Button, Container, TextField, Typography } from "@mui/material";
 import MarketDisplay from "../../modules/market/components/MarketDisplay";
 import ImageIcon from "@mui/icons-material/Image";
-import SearchBarV2 from "../../common/components/SearchBarV2/SearchBarV2";
-import { Add } from "@material-ui/icons";
-import TabPanel from "../../common/components/TabPanel/TabPanel";
-import { a11yProps } from "../../common/components/TabPanel/helper";
-import StepperComponent from "../../common/components/Stepper";
-import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
-import DirectionsIcon from "@mui/icons-material/Directions";
-import { Delete } from "@mui/icons-material";
 import fleek from "../../fleek";
 import {
   useAccount,
@@ -54,18 +47,21 @@ import { NextRouter, useRouter } from "next/router";
 import BootstrapInput from "../../common/components/BootstrapInput/BootstrapInput";
 import { SERVICE_REFERENCE_MODULE } from "../../constant/contracts";
 import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
+import { QueryResult, useQuery } from "@apollo/client";
+import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
 const Buffer = require("buffer").Buffer;
 
+/**
+ * Elijah Hampton
+ * @returns NextPage The CreateServicePage component
+ */
 const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
-  const steps: Array<string> = ["Create a service", "Deploy to the network"];
-  const [tabIndex, setTabIndex] = useState<number>(0);
-  const [activeStep, setActiveStep] = useState<number>(0);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [serviceMetadataKey, setServiceMetadataKey] = useState("");
-  const [numMarkets, setNumMarkets] = useState<any>([]);
+  const marketsQuery: QueryResult = useQuery(GET_MARKETS);
+  const [selectedImage, setSelectedImage] = useState<any>(null);
+  const [serviceMetadataKey, setServiceMetadataKey] = useState<string>("");
+  const [marketDetails, setMarketDetails] = useState<any>([]);
   const [selectedMarketId, setSelectedMarketId] = useState<number>(-1);
-  const [marketsLoading, setMarketsLoading] = useState<boolean>(false);
-  const [createServiceForm, setCreateServiceForm] = useState({
+  const [createServiceForm, setCreateServiceForm] = useState<any>({
     serviceTitle: "",
     serviceDescription: "",
     serviceTags: "",
@@ -88,13 +84,52 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       },
     },
   });
+
+  const [createServiceDialogState, setCreateServiceDialogState] = useState({
+    loading: false,
+    open: false,
+    success: false,
+    error: false,
+    errorMessage: "",
+  });
+
+  const [createServiceFormErrorState, setCreateContractFormErrorState] =
+    useState({
+      serviceTitleError: false,
+      serviceTitleErrorMessage: "",
+      serviceDescriptionError: false,
+      serviceDescriptionErrorMessage: "",
+      beginnerPriceError: false,
+      beginnerPriceErrorMessage: "",
+      businessPriceError: false,
+      businessPriceErrorMessage: "",
+      enterprisePriceError: false,
+      enterprisePriceErrorMessage: "",
+    });
+
+  const onCloseCreateServiceDialog = () => {
+
+    if (createServiceDialogState.success == true) {
+      router.push("/view");
+    }
+    
+    setCreateServiceDialogState({
+      open: false,
+      loading: false,
+      error: false,
+      errorMessage: "",
+      success: false,
+    });
+
+    setServiceMetadataKey("");
+
+
+  };
+
   const router: NextRouter = useRouter();
   const fileRef = createRef();
 
   const accountData = useAccount();
-
-  console.log(NETWORK_MANAGER_ADDRESS);
-  console.log(SERVICE_COLLECT_MODULE);
 
   const networkManager_createService = useContractWrite(
     {
@@ -103,8 +138,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     },
     "createService",
     {
-      onError(error, variables, context) {},
-      onSuccess(data, variables, context) {},
       args: [
         1,
         serviceMetadataKey,
@@ -120,53 +153,50 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         gasLimit: BigNumber.from("11643163"),
       },
       onSettled(data, error, variables, context) {
-        console.log("@@@@@@@@@@@@@@@@@@@@@@");
-        console.log(data);
-        console.log(error);
-        console.log(variables);
-      },
-    }
-  );
+        if (error) {
+          setCreateServiceDialogState({
+            ...createServiceDialogState,
+            loading: false,
+            success: false,
+            error: true,
+            errorMessage: error.message,
+          });
 
-  const networkManager_getMarkets = useContractRead(
-    {
-      addressOrName: TOKEN_FACTORY_ADDRESS,
-      contractInterface: TokenFactoryInterface,
-    },
-    "getNumMarkets",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      onSuccess: (data: Result) => {
-        const total = hexToDecimal(data._hex);
-        let list = [];
-        for (let i = 0; i < total; i++) {
-          list.push(Number(i) + 1);
+          alert(error.message);
+        } else {
+          setCreateServiceDialogState({
+            ...createServiceDialogState,
+            loading: false,
+            success: true,
+            error: false,
+            errorMessage: "",
+          });
+
+          setServiceMetadataKey("");
         }
-        setNumMarkets(list);
-        // setMarketsDetails(data)
-        setMarketsLoading(false);
-      },
-      onError: (error) => {
-        setMarketsLoading(false);
       },
     }
   );
 
   useEffect(() => {
-    //if is first render
-    networkManager_getMarkets.refetch();
+    if (!marketsQuery.loading && marketsQuery.data) {
+      setMarketDetails(marketsQuery.data?.markets);
+    }
+  }, [marketsQuery.loading]);
+
+  useEffect(() => {
+    marketsQuery.refetch();
   }, []);
 
-  const handleOnChangeTabIndex = (
-    event: React.SyntheticEvent,
-    newValue: number
-  ) => setTabIndex(newValue);
-
   const handleOnPublish = async () => {
+    let retVal: string = "";
+
+    setCreateServiceDialogState({
+      ...createServiceDialogState,
+      loading: true
+    })
+
     try {
-      let retVal;
       if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
         //https://ipfs.infura.io:5001/api/v0
         const ipfs = create({
@@ -184,7 +214,20 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       }
 
       setServiceMetadataKey(retVal);
-      const confirm = await networkManager_createService.write({
+    } catch (error) {
+      setCreateServiceDialogState({
+        ...createServiceDialogState,
+        loading: false,
+        error: true,
+        success: false,
+        errorMessage: "Error uploading metadata to IPFS",
+      });
+
+      alert("Error uploading metadata to IPFS");
+    }
+
+    if (String(retVal)) {
+      const confirm = await networkManager_createService.writeAsync({
         args: [
           1,
           retVal,
@@ -200,11 +243,17 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           gasLimit: BigNumber.from("11643163"),
         },
       });
+    } else {
+      setCreateServiceDialogState({
+        ...createServiceDialogState,
+        loading: false,
+        error: true,
+        success: false,
+        errorMessage: "Error retrieving IPFS metadata hash",
+      });
 
-      console.log(createServiceForm);
-
-      router.push("/");
-    } catch (error) {}
+      alert("Error retrieving ipfs metadata hash");
+    }
   };
 
   const handleOnChangeOffer = (
@@ -347,53 +396,30 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const lastPublishDialogContent = publishServiceSuccessful ? (
-    <DialogContentText id="alert-dialog-description">
-      <Box py={2}>
-        <Typography fontSize={20} fontWeight="bold" py={1}>
-          Confirm Connect
-        </Typography>
-        <Typography variant="subtitle2">Send Transaction</Typography>
-      </Box>
-    </DialogContentText>
-  ) : (
-    <DialogContentText id="alert-dialog-description">
-      <Box py={2}>
-        <Typography fontSize={20} fontWeight="bold" py={1}>
-          Transaction Complete
-        </Typography>
-        <Typography variant="subtitle2">Send Transaction</Typography>
-      </Box>
-    </DialogContentText>
-  );
-
   const publishDialogContent = [
-    <DialogContentText id="alert-dialog-description">
-      <Typography fontSize={20} fontWeight="bold" py={1}>
-        {" "}
-        You are about to post a service to Lens Talent which will require one
-        step:
-      </Typography>
-
-      <ul>
-        <li>
+    <DialogContent>
+      <DialogContentText id="alert-dialog-description">
+        <Typography fontSize={20} fontWeight="bold" py={1}>
           {" "}
-          <Typography>Sending a transaction</Typography>
-        </li>
-      </ul>
-    </DialogContentText>,
+          You are about to post a service to Lens Talent. This will require
+          signing a transaction with your wallet.
+        </Typography>
+      </DialogContentText>
+      <Typography variant="caption">
+        Note: This transaction will cost MATIC.
+      </Typography>
+    </DialogContent>,
+    <DialogContent>
+      <DialogContentText>
+        {createServiceDialogState?.loading
+          ? "Waiting for confirmation..."
+          : "After pressing publish your wallet provider will prompt you to accept the transaction."}
+      </DialogContentText>
+    </DialogContent>,
   ];
 
   return (
-    <Container
-      component={Stack}
-      spacing={5}
-      maxWidth="lg"
-      sx={{
-        width: "100%",
-        padding: "2% 4%",
-      }}
-    >
+    <Container component={Stack} spacing={5} maxWidth="xl">
       <Box>
         <Typography fontWeight="600" fontSize={25}>
           Create a service
@@ -406,104 +432,121 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         </Typography>
       </Box>
 
-      <Box display="flex" alignItems="flex-start">
-        <Box width={600} maxWidth={600}>
-          <Typography fontWeight="700" fontSize={18} color="text.primary">
-            Select a market
-          </Typography>
-          <Typography color="text.secondary" fontWeight="500" fontSize={14}>
-            Select or search for the appropriate market to deploy your contract.
-          </Typography>
-          <Typography variant="caption">
-            Can't find a market?{" "}
-            <Typography component="span" color="primary" variant="button">
-              Learn about market proposals.
+      <Grid
+        container
+        display="flex"
+        alignItems="flex-start"
+        justifyContent="space-between"
+      >
+        <Grid item xs={4}>
+          <Box width={600} maxWidth={600}>
+            <Typography fontWeight="700" fontSize={18} color="text.primary">
+              Select a market
             </Typography>
-          </Typography>
-        </Box>
+            <Typography color="text.secondary" fontWeight="500" fontSize={14}>
+              Select or search for the appropriate market to deploy your
+              contract.
+            </Typography>
+            <Typography variant="caption">
+              Can't find a market?{" "}
+              <Typography component="span" color="primary" variant="button">
+                Learn about market proposals.
+              </Typography>
+            </Typography>
+          </Box>
+        </Grid>
 
-        <Card sx={{ width: "100%" }} variant="outlined">
-          <CardContent>
-            <Grid
-              container
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              {numMarkets.slice(0, 6).map((marketId) => {
-                return (
-                  <Grid item xs={2.9}>
-                    <MarketDisplay
-                      small
-                      marketId={marketId + 1}
-                      isShowingStats={false}
-                      selected={marketId === selectedMarketId}
-                      selectable
-                      onSelect={() => setSelectedMarketId(marketId)}
-                      showDescription={false}
-                      showStats={false}
-                    />
-                  </Grid>
-                );
-              })}
-            </Grid>
-          </CardContent>
-        </Card>
-      </Box>
+        <Grid item xs={6}>
+          <Card sx={{ width: "100%" }} variant="outlined">
+            <CardContent>
+              <Grid
+                container
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                {marketDetails.slice(0, 6).map((details) => {
+                  return (
+                    <Grid item xs={2.9}>
+                      <MarketDisplay
+                        small
+                        marketDetails={details}
+                        isShowingStats={false}
+                        selected={details?.id === selectedMarketId}
+                        selectable
+                        onSelect={() => setSelectedMarketId(details?.id)}
+                        showDescription={false}
+                        showStats={false}
+                      />
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Divider />
 
-      <Box display="flex" alignItems="flex-start">
-        <Box py={1} width={600} maxWidth={600}>
-          <Typography
-            fontWeight="700"
-            fontWeight="700"
-            color="text.primary"
-            fontSize={18}
-          >
+      <Grid
+        container
+        justifyContent="space-between"
+        display="flex"
+        alignItems="flex-start"
+      >
+        <Grid item xs={4}>
+          <Typography fontWeight="700" color="text.primary" fontSize={18}>
             Basic Information
           </Typography>
           <Typography color="text.secondary" fontWeight="500" fontSize={14}>
             Fill out basic information that will help readers better understand
             the contract.
           </Typography>
-        </Box>
+        </Grid>
 
-        <Card variant="outlined" sx={{ width: "100%" }}>
-          <CardContent>
-            <Stack spacing={2}>
-              <TextField
-                margin="normal"
-                sx={{ width: "100%" }}
-                variant="outlined"
-                label="Service Title"
-                aria-label="Pick a title for your service"
-                name="serviceTitle"
-                type="text"
-                onChange={handleOnChangeCreateServiceForm}
-              />
+        <Grid item xs={6}>
+          <Card variant="outlined" sx={{ width: "100%" }}>
+            <CardContent>
+              <Stack spacing={2}>
+                <TextField
+                  margin="normal"
+                  sx={{ width: "100%" }}
+                  variant="outlined"
+                  label="Service Title"
+                  aria-label="Pick a title for your service"
+                  name="serviceTitle"
+                  type="text"
+                  onChange={handleOnChangeCreateServiceForm}
+                />
 
-              <TextField
-                margin="normal"
-                rows={6}
-                multiline
-                sx={{ width: "100%" }}
-                variant="outlined"
-                label="Service Description"
-                aria-label="Pick a title for your service"
-                name="serviceDescription"
-                type="text"
-                onChange={handleOnChangeCreateServiceForm}
-              />
-            </Stack>
-          </CardContent>
-        </Card>
-      </Box>
+                <TextField
+                  margin="normal"
+                  rows={6}
+                  multiline
+                  sx={{ width: "100%" }}
+                  variant="outlined"
+                  label="Service Description"
+                  aria-label="Pick a title for your service"
+                  name="serviceDescription"
+                  type="text"
+                  onChange={handleOnChangeCreateServiceForm}
+                />
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Divider />
 
-      <Box display="flex" alignItems="flex-start">
-        <Box py={1} width={600} maxWidth={600}>
+      <Grid
+        container
+        justifyContent="space-between"
+        display="flex"
+        alignItems="flex-start"
+      >
+        <Grid item xs={4}>
           <Typography
             fontWeight="700"
             fontSize={18}
@@ -512,76 +555,66 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           >
             Add a thumbnail
           </Typography>
-        </Box>
+        </Grid>
 
-        <Card variant="outlined" sx={{ width: "100%" }}>
-          <CardContent>
-            <Box
-              sx={{
-                width: "100%",
-                border: "dashed 1px #B3B3B3",
+        <Grid item xs={6}>
+          <Card variant="outlined" sx={{ width: "100%" }}>
+            <CardContent>
+              <Box
+                sx={{
+                  width: "100%",
+                  border: "dashed 1px #B3B3B3",
 
-                height: 400,
-              }}
-            >
-              {selectedImage === null ? (
-                <Fragment>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    onChange={handleOnChangeFile}
-                    style={{ display: "none" }}
-                  />
-                  <Stack alignItems="center">
-                    <ImageIcon
-                      fontSize="large"
-                      sx={{ color: "#aaa", width: 80, height: 80 }}
+                  height: 400,
+                }}
+              >
+                {selectedImage === null ? (
+                  <Fragment>
+                    <input
+                      ref={fileRef}
+                      type="file"
+                      onChange={handleOnChangeFile}
+                      style={{ display: "none" }}
                     />
-                    <Box
-                      py={2}
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="center"
-                    >
-                      <Typography
-                        py={1}
-                        fontSize={25}
-                        variant="button"
-                        color="primary"
-                        onClick={() => fileRef.current.click()}
-                      >
-                        Select a thumbnail to represent your service
-                      </Typography>
-                      <Typography
-                        fontSize={22}
-                        fontWeight="medium"
-                        color="text.secondary"
-                      >
-                        Max 6MB each (12mb for videos)
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Fragment>
-              ) : (
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <img
-                    style={{ width: "100%", height: "100%" }}
-                    src={URL.createObjectURL(selectedImage)}
-                  />
-                </Box>
-              )}
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
+                    <Stack alignItems="center" justifyContent='center' sx={{ width: '100%', height: '100%' }}>
+                      <ImageIcon
+                        fontSize="large"
+                        sx={{ color: "#aaa", width: 80, height: 80 }}
+                      />
+                     
+                        <Typography
+                          py={1}
+                          fontSize={25}
+                          variant="button"
+                          color="primary"
+                          onClick={() => fileRef.current.click()}
+                        >
+                          Select a cover image
+                        </Typography>
+                 
+                    </Stack>
+                  </Fragment>
+                ) : (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <img
+                      style={{ width: "100%", height: "100%" }}
+                      src={URL.createObjectURL(selectedImage)}
+                    />
+                  </Box>
+                )}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Divider />
 
@@ -718,50 +751,101 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           >
             <FormControl sx={{ flexGrow: 1 }}>
               <InputLabel>Beginner Price</InputLabel>
-              <BootstrapInput
-                startAdornment={
-                  <img
-                    src="/assets/images/dai.svg"
-                    style={{ width: 15, height: 20 }}
-                  />
-                }
-                id="beginner"
-                type="number"
-                onChange={handleOnChangePrice}
-                value={`${createServiceForm.offers.beginner.price}`}
-              />
+              <Paper
+                elevation={0}
+                sx={{
+                  p: "7px 8px",
+                  display: "flex",
+                  alignItems: "center",
+                  border: "1px solid #eee",
+                }}
+              >
+                <img
+                  src="/assets/images/dai.svg"
+                  style={{ width: 15, height: 20 }}
+                />
+                <InputBase
+                  sx={{
+                    marginLeft: 1,
+                    border: "0px solid #eee",
+                    width: "100%",
+                  }}
+                  id="beginner"
+                  type="number"
+                  onChange={handleOnChangePrice}
+                  value={`${createServiceForm.offers.beginner.price}`}
+                  error={createServiceFormErrorState.beginnerPriceError}
+                />
+              </Paper>
+              <FormHelperText>
+                {createServiceFormErrorState.beginnerPriceErrorMessage}
+              </FormHelperText>
             </FormControl>
 
             <FormControl sx={{ flexGrow: 1 }}>
               <InputLabel>Business Price</InputLabel>
-              <BootstrapInput
-                startAdornment={
-                  <img
-                    src="/assets/images/dai.svg"
-                    style={{ width: 15, height: 20 }}
-                  />
-                }
-                id="business"
-                type="number"
-                onChange={handleOnChangePrice}
-                value={`${createServiceForm.offers.business.price}`}
-              />
+              <Paper
+                elevation={0}
+                sx={{
+                  p: "7px 8px",
+                  display: "flex",
+                  alignItems: "center",
+                  border: "1px solid #eee",
+                }}
+              >
+                <img
+                  src="/assets/images/dai.svg"
+                  style={{ width: 15, height: 20 }}
+                />
+                <InputBase
+                  sx={{
+                    marginLeft: 1,
+                    border: "0px solid #eee",
+                    width: "100%",
+                  }}
+                  id="business"
+                  type="number"
+                  onChange={handleOnChangePrice}
+                  value={`${createServiceForm.offers.business.price}`}
+                  error={createServiceFormErrorState.businessPriceError}
+                />
+              </Paper>
+              <FormHelperText>
+                {createServiceFormErrorState.businessPriceErrorMessage}
+              </FormHelperText>
             </FormControl>
 
             <FormControl sx={{ flexGrow: 1 }}>
               <InputLabel>Enterprise Price</InputLabel>
-              <BootstrapInput
-                startAdornment={
-                  <img
-                    src="/assets/images/dai.svg"
-                    style={{ width: 15, height: 20 }}
-                  />
-                }
-                id="enterprise"
-                type="number"
-                onChange={handleOnChangePrice}
-                value={`${createServiceForm.offers.enterprise.price}`}
-              />
+              <Paper
+                elevation={0}
+                sx={{
+                  p: "7px 8px",
+                  display: "flex",
+                  alignItems: "center",
+                  border: "1px solid #eee",
+                }}
+              >
+                <img
+                  src="/assets/images/dai.svg"
+                  style={{ width: 15, height: 20 }}
+                />
+                <InputBase
+                  sx={{
+                    marginLeft: 1,
+                    border: "0px solid #eee",
+                    width: "100%",
+                  }}
+                  id="enterprise"
+                  type="number"
+                  onChange={handleOnChangePrice}
+                  value={`${createServiceForm.offers.enterprise.price}`}
+                  error={createServiceFormErrorState.enterprisePriceError}
+                />
+              </Paper>
+              <FormHelperText>
+                {createServiceFormErrorState.enterprisePriceErrorMessage}
+              </FormHelperText>
             </FormControl>
           </Stack>
         </CardContent>
@@ -771,20 +855,34 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         <Button
           sx={{ mx: 1, width: 120, p: 1 }}
           variant="contained"
-          onClick={() => setPublishDialogIsOpen(true)}
+          /*disabled={
+            createServiceForm.offers.beginner.price === 0 ||
+            createServiceForm.offers.business.price === 0 ||
+            createServiceForm.offers.enterprise.price === 0 ||
+            createServiceForm.service_title >= 81 ||
+            createServiceForm.service_description >= 730
+          }*/
+          onClick={() => {
+            setCreateServiceDialogState({
+              ...createServiceDialogState,
+              open: true,
+            });
+          }}
         >
           Publish
         </Button>
       </Stack>
 
       <ConfirmationDialog
-        open={publishDialogIsOpen}
-        onOpen={onOpenPublishDialog}
-        onClose={() => setPublishDialogIsOpen(false)}
+        open={createServiceDialogState.open}
+        onOpen={() => {}}
+        onClose={onCloseCreateServiceDialog}
         primaryAction={handleOnPublish}
         primaryActionTitle="Publish"
+        hasSigningStep={false}
+        success={createServiceDialogState.success}
         content={publishDialogContent}
-        loading={loading}
+        loading={createServiceDialogState.loading}
       />
     </Container>
   );

@@ -54,6 +54,7 @@ import {
 } from "../../contractReduxSlice";
 import { ethers } from "ethers";
 import { GET_PURCHASED_SERVICE } from "../../ContractGQLQueries";
+import { getMetadata } from "../../../../common/ipfs-helper";
 
 interface IServiceCardProps {
   id: string;
@@ -161,47 +162,6 @@ const ServiceCard = ({
     }
   );
 
-  const getServiceMetadata = async (ptr) => {
-    let retVal: any = {};
-
-    try {
-      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
-        const ipfs = create({
-          url: "/ip4/127.0.0.1/tcp/8080",
-        });
-
-        retVal = await ipfs.get(`/ipfs/${ptr}`).next();
-      } else {
-        retVal = await fleek.getService(loadedData?.metadataPtr);
-      }
-
-      if (!retVal) {
-        alert("Unable to retrieve service metadata data")
-      } else {
-  
-        const jsonString = Buffer.from(retVal.value).toString("utf8");
-        const parsedString = jsonString.slice(
-          jsonString.indexOf("{"),
-          jsonString.lastIndexOf("}") + 1
-        );
-        const parsedData = JSON.parse(parsedString);
-        const updatedImg = Buffer.from(parsedData.serviceThumbnail.data);
-
-        setDisplayImg(updatedImg);
-  
-        setServiceMetadata(parsedData);
-      }
-      setErrors({
-        metadataErrors: false,
-      });
-    } catch (error) {
-      setErrors({
-        ...errors,
-        metadataError: true,
-      });
-    }
-  };
-
   const handleOnNavigateToServicePage = () => {
     router.push({
       pathname: "/view/service/1",
@@ -230,16 +190,16 @@ const ServiceCard = ({
   }, [loadedData?.creator]);
 
   useEffect(() => {
-    //if data doesnt exist get it from contract
-    if (!data) {
-      //TODOD: get serivce gql call
-      setLoadedData({});
-    } else {
-      if (loadedData.metadataPtr) {
-        getServiceMetadata(loadedData.metadataPtr);
-      }
+
+    async function loadMetadata() {
+      const metadata = await getMetadata(data?.metadataPtr)
+      console.log(metadata)
+      setServiceMetadata(metadata)
     }
-  }, [id, loadedData.id]);
+    
+    loadMetadata()
+
+  }, [data?.metadataPtr]);
 
   const renderButtonState = () => {
     if (!purchase) {

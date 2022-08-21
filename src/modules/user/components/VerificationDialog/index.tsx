@@ -319,6 +319,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
       open={open}
       onClose={handleClose}
     >
+      {registrationLoading ? <LinearProgress variant='indeterminate' /> : null}
       <DialogContent
         sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
       >
@@ -337,9 +338,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
           loop with your customers
         </DialogContentText>
       </DialogContent>
-      {registrationLoading ? (
-        <LinearProgress variant="indeterminate" />
-      ) : (
+  
         <>
           <DialogContent
             sx={{
@@ -357,6 +356,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
                       Display Name
                     </InputLabel>
                     <BootstrapInput
+                    disabled={registrationLoading}
                       fullWidth
                       onChange={handleOnChangeTextField}
                       size="small"
@@ -369,6 +369,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
                       About You
                     </InputLabel>
                     <BootstrapInput
+                             disabled={registrationLoading}
                       onChange={handleOnChangeTextField}
                       size="small"
                       id="settings-form-about-you"
@@ -384,6 +385,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
                       Certifications
                     </InputLabel>
                     <TextField
+                             disabled={registrationLoading}
                       inputRef={certificationsRef}
                       fullWidth
                       placeholder={
@@ -419,6 +421,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
                       Skills
                     </InputLabel>
                     <TextField
+                             disabled={registrationLoading}
                       size="small"
                       id="settings-skills"
                       inputRef={tagRef}
@@ -449,6 +452,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
                       Languages
                     </InputLabel>
                     <Select
+                             disabled={registrationLoading}
                       size="small"
                       label="Langauges"
                       id="settings-languages"
@@ -493,6 +497,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
                 }}
               >
                 <TextField
+                         disabled={registrationLoading}
                   value={chosenLensHandle}
                   id="register-lens-handle-text-field"
                   onChange={handleOnChangeTextField}
@@ -511,6 +516,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
             <FormControlLabel
               control={
                 <Checkbox
+                disabled={registrationLoading}
                   defaultChecked
                   onChange={handleOnChangeDisplayFreelancer}
                 />
@@ -524,16 +530,16 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
             {page === 0 ? (
               <Button onClick={handleClose}>Close</Button>
             ) : (
-              <Button onClick={() => setPage(0)}>Back</Button>
+              <Button disabled={registrationLoading} onClick={() => setPage(0)}>Back</Button>
             )}
             {page === 0 ? (
               <Button onClick={() => setPage(1)}>Next</Button>
             ) : (
-              <Button onClick={handleOnVerify}>Verify on LensTalent</Button>
+              <Button disabled={registrationLoading} onClick={handleOnVerify}>Verify on LensTalent</Button>
             )}
           </DialogActions>
         </>
-      )}
+
     </Dialog>
   );
 };

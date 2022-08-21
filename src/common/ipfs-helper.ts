@@ -16,7 +16,7 @@ export async function getMetadata(metadataString: string) {
       }
 
       if (!retVal) {
-        return ''
+        return {}
       } else {
         const jsonString = Buffer.from(retVal.value).toString("utf8");
         const parsedString = jsonString.slice(

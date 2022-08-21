@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, ReactNode, useEffect, useState } from "react";
 import clsx from "clsx";
 
 import {
@@ -52,13 +52,12 @@ import { FaBoxTissue } from "react-icons/fa";
 import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
+import { ClassNameMap } from "@mui/styles";
+import { UseAccountConfig } from "wagmi/dist/declarations/src/hooks/accounts/useAccount";
 
 /**
- *
- * @returns
- * TODO:
- * * Limit title character count to ?
- * * Limit description character count to 1112
+ * Elijah Hampton
+ * @returns NextPage The CreateContractPage component
  */
 const CreateContractPage: NextPage = (): JSX.Element => {
   const [createContractForm, setCreateContractForm] = useState({
@@ -87,14 +86,14 @@ const CreateContractPage: NextPage = (): JSX.Element => {
     });
 
   const router: NextRouter = useRouter();
-  const classes = useStyles();
-  const accountData = useAccount();
+  const classes: ClassNameMap<any> = useStyles();
+  const accountData: any = useAccount();
+  const marketsQuery: QueryResult = useQuery(GET_MARKETS);
   const [contractMetadataURI, setContractMetadataURI] = useState<string>("");
-  const [marketsLoading, setMarketsLoading] = useState<boolean>(false);
   const [marketDetails, setMarketDetails] = useState<any>({});
 
-  const createContractDialogOnOpen = () => {};
-  const [createContractDialogState, setCreateContractDialogState] = useState({
+  const createContractDialogOnOpen = (): void => {};
+  const [createContractDialogState, setCreateContractDialogState] = useState<any>({
     loading: false,
     open: false,
     success: false,
@@ -102,7 +101,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
     errorMessage: "",
   });
 
-  const createContractDialogContent = [
+  const createContractDialogContent: Array<ReactNode> = [
     <DialogContent>
       <DialogContentText>
         You are about to publish a contract to Lens Talent. This will involve
@@ -118,10 +117,8 @@ const CreateContractPage: NextPage = (): JSX.Element => {
           ? "Waiting for confirmation..."
           : "After pressing create your wallet provider will prompt you to accept the transaction."}
       </DialogContentText>
-    </DialogContent>,
+    </DialogContent>
   ];
-
-  const marketsQuery: QueryResult = useQuery(GET_MARKETS);
 
   useEffect(() => {
     if (!marketsQuery.loading && marketsQuery.data) {
@@ -850,7 +847,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         <Button
           sx={{ mx: 1, width: 120, p: 1 }}
           variant="contained"
-          // disabled={createContractForm.contract_definition_of_done.trim().length < 500 || createContractForm.contract_title.trim().length < 81 || createContractForm.contract_description.trim().length < 730}
+          // disabled={createContractForm.contract_definition_of_done.trim().length >= 500 || createContractForm.contract_title.trim().length >= 81 || createContractForm.contract_description.trim().length >= 730}
           onClick={() => {
             setCreateContractDialogState({
               ...createContractDialogState,

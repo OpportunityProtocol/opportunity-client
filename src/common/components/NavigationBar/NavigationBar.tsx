@@ -1,16 +1,11 @@
 import React, {
-  Fragment,
   useState,
   FC,
   useEffect,
   useContext,
   ChangeEvent,
 } from "react";
-import clsx from "clsx";
-import Popper from "@mui/material/Popper";
 import {
-  alpha,
-  Paper,
   Box,
   Container,
   Grid,
@@ -21,17 +16,12 @@ import {
   Toolbar,
   Typography,
   Divider,
-  CardContent,
-  darken,
   IconButton,
   MenuItem,
   Menu,
-  Avatar,
-  ListItemIcon,
-  LinearProgress,
 } from "@mui/material";
 
-import router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import Link from "next/link";
 
 import useStyles from "./NavigationBarStyle";
@@ -43,10 +33,8 @@ import {
   useBalance,
   useConnect,
   useContractRead,
-  useDisconnect,
   useFeeData,
 } from "wagmi";
-import { InjectedConnector } from "wagmi/connectors/injected";
 import {
   DAI_ADDRESS,
   ZERO_ADDRESS,
@@ -70,24 +58,20 @@ import {
   selectUserAddress,
 } from "../../../modules/user/userReduxSlice";
 import { BigNumber } from "ethers";
-import { RootState } from "../../../store";
 import {
-  AddCircle,
   AddCircleOutline,
-  Help,
   HelpOutline,
   LocalGasStation,
-  Logout,
-  PersonAdd,
-  QuestionMark,
-  QuestionMarkOutlined,
-  Search,
-  Settings,
 } from "@mui/icons-material";
-import { Work, GroupWork } from "@material-ui/icons";
 import SearchContext from "../../../context/SearchContext";
+import { QueryResult, useQuery } from "@apollo/client";
+import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../../modules/user/UserGQLQueries";
 
-const NavigationBar: FC = () => {
+/**
+ * Elijah Hampton
+ * @returns JSX.Element The NavigationBar component
+ */
+const NavigationBar: FC = (): JSX.Element => {
   const classes = useStyles();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -106,6 +90,13 @@ const NavigationBar: FC = () => {
     isConnected,
   } = useConnect();
   const accountData = useAccount();
+
+  const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
+    variables: {
+      userAddress
+    }
+  })
+  console.log(userData)
 
   //getProfile
   const lensHub_getProfile = useContractRead(
@@ -438,13 +429,18 @@ const NavigationBar: FC = () => {
 
                 <Stack direction="row" alignItems='center' spacing={1.5} ml={1.7}>
         
-                    <Typography
+        <Link href='/'>
+        <Typography
                       variant="button"
+                      fontSize={14}
+                      component={Button}
                       color={router.pathname == "/" ? "primary" : "text.secondary"}
                       sx={{ fontWeight: 'bold' }}
                     >
                       Explore
                     </Typography>
+        </Link>
+                    
               
 
                   <Link href="/work">
@@ -490,7 +486,7 @@ const NavigationBar: FC = () => {
                   )}
 
                   {isConnected && (
-                    <Link href="/contract">
+                    <Link href="/view">
                       <Typography
                         component={Button}
                         fontSize={14}
@@ -578,8 +574,9 @@ const NavigationBar: FC = () => {
                         </Button>
                       </MenuItem>
 
-                      <MenuItem onClick={() => router.push("/create/service")}>
+                      <MenuItem onClick={() => router.push("/create/service")} disabled={!userData.data?.verifiedUsers?.length > 0}>
                         <Button
+                        disabled={!userData.data?.verifiedUsers?.length > 0}
                           sx={{ width: 300 }}
                           variant="contained"
                           
@@ -633,7 +630,10 @@ const NavigationBar: FC = () => {
       </AppBar>
       <VerificationDialog
         open={verificationDialogOpen}
-        handleClose={() => setVerificationDialogOpen(false)}
+        handleClose={() => {
+          userData.refetch()
+          setVerificationDialogOpen(false)
+        }}
       />
     </React.Fragment>
   );

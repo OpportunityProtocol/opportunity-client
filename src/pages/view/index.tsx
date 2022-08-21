@@ -11,8 +11,10 @@ import {
   Tab,
   Pagination,
   Button,
+  Stack,
   ListItemIcon,
   Typography,
+  IconButton,
 } from "@mui/material";
 
 import { useStyles } from "../../modules/contract/ContractStyles";
@@ -56,21 +58,15 @@ import {
   GET_CONTRACTS_BY_WORKER,
 } from "../../modules/contract/ContractGQLQueries";
 import { NextPage } from "next";
+import { Refresh } from "@mui/icons-material";
 
 /**
- * Contracts
- * View all contracts and services
- * @returns
+ * @author Elijah Hampton
+ * @returns NextPage The Contracts page component
  */
 const Contracts: NextPage<any> = () => {
-  const classes = useStyles();
-  const dispatch = useDispatch();
-  const { data: signer, isError, isLoading } = useSigner();
-
   const [tabValue, setTabValue] = React.useState<number>(0);
   const userAddress = useSelector(selectUserAddress);
-  const userLensProfileInformation = useSelector(selectLens);
-  const userVerificationStatus = useSelector(selectVerificationStatus);
 
   // published services
   const [publishedServices, setPublishedServices] = useState<any>([]);
@@ -80,6 +76,15 @@ const Contracts: NextPage<any> = () => {
     Array<RelationshipStruct>
   >([]);
   const [workingContracts, setWorkingContracts] = useState<Array<any>>([]);
+
+  const onRefresh = () => {
+    servicesByCreatorQuery.refetch()
+    serviceQuery.refetch()
+    purchasedServicesByClientQuery.refetch()
+    activeServicesByCreatorQuery.refetch()
+    contractsCreatedByEmployerQuery.refetch()
+    workingContractsQuery.refetch()
+  }
 
   const servicesByCreatorQuery: QueryResult = useQuery(GET_SERVICES_BY_CREATOR, {
     variables: {
@@ -276,12 +281,10 @@ const Contracts: NextPage<any> = () => {
       const worker = event[4];
 
       if (userAddress === employer) {
-        //update contract in redux for user under contracts created
         contractsCreatedByEmployerQuery.refetch();
       }
 
       if (userAddress === worker) {
-        //update contracts in redux for user under contracts working
         workingContractsQuery.refetch();
       }
     }
@@ -310,9 +313,17 @@ const Contracts: NextPage<any> = () => {
 
   return (
     <Container maxWidth="lg" sx={{ height: "100vh" }}>
+      <Stack direction='row' spacing={1.4} alignItems='center'>
       <Typography pl={1} fontSize={25} fontWeight="medium">
         Contracts
       </Typography>
+      <Box sx={{ width: 30, height: 30, backgroundColor: '#eee', border: '1px solid #ccc', borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+        <IconButton onClick={onRefresh}>
+        <Refresh fontSize='small' color='primary' />
+        </IconButton>
+      </Box>
+      </Stack>
+
       <Box sx={{ width: "100%" }}>
         <Box sx={{ width: "100%", mt: 1, mb: 3 }}>
           <Tabs
@@ -413,7 +424,7 @@ const Contracts: NextPage<any> = () => {
             </Grid>
           </Box>
         </TabPanel>
-        <Divider />
+  
       </Box>
     </Container>
   );

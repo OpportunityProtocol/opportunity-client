@@ -26,6 +26,7 @@ import {
   Directions,
   KeyboardArrowRight,
   NorthEast,
+  Refresh,
   Search,
 } from "@mui/icons-material";
 import { NextPage } from "next";
@@ -149,6 +150,13 @@ const ExplorePage: NextPage = () => {
       setServices(getServices.data.services);
     }
   }, [getServices.loading]);
+
+  const onRefresh = () => {
+    contractsQuery.refetch();
+    marketsQuery.refetch();
+    verifiedFreelancersQuery.refetch();
+    getServices.refetch();
+  }
 
   //prepare explore page
   useEffect(() => {
@@ -375,10 +383,15 @@ const ExplorePage: NextPage = () => {
             <Search />
           </IconButton>
           <InputBase
-            sx={{ ml: 1, flex: 1 }}
+            sx={{ ml: 1, flex: 1, fontWeight: 'medium' }}
             placeholder="Find work anytime"
             inputProps={{ "aria-label": "search google maps" }}
           />
+          <Box alignSelf='flex-end'>
+            <IconButton onClick={onRefresh}>
+              <Refresh />
+            </IconButton>
+          </Box>
         </Paper>
       </Box>
       <Container maxWidth="xl" className={classes.root}>
