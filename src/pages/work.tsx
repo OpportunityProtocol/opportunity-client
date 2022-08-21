@@ -85,7 +85,7 @@ const Work: NextPage<any> = () => {
             value={searchQuery}
             onClickPrimaryButton={onSearch}
           />
-
+          
           <Stack direction="row" spacing={2}>
             <Card elevation={0}>
               <CardContent
@@ -184,8 +184,7 @@ const Work: NextPage<any> = () => {
                 })
               )}
             </Grid>
-
-
+            <Grid item xs={4} />
           </Grid>
         </Box>
       </Grid>
