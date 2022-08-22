@@ -275,7 +275,7 @@ const ConnectedAvatar: FC = () => {
               <ListItem divider>
                 <ListItemText 
                 primary='Gas Fee' 
-                secondary={feeData.data.formatted.gasPrice}
+                secondary={feeData?.data?.formatted?.gasPrice}
                 primaryTypographyProps={{
                   fontSize: 10,
                   fontWeight: 'medium'

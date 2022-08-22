@@ -72,6 +72,14 @@ import SearchContext from "../../../context/SearchContext";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../../modules/user/UserGQLQueries";
 
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogActions from "@mui/material/DialogActions";
+import CloseIcon from "@mui/icons-material/Close";
+import Metamaskconnect from "public/assets/images/coinbaseconnect.png";
+import Coinbaseconnect from "../../../../public/assets/images/coinbaseconnect.png";
+
 /**
  * Elijah Hampton
  * @returns JSX.Element The NavigationBar component
@@ -184,16 +192,20 @@ const NavigationBar: FC = (): JSX.Element => {
     addressOrName: accountData ? accountData?.data?.address : String(0),
   });
 
-  const [helpMenuAnchorEl, setHelpMenuAnchorEl] = useState<null | HTMLElement>(null)
-  const helpMenuIsOpen = Boolean(helpMenuAnchorEl)
+  const [helpMenuAnchorEl, setHelpMenuAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
+  const helpMenuIsOpen = Boolean(helpMenuAnchorEl);
 
-  const handleOnClickHelpIcon = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setHelpMenuAnchorEl(event.currentTarget)
-  }
+  const handleOnClickHelpIcon = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    setHelpMenuAnchorEl(event.currentTarget);
+  };
 
   const handleOnCloseHelpMenu = () => {
-    setHelpMenuAnchorEl(null)
-  }
+    setHelpMenuAnchorEl(null);
+  };
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -314,6 +326,20 @@ const NavigationBar: FC = (): JSX.Element => {
     setCreateMenuAnchorEl(null);
   };
 
+  const [modelopen, setmodelOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setmodelOpen(true);
+  };
+
+  const handlesClose = () => {
+    setmodelOpen(false);
+  };
+
+  useEffect(() => {
+    handlesClose()
+  }, [isConnected])
+
   return (
     <React.Fragment>
       <AppBar
@@ -323,8 +349,8 @@ const NavigationBar: FC = (): JSX.Element => {
           width: { sm: `100%` },
           ml: { sm: `100%` },
           bgcolor: "#fff",
-        //  height: "95px",
-          border: "1px solid #ddd !important"
+          //  height: "95px",
+          border: "1px solid #ddd !important",
         }}
       >
         <Toolbar className={classes.toolbar}>
@@ -502,37 +528,40 @@ const NavigationBar: FC = (): JSX.Element => {
                       anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                     >
                       <List>
-                        <ListItemButton onClick={() => router.push("/create/contract")}>
-                          <ListItemText 
-                          primary='Create a contract' 
-                          secondary="Create a contract if you're looking for a one time deal"
-                          primaryTypographyProps={{
-                            fontWeight: 'bold',
-                            fontSize: 14
-                          }} 
-                          secondaryTypographyProps={{
-                            fontSize: 12,
-                            fontWeight: 'medium',
-                            color: '#444'
-                          }}
+                        <ListItemButton
+                          onClick={() => router.push("/create/contract")}
+                        >
+                          <ListItemText
+                            primary="Create a contract"
+                            secondary="Create a contract if you're looking for a one time deal"
+                            primaryTypographyProps={{
+                              fontWeight: "bold",
+                              fontSize: 14,
+                            }}
+                            secondaryTypographyProps={{
+                              fontSize: 12,
+                              fontWeight: "medium",
+                              color: "#444",
+                            }}
                           />
                         </ListItemButton>
 
-                        <ListItemButton 
-                        onClick={() => router.push("/create/service")}
-                        disabled={!userData.data?.verifiedUsers?.length > 0}>
-                          <ListItemText 
-                          primary='Create a service' 
-                          secondary='Publish a service and allow your peers to invest in its success'
-                          primaryTypographyProps={{
-                            fontWeight: 'bold',
-                            fontSize: 14
-                          }}  
-                          secondaryTypographyProps={{
-                            fontSize: 12,
-                            fontWeight: 'medium',
-                            color: '#444'
-                          }}
+                        <ListItemButton
+                          onClick={() => router.push("/create/service")}
+                          disabled={!userData.data?.verifiedUsers?.length > 0}
+                        >
+                          <ListItemText
+                            primary="Create a service"
+                            secondary="Publish a service and allow your peers to invest in its success"
+                            primaryTypographyProps={{
+                              fontWeight: "bold",
+                              fontSize: 14,
+                            }}
+                            secondaryTypographyProps={{
+                              fontSize: 12,
+                              fontWeight: "medium",
+                              color: "#444",
+                            }}
                           />
                         </ListItemButton>
                       </List>
@@ -540,23 +569,22 @@ const NavigationBar: FC = (): JSX.Element => {
                   </>
 
                   <>
-                  <Tooltip title='Help'>
-                  <IconButton size="large" onClick={handleOnClickHelpIcon}>
-                    <HelpOutline
-                      fontSize="medium"
-                      sx={{ color: "rgb(158, 158, 166)" }}
-                    />
-                  </IconButton>
-                  </Tooltip>
+                    <Tooltip title="Help">
+                      <IconButton size="large" onClick={handleOnClickHelpIcon}>
+                        <HelpOutline
+                          fontSize="medium"
+                          sx={{ color: "rgb(158, 158, 166)" }}
+                        />
+                      </IconButton>
+                    </Tooltip>
 
-                  <Menu
+                    <Menu
                       anchorEl={helpMenuAnchorEl}
                       id="help-menu"
                       open={helpMenuIsOpen}
                       onClose={handleOnCloseHelpMenu}
                       onClick={handleOnCloseHelpMenu}
                       PaperProps={{
-
                         elevation: 0,
                         sx: {
                           borderRadius: 0,
@@ -587,61 +615,197 @@ const NavigationBar: FC = (): JSX.Element => {
                       anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                     >
                       <List sx={{ width: 250 }}>
-                      
-
-                  
                         <ListItemButton>
-                        <ListItemIcon>
-                      <QuestionMarkOutlined fontSize='small' />
-                        </ListItemIcon>
-                          <ListItemText primary='Get Help (Discord)' />
+                          <ListItemIcon>
+                            <QuestionMarkOutlined fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary="Get Help (Discord)" />
                         </ListItemButton>
 
-
-                      <ListItemButton>
-                      <ListItemIcon>
-                     <Book fontSize='small' />
-                        </ListItemIcon>
-                          <ListItemText primary='Tutorial' />
+                        <ListItemButton>
+                          <ListItemIcon>
+                            <Book fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary="Tutorial" />
                         </ListItemButton>
 
-
-                      <ListItemButton>
-                      <ListItemIcon>
-                      <WebAsset fontSize='small' />
-                        </ListItemIcon>
-                          <ListItemText primary='Blog' />
+                        <ListItemButton>
+                          <ListItemIcon>
+                            <WebAsset fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary="Blog" />
                         </ListItemButton>
                         <ListItemButton>
-                        <ListItemIcon>
-                      <QuestionAnswer fontSize='small' />
-                        </ListItemIcon>
-                          <ListItemText primary='FAQ' />
+                          <ListItemIcon>
+                            <QuestionAnswer fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText primary="FAQ" />
                         </ListItemButton>
                       </List>
                     </Menu>
                   </>
 
-
                   {connected === true ? (
                     <ConnectedAvatar />
                   ) : (
                     <Chip
-                    color='primary'
-                    icon={<Language fontSize='small' />}
-                    size='medium'
-                    label='Connect'
-                      sx={{ fontWeight: 'bold', color: 'white', fontSize: 12 }}
-
-                      onClick={() => connect()}
-                     />
+                      color="primary"
+                      icon={<Language fontSize="small" />}
+                      size="medium"
+                      label="Connect"
+                      sx={{
+                        fontWeight: "bold",
+                        color: "white",
+                        fontSize: "15px",
+                      }}
+                      onClick={handleClickOpen}
+                    />
                   )}
                 </Stack>
               </Grid>
             </Grid>
           </Container>
         </Toolbar>
-  
+        <Dialog
+          sx={{ width: "100%", maxWidth: "425" }}
+          open={modelopen}
+          onClose={handlesClose}
+        >
+          <DialogContent
+            sx={{
+              border: "0.187rem solid #ddd",
+              bordeRadius: "0.5rem",
+              padding: "48px 56px",
+            }}
+          >
+            <CloseIcon
+              fontSize="large"
+              onClick={handlesClose}
+              sx={{
+                padding: "0px",
+                height: "20px",
+                position: "absolute",
+                right: "17px",
+                top: "17px",
+                width: "20px",
+                cursor: "pointer",
+              }}
+            />
+            <DialogTitle
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "0px",
+                marginBottom: "2rem",
+              }}
+            >
+              Login
+            </DialogTitle>
+
+            <div>
+              {connectors.slice(-2, 1).map((connector) => (
+                <Button
+                  variant="outlined"
+                  disabled={!connector.ready}
+                  key={connector.id}
+                  onClick={() => connect({ connector })}
+                  sx={{
+                    paddingLeft: "24px",
+                    paddingRight: "163px",
+                    paddingTop: "15px",
+                    paddingBottom: "15px",
+                    borderRadius: "0.1875rem",
+                  }}
+                >
+                  <img
+                    src="/assets/images/metamaskconnect.png"
+                    alt="metamaskwalletlogo"
+                    style={{ width: 28, height: 28 }}
+                  />
+                  <Typography
+                    sx={{
+                      fontFamily: "sans-serif",
+                      fontStyle: "normal",
+
+                      lineHeight: "normal",
+                      fontSize: "0.875rem",
+                      fontWeight: "700",
+                      color: "#000000",
+                      marginLeft: "1.3125rem",
+                    }}
+                  >
+                    {connector.name}
+
+                    {isConnecting &&
+                      connector.id === pendingConnector?.id &&
+                      " (connecting)"}
+                  </Typography>
+                </Button>
+              ))}
+
+              <Divider>
+                <Typography
+                  sx={{
+                    fontFamily: "sans-serif",
+                    fontStyle: "normal",
+                    fontWeight: "400",
+                    lineHeight: "normal",
+                    fontSize: "0.75rem",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "2rem 0;",
+                  }}
+                >
+                  OR
+                </Typography>
+              </Divider>
+
+              {connectors.slice(1).map((connector) => (
+                <Button
+                  variant="outlined"
+                  disabled={!connector.ready}
+                  key={connector.id}
+                  onClick={() => connect({ connector })}
+                  sx={{
+                    paddingLeft: "24px",
+                    paddingRight: "122px",
+                    paddingTop: "12px",
+                    paddingBottom: "12px",
+                    borderRadius: "0.1875rem",
+                  }}
+                >
+                  <img
+                    src="/assets/images/coinbaseconnect.png"
+                    alt="coinnasewalletlogo"
+                    style={{ width: 28, height: 28 }}
+                  />
+
+                  <Typography
+                    sx={{
+                      fontFamily: "sans-serif",
+                      fontStyle: "normal",
+
+                      lineHeight: "normal",
+                      fontSize: "0.875rem",
+                      fontWeight: "700",
+                      color: "#000000",
+                      marginLeft: "1.3125rem",
+                    }}
+                  >
+                    {connector.name}
+                    {!connector.ready && " (unsupported)"}
+                    {isConnecting &&
+                      connector.id === pendingConnector?.id &&
+                      " (connecting)"}
+                  </Typography>
+                </Button>
+              ))}
+
+              {error && <div>{error.message}</div>}
+            </div>
+          </DialogContent>
+        </Dialog>
       </AppBar>
       <VerificationDialog
         open={verificationDialogOpen}
