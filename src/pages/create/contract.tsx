@@ -40,7 +40,12 @@ import MarketDisplay from "../../modules/market/components/MarketDisplay";
 import { DesktopDatePicker } from "@mui/lab";
 import { create } from "ipfs-http-client";
 import fleek from "../../fleek";
-import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import {
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
 import { NETWORK_MANAGER_ADDRESS, TOKEN_FACTORY_ADDRESS } from "../../constant";
 import { NetworkManagerInterface, TokenFactoryInterface } from "../../abis";
 import { BigNumber } from "ethers";
@@ -53,7 +58,6 @@ import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
 import { ClassNameMap } from "@mui/styles";
-import { UseAccountConfig } from "wagmi/dist/declarations/src/hooks/accounts/useAccount";
 
 /**
  * Elijah Hampton
@@ -93,13 +97,14 @@ const CreateContractPage: NextPage = (): JSX.Element => {
   const [marketDetails, setMarketDetails] = useState<any>({});
 
   const createContractDialogOnOpen = (): void => {};
-  const [createContractDialogState, setCreateContractDialogState] = useState<any>({
-    loading: false,
-    open: false,
-    success: false,
-    error: false,
-    errorMessage: "",
-  });
+  const [createContractDialogState, setCreateContractDialogState] =
+    useState<any>({
+      loading: false,
+      open: false,
+      success: false,
+      error: false,
+      errorMessage: "",
+    });
 
   const createContractDialogContent: Array<ReactNode> = [
     <DialogContent>
@@ -117,7 +122,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
           ? "Waiting for confirmation..."
           : "After pressing create your wallet provider will prompt you to accept the transaction."}
       </DialogContentText>
-    </DialogContent>
+    </DialogContent>,
   ];
 
   useEffect(() => {
@@ -215,38 +220,38 @@ const CreateContractPage: NextPage = (): JSX.Element => {
     });
   };
 
-  const networkManager_createContract = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_createContractPrepare = usePrepareContractWrite({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "createContract",
+    args: [createContractForm.contract_market_id, contractMetadataURI],
+    onSettled(data, error) {
+      if (error) {
+        setCreateContractDialogState({
+          ...createContractDialogState,
+          loading: false,
+          success: false,
+          error: true,
+          errorMessage: error.message,
+        });
+
+        alert(error.message);
+      } else {
+        setCreateContractDialogState({
+          ...createContractDialogState,
+          loading: false,
+          success: true,
+          error: false,
+          errorMessage: "",
+        });
+
+        setContractMetadataURI("");
+      }
     },
-    "createContract",
-    {
-      args: [createContractForm.contract_market_id, contractMetadataURI],
-      onSettled(data, error, variables, context) {
-        if (error) {
-          setCreateContractDialogState({
-            ...createContractDialogState,
-            loading: false,
-            success: false,
-            error: true,
-            errorMessage: error.message,
-          });
+  });
 
-          alert(error.message);
-        } else {
-          setCreateContractDialogState({
-            ...createContractDialogState,
-            loading: false,
-            success: true,
-            error: false,
-            errorMessage: "",
-          });
-
-          setContractMetadataURI("");
-        }
-      },
-    }
+  const networkManager_createContract = useContractWrite(
+    networkManager_createContractPrepare.config
   );
 
   const handleOnCreate = async () => {
@@ -268,7 +273,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         ).path;
       } else {
         retVal = await fleek.uploadService(
-          String(accountData.data.address) +
+          String(accountData.address) +
             ":" +
             createContractForm.contract_title,
           JSON.stringify(createContractForm)
@@ -290,7 +295,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
 
     if (String(retVal)) {
       await networkManager_createContract.writeAsync({
-        args: [createContractForm.contract_market_id, String(retVal)],
+        recklesslySetUnpreparedArgs: [createContractForm.contract_market_id, String(retVal)],
       });
     } else {
       setCreateContractDialogState({

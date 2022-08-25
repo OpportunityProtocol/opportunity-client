@@ -33,10 +33,11 @@
     "@toruslabs/torus-embed": "^1.23.2",
     "@walletconnect/web3-provider": "^1.7.8",
     "clsx": "^1.1.1",
+    "connectkit": "^0.0.1",
     "cryptocurrency-icons": "^0.18.0",
     "date-fns": "^2.29.2",
     "eslint-config-airbnb-typescript-prettier": "^5.0.0",
-    "ethers": "^5.6.8",
+    "ethers": "^5.7.0",
     "firebase": "9.0.2",
     "fortmatic": "^2.4.0",
     "graphql": "^16.5.0",
@@ -65,7 +66,7 @@
     "redux-saga": "^1.1.3",
     "redux-thunk": "^2.4.1",
     "styled-components": "^5.3.3",
-    "wagmi": "^0.4.10",
+    "wagmi": "^0.6.4",
     "web3modal": "^1.9.7"
   },
   "devDependencies": {

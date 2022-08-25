@@ -30,7 +30,11 @@ import {
   Checkbox,
   LinearProgress,
 } from "@mui/material";
-import { useContractRead, useContractWrite } from "wagmi";
+import {
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
 import {
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
@@ -94,41 +98,37 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
   });
 
   //getProfile
-  const lensHub_getProfile = useContractRead(
-    {
-      addressOrName: LENS_HUB_PROXY,
-      contractInterface: LensHubInterface,
-    },
-    "getProfile",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      args: [lensProfileId],
-      onSuccess: (data) => {
-        const {
+  const lensHub_getProfile = useContractRead({
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "getProfile",
+    enabled: false,
+    watch: false,
+    chainId: CHAIN_ID,
+    args: [lensProfileId],
+    onSuccess: (data) => {
+      const {
+        followModule,
+        followNFT,
+        followNFTURI,
+        handle,
+        imageURI,
+        pubCount,
+      } = data;
+
+      dispatch(
+        userLensDataStored({
           followModule,
           followNFT,
           followNFTURI,
           handle,
           imageURI,
-          pubCount,
-        } = data;
-
-        dispatch(
-          userLensDataStored({
-            followModule,
-            followNFT,
-            followNFTURI,
-            handle,
-            imageURI,
-            pubCount: hexToDecimal(Number(pubCount._hex)),
-            profileId: Number(lensProfileId),
-          })
-        );
-      },
-    }
-  );
+          pubCount: hexToDecimal(Number(pubCount._hex)),
+          profileId: Number(lensProfileId),
+        })
+      );
+    },
+  });
 
   useEffect(() => {
     if (lensProfileId !== 0) {
@@ -138,62 +138,58 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     }
   }, [lensProfileId]);
 
-  const networkManager_getLensProfileIdFromAddress = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_getLensProfileIdFromAddress = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "getLensProfileIdFromAddress",
+    enabled: false,
+    chainId: CHAIN_ID,
+    args: [userAddress],
+    onSuccess: (data: Result) => {
+      setLensProfileId(hexToDecimal(data._hex));
     },
-    "getLensProfileIdFromAddress",
-    {
-      enabled: false,
-      chainId: CHAIN_ID,
-      args: [userAddress],
-      onSuccess: (data: Result) => {
-        setLensProfileId(hexToDecimal(data._hex));
+    onError: (error) => {},
+  });
+
+  const networkManager_registerWorkerPrepare = usePrepareContractWrite({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: JSON.stringify(NetworkManagerInterface),
+    functionName: "register",
+    args: [
+      {
+        to: NETWORK_MANAGER_ADDRESS,
+        handle: chosenLensHandle,
+        imageURI:
+          "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+        followModule: ZERO_ADDRESS,
+        followModuleInitData: [],
+        followNFTURI: "",
       },
-      onError: (error) => {},
-    }
-  );
+      updatedPtr,
+    ],
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+    },
+    onSuccess: (data) => {},
+    onError(error: Error) {
+      if (String(error).includes("Taken")) {
+        setChosenHandleErrorText(
+          "This handle has already been taken. Try another."
+        );
+      } else {
+        setChosenHandleErrorText(error.message);
+      }
+    },
+    onSettled(data, error) {
+      networkManager_getLensProfileIdFromAddress.refetch();
+      setRegistrationLoading(false);
+      handleClose();
+    },
+  });
 
   const networkManager_registerWorker = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: JSON.stringify(NetworkManagerInterface),
-    },
-    "register",
-    {
-      args: [
-        {
-          to: NETWORK_MANAGER_ADDRESS,
-          handle: chosenLensHandle,
-          imageURI:
-            "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
-          followModule: ZERO_ADDRESS,
-          followModuleInitData: [],
-          followNFTURI: "",
-        },
-        updatedPtr,
-      ],
-      overrides: {
-        gasLimit: ethers.BigNumber.from("2000000"),
-        gasPrice: 90000000000,
-      },
-      onSuccess: (data) => {},
-      onError(error: Error, variables, context) {
-        if (String(error).includes("Taken")) {
-          setChosenHandleErrorText(
-            "This handle has already been taken. Try another."
-          );
-        } else {
-          setChosenHandleErrorText(error.message);
-        }
-      },
-      onSettled(data, error, variables, context) {
-        networkManager_getLensProfileIdFromAddress.refetch();
-        setRegistrationLoading(false);
-        handleClose();
-      },
-    }
+    networkManager_registerWorkerPrepare.config
   );
 
   const handleOnVerify = async () => {
@@ -224,7 +220,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     }
 
     await networkManager_registerWorker.writeAsync({
-      args: [
+      recklesslySetUnpreparedArgs: [
         {
           to: NETWORK_MANAGER_ADDRESS,
           handle: chosenLensHandle,
@@ -236,7 +232,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
         },
         retVal,
       ],
-      overrides: {
+      recklesslySetUnpreparedOverrides: {
         gasLimit: ethers.BigNumber.from("2000000"),
         gasPrice: 90000000000,
       },
@@ -319,7 +315,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
       open={open}
       onClose={handleClose}
     >
-      {registrationLoading ? <LinearProgress variant='indeterminate' /> : null}
+      {registrationLoading ? <LinearProgress variant="indeterminate" /> : null}
       <DialogContent
         sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
       >
@@ -338,208 +334,209 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
           loop with your customers
         </DialogContentText>
       </DialogContent>
-  
-        <>
-          <DialogContent
-            sx={{
-              textAlign: "center",
-              display: "flex",
-              alignItems: "center",
-              flexDirection: "column",
-            }}
-          >
-            {page === 0 ? (
-              <Box sx={{ width: "100%" }}>
-                <Stack spacing={4}>
-                  <FormControl variant="standard">
-                    <InputLabel shrink htmlFor="settings-form-display-name">
-                      Display Name
-                    </InputLabel>
-                    <BootstrapInput
+
+      <>
+        <DialogContent
+          sx={{
+            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
+          }}
+        >
+          {page === 0 ? (
+            <Box sx={{ width: "100%" }}>
+              <Stack spacing={4}>
+                <FormControl variant="standard">
+                  <InputLabel shrink htmlFor="settings-form-display-name">
+                    Display Name
+                  </InputLabel>
+                  <BootstrapInput
                     disabled={registrationLoading}
-                      fullWidth
-                      onChange={handleOnChangeTextField}
-                      size="small"
-                      id="settings-form-display-name"
-                    />
-                  </FormControl>
+                    fullWidth
+                    onChange={handleOnChangeTextField}
+                    size="small"
+                    id="settings-form-display-name"
+                  />
+                </FormControl>
 
-                  <FormControl variant="standard">
-                    <InputLabel shrink htmlFor="settings-form-about-you">
-                      About You
-                    </InputLabel>
-                    <BootstrapInput
-                             disabled={registrationLoading}
-                      onChange={handleOnChangeTextField}
-                      size="small"
-                      id="settings-form-about-you"
-                    />
-                  </FormControl>
+                <FormControl variant="standard">
+                  <InputLabel shrink htmlFor="settings-form-about-you">
+                    About You
+                  </InputLabel>
+                  <BootstrapInput
+                    disabled={registrationLoading}
+                    onChange={handleOnChangeTextField}
+                    size="small"
+                    id="settings-form-about-you"
+                  />
+                </FormControl>
 
-                  <FormControl
-                    component="form"
-                    onSubmit={handleOnSubmitCertification}
-                    variant="standard"
-                  >
-                    <InputLabel shrink htmlFor="settings-certifications">
-                      Certifications
-                    </InputLabel>
-                    <TextField
-                             disabled={registrationLoading}
-                      inputRef={certificationsRef}
-                      fullWidth
-                      placeholder={
-                        metadataState.certifications.length < 5
-                          ? "Enter tags"
-                          : ""
-                      }
-                      sx={{ margin: "1rem 0" }}
-                      margin="none"
-                      InputProps={{
-                        startAdornment: (
-                          <Box sx={{ margin: "0 0.2rem 0 0", display: "flex" }}>
-                            {metadataState.certifications.map((data, index) => {
-                              return <Tag data={data} key={index} />;
-                            })}
-                          </Box>
-                        ),
-                      }}
-                      size="small"
-                      id="settings-certifications"
-                    />
-                    <FormHelperText>
-                      Enter certifications separated by commas
-                    </FormHelperText>
-                  </FormControl>
-
-                  <FormControl
-                    component="form"
-                    onSubmit={handleOnSubmitSkill}
-                    variant="standard"
-                  >
-                    <InputLabel shrink htmlFor="settings-skills">
-                      Skills
-                    </InputLabel>
-                    <TextField
-                             disabled={registrationLoading}
-                      size="small"
-                      id="settings-skills"
-                      inputRef={tagRef}
-                      fullWidth
-                      variant="standard"
-                      sx={{ margin: "1rem 0" }}
-                      margin="none"
-                      placeholder={
-                        metadataState.skills.length < 5 ? "Enter tags" : ""
-                      }
-                      InputProps={{
-                        startAdornment: (
-                          <Box sx={{ margin: "0 0.2rem 0 0", display: "flex" }}>
-                            {metadataState.skills.map((data, index) => {
-                              return <Tag data={data} key={index} />;
-                            })}
-                          </Box>
-                        ),
-                      }}
-                    />
-                    <FormHelperText>
-                      Enter skills separated by commas
-                    </FormHelperText>
-                  </FormControl>
-
-                  <FormControl variant="outlined">
-                    <InputLabel size="small" htmlFor="settings-languagest">
-                      Languages
-                    </InputLabel>
-                    <Select
-                             disabled={registrationLoading}
-                      size="small"
-                      label="Langauges"
-                      id="settings-languages"
-                      multiple
-                      variant="outlined"
-                      value={metadataState.languages}
-                      onChange={handleChange}
-                      input={
-                        <OutlinedInput id="select-multiple-chip" label="Chip" />
-                      }
-                      renderValue={(selected) => (
-                        <Box
-                          sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
-                        >
-                          {selected.map((value) => (
-                            <Chip key={value} label={value} />
-                          ))}
+                <FormControl
+                  component="form"
+                  onSubmit={handleOnSubmitCertification}
+                  variant="standard"
+                >
+                  <InputLabel shrink htmlFor="settings-certifications">
+                    Certifications
+                  </InputLabel>
+                  <TextField
+                    disabled={registrationLoading}
+                    inputRef={certificationsRef}
+                    fullWidth
+                    placeholder={
+                      metadataState.certifications.length < 5
+                        ? "Enter tags"
+                        : ""
+                    }
+                    sx={{ margin: "1rem 0" }}
+                    margin="none"
+                    InputProps={{
+                      startAdornment: (
+                        <Box sx={{ margin: "0 0.2rem 0 0", display: "flex" }}>
+                          {metadataState.certifications.map((data, index) => {
+                            return <Tag data={data} key={index} />;
+                          })}
                         </Box>
-                      )}
-                      MenuProps={MenuProps}
-                    >
-                      {selectedLanguages.map((language) => {
-                        return (
-                          <MenuItem value={language} key={language}>
-                            {language}
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                  </FormControl>
-                </Stack>
-              </Box>
-            ) : (
-              <FormControl
-                sx={{
-                  marginBottom: 3,
-                  marginTop: 3,
+                      ),
+                    }}
+                    size="small"
+                    id="settings-certifications"
+                  />
+                  <FormHelperText>
+                    Enter certifications separated by commas
+                  </FormHelperText>
+                </FormControl>
 
-                  display: "flex",
-                  alignItems: "center",
-                  alignSelf: "center",
-                }}
-              >
-                <TextField
-                         disabled={registrationLoading}
-                  value={chosenLensHandle}
-                  id="register-lens-handle-text-field"
-                  onChange={handleOnChangeTextField}
-                  size="small"
-                  fullWidth
-                  error={chosenHandleError}
-                />
-                <FormHelperText>
-                  {chosenHandleError
-                    ? chosenHandleErrorText
-                    : "Choose a unique handle to identify your profile"}
-                </FormHelperText>
-              </FormControl>
-            )}
+                <FormControl
+                  component="form"
+                  onSubmit={handleOnSubmitSkill}
+                  variant="standard"
+                >
+                  <InputLabel shrink htmlFor="settings-skills">
+                    Skills
+                  </InputLabel>
+                  <TextField
+                    disabled={registrationLoading}
+                    size="small"
+                    id="settings-skills"
+                    inputRef={tagRef}
+                    fullWidth
+                    variant="standard"
+                    sx={{ margin: "1rem 0" }}
+                    margin="none"
+                    placeholder={
+                      metadataState.skills.length < 5 ? "Enter tags" : ""
+                    }
+                    InputProps={{
+                      startAdornment: (
+                        <Box sx={{ margin: "0 0.2rem 0 0", display: "flex" }}>
+                          {metadataState.skills.map((data, index) => {
+                            return <Tag data={data} key={index} />;
+                          })}
+                        </Box>
+                      ),
+                    }}
+                  />
+                  <FormHelperText>
+                    Enter skills separated by commas
+                  </FormHelperText>
+                </FormControl>
 
-            <FormControlLabel
-              control={
-                <Checkbox
+                <FormControl variant="outlined">
+                  <InputLabel size="small" htmlFor="settings-languagest">
+                    Languages
+                  </InputLabel>
+                  <Select
+                    disabled={registrationLoading}
+                    size="small"
+                    label="Langauges"
+                    id="settings-languages"
+                    multiple
+                    variant="outlined"
+                    value={metadataState.languages}
+                    onChange={handleChange}
+                    input={
+                      <OutlinedInput id="select-multiple-chip" label="Chip" />
+                    }
+                    renderValue={(selected) => (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {selected.map((value) => (
+                          <Chip key={value} label={value} />
+                        ))}
+                      </Box>
+                    )}
+                    MenuProps={MenuProps}
+                  >
+                    {selectedLanguages.map((language) => {
+                      return (
+                        <MenuItem value={language} key={language}>
+                          {language}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+              </Stack>
+            </Box>
+          ) : (
+            <FormControl
+              sx={{
+                marginBottom: 3,
+                marginTop: 3,
+
+                display: "flex",
+                alignItems: "center",
+                alignSelf: "center",
+              }}
+            >
+              <TextField
                 disabled={registrationLoading}
-                  defaultChecked
-                  onChange={handleOnChangeDisplayFreelancer}
-                />
-              }
-              label="Show freelancer stats on profile"
-              sx={{ fontWeight: "medium", fontSize: "14px" }}
-            />
-          </DialogContent>
+                value={chosenLensHandle}
+                id="register-lens-handle-text-field"
+                onChange={handleOnChangeTextField}
+                size="small"
+                fullWidth
+                error={chosenHandleError}
+              />
+              <FormHelperText>
+                {chosenHandleError
+                  ? chosenHandleErrorText
+                  : "Choose a unique handle to identify your profile"}
+              </FormHelperText>
+            </FormControl>
+          )}
 
-          <DialogActions>
-            {page === 0 ? (
-              <Button onClick={handleClose}>Close</Button>
-            ) : (
-              <Button disabled={registrationLoading} onClick={() => setPage(0)}>Back</Button>
-            )}
-            {page === 0 ? (
-              <Button onClick={() => setPage(1)}>Next</Button>
-            ) : (
-              <Button disabled={registrationLoading} onClick={handleOnVerify}>Verify on LensTalent</Button>
-            )}
-          </DialogActions>
-        </>
+          <FormControlLabel
+            control={
+              <Checkbox
+                disabled={registrationLoading}
+                defaultChecked
+                onChange={handleOnChangeDisplayFreelancer}
+              />
+            }
+            label="Show freelancer stats on profile"
+            sx={{ fontWeight: "medium", fontSize: "14px" }}
+          />
+        </DialogContent>
 
+        <DialogActions>
+          {page === 0 ? (
+            <Button onClick={handleClose}>Close</Button>
+          ) : (
+            <Button disabled={registrationLoading} onClick={() => setPage(0)}>
+              Back
+            </Button>
+          )}
+          {page === 0 ? (
+            <Button onClick={() => setPage(1)}>Next</Button>
+          ) : (
+            <Button disabled={registrationLoading} onClick={handleOnVerify}>
+              Verify on LensTalent
+            </Button>
+          )}
+        </DialogActions>
+      </>
     </Dialog>
   );
 };
