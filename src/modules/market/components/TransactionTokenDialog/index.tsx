@@ -34,6 +34,7 @@ import {
   useContractRead,
   useContractWrite,
   useFeeData,
+  usePrepareContractWrite,
   useProvider,
   useSigner,
 } from "wagmi";
@@ -99,6 +100,8 @@ const TransactionTokenDialog: FC<
   const [countdown, setCountdown] = useState<number>(Date.now() + 30000);
   const [tokenMarketDetails, setTokenMarketDetails] = useState<any>({});
   const [tokenSupply, setTokenSupply] = useState<any>(0);
+  const signer = useSigner()
+  const [balanceOf, setBalance] = useState<number>(0)
 
   const [buyingEnabled, setBuyingEnabled] = useState<boolean>(false)
   const feeData = useFeeData();
@@ -152,9 +155,7 @@ const TransactionTokenDialog: FC<
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
       contractInterface: NetworkManagerInterface,
-    },
-    "getProtocolFee",
-    {
+    functionName: "getProtocolFee",
       enabled: false,
       watch: false,
       chainId: CHAIN_ID,
@@ -165,17 +166,11 @@ const TransactionTokenDialog: FC<
     }
   );
 
-  const provider = useProvider();
-
-
-  const tokenExchange_buyTokens = useContractWrite(
+  const tokenExchange_buyTokensPrepare = usePrepareContractWrite(
     {
       addressOrName: TOKEN_EXCHANGE_ADDRESS,
       contractInterface: TokenExchangeInterface,
-    },
-    "buyTokens",
-
-    {
+    functionName: "buyTokens",
       args: [
         tokenAddress,
         numTokens,
@@ -186,14 +181,10 @@ const TransactionTokenDialog: FC<
       overrides: {
         gasLimit: BigNumber.from("900000"),
       },
-      onSuccess(data, variables, context) {
-  
-      },
-      onError(err) {
-
-      }
     }
-  );
+  )
+
+  const tokenExchange_buyTokens = useContractWrite(tokenExchange_buyTokensPrepare.config);
 
   const onBuy = async () => {
     await dai_approve.writeAsync().then(() => {
@@ -201,30 +192,25 @@ const TransactionTokenDialog: FC<
     })
   }
 
-  const tokenExchange_sellTokens = useContractWrite(
+  const tokenExchange_sellTokensPrepare = usePrepareContractWrite(
     {
       addressOrName: TOKEN_EXCHANGE_ADDRESS,
       contractInterface: TokenExchangeInterface,
-    },
-    "sellTokens",
-    {
+    functionName: "sellTokens",
       args: [tokenAddress, numTokens, 0, userAddress],
       overrides: {
         gasLimit: BigNumber.from("900000"),
       },
-      onError(error, variables, context) {
-        console.log(variables)
-      },
     }
-  );
+  )
+
+  const tokenExchange_sellTokens = useContractWrite(tokenExchange_sellTokensPrepare.config);
 
   const tokenExchange_getCostForBuyingTokens = useContractRead(
     {
       addressOrName: TOKEN_EXCHANGE_ADDRESS,
       contractInterface: TokenExchangeInterface,
-    },
-    "getCostForBuyingTokens",
-    {
+    functionName: "getCostForBuyingTokens",
       args: [tokenAddress, numTokens],
       enabled: false,
       watch: false,
@@ -236,9 +222,6 @@ const TransactionTokenDialog: FC<
       onSuccess(data) {
         setCostForBuying(hexToDecimal(data._hex));
       },
-      onError(err) {
-  
-      },
     }
   );
 
@@ -246,9 +229,7 @@ const TransactionTokenDialog: FC<
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
       contractInterface: NetworkManagerInterface
-    },
-    "isFamiliar",
-    {
+      functionName: "isFamiliar",
       args: [userAddress, serviceId],
       enabled: true,
       watch: true,
@@ -297,9 +278,7 @@ const TransactionTokenDialog: FC<
     {
       addressOrName: TOKEN_EXCHANGE_ADDRESS,
       contractInterface: TokenExchangeInterface,
-    },
-    "getPriceForSellingTokens",
-    {
+    functionName: "getPriceForSellingTokens",
       args: [tokenAddress, numTokens],
       enabled: false,
       watch: false,
@@ -322,9 +301,7 @@ const TransactionTokenDialog: FC<
     {
       addressOrName: TOKEN_FACTORY_ADDRESS,
       contractInterface: TokenFactoryInterface,
-    },
-    "getMarketDetailsByID",
-    {
+    functionName: "getMarketDetailsByID",
       args: [Number(serviceData?.marketId)],
       enabled: false,
       watch: false,
@@ -342,16 +319,16 @@ const TransactionTokenDialog: FC<
     }
   );
 
-  const dai_approve = useContractWrite(
+  const dai_approvePrepare = usePrepareContractWrite(
     {
       addressOrName: DAI_ADDRESS,
       contractInterface: DaiInterface,
-    },
-    "approve",
-    {
+    functionName: "approve",
       args: [TOKEN_EXCHANGE_ADDRESS, costForBuying + 100],
     }
-  );
+  )
+
+  const dai_approve = useContractWrite(dai_approvePrepare.config);
 
   const handleOnChangeNumTokensToBuy = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -408,11 +385,8 @@ const TransactionTokenDialog: FC<
     }
   };
 
-const signer = useSigner()
-  const [balanceOf, setBalance] = useState<number>(0)
+
   const getBalance = async () => {
-    console.log(tokenAddress)
-    console.log(ZERO_ADDRESS)
     if (tokenAddress != ZERO_ADDRESS) {
     setBalance(await new ethers.Contract(tokenAddress, DaiInterface, signer.data.provider).balanceOf(userAddress))
     }

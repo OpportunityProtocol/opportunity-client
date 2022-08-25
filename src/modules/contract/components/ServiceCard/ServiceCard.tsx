@@ -22,7 +22,12 @@ import {
   PurchasedServiceMetadataStruct,
   ServiceStruct,
 } from "../../../../typechain-types/NetworkManager";
-import { useContractRead, useContractWrite, useQuery } from "wagmi";
+import {
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+  useQuery,
+} from "wagmi";
 import {
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
@@ -70,8 +75,8 @@ const ServiceCard = ({
   data,
   purchaseData,
   purchase = false,
-  text=false,
-  outlined = true
+  text = false,
+  outlined = true,
 }: IServiceCardProps) => {
   const cardStyles = useStyles();
   const router: NextRouter = useRouter();
@@ -90,77 +95,66 @@ const ServiceCard = ({
 
   const userAddress = useSelector(selectUserAddress);
 
+  const networkManager_resolveServicePrepare = usePrepareContractWrite({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "resolveService",
+    onSuccess: async (data) => {
+      if (userAddress === loadedData?.creator) {
+        dispatch(
+          activePublishedServiceDataAdded({
+            ...loadedData,
+            status: 2,
+          })
+        );
+      }
+
+      if (userAddress == purchaseData.client) {
+        dispatch(
+          purchasedServiceDataAdded({
+            ...loadedData,
+            status: 2,
+          })
+        );
+      }
+    },
+    onError: (error) => {},
+    overrides: {
+      from: userAddress,
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+    },
+    args: [Number(loadedData?.id), Number(purchaseData?.purchaseId)],
+  });
   const networkManager_resolveService = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "resolveService",
-    {
-      args: [Number(loadedData?.id), Number(purchaseData?.purchaseId)],
-      onSuccess: async (data) => {
-        if (userAddress === loadedData?.creator) {
-          dispatch(
-            activePublishedServiceDataAdded({
-              ...loadedData,
-              status: 2,
-            })
-          );
-        }
-
-        if (userAddress == purchaseData.client) {
-          dispatch(
-            purchasedServiceDataAdded({
-              ...loadedData,
-              status: 2,
-            })
-          );
-        }
-      },
-      onError: (error) => {},
-      overrides: {
-        from: userAddress,
-        gasLimit: ethers.BigNumber.from("2000000"),
-        gasPrice: 90000000000,
-      },
-    }
+    networkManager_resolveServicePrepare.config
   );
 
-  const lensHub_getProfile = useContractRead(
-    {
-      addressOrName: LENS_HUB_PROXY,
-      contractInterface: LensHubInterface,
+  const lensHub_getProfile = useContractRead({
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "getProfile",
+    enabled: false,
+    watch: false,
+    chainId: CHAIN_ID,
+    args: [serviceOwnerLensProfileId],
+    onSuccess: (data) => {
+      setServiceOwnerLensData(data);
     },
-    "getProfile",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      args: [serviceOwnerLensProfileId],
-      onSuccess: (data) => {
-        setServiceOwnerLensData(data);
-      },
-    }
-  );
+  });
 
-  const networkManager_getLensProfileIdFromAddress = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_getLensProfileIdFromAddress = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "getLensProfileIdFromAddress",
+    enabled: false,
+    chainId: CHAIN_ID,
+    args: [loadedData?.creator ? loadedData?.creator : ZERO_ADDRESS],
+    onSuccess: (data: Result) => {
+      setServiceOwnerLensProfileId(hexToDecimal(data._hex));
     },
-    "getLensProfileIdFromAddress",
-    {
-      enabled: false,
-      chainId: CHAIN_ID,
-      args: [loadedData?.creator ? loadedData?.creator : ZERO_ADDRESS],
-      onSuccess: (data: Result) => {
-        setServiceOwnerLensProfileId(hexToDecimal(data._hex));
-      },
-      onError: (error) => {
-    
-      },
-    }
-  );
+    onError: (error) => {},
+  });
 
   const handleOnNavigateToServicePage = () => {
     router.push({
@@ -190,15 +184,13 @@ const ServiceCard = ({
   }, [loadedData?.creator]);
 
   useEffect(() => {
-
     async function loadMetadata() {
-      const metadata = await getMetadata(data?.metadataPtr)
-      console.log(metadata)
-      setServiceMetadata(metadata)
+      const metadata = await getMetadata(data?.metadataPtr);
+      console.log(metadata);
+      setServiceMetadata(metadata);
     }
-    
-    loadMetadata()
 
+    loadMetadata();
   }, [data?.metadataPtr]);
 
   const renderButtonState = () => {
@@ -305,56 +297,87 @@ const ServiceCard = ({
     }
   };
 
-  return text ?
-  <Box>
-  {serviceMetadata?.service_title ? (
-
-          <Typography fontWeight='normal' fontSize={12} color={(theme) => theme.palette.primary.main}>
-       {serviceMetadata?.service_title}  
-     </Typography>
-    
-
-   ) : (
-
-             <Typography fontWeight='medium' fontSize={13} color={(theme) => theme.palette.primary.main}>
-       Unable to load service title
-     </Typography>
-   )}
-</Box>
-:
-(
-    <Card square variant="elevation" elevation={10} sx={{ boxShadow: '0 19px 38px #eee, 0 15px 12px #eee', display: 'flex', alignItems: 'center', width: "100%", height: 100, cursor: userAddress ? 'pointer' : 'auto' }} onClick={userAddress ? () => router.push(`/view/service/${data?.id}`) : () => {}}>
-
-           
-       
-          <Box sx={{flex: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
-
-  
-      <CardContent sx={{ flex: '1 0 auto', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly'}}>
-    
-
-          <Typography
-            fontWeight="600"
-            fontSize={12}
-      
-          >
-            {serviceMetadata?.service_title ? serviceMetadata?.service_title : 'Unable to load service title'}
+  return text ? (
+    <Box>
+      {serviceMetadata?.service_title ? (
+        <Typography
+          fontWeight="normal"
+          fontSize={12}
+          color={(theme) => theme.palette.primary.main}
+        >
+          {serviceMetadata?.service_title}
+        </Typography>
+      ) : (
+        <Typography
+          fontWeight="medium"
+          fontSize={13}
+          color={(theme) => theme.palette.primary.main}
+        >
+          Unable to load service title
+        </Typography>
+      )}
+    </Box>
+  ) : (
+    <Card
+      square
+      variant="elevation"
+      elevation={10}
+      sx={{
+        boxShadow: "0 19px 38px #eee, 0 15px 12px #eee",
+        display: "flex",
+        alignItems: "center",
+        width: "100%",
+        height: 100,
+        cursor: userAddress ? "pointer" : "auto",
+      }}
+      onClick={
+        userAddress ? () => router.push(`/view/service/${data?.id}`) : () => {}
+      }
+    >
+      <Box
+        sx={{
+          flex: 1,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <CardContent
+          sx={{
+            flex: "1 0 auto",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-evenly",
+          }}
+        >
+          <Typography fontWeight="600" fontSize={12}>
+            {serviceMetadata?.service_title
+              ? serviceMetadata?.service_title
+              : "Unable to load service title"}
           </Typography>
 
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <img
+                src="/assets/images/dai.svg"
+                style={{ width: 15, height: 20 }}
+              />
+              <Typography
+                fontSize={13}
+                fontWeight="medium"
+                color="text.secondary"
+              >
+                {Math.random().toPrecision(2)}{" "}
+              </Typography>
+            </Stack>
+          </Box>
 
-        <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Stack direction="row" alignItems="center" spacing={0.5}>
-            <img
-              src="/assets/images/dai.svg"
-              style={{ width: 15, height: 20 }}
-            />
-            <Typography fontSize={13} fontWeight='medium' color='text.secondary'>
-              {Math.random().toPrecision(2)}{" "}
-            </Typography>
-          </Stack>
-        </Box>
-
-     {/*   <Stack direction="row" alignItems="center">
+          {/*   <Stack direction="row" alignItems="center">
           {serviceMetadata?.tags &&
           serviceMetadata?.service_tags?.length > 0 ? (
             serviceMetadata?.service_tags?.map((tag) => {
@@ -371,18 +394,16 @@ const ServiceCard = ({
             <Typography color='text.secondary' variant="caption">Unable to load tags</Typography>
           )}
           </Stack> */}
-
-      </CardContent>
+        </CardContent>
       </Box>
-      {
-          errors?.metadataError ?
-          <img src='' style={{ height: "100%", width: 110 }} />
-          :
-          <CardMedia
+      {errors?.metadataError ? (
+        <img src="" style={{ height: "100%", width: 110 }} />
+      ) : (
+        <CardMedia
           image={URL.createObjectURL(new Blob([displayImg]))}
           sx={{ height: "100%", width: 80 }}
         />
-         }
+      )}
       {/*renderButtonState()*/}
     </Card>
   );

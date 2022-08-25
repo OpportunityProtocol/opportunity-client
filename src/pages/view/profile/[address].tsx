@@ -33,6 +33,7 @@ import {
   useContractEvent,
   useContractRead,
   useContractWrite,
+  usePrepareContractWrite,
   useSigner,
   useSignTypedData,
 } from "wagmi";
@@ -182,7 +183,7 @@ const ProfilePage: NextPage<any> = () => {
 
   const { address } = router.query;
 
-  console.log(router.query)
+  console.log(router.query);
 
   const verifiedUserQuery: QueryResult = useQuery(
     GET_VERIFIED_FREELANCER_BY_ADDRESS,
@@ -193,7 +194,7 @@ const ProfilePage: NextPage<any> = () => {
     }
   );
 
-  console.log(verifiedUserQuery)
+  console.log(verifiedUserQuery);
 
   //contracts created
   const contractsByEmployerQuery: QueryResult = useQuery(
@@ -232,48 +233,38 @@ const ProfilePage: NextPage<any> = () => {
     },
   });
 
-  const networkManager_getLensProfileIdFromAddress = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_getLensProfileIdFromAddress = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "getLensProfileIdFromAddress",
+    enabled: false,
+    chainId: CHAIN_ID,
+    args: [accountData?.address],
+    onSuccess: (data: Result) => {
+      setProfileState({
+        ...profileState,
+        lensProfileId: hexToDecimal(data._hex),
+      });
     },
-    "getLensProfileIdFromAddress",
-    {
-      enabled: false,
-      chainId: CHAIN_ID,
-      args: [accountData?.data?.address],
-      onSuccess: (data: Result) => {
-        setProfileState({
-          ...profileState,
-          lensProfileId: hexToDecimal(data._hex),
-        });
-      },
-      onError: (error) => {
-      
-      },
-    }
-  );
+    onError: (error) => {},
+  });
 
   //getProfile
-  const lensHub_getProfile = useContractRead(
-    {
-      addressOrName: LENS_HUB_PROXY,
-      contractInterface: LensHubInterface,
+  const lensHub_getProfile = useContractRead({
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "getProfile",
+    enabled: false,
+    watch: false,
+    chainId: CHAIN_ID,
+    args: [profileState.lensProfileId],
+    onSuccess: (data: Result) => {
+      setProfileState({
+        ...profileState,
+        lensProfile: data,
+      });
     },
-    "getProfile",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      args: [profileState.lensProfileId],
-      onSuccess: (data: Result) => {
-        setProfileState({
-          ...profileState,
-          lensProfile: data,
-        });
-      },
-    }
-  );
+  });
 
   useEffect(() => {
     if (!contractsByEmployerQuery.loading && contractsByEmployerQuery.data) {
@@ -332,14 +323,11 @@ const ProfilePage: NextPage<any> = () => {
       });
 
       //only fetch profile id and created services if the user is a verified freelancers
-console.log('OOOOOO')
-        if (verifiedUserQuery.data?.verifiedUsers[0]?.metadata) {
-          console.log('PPPPPPPPPPPPPPP')
-          downloadMetadata(verifiedUserQuery.data?.verifiedUsers[0]?.metadata)
-        }
-        networkManager_getLensProfileIdFromAddress.refetch();
-        servicesCreated.refetch();
-      
+      if (verifiedUserQuery.data?.verifiedUsers[0]?.metadata) {
+        downloadMetadata(verifiedUserQuery.data?.verifiedUsers[0]?.metadata);
+      }
+      networkManager_getLensProfileIdFromAddress.refetch();
+      servicesCreated.refetch();
     }
   }, [verifiedUserQuery.loading]);
 
@@ -359,45 +347,43 @@ console.log('OOOOOO')
   }, [profileState?.lensProfile?.followNFT]);
 
   //get following
-  useContractEvent(
-    {
-      addressOrName: LENS_INTERACTION_LOGIC_ADDRESS,
-      contractInterface: [
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "follower",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "uint256[]",
-              name: "profileIds",
-              type: "uint256[]",
-            },
-            {
-              indexed: false,
-              internalType: "bytes[]",
-              name: "followModuleDatas",
-              type: "bytes[]",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "timestamp",
-              type: "256",
-            },
-          ],
-          name: "Followed",
-          type: "event",
-        },
-      ],
-    },
-    "Followed",
-    (event: Event) => {
+  useContractEvent({
+    addressOrName: LENS_INTERACTION_LOGIC_ADDRESS,
+    contractInterface: [
+      {
+        anonymous: false,
+        inputs: [
+          {
+            indexed: true,
+            internalType: "address",
+            name: "follower",
+            type: "address",
+          },
+          {
+            indexed: false,
+            internalType: "uint256[]",
+            name: "profileIds",
+            type: "uint256[]",
+          },
+          {
+            indexed: false,
+            internalType: "bytes[]",
+            name: "followModuleDatas",
+            type: "bytes[]",
+          },
+          {
+            indexed: false,
+            internalType: "uint256",
+            name: "timestamp",
+            type: "256",
+          },
+        ],
+        name: "Followed",
+        type: "event",
+      },
+    ],
+    eventName: "Followed",
+    listener: (event: Event) => {
       const follower: string = event.args[0];
       const profileIds: Array<string> = event.args[1];
       const followModuleDatas: Array<string> = event.args[2];
@@ -415,8 +401,8 @@ console.log('OOOOOO')
           };
         });
       }
-    }
-  );
+    },
+  });
 
   //get followers
   const fetchAddressFollowerState = async () => {
@@ -466,8 +452,8 @@ console.log('OOOOOO')
 
   const { data, isError, isLoading, isSuccess, error, signTypedData } =
     useSignTypedData({
-      onSettled(data, error, variables, context) {},
-      onError(error, variables, context) {},
+      onSettled(data, error) {},
+      onError(error) {},
     });
 
   const onSign = async () => {
@@ -513,33 +499,30 @@ console.log('OOOOOO')
     };
   };
 
-  const lensProtocol_followWithSig = useContractWrite(
-    {
-      addressOrName: LENS_HUB_PROXY,
-      contractInterface: LensHubInterface,
+  const lensProtocol_followWithSigPrepare = usePrepareContractWrite({
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "followWithSig",
+    args: [
+      {
+        follower: address,
+        profileIds: [address],
+        datas: [],
+        sig: { v: 0, r: 0, s: 0 },
+      },
+    ],
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+      value: 2000,
     },
-    "followWithSig",
-    {
-      args: [
-        {
-          follower: address,
-          profileIds: [address],
-          datas: [],
-          sig: { v: 0, r: 0, s: 0 },
-        },
-      ],
-      overrides: {
-        gasLimit: ethers.BigNumber.from("2000000"),
-        gasPrice: 90000000000,
-        value: 2000,
-      },
-      onSettled(data, error, variables, context) {
-        fetchAddressFollowerState();
-      },
-      onError(error, variables, context) {
+    onSettled(data, error) {
+      fetchAddressFollowerState();
+    },
+  });
 
-      },
-    }
+  const lensProtocol_followWithSig = useContractWrite(
+    lensProtocol_followWithSigPrepare.config
   );
 
   const onConnect = async () => {
@@ -548,7 +531,7 @@ console.log('OOOOOO')
         await ethers.utils.splitSignature(data);
 
       await lensProtocol_followWithSig.writeAsync({
-        args: [
+        recklesslySetUnpreparedArgs: [
           {
             follower: address,
             profileIds: [profileState?.lensProfileId],
@@ -565,46 +548,42 @@ console.log('OOOOOO')
     }
   };
 
-
-
   const downloadMetadata = async (ptr: string) => {
-      let retVal: any = {};
-  
-      try {
-        if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
-          const ipfs = create({
-            url: "/ip4/127.0.0.1/tcp/8080",
-          });
-  
-          retVal = await ipfs.get(`/ipfs/${ptr}`).next();
-        } else {
-          retVal = await fleek.getUser(ptr);
-        }
-  
-        if (!retVal) {
-          throw new Error("Unable to retrieve user metadata");
-        } else {
-          const jsonString = Buffer.from(retVal.value).toString("utf8");
-          const parsedString = jsonString.slice(
-            jsonString.indexOf("{"),
-            jsonString.lastIndexOf("}") + 1
-          );
-          const parsedData = JSON.parse(parsedString);
-      
-     
-          setProfileState({
-            ...profileState,
-            general: {
-              ...profileState.general,
-              ...parsedData
-            }
-          })
-        }
+    let retVal: any = {};
 
-      } catch (error) {
-        console.log("Error downloading metadata from profile")
+    try {
+      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+        const ipfs = create({
+          url: "/ip4/127.0.0.1/tcp/8080",
+        });
+
+        retVal = await ipfs.get(`/ipfs/${ptr}`).next();
+      } else {
+        retVal = await fleek.getUser(ptr);
       }
-  }
+
+      if (!retVal) {
+        throw new Error("Unable to retrieve user metadata");
+      } else {
+        const jsonString = Buffer.from(retVal.value).toString("utf8");
+        const parsedString = jsonString.slice(
+          jsonString.indexOf("{"),
+          jsonString.lastIndexOf("}") + 1
+        );
+        const parsedData = JSON.parse(parsedString);
+
+        setProfileState({
+          ...profileState,
+          general: {
+            ...profileState.general,
+            ...parsedData,
+          },
+        });
+      }
+    } catch (error) {
+      console.log("Error downloading metadata from profile");
+    }
+  };
 
   const connectDialogContent = [
     <DialogContentText id="alert-dialog-description">
@@ -767,12 +746,17 @@ console.log('OOOOOO')
                 profileState?.servicesCreated?.length > 0 ? (
                   profileState?.servicesCreated.map((service) => {
                     return (
-                      <ServiceCard outlined={true} id={service?.serviceId} data={service} />
+                      <ServiceCard
+                        outlined={true}
+                        id={service?.serviceId}
+                        data={service}
+                      />
                     );
                   })
                 ) : (
                   <Typography>
-                    {profileState?.general?.display_name}s hasn't created any services.
+                    {profileState?.general?.display_name}s hasn't created any
+                    services.
                   </Typography>
                 )}
               </Box>
@@ -792,7 +776,8 @@ console.log('OOOOOO')
                   })
                 ) : (
                   <Typography>
-                    {profileState?.general?.display_name}s hasn't created any contracts.
+                    {profileState?.general?.display_name}s hasn't created any
+                    contracts.
                   </Typography>
                 )}
               </Box>
@@ -807,31 +792,49 @@ console.log('OOOOOO')
         </Grid>
 
         <Grid item xs={4}>
-          <Stack pb={2} direction='row' alignItems='center' justifyContent='space-between'>
-          <Typography fontSize={20} fontWeight="medium">
-            Overview
-          </Typography>
+          <Stack
+            pb={2}
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography fontSize={20} fontWeight="medium">
+              Overview
+            </Typography>
 
-          <Button startIcon={<Settings />} variant="outlined" color="primary" onClick={() => router.push(`/view/profile/${userAddress}/settings?metadata=${verifiedUserQuery?.data?.verifiedUsers[0]?.metadata}`)}>
-                  Settings
-                </Button>
+            <Button
+              startIcon={<Settings />}
+              variant="outlined"
+              color="primary"
+              onClick={() =>
+                router.push(
+                  `/view/profile/${userAddress}/settings?metadata=${verifiedUserQuery?.data?.verifiedUsers[0]?.metadata}`
+                )
+              }
+            >
+              Settings
+            </Button>
           </Stack>
 
           <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
               <Stack spacing={1.5} alignItems="center">
-                {
-                  profileState?.general?.imageURI ?
-                  <img src={profileState?.general?.imageURI} style={{width: 70, height: 70, borderRadius: 70}} />
-                  :
+                {profileState?.general?.imageURI ? (
+                  <img
+                    src={profileState?.general?.imageURI}
+                    style={{ width: 70, height: 70, borderRadius: 70 }}
+                  />
+                ) : (
                   <Jazzicon
-                  diameter={70}
-                  seed={jsNumberForAddress(String(address))}
-                />
-                }
-              
+                    diameter={70}
+                    seed={jsNumberForAddress(String(address))}
+                  />
+                )}
+
                 <Box py={0.5} textAlign="center">
-                  <Typography fontWeight="medium">{profileState?.general?.display_name}</Typography>
+                  <Typography fontWeight="medium">
+                    {profileState?.general?.display_name}
+                  </Typography>
                   <Typography
                     variant="body2"
                     color="rgb(94, 94, 94)"
@@ -902,8 +905,10 @@ console.log('OOOOOO')
                     ) : null}
                     <Typography textAlign="start" py={1} variant="caption">
                       {" "}
-                      Get suggestions on {profileState?.general?.display_name} latest services and contracts by
-                      connecting.{" "}
+                      Get suggestions on {
+                        profileState?.general?.display_name
+                      }{" "}
+                      latest services and contracts by connecting.{" "}
                     </Typography>
                   </>
                 ) : null}
@@ -911,105 +916,78 @@ console.log('OOOOOO')
             </CardContent>
           </Card>
 
-            <Card variant="outlined" className={classes.marginBottom}>
+          <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
+              <Typography fontWeight="medium" py={1}>
+                Description
+              </Typography>
 
-                <Typography fontWeight="medium" py={1}>Description</Typography>
-
-                  {
-                    profileState?.general?.description ?
-                    <Typography variant="caption" color="#9E9E9E">
-                      {profileState?.general?.description}
-                    </Typography>
-                    :
-                    <Typography>
-                      No description
-                    </Typography>
-                  }
-        
+              {profileState?.general?.description ? (
+                <Typography variant="caption" color="#9E9E9E">
+                  {profileState?.general?.description}
+                </Typography>
+              ) : (
+                <Typography>No description</Typography>
+              )}
             </CardContent>
-                </Card>
+          </Card>
 
-           <Card variant="outlined" className={classes.marginBottom}>
+          <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
+              <Typography fontWeight="medium" py={1}>
+                Certifications
+              </Typography>
 
-                <Typography fontWeight="medium" py={1}>Certifications</Typography>
-
-                {
-                    profileState?.general?.certifications &&  profileState?.general?.certifications?.length ?
-                    <Stack direction='row' alignItems='center' spacing={2}>
-                      {
-   profileState?.general?.certifications.map((cert) => {
-    return (
-      <Chip label={cert} size='small' />
-    )
-  })
-                      }
-                    </Stack>
-                 
-                    :
-                    <Typography>
-                      No certifications
-                    </Typography>
-                  }
-
-
+              {profileState?.general?.certifications &&
+              profileState?.general?.certifications?.length ? (
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  {profileState?.general?.certifications.map((cert) => {
+                    return <Chip label={cert} size="small" />;
+                  })}
+                </Stack>
+              ) : (
+                <Typography>No certifications</Typography>
+              )}
             </CardContent>
-                </Card>
+          </Card>
 
-           <Card variant="outlined" className={classes.marginBottom}>
+          <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
+              <Typography fontWeight="medium" py={1}>
+                Skills
+              </Typography>
 
-                <Typography fontWeight="medium" py={1}>Skills</Typography>
-
-                {
-                    profileState?.general?.skills &&  profileState?.general?.skills?.length ?
-                    <Stack direction='row' alignItems='center' spacing={2}>
-                      {
-      profileState?.general?.skills.map((cert) => {
-        return (
-          <Chip label={cert} size='small' />
-        )
-      })
-                      }
-                    </Stack>
-              
-                    :
-                    <Typography>
-                      No skills
-                    </Typography>
-                  }
-
-  
+              {profileState?.general?.skills &&
+              profileState?.general?.skills?.length ? (
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  {profileState?.general?.skills.map((cert) => {
+                    return <Chip label={cert} size="small" />;
+                  })}
+                </Stack>
+              ) : (
+                <Typography>No skills</Typography>
+              )}
             </CardContent>
-              </Card>
+          </Card>
 
-            <Card variant="outlined" className={classes.marginBottom}>
+          <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
+              <Typography fontWeight="medium" py={1}>
+                Languages
+              </Typography>
 
-                <Typography fontWeight="medium" py={1}>Languages</Typography>
-
-                {
-                    profileState?.general?.languages &&  profileState?.general?.languages?.length ?
-                    <Stack direction='row' alignItems='center' spacing={2}>
-{
-   profileState?.general?.languages.map((cert) => {
-    return (
-      <Chip label={cert} size='small' />
-    )
-  })
-}
-                    </Stack>
-                   
-                    :
-                    <Typography>
-                      No languages
-                    </Typography>
-                  }
-
-
+              {profileState?.general?.languages &&
+              profileState?.general?.languages?.length ? (
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  {profileState?.general?.languages.map((cert) => {
+                    return <Chip label={cert} size="small" />;
+                  })}
+                </Stack>
+              ) : (
+                <Typography>No languages</Typography>
+              )}
             </CardContent>
-            </Card>
+          </Card>
         </Grid>
       </Grid>
       <ConfirmationDialog

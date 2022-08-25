@@ -20,9 +20,7 @@ import {
   Button,
 } from "@mui/material";
 import { useStyles } from "../../../modules/contract/ContractStyles";
-import {
-  FavoriteBorderOutlined,
-} from "@mui/icons-material";
+import { FavoriteBorderOutlined } from "@mui/icons-material";
 
 import JobDisplay from "../../../modules/market/components/JobDisplay";
 import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
@@ -36,6 +34,7 @@ import {
   useContractEvent,
   useContractRead,
   useContractWrite,
+  usePrepareContractWrite,
 } from "wagmi";
 import { DAI_ADDRESS, NETWORK_MANAGER_ADDRESS } from "../../../constant";
 import { DaiInterface, NetworkManagerInterface } from "../../../abis";
@@ -48,6 +47,8 @@ import { Result } from "ethers/lib/utils";
 import { create } from "ipfs-http-client";
 import fleek from "../../../fleek";
 import { ethers } from "ethers";
+import { ClassNameMap } from "@material-ui/core/styles/withStyles";
+import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
 
 const contractDetailsPrimaryTypographyProps = {
   fontSize: 14,
@@ -68,9 +69,7 @@ const contractDetailsSecondaryTypographyProps = {
  * @dev TODO: Add modal for inputting accepted solution pointer
  */
 const ViewContract: NextPage<any> = () => {
-  const {
-    data: { address, connector },
-  } = useAccount();
+  const { address, connector } = useAccount();
   const router = useRouter();
   const { contractId } = router.query;
 
@@ -92,35 +91,29 @@ const ViewContract: NextPage<any> = () => {
     color: "linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)",
   });
 
-  const networkManager_getContractData = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_getContractData = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "getContractData",
+    enabled: false,
+    chainId: CHAIN_ID,
+    args: [contractId],
+    onSuccess: (data: Result) => {
+      setMetadataString(data.taskMetadataPtr);
     },
-    "getContractData",
-    {
-      enabled: false,
-      chainId: CHAIN_ID,
-      args: [contractId],
-      onSuccess: (data: Result) => {
-        setMetadataString(data.taskMetadataPtr);
-      },
-      onError: (error) => {
-        setMetadataString("");
-      },
-    }
-  );
+    onError: (error) => {
+      setMetadataString("");
+    },
+  });
 
-  const dai_approve = useContractWrite(
-    {
-      addressOrName: DAI_ADDRESS,
-      contractInterface: DaiInterface,
-    },
-    "approve",
-    {
-      args: [NETWORK_MANAGER_ADDRESS, 100000],
-    }
-  );
+  const dai_approvePrepare = usePrepareContractWrite({
+    addressOrName: DAI_ADDRESS,
+    contractInterface: DaiInterface,
+    functionName: "approve",
+    args: [NETWORK_MANAGER_ADDRESS, 100000],
+  });
+
+  const dai_approve = useContractWrite(dai_approvePrepare.config);
 
   useEffect(() => {
     if (contractId) {
@@ -190,89 +183,84 @@ const ViewContract: NextPage<any> = () => {
     syncContractData();
   }, [contractByIdQuery.loading]);
 
-  useContractEvent(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "ContractOwnershipUpdate",
-    async (event: Event) => {
+  useContractEvent({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    eventName: "ContractOwnershipUpdate",
+    listener: async (event: Event) => {
       contractByIdQuery.refetch();
-    }
-  );
+    },
+  });
 
-  useContractEvent(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "ContractOwnershipUpdate",
-    async (event: Event) => {
+  useContractEvent({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    eventName: "ContractOwnershipUpdate",
+    listener: async (event: Event) => {
       contractByIdQuery.refetch();
-    }
-  );
+    },
+  });
+
+  const networkManager_grantProposalRequestPrepare = usePrepareContractWrite({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "grantProposalRequest",
+    args: [contractId, "0xBA77D43eE401A4C4a229C3649CCeDBfE2B517208", 100],
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+    },
+    onSettled(data, error) {
+      if (error) {
+      } else {
+        contractByIdQuery.refetch();
+      }
+    },
+  });
 
   const networkManager_grantProposalRequest = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "grantProposalRequest",
-    {
-      args: [contractId, "0xBA77D43eE401A4C4a229C3649CCeDBfE2B517208", 100],
-      overrides: {
-        gasLimit: ethers.BigNumber.from("2000000"),
-        gasPrice: 90000000000,
-      },
-      onSettled(data, error, variables, context) {
-        if (error) {
-        } else {
-          contractByIdQuery.refetch();
-        }
-      },
-    }
+    networkManager_grantProposalRequestPrepare.config
   );
+
+  const networkManager_releaseContractPrepare = usePrepareContractWrite({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "releaseContract",
+    args: [contractId],
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+    },
+    onSettled(data, error) {
+      if (error) {
+      } else {
+        contractByIdQuery.refetch();
+      }
+    },
+  });
 
   const networkManager_releaseContract = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "releaseContract",
-    {
-      args: [contractId],
-      overrides: {
-        gasLimit: ethers.BigNumber.from("2000000"),
-        gasPrice: 90000000000,
-      },
-      onSettled(data, error, variables, context) {
-        if (error) {
-        } else {
-          contractByIdQuery.refetch();
-        }
-      },
-    }
+    networkManager_releaseContractPrepare.config
   );
 
-  const networkManager_resolveContract = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_resolveContractPrepare = usePrepareContractWrite({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "resolveContract",
+    args: [contractId, acceptedSolutionPtr],
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
     },
-    "resolveContract",
-    {
-      args: [contractId, acceptedSolutionPtr],
-      overrides: {
-        gasLimit: ethers.BigNumber.from("2000000"),
-        gasPrice: 90000000000,
-      },
-      onSettled(data, error, variables, context) {
-        if (error) {
-        } else {
-          contractByIdQuery.refetch();
-        }
-      },
-    }
+    onSettled(data, error) {
+      if (error) {
+      } else {
+        contractByIdQuery.refetch();
+      }
+    },
+  });
+  const networkManager_resolveContract = useContractWrite(
+    networkManager_releaseContractPrepare.config
   );
 
   const renderPrimaryButtonState = () => {
@@ -499,7 +487,6 @@ const ViewContract: NextPage<any> = () => {
             <JobDisplay data={contractData} />
           </Box>
 
-
           <Card variant="outlined" className={classes.marginBottom}>
             <CardContent>
               <Typography
@@ -511,9 +498,7 @@ const ViewContract: NextPage<any> = () => {
                 Reviews
               </Typography>
               {reviews.length === 0 ? (
-                <Typography variant="caption">
-                  No reviews
-                </Typography>
+                <Typography variant="caption">No reviews</Typography>
               ) : (
                 reviews.slice(4, 9).map(
                   (
@@ -607,7 +592,6 @@ const ViewContract: NextPage<any> = () => {
             >
               Save Contract
             </Button>
-
           </Stack>
 
           <Alert
@@ -644,7 +628,6 @@ const ViewContract: NextPage<any> = () => {
                     }
                   />
                 </ListItem>
-
               </List>
             </CardContent>
           </Card>

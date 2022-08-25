@@ -15,7 +15,7 @@ import {
   Divider,
 } from "@mui/material";
 
-import { useRouter } from "next/router";
+import { NextRouter, useRouter } from "next/router";
 import { IJobDisplayProps } from "../../MarketInterface";
 import { useAccount, useContractRead } from "wagmi";
 import {
@@ -36,8 +36,8 @@ import { getMetadata } from "../../../../common/ipfs-helper";
  * @dev This component temporarily fetches contract data from the blockchain instead of graphql to obtain the contract
  * metadata due to issues with graphql returning a different encoded format
  */
-const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text=false }) => {
-  const router = useRouter();
+const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text = false }) => {
+  const router: NextRouter = useRouter();
   const accountData = useAccount();
 
   const [contractOwnerData, setContractOwnerData] = useState<any>({
@@ -46,61 +46,49 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text=false }) => {
   const [contractMetadata, setContractMetadata] = useState({});
   const [metadataString, setMetadataString] = useState("");
 
-  const networkManager_getContractData = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_getContractData = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "getContractData",
+    enabled: false,
+    chainId: CHAIN_ID,
+    args: [data?.id],
+    onSuccess: (data: Result) => {
+      setMetadataString(data.taskMetadataPtr);
     },
-    "getContractData",
-    {
-      enabled: false,
-      chainId: CHAIN_ID,
-      args: [data?.id],
-      onSuccess: (data: Result) => {
-        setMetadataString(data.taskMetadataPtr);
-      },
-      onError: (error) => {
-        setMetadataString("");
-      },
-    }
-  );
+    onError: (error) => {
+      setMetadataString("");
+    },
+  });
 
-  const networkManager_getLensProfileIdFromAddress = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_getLensProfileIdFromAddress = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "getLensProfileIdFromAddress",
+    enabled: false,
+    chainId: CHAIN_ID,
+    args: [accountData?.address],
+    onSuccess: (data: Result) => {
+      setContractOwnerData({
+        ...contractOwnerData,
+        lensProfileId: hexToDecimal(data?._hex),
+      });
     },
-    "getLensProfileIdFromAddress",
-    {
-      enabled: false,
-      chainId: CHAIN_ID,
-      args: [accountData?.data?.address],
-      onSuccess: (data: Result) => {
-        setContractOwnerData({
-          ...contractOwnerData,
-          lensProfileId: hexToDecimal(data?._hex),
-        });
-      },
-      onError: (error) => {},
-    }
-  );
+    onError: (error) => {},
+  });
 
-  const lensHub_getProfile = useContractRead(
-    {
-      addressOrName: LENS_HUB_PROXY,
-      contractInterface: LensHubInterface,
+  const lensHub_getProfile = useContractRead({
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "getProfile",
+    enabled: false,
+    watch: false,
+    chainId: CHAIN_ID,
+    args: [contractOwnerData?.lensProfileId],
+    onSuccess: (data: Result) => {
+      setContractOwnerData(data);
     },
-    "getProfile",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      args: [contractOwnerData?.lensProfileId],
-      onSuccess: (data: Result) => {
-        setContractOwnerData(data);
-      },
-    }
-  );
+  });
 
   useEffect(() => {
     if (data?.id) {
@@ -129,69 +117,69 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text=false }) => {
     }
   }, [metadataString]);
 
-  return text ? 
-  <Box>
-       {contractMetadata?.contract_title ? (
-        <Stack direction='row' alignItems='center' spacing={1}>
-               <Typography fontWeight='normal' fontSize={12} color={(theme) => theme.palette.primary.main}>
-            {contractMetadata?.contract_title}  
+  return text ? (
+    <Box>
+      {contractMetadata?.contract_title ? (
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography
+            fontWeight="normal"
+            fontSize={12}
+            color={(theme) => theme.palette.primary.main}
+          >
+            {contractMetadata?.contract_title}
           </Typography>
 
-           <Box display='flex' alignItems='center'>
-
-               <Typography pl={1} fontSize={13}>
-            2.50
-          </Typography>
-          <img
+          <Box display="flex" alignItems="center">
+            <Typography pl={1} fontSize={13}>
+              2.50
+            </Typography>
+            <img
               src="/assets/images/dai.svg"
               style={{ width: 15, height: 20 }}
             />
-           </Box>
-          
-    
+          </Box>
         </Stack>
- 
-        ) : (
-          <Stack direction='row' alignItems='center' spacing={1}>
-                  <Typography fontWeight='medium' fontSize={13} color={(theme) => theme.palette.primary.main}>
+      ) : (
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography
+            fontWeight="medium"
+            fontSize={13}
+            color={(theme) => theme.palette.primary.main}
+          >
             Unable to load contract title
           </Typography>
 
-              <Box display='flex' alignItems='center'>
-              <img
+          <Box display="flex" alignItems="center">
+            <img
               src="/assets/images/dai.svg"
               style={{ width: 15, height: 20 }}
             />
 
-              <Typography pl={1}  fontSize={12}>
-            2.50
-          </Typography>
-            
-              </Box>
-           
-    
-          </Stack>
-        )}
-  </Box>
-  :
-  (
+            <Typography pl={1} fontSize={12}>
+              2.50
+            </Typography>
+          </Box>
+        </Stack>
+      )}
+    </Box>
+  ) : (
     <Card
       onClick={
-        accountData?.data?.address
+        accountData.address
           ? () => router.push(`/view/contract/${data?.id}`)
           : () => {}
       }
       key={Math.random()}
-      square 
+      square
       variant="elevation"
       sx={{
-        boxShadow: '0 19px 38px #eee, 0 15px 12px #eee',
-        cursor: accountData?.data?.address ? "pointer" : "auto",
+        boxShadow: "0 19px 38px #eee, 0 15px 12px #eee",
+        cursor: accountData.address ? "pointer" : "auto",
         width: "100%",
         height: 210,
-        '&:hover': {
-          color: (theme) => theme.palette.primary.main
-        }
+        "&:hover": {
+          color: (theme) => theme.palette.primary.main,
+        },
       }}
     >
       <CardContent
@@ -278,9 +266,15 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text=false }) => {
             </Typography>
           </Grid>
           <Grid item>
-            <Chip variant='outlined' size='small' label={contractMetadata?.meta?.duration
-                ? contractMetadata?.meta?.duration
-                : "Undefined"} />
+            <Chip
+              variant="outlined"
+              size="small"
+              label={
+                contractMetadata?.meta?.duration
+                  ? contractMetadata?.meta?.duration
+                  : "Undefined"
+              }
+            />
           </Grid>
         </Grid>
       </CardContent>

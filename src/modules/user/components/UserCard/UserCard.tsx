@@ -61,9 +61,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
     {
       addressOrName: LENS_HUB_PROXY,
       contractInterface: LensHubInterface,
-    },
-    "getProfile",
-    {
+    functionName: "getProfile",
       enabled: false,
       watch: false,
       chainId: CHAIN_ID,
@@ -86,9 +84,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
       contractInterface: NetworkManagerInterface,
-    },
-    "getLensProfileIdFromAddress",
-    {
+    functionName: "getLensProfileIdFromAddress",
       enabled: false,
       chainId: CHAIN_ID,
       args: [address],
