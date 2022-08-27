@@ -89,9 +89,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     useState<boolean>(false);
   const [purchaseIndex, setPurchaseIndex] = useState(0);
   const [serviceData, setServiceData] = useState<any>({});
-  const [servicePubId, setServicePubId] = useState<number>(0);
-  const [servicePublicationData, setServicePublicationData] =
-    useState<PublicationStructStruct>({});
   const [serviceMetadata, setServiceMetadata] = useState({});
   const [displayImg, setDisplayImg] = useState();
   const [collectSig, setCollectSig] = useState({});
@@ -169,38 +166,9 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     onError: (error) => {},
   });
 
-  //get pub id
-  const networkManager_getPubIdFromServiceId = useContractRead({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    contractInterface: NetworkManagerInterface,
-    functionName: "getPubIdFromServiceId",
-    enabled: true,
-    watch: false,
-    args: router.query?.serviceId,
-    onSuccess(data: Result) {
-      setServicePubId(hexToDecimal(data._hex));
-    },
-    onError(error) {},
-  });
-
-  //get pub data
-  const lensHub_getPub = useContractRead({
-    addressOrName: LENS_HUB_PROXY,
-    contractInterface: LensHubInterface,
-    functionName: "getPub",
-    enabled: true,
-    watch: false,
-    args: [serviceOwnerLensProfileId, servicePubId],
-    onSuccess(data: Result) {
-      setServicePublicationData(data);
-    },
-    onError(error) {},
-  });
-
   useEffect(() => {
     serviceQueryById.refetch();
     networkManager_getLensProfileIdFromAddress.refetch();
-    networkManager_getPubIdFromServiceId.refetch();
   }, [router.query.serviceId]);
 
   useEffect(() => {
@@ -208,10 +176,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       setServiceData(serviceQueryById.data.service);
     }
   });
-
-  useEffect(() => {
-    lensHub_getPub.refetch();
-  }, [serviceOwnerLensProfileId, servicePubId]);
 
   //fetch lens profile among  lens profile id change
   useEffect(() => {
@@ -260,82 +224,11 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     networkManager_purchaseServicePrepare.config
   );
 
-  const dai_approvePrepare = usePrepareContractWrite({
-    addressOrName: DAI_ADDRESS,
-    contractInterface: DaiInterface,
-    functionName: "approve",
-    args: [SERVICE_COLLECT_MODULE, 100000],
-  });
-
-  const dai_approve = useContractWrite(dai_approvePrepare.config);
-
-  const { data, isError, isLoading, isSuccess, error, signTypedData } =
-    useSignTypedData({
-      onSettled(data, error) {},
-      onError(error) {},
-    });
-
-  const getDomain = () => {
-    return {
-      name: "Lens Protocol Profiles",
-      version: "1",
-      chainId: CHAIN_ID,
-      verifyingContract: LENS_HUB_PROXY,
-    };
-  };
-
-  const getTypes = () => {
-    return {
-      CollectWithSig: [
-        { name: "profileId", type: "uint256" },
-        { name: "pubId", type: "uint256" },
-        { name: "data", type: "bytes" },
-        { name: "nonce", type: "uint256" },
-        { name: "deadline", type: "uint256" },
-      ],
-    };
-  };
-
-  const getValues = async () => {
-    const nonce =
-      await new ethers.providers.JsonRpcProvider().getTransactionCount(
-        userAddress
-      );
-    return {
-      profileId: serviceOwnerLensProfileId,
-      pubId: servicePubId,
-      data: [],
-      nonce,
-      deadline: 0,
-    };
-  };
 
   const onPurchase = async () => {
-    dai_approve.writeAsync().then(async () => {
-      if (isSuccess) {
-        const splitSignature: ethers.Signature =
-          await ethers.utils.splitSignature(data);
-        await networkManager_purchaseService.writeAsync({
-          recklesslySetUnpreparedArgs: [
-            serviceData.id,
-            BigNumber.from("0"),
-            {
-              v: splitSignature.v,
-              r: splitSignature.r,
-              s: splitSignature.s,
-              deadline: 0,
-            },
-          ],
-        });
-      }
+    await networkManager_purchaseService.writeAsync({
+      recklesslySetUnpreparedArgs: [serviceData.id, BigNumber.from("0")],
     });
-  };
-
-  const onSign = async () => {
-    const domain = getDomain();
-    const types = getTypes();
-    const value = await getValues();
-    await signTypedData({ domain, types, value });
   };
 
   const lensHub_commentPrepare = usePrepareContractWrite({
@@ -368,27 +261,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
 
   const [buyingEnabled, setBuyingEnabled] = useState<boolean>(false);
 
-  const serviceCollectModule_isFamiliar = useContractRead({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    contractInterface: NetworkManagerInterface,
-    functionName: "isFamiliar",
-    args: [userAddress, serviceData?.id],
-    enabled: true,
-    watch: true,
-    cacheTime: 30000,
-    chainId: CHAIN_ID,
-
-    overrides: {
-      gasLimit: BigNumber.from("900000"),
-    },
-    onSuccess(data) {
-      setBuyingEnabled(true);
-    },
-    onError(err) {
-      setBuyingEnabled(true);
-    },
-  });
-
   const confirmationDialogContent = [
     <DialogContentText id="alert-dialog-description">
       <Typography fontSize={20} fontWeight="bold" py={1}>
@@ -409,16 +281,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
           <Typography>Executing the transaction</Typography>
         </li>
       </ul>
-    </DialogContentText>,
-    <DialogContentText id="alert-dialog-description">
-      <Box py={2}>
-        <Typography fontSize={20} fontWeight="bold" py={1}>
-          Sign the transaction
-        </Typography>
-        <Typography variant="subtitle2">
-          Your wallet will prompt you to sign the transaction.
-        </Typography>
-      </Box>
     </DialogContentText>,
 
     <DialogContentText id="alert-dialog-description">
@@ -945,10 +807,9 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         onClose={() => {
           setPurchaseDialogIsOpen(false);
         }}
-        signAction={onSign}
         primaryAction={onPurchase}
         primaryActionTitle={"Purchase"}
-        hasSigningStep
+        hasSigningStep={false}
         content={confirmationDialogContent}
       />
 

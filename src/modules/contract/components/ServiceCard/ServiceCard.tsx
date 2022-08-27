@@ -13,6 +13,7 @@ import {
   Typography,
   Chip,
   CardActionArea,
+  DialogContentText,
 } from "@mui/material";
 import { useStyles } from "./ServiceCardStyle";
 import DAIIcon from "../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg";
@@ -27,6 +28,7 @@ import {
   useContractWrite,
   usePrepareContractWrite,
   useQuery,
+  useSignTypedData,
 } from "wagmi";
 import {
   LENS_HUB_PROXY,
@@ -60,6 +62,7 @@ import {
 import { ethers } from "ethers";
 import { GET_PURCHASED_SERVICE } from "../../ContractGQLQueries";
 import { getMetadata } from "../../../../common/ipfs-helper";
+import { ConfirmationDialog } from "../../../../common/components/ConfirmationDialog";
 
 interface IServiceCardProps {
   id: string;
@@ -84,6 +87,7 @@ const ServiceCard = ({
 
   const [serviceOwnerLensData, setServiceOwnerLensData] =
     useState<ProfileStructStruct>({});
+    const [servicePubId, setServicePubId] = useState<number>(0);
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
   const [serviceMetadata, setServiceMetadata] = useState<any>({});
@@ -91,6 +95,7 @@ const ServiceCard = ({
   const [errors, setErrors] = useState<any>({
     metadataError: false,
   });
+
   const dispatch = useDispatch();
 
   const userAddress = useSelector(selectUserAddress);
@@ -99,32 +104,25 @@ const ServiceCard = ({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "resolveService",
-    onSuccess: async (data) => {
-      if (userAddress === loadedData?.creator) {
-        dispatch(
-          activePublishedServiceDataAdded({
-            ...loadedData,
-            status: 2,
-          })
-        );
+    onSettled: (data, error) => {
+      if (error) {
+        setResolveServiceSuccessful(false);
+      } else {
+        setResolveServiceSuccessful(true);
       }
 
-      if (userAddress == purchaseData.client) {
-        dispatch(
-          purchasedServiceDataAdded({
-            ...loadedData,
-            status: 2,
-          })
-        );
-      }
+      setResolveServiceLoading(false);
     },
-    onError: (error) => {},
     overrides: {
       from: userAddress,
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
     },
-    args: [Number(loadedData?.id), Number(purchaseData?.purchaseId)],
+    args: [
+      Number(loadedData?.id),
+      Number(purchaseData?.purchaseId),
+      { v: 0, r: 0, s: 0 },
+    ],
   });
   const networkManager_resolveService = useContractWrite(
     networkManager_resolveServicePrepare.config
@@ -142,6 +140,13 @@ const ServiceCard = ({
       setServiceOwnerLensData(data);
     },
   });
+
+    //fetch lens profile among  lens profile id change
+    useEffect(() => {
+      lensHub_getProfile.refetch({
+        throwOnError: true,
+      });
+    }, [serviceOwnerLensProfileId]);
 
   const networkManager_getLensProfileIdFromAddress = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -192,6 +197,113 @@ const ServiceCard = ({
 
     loadMetadata();
   }, [data?.metadataPtr]);
+
+  const signTypedData =
+    useSignTypedData({
+      onSettled(data, error) {},
+      onError(error) {},
+    });
+
+  const [resolveServiceSuccessful, setResolveServiceSuccessful] =
+    useState<boolean>(false);
+  const [resolveServiceLoading, setResolveServiceLoading] =
+    useState<boolean>(false);
+  const [resolveServiceDialogIsOpen, setResolveServiceDialogIsOpen] =
+    useState<boolean>(false);
+
+  const getDomain = () => {
+    return {
+      name: "Lens Protocol Profiles",
+      version: "1",
+      chainId: CHAIN_ID,
+      verifyingContract: LENS_HUB_PROXY,
+    };
+  };
+
+  const getValues = async () => {
+    const nonce =
+      await new ethers.providers.JsonRpcProvider().getTransactionCount(
+        userAddress
+      );
+    return {
+      profileId: serviceOwnerLensProfileId,
+      pubId: servicePubId,
+      data: [],
+      nonce,
+      deadline: 0,
+    };
+  };
+
+  const getTypes = () => {
+    return {
+      CollectWithSig: [
+        { name: "profileId", type: "uint256" },
+        { name: "pubId", type: "uint256" },
+        { name: "data", type: "bytes" },
+        { name: "nonce", type: "uint256" },
+        { name: "deadline", type: "uint256" },
+      ],
+    };
+  };
+
+  const onSign = async () => {
+    const domain = getDomain();
+    const types = getTypes();
+    const value = await getValues();
+    await signTypedData.signTypedData({ domain, types, value });
+  };
+
+  const onResolveService = async () => {
+    if (signTypedData.isSuccess) {
+      const splitSignature: ethers.Signature =
+        await ethers.utils.splitSignature(signTypedData.data);
+
+      await networkManager_resolveService.writeAsync({
+        recklesslySetUnpreparedArgs: [
+          Number(loadedData?.id),
+          Number(purchaseData?.purchaseId),
+          { v: splitSignature.v, r: splitSignature.r, s: splitSignature.s },
+        ],
+      });
+    }
+  };
+
+  const confirmationDialogContent = [
+    <DialogContentText id="alert-dialog-description">
+      <Typography fontSize={20} fontWeight="bold" py={1}>
+        {" "}
+        You are about to purchase a service which will require three actions:
+      </Typography>
+
+      <ul>
+        <li>
+          {" "}
+          <Typography>Signing a transaction</Typography>
+        </li>
+        <li>
+          {" "}
+          <Typography>Approving the funds</Typography>
+        </li>
+        <li>
+          <Typography>Executing the transaction</Typography>
+        </li>
+      </ul>
+    </DialogContentText>,
+
+    <DialogContentText>Sign</DialogContentText>,
+
+    <DialogContentText id="alert-dialog-description">
+      <Box py={2}>
+        <Typography fontSize={20} fontWeight="bold" py={1}>
+          Confirm purchase
+        </Typography>
+        <Typography variant="subtitle2">
+          Your wallet will prompt you to sign the transaction. Only accept
+          transaction from addresses you trust.
+        </Typography>
+      </Box>
+    </DialogContentText>,
+  ];
 
   const renderButtonState = () => {
     if (!purchase) {
@@ -404,7 +516,19 @@ const ServiceCard = ({
           sx={{ height: "100%", width: 80 }}
         />
       )}
-      {/*renderButtonState()*/}
+      {renderButtonState()}
+      <ConfirmationDialog
+        success={resolveServiceSuccessful}
+        loading={resolveServiceLoading}
+        open={resolveServiceDialogIsOpen}
+        onOpen={() => {}}
+        onClose={() => setResolveServiceDialogIsOpen(false)}
+        hasSigningStep={true}
+        content={confirmationDialogContent}
+        signAction={onSign}
+        primaryAction={onResolveService}
+        primaryActionTitle="Confirm"
+      />
     </Card>
   );
 };
