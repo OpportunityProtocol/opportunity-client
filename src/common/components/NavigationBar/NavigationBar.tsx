@@ -94,15 +94,10 @@ const NavigationBar: FC = (): JSX.Element => {
   const [lensProfileId, setLensProfileId] = useState<Result | any>(0);
   const userAddress = useSelector(selectUserAddress);
   const connected = useSelector(selectUserConnectionStatus);
-  const {
-    connect,
-    connectors,
-    error,
-    isConnecting,
-    pendingConnector,
-    isConnected,
-  } = useConnect();
+
+  const connectData = useConnect()
   const accountData = useAccount();
+
 
   const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     variables: {
@@ -112,13 +107,10 @@ const NavigationBar: FC = (): JSX.Element => {
   console.log(userData);
 
   //getProfile
-  const lensHub_getProfile = useContractRead(
-    {
+  const lensHub_getProfile = useContractRead({
       addressOrName: LENS_HUB_PROXY,
       contractInterface: LensHubInterface,
-    },
-    "getProfile",
-    {
+      functionName: "getProfile",
       enabled: false,
       watch: false,
       chainId: CHAIN_ID,
@@ -144,8 +136,7 @@ const NavigationBar: FC = (): JSX.Element => {
           })
         );
       },
-    }
-  );
+    })
 
   useEffect(() => {
     if (lensProfileId !== 0) {
@@ -159,12 +150,10 @@ const NavigationBar: FC = (): JSX.Element => {
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
       contractInterface: NetworkManagerInterface,
-    },
-    "getLensProfileIdFromAddress",
-    {
+      functionName: "getLensProfileIdFromAddress",
       enabled: false,
       chainId: CHAIN_ID,
-      args: [accountData?.data?.address],
+      args: [accountData?.address],
       onSuccess: (data: Result) => {
         setLensProfileId(hexToDecimal(data._hex));
       },
@@ -176,9 +165,7 @@ const NavigationBar: FC = (): JSX.Element => {
     {
       addressOrName: DAI_ADDRESS,
       contractInterface: JSON.stringify(DaiInterface),
-    },
-    "balanceOf",
-    {
+      functionName: "balanceOf",
       enabled: false,
       cacheTime: 50000,
       watch: true,
@@ -189,7 +176,7 @@ const NavigationBar: FC = (): JSX.Element => {
   );
 
   const ethBalanceData = useBalance({
-    addressOrName: accountData ? accountData?.data?.address : String(0),
+    addressOrName: accountData ? accountData.address : String(0),
   });
 
   const [helpMenuAnchorEl, setHelpMenuAnchorEl] = useState<null | HTMLElement>(
@@ -217,7 +204,7 @@ const NavigationBar: FC = (): JSX.Element => {
   };
 
   const onFetchLensProfileId = () => {
-    if (accountData.data.address && accountData.data.address != ZERO_ADDRESS) {
+    if (accountData.address && accountData.address != ZERO_ADDRESS) {
       networkManager_getLensProfileIdFromAddress
         .refetch({
           throwOnError: true,
@@ -240,11 +227,9 @@ const NavigationBar: FC = (): JSX.Element => {
         ethBalance: string | number = 0,
         daiBalance: Result | number = 0;
 
-      accountData.refetch();
-
-      if (accountData.isSuccess && accountData.data) {
-        address = accountData.data.address;
-        connector = accountData.data.connector;
+      if (accountData.status == 'connected') {
+        address = accountData.address;
+        connector = accountData.connector;
         onFetchLensProfileId();
       }
 
@@ -265,14 +250,16 @@ const NavigationBar: FC = (): JSX.Element => {
           erc20Balance: {
             [DAI_ADDRESS]: hexToDecimal(BigNumber.from(daiBalance)._hex),
           },
-          connector: String(connector?.name),
+          connector: String(connectData.data.connector.name),
           address,
-          connected: accountData.isSuccess && !accountData.isError,
+          connected: accountData.status == 'connected'
         })
       );
     }
 
-    if (isConnected) {
+
+    
+    if (connectData.status === 'success') {
       handleOnIsConnected();
     } else {
       dispatch(
@@ -285,7 +272,7 @@ const NavigationBar: FC = (): JSX.Element => {
         })
       );
     }
-  }, [isConnected]);
+  }, [connectData.status]);
 
   const feeData = useFeeData();
   const [gasPrice, setGasPrice] = useState<string>("0");
@@ -337,8 +324,13 @@ const NavigationBar: FC = (): JSX.Element => {
   };
 
   useEffect(() => {
-    handlesClose()
-  }, [isConnected])
+
+    if (connectData.status === 'success') {
+      handlesClose();
+    }
+
+  }, [connectData.status]);
+
 
   return (
     <React.Fragment>
@@ -427,7 +419,7 @@ const NavigationBar: FC = (): JSX.Element => {
                     </Typography>
                   </Link>
 
-                  {isConnected && (
+                  {connectData.status === 'success' && (
                     <Link href="/messenger">
                       <Typography
                         component={Button}
@@ -445,7 +437,7 @@ const NavigationBar: FC = (): JSX.Element => {
                     </Link>
                   )}
 
-                  {isConnected && (
+                  {connectData.status === 'success' && (
                     <Link href="/view">
                       <Typography
                         component={Button}
@@ -704,12 +696,16 @@ const NavigationBar: FC = (): JSX.Element => {
             </DialogTitle>
 
             <div>
-              {connectors.slice(-2, 1).map((connector) => (
+
+              {connectData.connectors.slice(-2, 1).map((connector) => (
+
                 <Button
                   variant="outlined"
                   disabled={!connector.ready}
                   key={connector.id}
-                  onClick={() => connect({ connector })}
+
+                  onClick={() => connectData.connect({ connector })}
+
                   sx={{
                     paddingLeft: "24px",
                     paddingRight: "163px",
@@ -737,8 +733,10 @@ const NavigationBar: FC = (): JSX.Element => {
                   >
                     {connector.name}
 
-                    {isConnecting &&
-                      connector.id === pendingConnector?.id &&
+
+                    {connectData.status === 'loading' &&
+                      connector.id === connectData.pendingConnector?.id &&
+
                       " (connecting)"}
                   </Typography>
                 </Button>
@@ -761,12 +759,16 @@ const NavigationBar: FC = (): JSX.Element => {
                 </Typography>
               </Divider>
 
-              {connectors.slice(1).map((connector) => (
+
+              {connectData.connectors.slice(1).map((connector) => (
+
                 <Button
                   variant="outlined"
                   disabled={!connector.ready}
                   key={connector.id}
-                  onClick={() => connect({ connector })}
+
+                  onClick={() => connectData.connect({ connector })}
+
                   sx={{
                     paddingLeft: "24px",
                     paddingRight: "122px",
@@ -795,14 +797,18 @@ const NavigationBar: FC = (): JSX.Element => {
                   >
                     {connector.name}
                     {!connector.ready && " (unsupported)"}
-                    {isConnecting &&
-                      connector.id === pendingConnector?.id &&
+
+                    {connectData.status === 'loading' &&
+                      connector.id === connectData.pendingConnector?.id &&
+
                       " (connecting)"}
                   </Typography>
                 </Button>
               ))}
 
-              {error && <div>{error.message}</div>}
+
+              {connectData.error && <div>{connectData.error.message}</div>}
+
             </div>
           </DialogContent>
         </Dialog>

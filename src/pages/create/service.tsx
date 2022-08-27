@@ -30,6 +30,7 @@ import {
   useAccount,
   useContractRead,
   useContractWrite,
+  usePrepareContractWrite,
   useProvider,
 } from "wagmi";
 import {
@@ -108,11 +109,10 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     });
 
   const onCloseCreateServiceDialog = () => {
-
     if (createServiceDialogState.success == true) {
       router.push("/view");
     }
-    
+
     setCreateServiceDialogState({
       open: false,
       loading: false,
@@ -122,8 +122,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     });
 
     setServiceMetadataKey("");
-
-
   };
 
   const router: NextRouter = useRouter();
@@ -131,51 +129,51 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
   const accountData = useAccount();
 
-  const networkManager_createService = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "createService",
-    {
-      args: [
-        1,
-        serviceMetadataKey,
-        [
-          Number(createServiceForm.offers.beginner.price),
-          Number(createServiceForm.offers.business.price),
-          Number(createServiceForm.offers.enterprise.price),
-        ],
-        SERVICE_COLLECT_MODULE,
-        SERVICE_REFERENCE_MODULE,
+  const networkManager_createServicePrepare = usePrepareContractWrite({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "createService",
+    args: [
+      1,
+      serviceMetadataKey,
+      [
+        Number(createServiceForm.offers.beginner.price),
+        Number(createServiceForm.offers.business.price),
+        Number(createServiceForm.offers.enterprise.price),
       ],
-      overrides: {
-        gasLimit: BigNumber.from("11643163"),
-      },
-      onSettled(data, error, variables, context) {
-        if (error) {
-          setCreateServiceDialogState({
-            ...createServiceDialogState,
-            loading: false,
-            success: false,
-            error: true,
-            errorMessage: error.message,
-          });
+      SERVICE_COLLECT_MODULE,
+      SERVICE_REFERENCE_MODULE,
+    ],
+    overrides: {
+      gasLimit: BigNumber.from("11643163"),
+    },
+    onSettled(data, error) {
+      if (error) {
+        setCreateServiceDialogState({
+          ...createServiceDialogState,
+          loading: false,
+          success: false,
+          error: true,
+          errorMessage: error.message,
+        });
 
-          alert(error.message);
-        } else {
-          setCreateServiceDialogState({
-            ...createServiceDialogState,
-            loading: false,
-            success: true,
-            error: false,
-            errorMessage: "",
-          });
+        alert(error.message);
+      } else {
+        setCreateServiceDialogState({
+          ...createServiceDialogState,
+          loading: false,
+          success: true,
+          error: false,
+          errorMessage: "",
+        });
 
-          setServiceMetadataKey("");
-        }
-      },
-    }
+        setServiceMetadataKey("");
+      }
+    },
+  });
+
+  const networkManager_createService = useContractWrite(
+    networkManager_createServicePrepare.config
   );
 
   useEffect(() => {
@@ -193,8 +191,8 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
     setCreateServiceDialogState({
       ...createServiceDialogState,
-      loading: true
-    })
+      loading: true,
+    });
 
     try {
       if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
@@ -206,7 +204,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         retVal = await (await ipfs.add(JSON.stringify(createServiceForm))).path;
       } else {
         retVal = await fleek.uploadService(
-          String(accountData.data.address) +
+          String(accountData.address) +
             ":" +
             createServiceForm.serviceTitle,
           JSON.stringify(createServiceForm)
@@ -228,7 +226,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
     if (String(retVal)) {
       const confirm = await networkManager_createService.writeAsync({
-        args: [
+        recklesslySetUnpreparedArgs: [
           1,
           retVal,
           [
@@ -239,9 +237,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           SERVICE_COLLECT_MODULE,
           SERVICE_REFERENCE_MODULE,
         ],
-        overrides: {
-          gasLimit: BigNumber.from("11643163"),
-        },
       });
     } else {
       setCreateServiceDialogState({
@@ -576,22 +571,25 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                       onChange={handleOnChangeFile}
                       style={{ display: "none" }}
                     />
-                    <Stack alignItems="center" justifyContent='center' sx={{ width: '100%', height: '100%' }}>
+                    <Stack
+                      alignItems="center"
+                      justifyContent="center"
+                      sx={{ width: "100%", height: "100%" }}
+                    >
                       <ImageIcon
                         fontSize="large"
                         sx={{ color: "#aaa", width: 80, height: 80 }}
                       />
-                     
-                        <Typography
-                          py={1}
-                          fontSize={25}
-                          variant="button"
-                          color="primary"
-                          onClick={() => fileRef.current.click()}
-                        >
-                          Select a cover image
-                        </Typography>
-                 
+
+                      <Typography
+                        py={1}
+                        fontSize={25}
+                        variant="button"
+                        color="primary"
+                        onClick={() => fileRef.current.click()}
+                      >
+                        Select a cover image
+                      </Typography>
                     </Stack>
                   </Fragment>
                 ) : (

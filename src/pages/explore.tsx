@@ -757,7 +757,7 @@ const ExplorePage: NextPage = () => {
               square
               elevation={10}
               key={index}
-              sx={{ height, boxShadow: "0 19px 38px #aaa, 0 15px 12px #aaa" }}
+              sx={{ height, boxShadow: "none", border: '1px solid #ddd' }}
             >
               {index !== 0 ? (
                 <>

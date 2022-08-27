@@ -29,7 +29,7 @@ import BootstrapInput from "../../../../common/components/BootstrapInput/Bootstr
 import { makeStyles } from "@mui/styles";
 import { NextRouter, useRouter } from "next/router";
 import { Cancel } from "@mui/icons-material";
-import { useContractWrite } from "wagmi";
+import { useContractWrite, usePrepareContractWrite } from "wagmi";
 import { NETWORK_MANAGER_ADDRESS } from "../../../../constant";
 import { NetworkManagerInterface } from "../../../../abis";
 import { ethers } from "ethers";
@@ -233,19 +233,21 @@ console.log(parsedData)
     });
   };
 
-  const networkManager_updateUser = useContractWrite(
+  const networkManager_updateUserPrepare = usePrepareContractWrite(
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
       contractInterface: NetworkManagerInterface,
-    },
-    "updateMetadata",
-    {
+    functionName: "updateMetadata",
       overrides: {
         gasLimit: ethers.BigNumber.from("2000000"),
         gasPrice: 90000000000,
       },
       args: [""],
     }
+  )
+
+  const networkManager_updateUser = useContractWrite(
+    networkManager_updateUserPrepare.config
   );
 
   const userAddress = useSelector(selectUserAddress);
@@ -267,7 +269,7 @@ console.log(parsedData)
     }
 
     await networkManager_updateUser.writeAsync({
-      args: [retVal],
+      recklesslySetUnpreparedArgs: [retVal],
     });
   };
 

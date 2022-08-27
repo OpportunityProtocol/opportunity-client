@@ -59,28 +59,24 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
     color: "linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)",
   });
 
-  const [state, setState] = useState<any>({})
+  const [state, setState] = useState<any>({});
 
   const [fallbackLensProfileId, setFallbackLensProfileId] = useState<number>(0);
   const [fallbackLensProfile, setFallbackLensProfile] =
     useState<ProfileStructStruct>({});
 
-  const lensHub_getProfile = useContractRead(
-    {
-      addressOrName: LENS_HUB_PROXY,
-      contractInterface: LensHubInterface,
+  const lensHub_getProfile = useContractRead({
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "getProfile",
+    enabled: false,
+    watch: false,
+    chainId: CHAIN_ID,
+    args: [fallbackLensProfileId],
+    onSuccess: (data) => {
+      setFallbackLensProfile(data);
     },
-    "getProfile",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      args: [fallbackLensProfileId],
-      onSuccess: (data) => {
-        setFallbackLensProfile(data);
-      },
-    }
-  );
+  });
 
   useEffect(() => {
     if (fallbackLensProfileId !== 0) {
@@ -90,22 +86,18 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
     }
   }, [fallbackLensProfileId]);
 
-  const networkManager_getLensProfileIdFromAddress = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_getLensProfileIdFromAddress = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "getLensProfileIdFromAddress",
+    enabled: false,
+    chainId: CHAIN_ID,
+    args: [address],
+    onSuccess: (data: Result) => {
+      setFallbackLensProfileId(hexToDecimal(data._hex));
     },
-    "getLensProfileIdFromAddress",
-    {
-      enabled: false,
-      chainId: CHAIN_ID,
-      args: [address],
-      onSuccess: (data: Result) => {
-        setFallbackLensProfileId(hexToDecimal(data._hex));
-      },
-      onError: (error) => {},
-    }
-  );
+    onError: (error) => {},
+  });
 
   const downloadMetadata = async (ptr: string) => {
     let retVal: any = {};
@@ -130,18 +122,16 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
           jsonString.lastIndexOf("}") + 1
         );
         const parsedData = JSON.parse(parsedString);
-    console.log(parsedData)
-   console.log('@@@@@@@@@@@@@@@@@@')
+
         setState({
           ...state,
-          ...parsedData
-        })
+          ...parsedData,
+        });
       }
-
     } catch (error) {
-      console.log("Error downloading metadata from profile")
+      console.log("Error downloading metadata from profile");
     }
-}
+  };
 
   const verifiedUserQuery: QueryResult = useQuery(
     GET_VERIFIED_FREELANCER_BY_ADDRESS,
@@ -154,14 +144,14 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
 
   useEffect(() => {
     if (!verifiedUserQuery.loading && verifiedUserQuery.data) {
-      downloadMetadata(verifiedUserQuery.data?.verifiedUsers[0]?.metadata)
+      downloadMetadata(verifiedUserQuery.data?.verifiedUsers[0]?.metadata);
     }
   }, [verifiedUserQuery.loading]);
 
   useEffect(() => {
     if (address) {
       networkManager_getLensProfileIdFromAddress.refetch();
-      verifiedUserQuery.refetch()
+      verifiedUserQuery.refetch();
     }
   }, [address]);
 
@@ -179,7 +169,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
     <Card
       onClick={() => router.push("/profile")}
       variant="outlined"
-      sx={{ cursor: 'pointer', borderRadius: 2, width: "100%", maxWidth: 400 }}
+      sx={{ cursor: "pointer", borderRadius: 2, width: "100%", maxWidth: 400 }}
     >
       <CardContent
         sx={{
@@ -196,33 +186,33 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
           />
         </Box>
 
-<Box>
-<Typography textAlign="center" pb={1}>
-          {state?.display_name}
-        </Typography>
-        <Typography textAlign="center" pb={1} variant='subtitle2' fontWeight="bold">
-          {renderHandle()}
-        </Typography>
-</Box>
-      
-<Typography
+        <Box>
+          <Typography textAlign="center" pb={1}>
+            {state?.display_name}
+          </Typography>
+          <Typography
+            textAlign="center"
+            pb={1}
+            variant="subtitle2"
+            fontWeight="bold"
+          >
+            {renderHandle()}
+          </Typography>
+        </Box>
+
+        <Typography
           fontSize={15}
           color="rgb(90, 104,119)"
           textAlign="center"
           paragraph
           fontWeight="500"
         >
-          {state?.description ? <Typography>{state?.description}</Typography> : <Typography> No description </Typography> }
+          {state?.description ? (
+            <Typography>{state?.description}</Typography>
+          ) : (
+            <Typography> No description </Typography>
+          )}
         </Typography>
-
-  
-        {/*
-
-       Replace with avatar border
-       
-       <Typography color='primary' variant='subtitle2'>
-            Available for hire
-        </Typography> */}
 
         {showValue ? (
           <Typography
@@ -241,22 +231,16 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
       </CardContent>
       <Divider />
       <CardContent>
-      <Stack
+        <Stack
           textAlign="center"
           direction="row"
           alignItems="center"
           spacing={1}
         >
-          {
-            state?.skills?.map((skill) => {
-              return (
-                <Chip label={skill} key={skill} size='small' />
-              )
-            })
-          }
+          {state?.skills?.map((skill) => {
+            return <Chip label={skill} key={skill} size="small" />;
+          })}
         </Stack>
-        
-      
       </CardContent>
     </Card>
   );

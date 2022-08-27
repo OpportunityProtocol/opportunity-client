@@ -35,7 +35,12 @@ import { AccountCircleOutlined, ShareOutlined } from "@mui/icons-material";
 import { NextPage } from "next";
 import { NextRouter, useRouter, withRouter } from "next/router";
 import { ServiceStruct } from "../../../typechain-types/NetworkManager";
-import { useContractRead, useContractWrite, useSignTypedData } from "wagmi";
+import {
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+  useSignTypedData,
+} from "wagmi";
 import {
   DAI_ADDRESS,
   LENS_HUB_PROXY,
@@ -72,7 +77,7 @@ import { MailOutline, Refresh } from "@material-ui/icons";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_SERVICE_BY_ID } from "../../../modules/contract/ContractGQLQueries";
 import { maxWidth } from "@mui/system";
-import { getMetadata } from '../../../common/ipfs-helper'
+import { getMetadata } from "../../../common/ipfs-helper";
 
 interface IViewContractPage {
   router: NextRouter;
@@ -99,20 +104,20 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
 
   const [tokenTransactionDialogOpen, setTokenTransactionDialogOpen] =
     useState<boolean>(false);
-    const [loadingReviewTx, setLoadingReviewTx] = useState<boolean>(false)
+  const [loadingReviewTx, setLoadingReviewTx] = useState<boolean>(false);
   const [reviewRating, setReviewRating] = useState<number>(0);
-  const [review, setReview] = useState<string>('')
-  const [reviewError, setReviewError] = useState<boolean>(false)
-  const [reviewDialogVisible, setReviewDialogVisible] = useState<boolean>(false)
-  
+  const [review, setReview] = useState<string>("");
+  const [reviewError, setReviewError] = useState<boolean>(false);
+  const [reviewDialogVisible, setReviewDialogVisible] =
+    useState<boolean>(false);
 
   const userAddress = useSelector(selectUserAddress);
 
   const serviceQueryById: QueryResult = useQuery(GET_SERVICE_BY_ID, {
     variables: {
-      serviceId: router.query.serviceId
-    }
-  })
+      serviceId: router.query.serviceId,
+    },
+  });
 
   const renderPackageInformation = (idx: number) => {
     try {
@@ -136,93 +141,73 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   };
 
   //get user lens profile id
-  const networkManager_getLensProfileIdFromAddress = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_getLensProfileIdFromAddress = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "getLensProfileIdFromAddress",
+    enabled: false,
+    chainId: CHAIN_ID,
+    args: serviceData?.creator,
+    onSuccess: (data: Result) => {
+      setServiceOwnerLensProfileId(hexToDecimal(data._hex));
     },
-    "getLensProfileIdFromAddress",
-    {
-      enabled: false,
-      chainId: CHAIN_ID,
-      args: serviceData?.creator,
-      onSuccess: (data: Result) => {
-        setServiceOwnerLensProfileId(hexToDecimal(data._hex));
-      },
-      onError: (error) => {
-
-      },
-    }
-  );
+    onError: (error) => {},
+  });
 
   //get user lens profile
-  const lensHub_getProfile = useContractRead(
-    {
-      addressOrName: LENS_HUB_PROXY,
-      contractInterface: LensHubInterface,
+  const lensHub_getProfile = useContractRead({
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "getProfile",
+    enabled: false,
+    watch: false,
+    chainId: CHAIN_ID,
+    args: [serviceOwnerLensProfileId],
+    onSuccess: (data: Result) => {
+      setSeriviceOwnerLensProfile(data);
     },
-    "getProfile",
-    {
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      args: [serviceOwnerLensProfileId],
-      onSuccess: (data: Result) => {
-        setSeriviceOwnerLensProfile(data);
-      },
-      onError: (error) => {
-
-      },
-    }
-  );
+    onError: (error) => {},
+  });
 
   //get pub id
-  const networkManager_getPubIdFromServiceId = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_getPubIdFromServiceId = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "getPubIdFromServiceId",
+    enabled: true,
+    watch: false,
+    args: router.query?.serviceId,
+    onSuccess(data: Result) {
+      setServicePubId(hexToDecimal(data._hex));
     },
-    "getPubIdFromServiceId",
-    {
-      enabled: true,
-      watch: false,
-      args: router.query?.serviceId,
-      onSuccess(data: Result) {
-        setServicePubId(hexToDecimal(data._hex));
-      },
-      onError(error) {},
-    }
-  );
+    onError(error) {},
+  });
 
   //get pub data
-  const lensHub_getPub = useContractRead(
-    {
-      addressOrName: LENS_HUB_PROXY,
-      contractInterface: LensHubInterface,
+  const lensHub_getPub = useContractRead({
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "getPub",
+    enabled: true,
+    watch: false,
+    args: [serviceOwnerLensProfileId, servicePubId],
+    onSuccess(data: Result) {
+      setServicePublicationData(data);
     },
-    "getPub",
-    {
-      enabled: true,
-      watch: false,
-      args: [serviceOwnerLensProfileId, servicePubId],
-      onSuccess(data: Result) {
-        setServicePublicationData(data);
-      },
-      onError(error) {},
-    }
-  );
+    onError(error) {},
+  });
 
   useEffect(() => {
-    serviceQueryById.refetch()
+    serviceQueryById.refetch();
     networkManager_getLensProfileIdFromAddress.refetch();
     networkManager_getPubIdFromServiceId.refetch();
-  }, [router.query.serviceId])
+  }, [router.query.serviceId]);
 
   useEffect(() => {
     if (!serviceQueryById.loading && serviceQueryById.data) {
-      setServiceData(serviceQueryById.data.service)
+      setServiceData(serviceQueryById.data.service);
     }
-  })
+  });
 
   useEffect(() => {
     lensHub_getPub.refetch();
@@ -235,59 +220,59 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     });
   }, [serviceOwnerLensProfileId]);
 
-
   useEffect(() => {
     async function loadMetadata() {
       if (serviceData?.metadataPtr) {
-        const parsedData = await getMetadata(serviceData?.metadataPtr)
+        const parsedData = await getMetadata(serviceData?.metadataPtr);
         //@ts-ignore
-        if (parsedData?.serviceThumbnail && parsedData?.serviceThumbnail?.data) {
-          const buffer: Buffer = parsedData?.serviceThumbnail?.data
+        if (
+          parsedData?.serviceThumbnail &&
+          parsedData?.serviceThumbnail?.data
+        ) {
+          const buffer: Buffer = parsedData?.serviceThumbnail?.data;
           const updatedImg: any = Buffer.from(buffer);
-          
+
           setDisplayImg(updatedImg);
           setServiceMetadata(parsedData);
         }
       }
     }
 
-    loadMetadata()
+    loadMetadata();
   }, [serviceData?.metadataPtr]);
 
-  const networkManager_purchaseService = useContractWrite(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
+  const networkManager_purchaseServicePrepare = usePrepareContractWrite({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "purchaseServiceOffering",
+    onSuccess(data) {
+      setSuccessfulPaymentAlertVisible(true);
     },
-    "purchaseServiceOffering",
-    {
-      onSuccess(data, variables, context) {
-        setSuccessfulPaymentAlertVisible(true);
-      },
-      onError(error, variables, context) {},
-      args: [serviceData.id, ZERO_ADDRESS, purchaseIndex, collectSig],
-      overrides: {
-        gasLimit: ethers.BigNumber.from("2000000"),
-        gasPrice: 90000000000,
-      },
-    }
+    onError(error) {},
+    args: [serviceData.id, ZERO_ADDRESS, purchaseIndex, collectSig],
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+    },
+  });
+
+  const networkManager_purchaseService = useContractWrite(
+    networkManager_purchaseServicePrepare.config
   );
 
-  const dai_approve = useContractWrite(
-    {
-      addressOrName: DAI_ADDRESS,
-      contractInterface: DaiInterface,
-    },
-    "approve",
-    {
-      args: [SERVICE_COLLECT_MODULE, 100000],
-    }
-  );
+  const dai_approvePrepare = usePrepareContractWrite({
+    addressOrName: DAI_ADDRESS,
+    contractInterface: DaiInterface,
+    functionName: "approve",
+    args: [SERVICE_COLLECT_MODULE, 100000],
+  });
+
+  const dai_approve = useContractWrite(dai_approvePrepare.config);
 
   const { data, isError, isLoading, isSuccess, error, signTypedData } =
     useSignTypedData({
-      onSettled(data, error, variables, context) {},
-      onError(error, variables, context) {},
+      onSettled(data, error) {},
+      onError(error) {},
     });
 
   const getDomain = () => {
@@ -329,94 +314,80 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     dai_approve.writeAsync().then(async () => {
       if (isSuccess) {
         const splitSignature: ethers.Signature =
-        await ethers.utils.splitSignature(data);
-      await networkManager_purchaseService.writeAsync({
-        args: [
-          serviceData.id,
-          BigNumber.from("0"),
-          {
-            v: splitSignature.v,
-            r: splitSignature.r,
-            s: splitSignature.s,
-            deadline: 0,
-          },
-        ],
-      });
+          await ethers.utils.splitSignature(data);
+        await networkManager_purchaseService.writeAsync({
+          recklesslySetUnpreparedArgs: [
+            serviceData.id,
+            BigNumber.from("0"),
+            {
+              v: splitSignature.v,
+              r: splitSignature.r,
+              s: splitSignature.s,
+              deadline: 0,
+            },
+          ],
+        });
       }
     });
-
   };
 
   const onSign = async () => {
     const domain = getDomain();
     const types = getTypes();
     const value = await getValues();
-    await signTypedData({ domain, types, value })
+    await signTypedData({ domain, types, value });
   };
 
-  const lensHub_comment = useContractWrite(
-    {
-      addressOrName: LENS_HUB_PROXY,
-      contractInterface: LensHubInterface
+  const lensHub_commentPrepare = usePrepareContractWrite({
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "comment",
+    args: [],
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
     },
-    "comment",
-    {
-      args: [],
-      overrides: {
-        gasLimit: ethers.BigNumber.from("2000000"),
-        gasPrice: 90000000000,
-      },
-      onError(error, variables, context) {
-  
-      },
-      onSuccess(data, variables, context) {
+    onSettled(data, error) {
+      setLoadingReviewTx(false);
+    },
+  });
 
-      },
-      onSettled(data, error, variables, context) {
-    
-        setLoadingReviewTx(false)
-      },
-    }
-  )
+  const lensHub_comment = useContractWrite(lensHub_commentPrepare.config);
 
   const onSubmitReview = async () => {
-    setLoadingReviewTx(true)
-    await lensHub_comment.writeAsync()
-    .catch(error => {
-      setReviewError(true)
-    })
-    .finally(() => {
-      setLoadingReviewTx(false)
-    })
-  }
+    setLoadingReviewTx(true);
+    await lensHub_comment
+      .writeAsync()
+      .catch((error) => {
+        setReviewError(true);
+      })
+      .finally(() => {
+        setLoadingReviewTx(false);
+      });
+  };
 
-  const [buyingEnabled, setBuyingEnabled] = useState<boolean>(false)
+  const [buyingEnabled, setBuyingEnabled] = useState<boolean>(false);
 
-  const serviceCollectModule_isFamiliar = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface
+  const serviceCollectModule_isFamiliar = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "isFamiliar",
+    args: [userAddress, serviceData?.id],
+    enabled: true,
+    watch: true,
+    cacheTime: 30000,
+    chainId: CHAIN_ID,
+
+    overrides: {
+      gasLimit: BigNumber.from("900000"),
     },
-    "isFamiliar",
-    {
-      args: [userAddress, serviceData?.id],
-      enabled: true,
-      watch: true,
-      cacheTime: 30000,
-      chainId: CHAIN_ID,
-      
-      overrides: {
-        gasLimit: BigNumber.from("900000"),
-      },
-      onSuccess(data) {
-        setBuyingEnabled(true)
-      },
-      onError(err) {
-        setBuyingEnabled(true)
-      },
-    }
-  )
-
+    onSuccess(data) {
+      setBuyingEnabled(true);
+    },
+    onError(err) {
+      setBuyingEnabled(true);
+    },
+  });
 
   const confirmationDialogContent = [
     <DialogContentText id="alert-dialog-description">
@@ -479,126 +450,130 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
             justifyContent="space-between"
           >
             <Card
-            elevation={0}
+              elevation={0}
               sx={{
-               //border: '1px solid #ddd',
+                //border: '1px solid #ddd',
                 width: "100%",
                 py: 2,
-              //  bgcolor: "transparent !important",
-              //  flexDirection: "column",
+                //  bgcolor: "transparent !important",
+                //  flexDirection: "column",
               }}
             >
-              <CardContent sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between'}}>
+              <CardContent
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Stack spacing={3}>
+                  <Stack>
+                    <VerifiedAvatar
+                      address={serviceData?.creator}
+                      lensProfile={serviceOnwerLensProfile}
+                      lensProfileId={serviceOwnerLensProfileId}
+                      showHandle={false}
+                      showValue={false}
+                    />
+                  </Stack>
 
+                  <Stack spacing={0.3}>
+                    <Typography fontWeight="bold" fontSize={20} maxWidth={60}>
+                      {serviceMetadata?.serviceTitle
+                        ? serviceMetadata?.serviceTitle
+                        : "Unable to load title"}
+                    </Typography>
+                    <Typography
+                      paragraph
+                      fontSize={16}
+                      fontWeight="normal"
+                      color="rgb(0, 0, 0, 0.52)"
+                    >
+                      {serviceMetadata?.serviceDescription
+                        ? serviceMetadata?.serviceDescription
+                        : "Unable to load description"}
+                    </Typography>
+                  </Stack>
 
-              <Stack spacing={3}>
-                <Stack>
-                  <VerifiedAvatar
-                    address={serviceData?.creator}
-                    lensProfile={serviceOnwerLensProfile}
-                    lensProfileId={serviceOwnerLensProfileId}
-                    showHandle={false}
-                    showValue={false}
-                  />
-
-                </Stack>
-
-    
-
-                <Stack spacing={0.3}>
-                  <Typography fontWeight="bold" fontSize={20} maxWidth={60}>
-                    {serviceMetadata?.serviceTitle
-                      ? serviceMetadata?.serviceTitle
-                      : "Unable to load title"}
-                  </Typography>
-                  <Typography
-                    paragraph
-                    fontSize={16}
-                    fontWeight="normal"
-                    color="rgb(0, 0, 0, 0.52)"
+                  <Stack
+                    my={2}
+                    direction="row"
+                    alignItems="center"
+                    spacing={5}
+                    sx={{ width: "100%" }}
                   >
-                    {serviceMetadata?.serviceDescription
-                      ? serviceMetadata?.serviceDescription
-                      : "Unable to load description"}
-                  </Typography>
-                </Stack>
-
-                <Stack
-              my={2}
-              direction="row"
-              alignItems="center"
-              spacing={5}
-              sx={{ width: "100%" }}
-            >
-              <Box textAlign="start">
-                <Typography
-                  pb={1}
-                  fontWeight="bold"
-                  fontSize={13}
-                  color="rgba(0,0,0,.56)"
-                >
-                  Confidence
-                </Typography>
-
-                <Stack spacing={1} direction="row" alignItems="center">
-                  <img
-                    src="/assets/images/dai.svg"
-                    style={{ width: 20, height: 25 }}
-                  />
-                  <Typography fontWeight="medium" fontSize={13} color="primary">
-                    $12,434 value locked{" "}
-                    <span>
-                      {" "}
+                    <Box textAlign="start">
                       <Typography
-                        component="span"
-                        fontSize={12}
-                        color="secondary.main"
+                        pb={1}
+                        fontWeight="bold"
+                        fontSize={13}
+                        color="rgba(0,0,0,.56)"
                       >
-                        {" "}
-                        +5.4%{" "}
+                        Confidence
                       </Typography>
-                    </span>
-                  </Typography>
+
+                      <Stack spacing={1} direction="row" alignItems="center">
+                        <img
+                          src="/assets/images/dai.svg"
+                          style={{ width: 20, height: 25 }}
+                        />
+                        <Typography
+                          fontWeight="medium"
+                          fontSize={13}
+                          color="primary"
+                        >
+                          $12,434 value locked{" "}
+                          <span>
+                            {" "}
+                            <Typography
+                              component="span"
+                              fontSize={12}
+                              color="secondary.main"
+                            >
+                              {" "}
+                              +5.4%{" "}
+                            </Typography>
+                          </span>
+                        </Typography>
+                      </Stack>
+                    </Box>
+
+                    <Box textAlign="start">
+                      <Typography
+                        pb={1}
+                        fontWeight="bold"
+                        fontSize={13}
+                        color="rgba(0,0,0,.56)"
+                      >
+                        Date Posted
+                      </Typography>
+
+                      <Typography
+                        fontWeight="bold"
+                        fontSize={13}
+                        color="primary"
+                      >
+                        {new Date().toDateString()}
+                      </Typography>
+                    </Box>
+                  </Stack>
                 </Stack>
-              </Box>
 
-              <Box textAlign="start">
-                <Typography
-                  pb={1}
-                  fontWeight="bold"
-                  fontSize={13}
-                  color="rgba(0,0,0,.56)"
-                >
-                  Date Posted
-                </Typography>
+                <Stack direction="row" alignItems="center" my={3}>
+                  <IconButton fontSize="large">
+                    <MailOutline />
+                  </IconButton>
 
-                <Typography fontWeight="bold" fontSize={13} color="primary">
-                  {new Date().toDateString()}
-                </Typography>
-              </Box>
+                  <IconButton fontSize="large">
+                    <AccountCircleOutlined />
+                  </IconButton>
 
-             
-            </Stack>
-              </Stack>
-
-              <Stack direction="row" alignItems="center" my={3}>
-              <IconButton fontSize="large">
-                <MailOutline />
-              </IconButton>
-
-              <IconButton fontSize="large">
-                <AccountCircleOutlined />
-              </IconButton>
-
-              <IconButton fontSize="large">
-                <ShareOutlined />
-              </IconButton>
-            </Stack>
+                  <IconButton fontSize="large">
+                    <ShareOutlined />
+                  </IconButton>
+                </Stack>
               </CardContent>
-              
             </Card>
-
-
           </Stack>
 
           <Box my={1.5}>
@@ -610,7 +585,11 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                 <Typography variant="button">How it works</Typography>
               </Box>
               <Stack py={2} spacing={3} direction="row" alignItems="center">
-                <Button disabled={false} variant="contained" onClick={() => setTokenTransactionDialogOpen(true)}>
+                <Button
+                  disabled={false}
+                  variant="contained"
+                  onClick={() => setTokenTransactionDialogOpen(true)}
+                >
                   Invest
                 </Button>
                 <Button variant="outlined" sx={{}}>
@@ -941,7 +920,12 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                 Reviews
               </Typography>
 
-              <Button variant="text" onClick={() => setReviewDialogVisible(true)}>Leave a comment</Button>
+              <Button
+                variant="text"
+                onClick={() => setReviewDialogVisible(true)}
+              >
+                Leave a comment
+              </Button>
             </Stack>
             <Typography color="text.secondary" paragraph>
               0 reviews for @janicecoleman007's services
@@ -968,7 +952,12 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         content={confirmationDialogContent}
       />
 
-      <Dialog fullWidth maxWidth="md" open={reviewDialogVisible} onClose={() => setReviewDialogVisible(false)}>
+      <Dialog
+        fullWidth
+        maxWidth="md"
+        open={reviewDialogVisible}
+        onClose={() => setReviewDialogVisible(false)}
+      >
         <Box sx={{ bgcolor: "rgb(247, 247, 250)" }}>
           <DialogTitle>Submit a review</DialogTitle>
         </Box>
@@ -976,8 +965,9 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         {loadingReviewTx && <LinearProgress />}
 
         <DialogContent>
-          <DialogContentText pb={3} fontWeight='medium'>
-            Provide a rating for the quality of work provided by @babys8. You can only submit one review per rating.
+          <DialogContentText pb={3} fontWeight="medium">
+            Provide a rating for the quality of work provided by @babys8. You
+            can only submit one review per rating.
           </DialogContentText>
           <Stack spacing={2}>
             <Rating
@@ -991,25 +981,29 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
               <InputBase
                 placeholder="Leave a review for @babys8"
                 sx={{ width: "100%", p: 2, bgcolor: "rgb(247, 247, 250)" }}
-                error={reviewError}          
+                error={reviewError}
               />
-              {
-                reviewError && (
-                  <FormHelperText>
-                    Something went wrong. Please check your wallet and try again.
-                  </FormHelperText>
-                )
-              }
+              {reviewError && (
+                <FormHelperText>
+                  Something went wrong. Please check your wallet and try again.
+                </FormHelperText>
+              )}
             </Paper>
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => {
-            setReview('')
-            setReviewError(false)
-            setReviewDialogVisible(false)
-          }}>Cancel</Button>
-          <Button onClick={onSubmitReview} disabled={review.length < 25}>Submit Review</Button>
+          <Button
+            onClick={() => {
+              setReview("");
+              setReviewError(false);
+              setReviewDialogVisible(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button onClick={onSubmitReview} disabled={review.length < 25}>
+            Submit Review
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>

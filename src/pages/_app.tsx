@@ -56,23 +56,13 @@ const client = createClient({
     new CoinbaseWalletConnector({
       chains,
       options: {
-        appName: "wagmi",
-      },
-    }),
-    new WalletConnectConnector({
-      chains,
-      options: {
-        qrcode: true,
-      },
-    }),
-    new InjectedConnector({
-      chains,
-      options: {
-        name: "Injected",
-        shimDisconnect: true,
+        appName: 'wagmi',
       },
     }),
   ],
+  
+  webSocketProvider,
+
   provider(config) {
     if (Number(process.env.NEXT_PUBLIC_CHAIN_ID) == 1337) {
       return new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545", {

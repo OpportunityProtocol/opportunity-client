@@ -53,6 +53,7 @@ import {
   useDisconnect,
   useContractRead,
   useFeeData,
+  usePrepareContractWrite,
 } from "wagmi";
 import { hexToDecimal } from "../../helper";
 import { DaiInterface } from "../../../abis";
@@ -115,29 +116,21 @@ const ConnectedAvatar: FC = () => {
   const handlePopoverClose = () => {
     setAnchorEl(null);
   };
+
+  const daiContractWritePrepare = usePrepareContractWrite({
+    addressOrName: DAI_ADDRESS,
+    contractInterface: DaiInterface,
+    functionName: "mint(uint256)",
+  })
   
-  const dai_mint = useContractWrite(
-    {
-      addressOrName: DAI_ADDRESS,
-      contractInterface: JSON.stringify(DaiInterface),
-    },
-    "mint(uint256)",
-    {
-      args: [10000],
-      overrides: {
-        gasLimit: ethers.BigNumber.from("2000000"),
-        gasPrice: 90000000000,
-      }
-    }
-  );
+  const dai_mint = useContractWrite(daiContractWritePrepare.config)
+  
 
   const dai_balanceOf = useContractRead(
     {
       addressOrName: DAI_ADDRESS,
-      contractInterface: JSON.stringify(DaiInterface),
-    },
-    "balanceOf",
-    {
+      contractInterface: DaiInterface,
+      functionName: "balanceOf",
       enabled: false,
       cacheTime: 50000,
       watch: true,
@@ -275,7 +268,7 @@ const ConnectedAvatar: FC = () => {
               <ListItem divider>
                 <ListItemText 
                 primary='Gas Fee' 
-                secondary={feeData.data.formatted.gasPrice}
+                secondary={feeData?.data?.formatted?.gasPrice}
                 primaryTypographyProps={{
                   fontSize: 10,
                   fontWeight: 'medium'

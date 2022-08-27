@@ -78,19 +78,22 @@ const Contracts: NextPage<any> = () => {
   const [workingContracts, setWorkingContracts] = useState<Array<any>>([]);
 
   const onRefresh = () => {
-    servicesByCreatorQuery.refetch()
-    serviceQuery.refetch()
-    purchasedServicesByClientQuery.refetch()
-    activeServicesByCreatorQuery.refetch()
-    contractsCreatedByEmployerQuery.refetch()
-    workingContractsQuery.refetch()
-  }
+    servicesByCreatorQuery.refetch();
+    serviceQuery.refetch();
+    purchasedServicesByClientQuery.refetch();
+    activeServicesByCreatorQuery.refetch();
+    contractsCreatedByEmployerQuery.refetch();
+    workingContractsQuery.refetch();
+  };
 
-  const servicesByCreatorQuery: QueryResult = useQuery(GET_SERVICES_BY_CREATOR, {
-    variables: {
-      creator: userAddress
+  const servicesByCreatorQuery: QueryResult = useQuery(
+    GET_SERVICES_BY_CREATOR,
+    {
+      variables: {
+        creator: userAddress,
+      },
     }
-  });
+  );
 
   const serviceQuery: QueryResult = useQuery(GET_SERVICE_BY_ID, {
     variables: {
@@ -191,13 +194,15 @@ const Contracts: NextPage<any> = () => {
         ) {
           activeServices[i] = {
             ...activeServices[i],
-            purchaseData: activeServicesByCreatorQuery.data.purchasedServices[i],
+            purchaseData:
+              activeServicesByCreatorQuery.data.purchasedServices[i],
           };
 
           await serviceQuery
             .refetch({
               serviceId:
-                activeServicesByCreatorQuery.data.purchasedServices[i].serviceId,
+                activeServicesByCreatorQuery.data.purchasedServices[i]
+                  .serviceId,
             })
             .then((serviceData) => {
               activeServices[i] = {
@@ -214,43 +219,37 @@ const Contracts: NextPage<any> = () => {
     syncActiveServices();
   }, [activeServicesByCreatorQuery.loading]);
 
-  useContractEvent(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface
-    },
-    "ServicePurchased",
-    async (event: Event) => {
-       //TODO: Only refresh if the id of the services coincides with the id of one by the client or creator
-      purchasedServicesByClientQuery.refetch()
-      activeServicesByCreatorQuery.refetch()
-    }
-  )
-
-  useContractEvent(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "ServiceResolved",
-    async (event: Event) => {
+  useContractEvent({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    eventName: "ServicePurchased",
+    listener: async (event: Event) => {
       //TODO: Only refresh if the id of the services coincides with the id of one by the client or creator
       purchasedServicesByClientQuery.refetch();
       activeServicesByCreatorQuery.refetch();
-    }
-  );
-
-  useContractEvent(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
     },
-    "ServiceCreated",
-    async (event: Event) => {
+  });
+
+  useContractEvent({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    eventName: "ServiceResolved",
+    listener: async (event: Event) => {
       //TODO: Only refresh if the id of the services coincides with the id of one by the client or creator
-      servicesByCreatorQuery.refetch()
-    }
-  );
+      purchasedServicesByClientQuery.refetch();
+      activeServicesByCreatorQuery.refetch();
+    },
+  });
+
+  useContractEvent({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    eventName: "ServiceCreated",
+    listener: async (event: Event) => {
+      //TODO: Only refresh if the id of the services coincides with the id of one by the client or creator
+      servicesByCreatorQuery.refetch();
+    },
+  });
 
   useEffect(() => {
     if (
@@ -267,13 +266,11 @@ const Contracts: NextPage<any> = () => {
     }
   }, [workingContractsQuery.loading]);
 
-  useContractEvent(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    },
-    "ContractOwnershipUpdate",
-    async (event: Event) => {
+  useContractEvent({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    eventName: "ContractOwnershipUpdate",
+    listener: async (event: Event) => {
       const contractId = event[0];
       const marketId = event[1];
       const ownership = event[2];
@@ -287,41 +284,50 @@ const Contracts: NextPage<any> = () => {
       if (userAddress === worker) {
         workingContractsQuery.refetch();
       }
-    }
-  );
-
-  useContractEvent(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
     },
-    "ContractCreated",
-    async (event: Event) => {
+  });
+
+  useContractEvent({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    eventName: "ContractCreated",
+    listener: async (event: Event) => {
       const creator = event[0];
       const marketId = event[1];
       const metadataPtr = event[2];
 
       if (userAddress === creator) {
-        contractsCreatedByEmployerQuery.refetch();
+        contractsCreatedByEmployerQuery.refetch()
       }
-    }
-  );
+    },
+  });
 
   const handleOnChangeTab = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-  }
+  };
 
   return (
     <Container maxWidth="lg" sx={{ height: "100vh" }}>
-      <Stack direction='row' spacing={1.4} alignItems='center'>
-      <Typography pl={1} fontSize={25} fontWeight="medium">
-        Contracts
-      </Typography>
-      <Box sx={{ width: 30, height: 30, backgroundColor: '#eee', border: '1px solid #ccc', borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-        <IconButton onClick={onRefresh}>
-        <Refresh fontSize='small' color='primary' />
-        </IconButton>
-      </Box>
+      <Stack direction="row" spacing={1.4} alignItems="center">
+        <Typography pl={1} fontSize={25} fontWeight="medium">
+          Contracts
+        </Typography>
+        <Box
+          sx={{
+            width: 30,
+            height: 30,
+            backgroundColor: "#eee",
+            border: "1px solid #ccc",
+            borderRadius: 999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconButton onClick={onRefresh}>
+            <Refresh fontSize="small" color="primary" />
+          </IconButton>
+        </Box>
       </Stack>
 
       <Box sx={{ width: "100%" }}>
@@ -332,9 +338,7 @@ const Contracts: NextPage<any> = () => {
             textColor="primary"
             indicatorColor="primary"
           >
-            <Tab
-              value={0}
-              label="Published Services"/>
+            <Tab value={0} label="Published Services" />
             <Tab value={1} label="Services Purchased" />
             <Tab value={2} label="Services Working" />
             <Tab value={3} label="Published Contracts" />
@@ -347,10 +351,10 @@ const Contracts: NextPage<any> = () => {
             <Grid container direction="row" alignItems="center" spacing={2}>
               {publishedServices.map((service: ServiceStruct, idx: number) => {
                 return (
-                     <Grid item xs={4} key={service.id}>
-                  <ServiceCard id={Number(service.id)} data={service} />
-                </Grid>
-                )
+                  <Grid item xs={4} key={service.id}>
+                    <ServiceCard id={Number(service.id)} data={service} />
+                  </Grid>
+                );
               })}
             </Grid>
           </Box>
@@ -424,7 +428,6 @@ const Contracts: NextPage<any> = () => {
             </Grid>
           </Box>
         </TabPanel>
-  
       </Box>
     </Container>
   );
