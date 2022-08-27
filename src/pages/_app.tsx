@@ -15,20 +15,18 @@ import {
   chain,
 } from "wagmi";
 
-import { alchemyProvider } from "wagmi/providers/alchemy";
-import { publicProvider } from "wagmi/providers/public";
-import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
-import { InjectedConnector } from "wagmi/connectors/injected";
-import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import {
-  ALCHEMY_API_KEY,
-  ALCHEMY_HTTPS,
-  NETWORK_MANAGER_ADDRESS,
-} from "../constant";
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { publicProvider } from 'wagmi/providers/public'
+import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
+import { InjectedConnector } from 'wagmi/connectors/injected'
+import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
+import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
+import { ALCHEMY_API_KEY, ALCHEMY_HTTPS } from '../constant';
+
+
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
-import MarketDisplay from "../modules/market/components/MarketDisplay";
-import MarketToolbar from "../modules/market/components/MarketToolbar";
+
+
 import { ethers, getDefaultProvider } from "ethers";
 import { Provider as ReduxProvider } from "react-redux";
 import { store } from "../store";
@@ -51,7 +49,6 @@ const { chains, provider, webSocketProvider } = configureChains(
     }),
   ]
 );
-
 const client = createClient({
   autoConnect: true,
   connectors: [
