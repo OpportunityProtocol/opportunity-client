@@ -108,6 +108,7 @@ const ConnectedAvatar: FC = () => {
   );
   const userConnector = useSelector(selectUserConnector);
   const connected = useSelector(selectUserConnectionStatus);
+  const accountData = useAccount()
 
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -161,7 +162,7 @@ const ConnectedAvatar: FC = () => {
 
   return (
     <StyledBadge
-      connected={connected}
+      connected={accountData.isConnected}
       overlap="circular"
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       variant="dot"

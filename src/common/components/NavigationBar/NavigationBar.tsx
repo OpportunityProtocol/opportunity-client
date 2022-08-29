@@ -99,6 +99,7 @@ const NavigationBar: FC = (): JSX.Element => {
   const accountData = useAccount();
 
 
+
   const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     variables: {
       userAddress,
@@ -227,7 +228,7 @@ const NavigationBar: FC = (): JSX.Element => {
         ethBalance: string | number = 0,
         daiBalance: Result | number = 0;
 
-      if (accountData.status == 'connected') {
+      if (accountData.isConnected) {
         address = accountData.address;
         connector = accountData.connector;
         onFetchLensProfileId();
@@ -248,18 +249,18 @@ const NavigationBar: FC = (): JSX.Element => {
         userWalletDataStored({
           balance: ethBalance,
           erc20Balance: {
-            [DAI_ADDRESS]: hexToDecimal(BigNumber.from(daiBalance)._hex),
+            [DAI_ADDRESS]: hexToDecimal(BigNumber.from(Number(daiBalance))._hex),
           },
-          connector: String(connectData.data.connector.name),
+          connector: String(connectData.data?.connector.name),
           address,
-          connected: accountData.status == 'connected'
+          connected: accountData.isConnected
         })
       );
     }
 
 
     
-    if (connectData.status === 'success') {
+    if (accountData.isConnected) {
       handleOnIsConnected();
     } else {
       dispatch(
@@ -272,7 +273,7 @@ const NavigationBar: FC = (): JSX.Element => {
         })
       );
     }
-  }, [connectData.status]);
+  }, [accountData.isConnected]);
 
   const feeData = useFeeData();
   const [gasPrice, setGasPrice] = useState<string>("0");
@@ -325,11 +326,12 @@ const NavigationBar: FC = (): JSX.Element => {
 
   useEffect(() => {
 
-    if (connectData.status === 'success') {
+    if (accountData.isConnected) {
+
       handlesClose();
     }
 
-  }, [connectData.status]);
+  }, [accountData.isConnected]);
 
 
   return (
@@ -419,7 +421,7 @@ const NavigationBar: FC = (): JSX.Element => {
                     </Typography>
                   </Link>
 
-                  {connectData.status === 'success' && (
+                  {accountData.isConnected && (
                     <Link href="/messenger">
                       <Typography
                         component={Button}
@@ -437,7 +439,7 @@ const NavigationBar: FC = (): JSX.Element => {
                     </Link>
                   )}
 
-                  {connectData.status === 'success' && (
+                  {accountData.isConnected && (
                     <Link href="/view">
                       <Typography
                         component={Button}
@@ -637,7 +639,7 @@ const NavigationBar: FC = (): JSX.Element => {
                     </Menu>
                   </>
 
-                  {connected === true ? (
+                  {accountData.isConnected ? (
                     <ConnectedAvatar />
                   ) : (
                     <Chip
