@@ -68,127 +68,85 @@ const Work: NextPage<any> = () => {
   };
 
   return (
-    <Grid component={Container} maxWidth="lg" container direction="column">
-      <Grid container item>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          spacing={2}
-          my={3}
-          width="100%"
-        >
-                    <SearchBarV2
-            placeholder="Search contracts and services"
-            width="50%"
-            onKeyDown={onSearch}
-            onChange={onChange}
-            value={searchQuery}
-            onClickPrimaryButton={onSearch}
-          />
-          
-          <Stack direction="row" spacing={2}>
-            <Card elevation={0}>
-              <CardContent
-                component={Stack}
-                direction="row"
-                spacing={2}
-                sx={{ display: "flex", alignItems: "center" }}
-              >
-                <Typography variant="body2" fontWeight="500">
-                  Contracts
-                </Typography>
-                <Checkbox checked={contractsChecked} onChange={handleOnChangeContractsChecked} />
-              </CardContent>
-            </Card>
-
-            <Card elevation={0}>
-              <CardContent
-                component={Stack}
-                direction="row"
-                spacing={2}
-                sx={{ display: "flex", alignItems: "center" }}
-              >
-                <Typography variant="body2" fontWeight="500">
-                  Services
-                </Typography>
-                <Checkbox checked={servicesChecked} onChange={handleChangeServicesChecked} />
-              </CardContent>
-            </Card>
+    <Container maxWidth="xl">
+      <Grid container>
+        <Grid container item>
+          <Stack direction="row" alignItems='center' my={1} width="100%">
+            <Box>
+            <SearchBarV1
+              width={300}
+              placeholder="Find work"
+              value={searchQuery}
+              onChange={onChange}
+              onKeyDown={onSearch}
+            />
+            </Box>
+       
+        
           </Stack>
-        </Stack>
 
-        <Box sx={{ width: "100%" }}>
-          <Grid container spacing={5} direction="row" alignItems="flex-start">
-            <Grid item xs={8}>
-              <Typography
-                pb={2}
-                width="100%"
-                color={(theme) => theme.palette.primary.dark}
-                variant="subtitle2"
-              >
-                A decentralized protocol for cooperation
-              </Typography>
-              <Divider sx={{ mb: 3 }} />
-
-              {searchContext.results.all &&
-              searchContext.results.all.length === 0 ? (
-                <Stack
-                  sx={{
-                    width: "100%",
-                    height: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+          <Box sx={{ width: "100%" }}>
+            <Grid container spacing={5} direction="row" alignItems="flex-start">
+              <Grid item xs={8}>
+                <Typography
+                  pb={2}
+                  width="100%"
+                  color={(theme) => theme.palette.primary.dark}
+                  variant="subtitle2"
                 >
-                  <img
-                    src="/assets/images/regular_man_one.svg"
-                    style={{ height: 200 }}
-                  />
-                  <Typography
-                    py={1}
-                    fontSize={20}
-                    variant="body2"
-                    textAlign="center"
+                  A decentralized protocol for cooperation
+                </Typography>
+                <Divider sx={{ mb: 3 }} />
+
+                {searchContext.results.all &&
+                searchContext.results.all.length === 0 ? (
+                  <Stack
+                    sx={{
+                      width: "100%",
+                      height: 700,
+                      display: "flex",
+                      alignItems: "flex-start",
+                    }}
                   >
-                    No results found for {searchQuery}
-                  </Typography>
-                  <Typography
-                    width={500}
-                    textAlign="center"
-                    fontSize={15}
-                    paragraph
-                  >
-                    Thank you for using Lens Talent. We are activaly working on
-                    onboarding new users to the platform.{" "}
-                    <Typography
-                      color="primary"
-                      component="span"
-                      variant="button"
-                    >
-                      Help us by sharing.
+                    <img
+                      src="/assets/images/regular_man_one.svg"
+                      style={{ height: 200 }}
+                    />
+                    <Typography py={1} fontSize={20} variant="body2">
+                      No results found for {searchQuery}
                     </Typography>
-                  </Typography>
-                </Stack>
-              ) : (
-                searchContext.results.all.map((item) => {
-                  return (
-                    <Grid mb={1.5} xs={12} item sx={{ width: "100%" }}>
-                      {item?.__typename === "Contract" ? (
-                        <JobDisplay data={item} />
-                      ) : (
-                        <ServiceCard id={item?.id} data={item} />
-                      )}
-                    </Grid>
-                  );
-                })
-              )}
+                    <Typography width={500} fontSize={15} paragraph>
+                      Thank you for using Lens Talent. We are activaly working
+                      on onboarding new users to the platform.{" "}
+                      <Typography
+                        color="primary"
+                        component="span"
+                        variant="button"
+                      >
+                        Contribute
+                      </Typography>
+                    </Typography>
+                  </Stack>
+                ) : (
+                  searchContext.results.all.map((item) => {
+                    return (
+                      <Grid mb={1.5} xs={12} item sx={{ width: "100%" }}>
+                        {item?.__typename === "Contract" ? (
+                          <JobDisplay data={item} />
+                        ) : (
+                          <ServiceCard id={item?.id} data={item} />
+                        )}
+                      </Grid>
+                    );
+                  })
+                )}
+              </Grid>
+              <Grid item xs={4} />
             </Grid>
-            <Grid item xs={4} />
-          </Grid>
-        </Box>
+          </Box>
+        </Grid>
       </Grid>
-    </Grid>
+    </Container>
   );
 };
 
