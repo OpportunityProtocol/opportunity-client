@@ -35,7 +35,6 @@ import {
 } from "wagmi";
 import {
   NETWORK_MANAGER_ADDRESS,
-  SERVICE_COLLECT_MODULE,
   TOKEN_FACTORY_ADDRESS,
 } from "../../constant";
 import { NetworkManagerInterface, TokenFactoryInterface } from "../../abis";
@@ -46,7 +45,7 @@ import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../common/helper";
 import { NextRouter, useRouter } from "next/router";
 import BootstrapInput from "../../common/components/BootstrapInput/BootstrapInput";
-import { SERVICE_REFERENCE_MODULE } from "../../constant/contracts";
+import { FEE_COLLECT_MODULE, FOLLOWER_ONLY_REFERENCE_MODULE, SERVICE_REFERENCE_MODULE } from "../../constant/contracts";
 import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
@@ -141,8 +140,8 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         Number(createServiceForm.offers.business.price),
         Number(createServiceForm.offers.enterprise.price),
       ],
-      SERVICE_COLLECT_MODULE,
-      SERVICE_REFERENCE_MODULE,
+      FEE_COLLECT_MODULE,
+      FOLLOWER_ONLY_REFERENCE_MODULE,
     ],
     overrides: {
       gasLimit: BigNumber.from("11643163"),
@@ -234,8 +233,8 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             Number(createServiceForm.offers.business.price),
             Number(createServiceForm.offers.enterprise.price),
           ],
-          SERVICE_COLLECT_MODULE,
-          SERVICE_REFERENCE_MODULE,
+          FEE_COLLECT_MODULE,
+          FOLLOWER_ONLY_REFERENCE_MODULE,
         ],
       });
     } else {

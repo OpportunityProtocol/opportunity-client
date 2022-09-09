@@ -14,6 +14,9 @@ import {
   Chip,
   CardActionArea,
   DialogContentText,
+  TableCell,
+  TableRow,
+  Paper,
 } from "@mui/material";
 import { useStyles } from "./ServiceCardStyle";
 import DAIIcon from "../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg";
@@ -63,7 +66,8 @@ import { ethers } from "ethers";
 import { GET_PURCHASED_SERVICE } from "../../ContractGQLQueries";
 import { getMetadata } from "../../../../common/ipfs-helper";
 import { ConfirmationDialog } from "../../../../common/components/ConfirmationDialog";
-
+import moment from "moment";
+import { withStyles } from '@mui/styles'
 interface IServiceCardProps {
   id: string;
   purchaseData?: PurchasedServiceMetadataStruct;
@@ -73,12 +77,56 @@ interface IServiceCardProps {
   text?: boolean;
 }
 
+const TableBodyCell = withStyles((theme) => ({
+  root: {
+    color: "black",
+    fontSize: "12px !important",
+    padding: "10px !important",
+  },
+}))(TableCell);
+
+const StatusChip = ({ status }: { status: string }) => {
+  const bgcolor = () => {
+    switch (status) {
+      case "Reclaimed":
+        return "rgba(255, 138, 0, .24)";
+      case "Dispute":
+        return "rgba(255, 0, 0, .19)";
+      case "Unclaimed":
+        return "rgba(36, 227, 32, 0.4)";
+      case "Claimed":
+      default:
+    }
+  };
+  const formStatus = () => {
+    switch (status) {
+      case "Reclaimed":
+        return "Pending Dispute";
+      default:
+        return status;
+    }
+  };
+
+  return (
+    <Chip
+      label={formStatus()}
+      sx={{
+        display: "flex",
+        borderRadius: 1,
+        fontSize: 10,
+        bgcolor: bgcolor(),
+        width: "80px",
+        height: "30px",
+      }}
+    />
+  );
+};
+
 const ServiceCard = ({
   id,
   data,
   purchaseData,
   purchase = false,
-  text = false,
   outlined = true,
 }: IServiceCardProps) => {
   const cardStyles = useStyles();
@@ -87,7 +135,7 @@ const ServiceCard = ({
 
   const [serviceOwnerLensData, setServiceOwnerLensData] =
     useState<ProfileStructStruct>({});
-    const [servicePubId, setServicePubId] = useState<number>(0);
+  const [servicePubId, setServicePubId] = useState<number>(0);
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
   const [serviceMetadata, setServiceMetadata] = useState<any>({});
@@ -141,12 +189,12 @@ const ServiceCard = ({
     },
   });
 
-    //fetch lens profile among  lens profile id change
-    useEffect(() => {
-      lensHub_getProfile.refetch({
-        throwOnError: true,
-      });
-    }, [serviceOwnerLensProfileId]);
+  //fetch lens profile among  lens profile id change
+  useEffect(() => {
+    lensHub_getProfile.refetch({
+      throwOnError: true,
+    });
+  }, [serviceOwnerLensProfileId]);
 
   const networkManager_getLensProfileIdFromAddress = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -198,11 +246,10 @@ const ServiceCard = ({
     loadMetadata();
   }, [data?.metadataPtr]);
 
-  const signTypedData =
-    useSignTypedData({
-      onSettled(data, error) {},
-      onError(error) {},
-    });
+  const signTypedData = useSignTypedData({
+    onSettled(data, error) {},
+    onError(error) {},
+  });
 
   const [resolveServiceSuccessful, setResolveServiceSuccessful] =
     useState<boolean>(false);
@@ -409,113 +456,90 @@ const ServiceCard = ({
     }
   };
 
-  return text ? (
-    <Box>
-      {serviceMetadata?.service_title ? (
-        <Typography
-          fontWeight="normal"
-          fontSize={12}
-          color={(theme) => theme.palette.primary.main}
-        >
-          {serviceMetadata?.service_title}
-        </Typography>
-      ) : (
-        <Typography
-          fontWeight="medium"
-          fontSize={13}
-          color={(theme) => theme.palette.primary.main}
-        >
-          Unable to load service title
-        </Typography>
-      )}
-    </Box>
-  ) : (
-    <Card
-      square
-      variant="elevation"
-      elevation={10}
-      sx={{
-        boxShadow: "0 19px 38px #eee, 0 15px 12px #eee",
-        display: "flex",
-        alignItems: "center",
-        width: "100%",
-        height: 100,
-        cursor: userAddress ? "pointer" : "auto",
-      }}
-      onClick={
-        userAddress ? () => router.push(`/view/service/${data?.id}`) : () => {}
-      }
-    >
-      <Box
+  return (
+    <>
+      <TableRow
+        onClick={
+          userAddress
+            ? () => router.push(`/view/service/${data?.id}`)
+            : () => {}
+        }
+        component={Paper}
+        variant="outlined"
         sx={{
-          flex: 1,
-          height: "100%",
+          width: "100%",
+          minWidth: "100% !important",
           display: "flex",
-          flexDirection: "column",
+          height: 130,
+          cursor: userAddress ? "pointer" : "auto",
         }}
       >
-        <CardContent
-          sx={{
-            flex: "1 0 auto",
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-evenly",
-          }}
-        >
-          <Typography fontWeight="600" fontSize={12}>
-            {serviceMetadata?.service_title
-              ? serviceMetadata?.service_title
-              : "Unable to load service title"}
-          </Typography>
-
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Stack direction="row" alignItems="center" spacing={0.5}>
+        <TableBodyCell sx={{ width: 150, fontWeight: "bold" }}>
+          Service
+        </TableBodyCell>
+        <TableBodyCell sx={{ width: "100% !important" }}>
+          <Box display="flex">
+            {errors?.metadataError ? (
+              <img src="" style={{ height: 60, width: 110 }} />
+            ) : (
               <img
-                src="/assets/images/dai.svg"
-                style={{ width: 15, height: 20 }}
+                src={URL.createObjectURL(new Blob([displayImg]))}
+                style={{
+                  marginRight: 15,
+                  borderRadius: 6,
+                  width: 110,
+                  height: 60,
+                }}
               />
-              <Typography
-                fontSize={13}
-                fontWeight="medium"
-                color="text.secondary"
-              >
-                {Math.random().toPrecision(2)}{" "}
-              </Typography>
-            </Stack>
-          </Box>
+            )}
 
-          {/*   <Stack direction="row" alignItems="center">
-          {serviceMetadata?.tags &&
-          serviceMetadata?.service_tags?.length > 0 ? (
-            serviceMetadata?.service_tags?.map((tag) => {
-              return (
-                <Chip
-                  variant="filled"
-                  sx={{ fontSize: 12, padding: 1, backgroundColor: "#eee" }}
-                  label={tag}
-                  size="small"
-                />
-              );
-            })
-          ) : (
-            <Typography color='text.secondary' variant="caption">Unable to load tags</Typography>
-          )}
-          </Stack> */}
-        </CardContent>
-      </Box>
-      {errors?.metadataError ? (
-        <img src="" style={{ height: "100%", width: 110 }} />
-      ) : (
-        <CardMedia
-          image={URL.createObjectURL(new Blob([displayImg]))}
-          sx={{ height: "100%", width: 80 }}
-        />
-      )}
+            <Box>
+              <Typography fontWeight="medium" fontSize={14}>
+                {serviceMetadata?.service_title
+                  ? serviceMetadata?.service_title
+                  : "Unable to load service title"}
+              </Typography>
+            </Box>
+          </Box>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            {serviceMetadata?.tags &&
+            serviceMetadata?.service_tags?.length > 0 ? (
+              serviceMetadata?.service_tags?.map((tag) => {
+                return (
+                  <Chip
+                    variant="filled"
+                    sx={{ fontSize: 12, padding: 1, backgroundColor: "#eee" }}
+                    label={tag}
+                    size="small"
+                  />
+                );
+              })
+            ) : (
+              <Typography color="text.secondary" variant="caption">
+                Unable to load tags
+              </Typography>
+            )}
+          </Stack>
+        </TableBodyCell>
+        <TableBodyCell sx={{ width: 150 }}>
+          <Stack direction="row" spacing={0.5}>
+            <img
+              src="/assets/images/dai.svg"
+              style={{ width: 18, height: 18 }}
+            />
+            <Typography variant="body2" fontSize={12}>
+              $25.99
+            </Typography>
+          </Stack>
+        </TableBodyCell>
+        <TableBodyCell sx={{ width: 150 }}>
+          <StatusChip status="Unclaimed" />
+        </TableBodyCell>
+        <TableBodyCell sx={{ width: 150 }}>
+          {moment().format("h:mm A")}
+        </TableBodyCell>
+      </TableRow>
+
       {renderButtonState()}
       <ConfirmationDialog
         success={resolveServiceSuccessful}
@@ -529,7 +553,7 @@ const ServiceCard = ({
         primaryAction={onResolveService}
         primaryActionTitle="Confirm"
       />
-    </Card>
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 import "../../styles/globals.css";
 import React, { useEffect, useState } from "react";
-import { Box, Container } from "@mui/material";
+import { Box, Container, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from "@mui/material";
 import type { AppProps } from "next/app";
 import Opportunity from "../Opportunity";
 import theme from "../../material_theme";
@@ -38,6 +38,7 @@ import { LocalizationProvider } from "@mui/lab";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import apolloClient from "../apollo";
 import { SearchProvider } from "../context/SearchContext";
+import { Inbox, Mail } from "@mui/icons-material";
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat],
   [
@@ -98,6 +99,48 @@ function MyApp({ Component, pageProps }: AppProps) {
     return null;
   }
 
+  const { window } = pageProps;
+
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const drawer = (
+    <div>
+      <Toolbar />
+      <Divider />
+      <List>
+        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
+          <ListItem key={text} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                {index % 2 === 0 ? <Inbox /> : <Mail />}
+              </ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        {['All mail', 'Trash', 'Spam'].map((text, index) => (
+          <ListItem key={text} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                {index % 2 === 0 ? <Inbox /> : <Mail />}
+              </ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </div>
+  );
+
+  const container = window !== undefined ? () => window().document.body : undefined;
+
+
   return (
     <React.Fragment>
       <Header />
@@ -108,10 +151,12 @@ function MyApp({ Component, pageProps }: AppProps) {
               <CssBaseline />
               <ApolloProvider client={apolloClient}>
                 <SearchProvider>
+            
                 <Opportunity>
-                  <NavigationBar />
+         
                   <Component {...pageProps} />
                 </Opportunity>
+               
                 </SearchProvider>
               </ApolloProvider>
             </ThemeProvider>

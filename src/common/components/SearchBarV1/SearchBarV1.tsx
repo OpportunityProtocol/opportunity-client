@@ -10,12 +10,12 @@ const SearchBarV1StyledInputBase = styled(InputBase)(({ theme }) => ({
     width: "100%",
     border: "none",
     fontSize: 14,
-    
-    padding: "10px 12px",
+    height: 35,
+    // padding: "10px 12px",
     marginLeft: 1,
     display: "flex",
-    flex: 1,
-    flexGrow: 1,
+    // flex: 1,
+    //flexGrow: 1,
   },
 }));
 
@@ -33,14 +33,14 @@ const SearchBarV1: FunctionComponent<any> = ({ width, ...inputProps }) => {
       sx={{
         display: "flex",
         width: width ? width : "auto",
-        border: "1px solid #ddd",
-        minWidth: "200px",
-        backgroundColor: "rgb(247, 247, 250)",
-        borderRadius: 2,
-      }} 
+        border: "1px solid #CFD0D7",
+        minWidth: "300px",
+        backgroundColor: "#FCFCFD",
+        borderRadius: 0
+      }}
     >
       <SearchBarV1StyledInputBase
-      size='small'
+        size="small"
         startAdornment={
           <Search
             style={{ color: "#9E9E9E", marginLeft: "12px", marginRight: "1px" }}
@@ -53,7 +53,7 @@ const SearchBarV1: FunctionComponent<any> = ({ width, ...inputProps }) => {
         }}
         inputProps={{
           "aria-label": "search jobs",
-          style: { padding: "8px 2px" },
+          // style: { padding: "8px 2px" },
         }}
         {...inputProps}
       />
