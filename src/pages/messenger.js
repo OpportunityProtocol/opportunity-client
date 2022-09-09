@@ -47,6 +47,15 @@ import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import User from "../modules/user/components/Messenger/User";
 import MessageForm from "../modules/user/components/Messenger/MessageForm";
 import Message from "../modules/user/components/Messenger/Message";
+import {
+  useAccount,
+  useContractEvent,
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+} from "wagmi";
+
+
 
 const Messenger = () => {
   const [users, setUsers] = useState([]);
@@ -55,10 +64,12 @@ const Messenger = () => {
   const [img, setImg] = useState("");
   const [msgs, setMsgs] = useState([]);
 
-  const user1 = 0//0auth.currentUser.uid;
+
+  const { address, connector } = useAccount();
+  const user1 = (address.toLowerCase());
 
   useEffect(() => {
-    const usersRef = collection(db, "users");
+    const usersRef = collection(db, "users", user1, "selectedUser");
     // create query object
     const q = query(usersRef, where("uid", "not-in", [user1]));
     // execute query
@@ -76,6 +87,7 @@ const Messenger = () => {
     setChat(user);
 
     const user2 = user.uid;
+    console.log(user)
     const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
 
     const msgsRef = collection(db, "messages", id, "chat");

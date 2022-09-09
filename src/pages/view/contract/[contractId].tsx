@@ -61,6 +61,23 @@ import CloseIcon from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide';
 import { TransitionProps } from '@mui/material/transitions';
 
+import { db, auth, storage } from "../../../../firebase";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  Timestamp,
+  orderBy,
+  setDoc,
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import { isConstValueNode } from "graphql";
+
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
     children: React.ReactElement;
@@ -290,11 +307,95 @@ const handleClose = () => setSendmessageOpen(false);
 
 
 
+const [data, setData] = useState({
+  proposalPayout: "",
+  proposalMessage: "",
+  error: null,
+});
+
+const { proposalPayout, proposalMessage, error } = data;
+
+const handleChanges = (e) => {
+  setData({ ...data, [e.target.name]: e.target.value });
+};
+
+
+  
+  const handleProposalSubmit = async (e) => {
+    e.preventDefault();
+    setData({ ...data, error: null});
+    if (!proposalPayout || !proposalMessage ) {
+      setData({ ...data, error: "* All fields are required *" });
+      return
+    };
+
+    try {
+
+
+      const user1 = (address.toLowerCase());
+
+      const user2 = ((contractData.employer).toLowerCase());
+
+    
+   
+
+    const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
+
+    const selectedRef1 = doc(db, "users", user1, "selectedUser", user2);
+    const selectedRef2 = doc(db, "users", user2, "selectedUser", user1);
+
+    console.log(user2, 'user 2');
+    
+    console.log(user1, "user1");
+    await setDoc(selectedRef1, {
+
+        uid: user2,
+        name: user2,
+      
+    
+    });
+    await setDoc(selectedRef2, {
+
+      uid: user1,
+      name: user1,
+      
+  
+  });
+    await addDoc(collection(db, "messages", id, "chat"), {
+      text: "",
+      from: user1,
+      to: user2,
+      createdAt: Timestamp.fromDate(new Date()),
+      proposalPayout,
+      proposalMessage,
+      Type: "Proposal",
+
+    });
+    setData({
+      proposalPayout,
+      proposalMessage,
+      error: null,
+});
+
+handleClose();
+  } catch(err) {
+    setData({ ...data, error: err.message });
+  }
+
+  
+
+  };
+
+  
+
+
+
   const renderPrimaryButtonState = () => {
     if (
       String(address).toLowerCase() ==
       String(contractData?.employer).toLowerCase()
     ) {
+      
       switch (contractData?.ownership) {
         case 0: //unclaimed
           return (
@@ -480,7 +581,13 @@ const handleClose = () => setSendmessageOpen(false);
       String(address).toLowerCase() !=
         String(contractData?.worker).toLowerCase() &&
       Number(contractData?.ownership) == 0
-    ) {
+      
+    ) { console.log(address);
+     console.log(contractData);
+
+
+
+
       return (
         <>
         <Button
@@ -664,7 +771,7 @@ const handleClose = () => setSendmessageOpen(false);
           paddingTop: '3rem !important',
           width: '100% !important',
         }}>
-        
+        {error ? <Typography  sx={{padding: "0px", position: "absolute", right: "100px", top: "17px", color:"red"}} className="error">{error}</Typography> : null}
         <CloseIcon
               fontSize="large"
               onClick={handleClose}
@@ -689,15 +796,15 @@ const handleClose = () => setSendmessageOpen(false);
       }}>Create Proposal</Typography>
 
 
+    
 
-
-        <List>
+        <List >
         
         <ListItem  sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start'}}>
             <ListItemText primary="Proposal Payout" secondary="Enter a proposed payout you would like to receive for this job." primaryTypographyProps={{fontWeight: '550'}} />
             <FormControl >
           
-          <Input id="outlined-basic" type="number" startAdornment={
+          <Input id="outlined-basic" type="number" name="proposalPayout" value={proposalPayout} onChange={handleChanges} startAdornment={
             <InputAdornment position="start">
                 <img src="/assets/images/dai.png" style={{ width: 20, height: 20 }} />
             </InputAdornment>
@@ -709,9 +816,9 @@ const handleClose = () => setSendmessageOpen(false);
             <ListItemText primary="Contract Proposal" secondary="Write a proposal detailing why you would be a good fit for this job." primaryTypographyProps={{fontWeight: '550'}}  />
             <FormControl fullWidth sx={{ width:'100%' }}>
           
-          <TextField id="outlined-basic" label="" variant="outlined"  multiline
-          rows={16}/>
-          
+          <TextField id="outlined-basic" label="" name="proposalMessage" variant="outlined"  multiline
+          rows={16} type="text" value={proposalMessage} onChange={handleChanges} onSubmit={handleProposalSubmit}
+        />
         </FormControl>
           </ListItem>
          
@@ -719,7 +826,7 @@ const handleClose = () => setSendmessageOpen(false);
       
         </List>
         <Grid sx={{alignItems: 'center', display: 'flex', justifyContent: 'center', marginBottom: '11px'}}>
-          <Button size="large" onClick={handleClose}>
+          <Button size="large" type="submit" onClick={handleProposalSubmit} >
             Send Proposal
           </Button>
         </Grid>
