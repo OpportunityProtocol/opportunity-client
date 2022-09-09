@@ -55,6 +55,21 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 
+const styles = createStyles({
+  button: {
+    margin: 10
+  },
+  buttonContainer: {
+    marginLeft: "10em",
+    display: "flex",
+    flexDirection: "row"
+  },
+  "@media (min-width: 960px)": {
+    buttonContainer: {
+      backgroundColor: "black"
+    }
+  }
+});
 
 
 const Messenger = () => {

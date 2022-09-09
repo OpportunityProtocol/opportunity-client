@@ -61,7 +61,9 @@ import { BigNumber } from "ethers";
 import {
   AddCircleOutline,
   Book,
+  Help,
   HelpOutline,
+  HelpSharp,
   Language,
   LocalGasStation,
   QuestionAnswer,
@@ -95,49 +97,46 @@ const NavigationBar: FC = (): JSX.Element => {
   const userAddress = useSelector(selectUserAddress);
   const connected = useSelector(selectUserConnectionStatus);
 
-  const connectData = useConnect()
+  const connectData = useConnect();
   const accountData = useAccount();
-
-
 
   const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     variables: {
       userAddress,
     },
   });
-  console.log(userData);
 
   //getProfile
   const lensHub_getProfile = useContractRead({
-      addressOrName: LENS_HUB_PROXY,
-      contractInterface: LensHubInterface,
-      functionName: "getProfile",
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      args: [lensProfileId],
-      onSuccess: (data) => {
-        const {
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "getProfile",
+    enabled: false,
+    watch: false,
+    chainId: CHAIN_ID,
+    args: [lensProfileId],
+    onSuccess: (data) => {
+      const {
+        followModule,
+        followNFT,
+        followNFTURI,
+        handle,
+        imageURI,
+        pubCount,
+      } = data;
+      dispatch(
+        userLensDataStored({
           followModule,
           followNFT,
           followNFTURI,
           handle,
           imageURI,
-          pubCount,
-        } = data;
-        dispatch(
-          userLensDataStored({
-            followModule,
-            followNFT,
-            followNFTURI,
-            handle,
-            imageURI,
-            pubCount: hexToDecimal(Number(pubCount._hex)),
-            profileId: Number(lensProfileId),
-          })
-        );
-      },
-    })
+          pubCount: hexToDecimal(Number(pubCount._hex)),
+          profileId: Number(lensProfileId),
+        })
+      );
+    },
+  });
 
   useEffect(() => {
     if (lensProfileId !== 0) {
@@ -147,34 +146,30 @@ const NavigationBar: FC = (): JSX.Element => {
     }
   }, [lensProfileId]);
 
-  const networkManager_getLensProfileIdFromAddress = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-      functionName: "getLensProfileIdFromAddress",
-      enabled: false,
-      chainId: CHAIN_ID,
-      args: [accountData?.address],
-      onSuccess: (data: Result) => {
-        setLensProfileId(hexToDecimal(data._hex));
-      },
-      onError: (error) => {},
-    }
-  );
+  const networkManager_getLensProfileIdFromAddress = useContractRead({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "getLensProfileIdFromAddress",
+    enabled: false,
+    chainId: CHAIN_ID,
+    args: [accountData?.address],
+    onSuccess: (data: Result) => {
+      setLensProfileId(hexToDecimal(data._hex));
+    },
+    onError: (error) => {},
+  });
 
-  const dai_balanceOf = useContractRead(
-    {
-      addressOrName: DAI_ADDRESS,
-      contractInterface: JSON.stringify(DaiInterface),
-      functionName: "balanceOf",
-      enabled: false,
-      cacheTime: 50000,
-      watch: true,
-      chainId: CHAIN_ID,
-      args: [userAddress],
-      onError: (error: Error) => {},
-    }
-  );
+  const dai_balanceOf = useContractRead({
+    addressOrName: DAI_ADDRESS,
+    contractInterface: JSON.stringify(DaiInterface),
+    functionName: "balanceOf",
+    enabled: false,
+    cacheTime: 50000,
+    watch: true,
+    chainId: CHAIN_ID,
+    args: [userAddress],
+    onError: (error: Error) => {},
+  });
 
   const ethBalanceData = useBalance({
     addressOrName: accountData ? accountData.address : String(0),
@@ -249,17 +244,17 @@ const NavigationBar: FC = (): JSX.Element => {
         userWalletDataStored({
           balance: ethBalance,
           erc20Balance: {
-            [DAI_ADDRESS]: hexToDecimal(BigNumber.from(Number(daiBalance))._hex),
+            [DAI_ADDRESS]: hexToDecimal(
+              BigNumber.from(Number(daiBalance))._hex
+            ),
           },
           connector: String(connectData.data?.connector.name),
           address,
-          connected: accountData.isConnected
+          connected: accountData.isConnected,
         })
       );
     }
 
-
-    
     if (accountData.isConnected) {
       handleOnIsConnected();
     } else {
@@ -330,7 +325,6 @@ const NavigationBar: FC = (): JSX.Element => {
 
       handlesClose();
     }
-
   }, [accountData.isConnected]);
 
 
@@ -338,19 +332,19 @@ const NavigationBar: FC = (): JSX.Element => {
     <React.Fragment>
       <AppBar
         variant="outlined"
-        // elevation={0}
         sx={{
-          width: { sm: `100%` },
-          ml: { sm: `100%` },
+          width: `calc(100% - ${320}px)`, 
+          ml: `${320}px`,
           bgcolor: "#fff",
-          //  height: "95px",
-          border: "1px solid #ddd !important",
+          border: 'none',
+          borderBottom: "1px solid #ddd !important",
+          padding: '0px 20px',
         }}
       >
         <Toolbar className={classes.toolbar}>
           <Container
             maxWidth="xl"
-            sx={{ display: "flex", flexDirection: "column", bgcolor: "#fff" }}
+            sx={{  display: "flex", flexDirection: "column", bgcolor: "#fff" }}
           >
             <Grid
               width="100%"
@@ -362,20 +356,14 @@ const NavigationBar: FC = (): JSX.Element => {
               justifyContent="space-between"
             >
               <Grid item sx={{ display: "flex", alignItems: "center" }}>
-                <Stack direction="row" alignItems="center" sx={{ mr: 2 }}>
+                <Stack direction="row" alignItems="center" sx={{  }}>
                   <img
                     className={classes.clickableBrand}
                     src="/assets/logo.svg"
                     style={{ width: 40, height: 40 }}
                   />
                 </Stack>
-                <SearchBarV1
-                  width={300}
-                  placeholder="Find work"
-                  value={searchQuery}
-                  onChange={onChangeSearchQuery}
-                  onKeyDown={onSearch}
-                />
+             
 
                 <Stack
                   direction="row"
@@ -388,38 +376,19 @@ const NavigationBar: FC = (): JSX.Element => {
                       variant="button"
                       fontSize={14}
                       component={Button}
+                      disableRipple
+                      disableFocusRipple
+                      disableTouchRipple
                       color={
                         router.pathname == "/" ? "primary" : "text.secondary"
                       }
                       sx={{ fontWeight: "bold" }}
                     >
-                      Explore
+                      Home
                     </Typography>
                   </Link>
 
-                  <Link href="/work">
-                    <Typography
-                      component={Button}
-                      fontSize={14}
-                      variant="button"
-                      color={
-                        router.pathname == "/work"
-                          ? "primary"
-                          : "text.secondary"
-                      }
-                      fontWeight="bold"
-                      disableFocusRipple
-                      disableElevation
-                      disableRipple
-                      disableTouchRipple
-                      aria-controls={open ? "basic-menu" : undefined}
-                      aria-haspopup="true"
-                      aria-expanded={open ? "true" : undefined}
-                      onClick={handleClick}
-                    >
-                      Work
-                    </Typography>
-                  </Link>
+       
 
                   {accountData.isConnected && (
                     <Link href="/messenger">
@@ -439,23 +408,7 @@ const NavigationBar: FC = (): JSX.Element => {
                     </Link>
                   )}
 
-                  {accountData.isConnected && (
-                    <Link href="/view">
-                      <Typography
-                        component={Button}
-                        fontSize={14}
-                        variant="button"
-                        color={
-                          router.pathname.includes("/contract")
-                            ? "primary"
-                            : "text.secondary"
-                        }
-                        fontWeight="bold"
-                      >
-                        Contracts
-                      </Typography>
-                    </Link>
-                  )}
+          
                 </Stack>
               </Grid>
 
@@ -470,7 +423,15 @@ const NavigationBar: FC = (): JSX.Element => {
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <>
                     <Tooltip title="Create">
-                      <IconButton
+                      <Chip
+                        clickable
+                        label="Create"
+                        sx={{
+                          fontWeight: "600",
+                          border: "1px solid #ddd",
+                          fontSize: "11px",
+                          bgcolor: "rgb(245, 245, 245)",
+                        }}
                         size="large"
                         onClick={handleOnClickCreateIcon}
                         aria-controls={
@@ -478,12 +439,13 @@ const NavigationBar: FC = (): JSX.Element => {
                         }
                         aria-haspopup="true"
                         aria-expanded={createMenuIsOpen ? "true" : undefined}
-                      >
-                        <AddCircleOutline
-                          fontSize="medium"
-                          sx={{ color: "rgb(158, 158, 166)" }}
-                        />
-                      </IconButton>
+                        icon={
+                          <AddCircleOutline
+                            fontSize="small"
+                            sx={{ color: "rgb(158, 158, 166)" }}
+                          />
+                        }
+                      />
                     </Tooltip>
 
                     <Menu
@@ -523,6 +485,7 @@ const NavigationBar: FC = (): JSX.Element => {
                     >
                       <List>
                         <ListItemButton
+                          disabled={!userData.data?.verifiedUsers?.length > 0}
                           onClick={() => router.push("/create/contract")}
                         >
                           <ListItemText
@@ -564,12 +527,23 @@ const NavigationBar: FC = (): JSX.Element => {
 
                   <>
                     <Tooltip title="Help">
-                      <IconButton size="large" onClick={handleOnClickHelpIcon}>
-                        <HelpOutline
-                          fontSize="medium"
-                          sx={{ color: "rgb(158, 158, 166)" }}
-                        />
-                      </IconButton>
+                      <Chip
+                        sx={{
+                          fontWeight: "600",
+                          border: "1px solid #ddd",
+                          fontSize: "11px",
+                          bgcolor: "rgb(245, 245, 245)",
+                        }}
+                        icon={
+                          <HelpOutline
+                            fontSize="small"
+                            sx={{ color: "rgb(158, 158, 166)" }}
+                          />
+                        }
+                        label="Help"
+                        size="large"
+                        onClick={handleOnClickHelpIcon}
+                      />
                     </Tooltip>
 
                     <Menu
@@ -644,13 +618,17 @@ const NavigationBar: FC = (): JSX.Element => {
                   ) : (
                     <Chip
                       color="primary"
-                      icon={<Language fontSize="small" />}
                       size="medium"
                       label="Connect"
+                      component={Button}
+                      disableRipple
+                      disableFocusRipple
+                      disableTouchRipple
                       sx={{
-                        fontWeight: "bold",
-                        color: "white",
-                        fontSize: "15px",
+                        fontWeight: "600",
+                        border: "1px solid #ddd",
+                        fontSize: "11px",
+                        bgcolor: "rgb(245, 245, 245)",
                       }}
                       onClick={handleClickOpen}
                     />
@@ -735,8 +713,7 @@ const NavigationBar: FC = (): JSX.Element => {
                   >
                     {connector.name}
 
-
-                    {connectData.status === 'loading' &&
+                    {connectData.status === "loading" &&
                       connector.id === connectData.pendingConnector?.id &&
 
                       " (connecting)"}
@@ -799,8 +776,7 @@ const NavigationBar: FC = (): JSX.Element => {
                   >
                     {connector.name}
                     {!connector.ready && " (unsupported)"}
-
-                    {connectData.status === 'loading' &&
+                    {connectData.status === "loading" &&
                       connector.id === connectData.pendingConnector?.id &&
 
                       " (connecting)"}
