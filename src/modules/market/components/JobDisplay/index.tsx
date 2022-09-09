@@ -224,7 +224,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text = false }) => {
         </Box>
 
         <Grid
-          pb={2}
+          pb={2}z
           container
           direction="row"
           flexDirection="row"

@@ -19,6 +19,7 @@ import {
   IconButton,
   Menu,
   InputBase,
+  Modal,
   Table,
   TableBody,
   Chip,
@@ -128,6 +129,14 @@ const ExplorePage: NextPage = () => {
 
   const [value, setValue] = React.useState<Date | null>(new Date());
 
+ 
+
+
+  
+ 
+
+
+
   return (
     <Container
       maxWidth="xl"
@@ -235,7 +244,7 @@ const ExplorePage: NextPage = () => {
           </Stack>
         </Stack>
 
-  
+
           <Box sx={{ my: 2,width: 500, display: "flex", flexDirection: "column" }}>
           
             <SearchBarV1 placeholder="Try website designer..." />
