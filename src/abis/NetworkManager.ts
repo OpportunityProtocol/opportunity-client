@@ -1,62 +1,5 @@
 const NetworkManagerInterface = [
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_available",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_required",
-        "type": "uint256"
-      }
-    ],
-    "name": "InsufficientPayment",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_ruling",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_numberOfChoices",
-        "type": "uint256"
-      }
-    ],
-    "name": "InvalidRuling",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidStatus",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "NotArbitrator",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "NotPayer",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "PayeeDepositStillPending",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ThirdPartyNotAllowed",
-    "type": "error"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -197,6 +140,38 @@ const NetworkManagerInterface = [
     "inputs": [
       {
         "indexed": true,
+        "internalType": "bytes32",
+        "name": "contractID",
+        "type": "bytes32"
+      }
+    ],
+    "name": "LogCancelArbitration",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "contractID",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "requester",
+        "type": "address"
+      }
+    ],
+    "name": "LogNotifyOfArbitrationRequest",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "uint256",
         "name": "_metaEvidenceID",
         "type": "uint256"
@@ -209,31 +184,6 @@ const NetworkManagerInterface = [
       }
     ],
     "name": "MetaEvidence",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "contract IArbitrator",
-        "name": "_arbitrator",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "_disputeID",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_ruling",
-        "type": "uint256"
-      }
-    ],
-    "name": "Ruling",
     "type": "event"
   },
   {
@@ -423,32 +373,6 @@ const NetworkManagerInterface = [
   },
   {
     "inputs": [],
-    "name": "LENS_CONTENT_REFERENCE_MODULE",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "LENS_FOLLOW_MODULE",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "_dai",
     "outputs": [
       {
@@ -494,19 +418,6 @@ const NetworkManagerInterface = [
   },
   {
     "inputs": [],
-    "name": "arbitrationFeeDepositPeriod",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "arbitrator",
     "outputs": [
       {
@@ -516,6 +427,19 @@ const NetworkManagerInterface = [
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "contractID",
+        "type": "bytes32"
+      }
+    ],
+    "name": "cancelContractArbitration",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -585,19 +509,6 @@ const NetworkManagerInterface = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "contractId",
-        "type": "uint256"
-      }
-    ],
-    "name": "depositArbitrationFeeForPayee",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
@@ -617,20 +528,7 @@ const NetworkManagerInterface = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "contractId",
-        "type": "uint256"
-      }
-    ],
-    "name": "disputeRelationship",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "contractId",
+        "name": "contractID",
         "type": "uint256"
       }
     ],
@@ -764,44 +662,6 @@ const NetworkManagerInterface = [
   {
     "inputs": [],
     "name": "getProtocolFee",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getPubIdFromServiceId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getPurchaseIdFromServiceId",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1024,7 +884,7 @@ const NetworkManagerInterface = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "contractId",
+        "name": "contractID",
         "type": "uint256"
       },
       {
@@ -1099,7 +959,7 @@ const NetworkManagerInterface = [
         "type": "uint256"
       }
     ],
-    "name": "isFamiliar",
+    "name": "isFamiliarWithService",
     "outputs": [
       {
         "internalType": "bool",
@@ -1143,6 +1003,24 @@ const NetworkManagerInterface = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "contractID",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address",
+        "name": "requester",
+        "type": "address"
+      }
+    ],
+    "name": "notifyOfContractArbitrationRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "proxyProfileCreator",
     "outputs": [
@@ -1166,33 +1044,6 @@ const NetworkManagerInterface = [
         "internalType": "uint8",
         "name": "offerIndex",
         "type": "uint8"
-      },
-      {
-        "components": [
-          {
-            "internalType": "uint8",
-            "name": "v",
-            "type": "uint8"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "r",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "s",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
-            "name": "deadline",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct DataTypes.EIP712Signature",
-        "name": "sig",
-        "type": "tuple"
       }
     ],
     "name": "purchaseServiceOffering",
@@ -1303,50 +1154,6 @@ const NetworkManagerInterface = [
     "name": "register",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "relationshipIDToEscrowDetails",
-    "outputs": [
-      {
-        "internalType": "enum NetworkLibrary.EscrowStatus",
-        "name": "status",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "disputeID",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "createdAt",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "reclaimedAt",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "payerFeeDeposit",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "payeeFeeDeposit",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -1480,7 +1287,7 @@ const NetworkManagerInterface = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "contractId",
+        "name": "contractID",
         "type": "uint256"
       }
     ],
@@ -1493,26 +1300,7 @@ const NetworkManagerInterface = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "contractId",
-        "type": "uint256"
-      }
-    ],
-    "name": "remainingTimeToDepositArbitrationFee",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "contractId",
+        "name": "contractID",
         "type": "uint256"
       },
       {
@@ -1529,17 +1317,17 @@ const NetworkManagerInterface = [
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "contractID",
+        "type": "bytes32"
       },
       {
-        "internalType": "uint256",
-        "name": "purchaseId",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "ruling",
+        "type": "bytes32"
       }
     ],
-    "name": "resolveService",
+    "name": "resolveDisputedContract",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1548,16 +1336,43 @@ const NetworkManagerInterface = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "disputeId",
+        "name": "serviceId",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "ruling",
+        "name": "purchaseId",
         "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint8",
+            "name": "v",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "r",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "s",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "deadline",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct DataTypes.EIP712Signature",
+        "name": "sig",
+        "type": "tuple"
       }
     ],
-    "name": "rule",
+    "name": "resolveService",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1730,56 +1545,12 @@ const NetworkManagerInterface = [
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_LENS_CONTENT_REFERENCE_MODULE",
-        "type": "address"
-      }
-    ],
-    "name": "setLensContentReferenceModule",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_LENS_FOLLOW_MODULE",
-        "type": "address"
-      }
-    ],
-    "name": "setLensFollowModule",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "protocolFee",
         "type": "uint256"
       }
     ],
     "name": "setProtocolFee",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "contractId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "_evidence",
-        "type": "string"
-      }
-    ],
-    "name": "submitEvidence",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1800,6 +1571,19 @@ const NetworkManagerInterface = [
   {
     "inputs": [
       {
+        "internalType": "bytes32",
+        "name": "contractID",
+        "type": "bytes32"
+      }
+    ],
+    "name": "triggerDisputeStatus",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "string",
         "name": "metadataPtr",
         "type": "string"
@@ -1814,7 +1598,7 @@ const NetworkManagerInterface = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "contractId",
+        "name": "contractID",
         "type": "uint256"
       },
       {

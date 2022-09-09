@@ -45,7 +45,6 @@ import {
   DAI_ADDRESS,
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
-  SERVICE_COLLECT_MODULE,
   ZERO_ADDRESS,
 } from "../../../constant";
 import {
