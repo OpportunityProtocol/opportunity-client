@@ -1,9 +1,6 @@
 import {
   Box,
   Grid,
-  Tab,
-  Tabs,
-  InputAdornment,
   Paper,
   InputBase,
   Card,
@@ -28,24 +25,18 @@ import ImageIcon from "@mui/icons-material/Image";
 import fleek from "../../fleek";
 import {
   useAccount,
-  useContractRead,
   useContractWrite,
   usePrepareContractWrite,
-  useProvider,
 } from "wagmi";
 import {
   NETWORK_MANAGER_ADDRESS,
-  TOKEN_FACTORY_ADDRESS,
 } from "../../constant";
 import { NetworkManagerInterface, TokenFactoryInterface } from "../../abis";
 import { BigNumber } from "ethers";
 import { create } from "ipfs-http-client";
-import { CHAIN_ID } from "../../constant/provider";
-import { Result } from "ethers/lib/utils";
-import { hexToDecimal } from "../../common/helper";
 import { NextRouter, useRouter } from "next/router";
 import BootstrapInput from "../../common/components/BootstrapInput/BootstrapInput";
-import { FEE_COLLECT_MODULE, FOLLOWER_ONLY_REFERENCE_MODULE, SERVICE_REFERENCE_MODULE } from "../../constant/contracts";
+import { FEE_COLLECT_MODULE, FOLLOWER_ONLY_REFERENCE_MODULE } from "../../constant/contracts";
 import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
