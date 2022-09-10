@@ -320,10 +320,13 @@ const NavigationBar: FC = (): JSX.Element => {
   };
 
   useEffect(() => {
+
     if (accountData.isConnected) {
+
       handlesClose();
     }
   }, [accountData.isConnected]);
+
 
   return (
     <React.Fragment>
@@ -673,12 +676,16 @@ const NavigationBar: FC = (): JSX.Element => {
             </DialogTitle>
 
             <div>
+
               {connectData.connectors.slice(-2, 1).map((connector) => (
+
                 <Button
                   variant="outlined"
                   disabled={!connector.ready}
                   key={connector.id}
+
                   onClick={() => connectData.connect({ connector })}
+
                   sx={{
                     paddingLeft: "24px",
                     paddingRight: "163px",
@@ -708,6 +715,7 @@ const NavigationBar: FC = (): JSX.Element => {
 
                     {connectData.status === "loading" &&
                       connector.id === connectData.pendingConnector?.id &&
+
                       " (connecting)"}
                   </Typography>
                 </Button>
@@ -730,12 +738,16 @@ const NavigationBar: FC = (): JSX.Element => {
                 </Typography>
               </Divider>
 
+
               {connectData.connectors.slice(1).map((connector) => (
+
                 <Button
                   variant="outlined"
                   disabled={!connector.ready}
                   key={connector.id}
+
                   onClick={() => connectData.connect({ connector })}
+
                   sx={{
                     paddingLeft: "24px",
                     paddingRight: "122px",
@@ -766,12 +778,15 @@ const NavigationBar: FC = (): JSX.Element => {
                     {!connector.ready && " (unsupported)"}
                     {connectData.status === "loading" &&
                       connector.id === connectData.pendingConnector?.id &&
+
                       " (connecting)"}
                   </Typography>
                 </Button>
               ))}
 
+
               {connectData.error && <div>{connectData.error.message}</div>}
+
             </div>
           </DialogContent>
         </Dialog>
