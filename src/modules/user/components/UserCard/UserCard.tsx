@@ -11,8 +11,6 @@ import {
   alpha,
 } from "@mui/material";
 import { NextRouter, useRouter } from "next/router";
-import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
-import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
 import { ClassNameMap } from "@mui/material";
 import { useState, useEffect, FC } from "react";
 import {

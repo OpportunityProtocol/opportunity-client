@@ -21,7 +21,7 @@ import {
 import { useStyles } from "./ServiceCardStyle";
 import DAIIcon from "../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg";
 import { NextRouter, useRouter } from "next/router";
-import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
+
 import {
   PurchasedServiceMetadataStruct,
   ServiceStruct,

@@ -11,8 +11,6 @@ import {
   alpha,
 } from "@mui/material";
 import { NextRouter, useRouter } from "next/router";
-import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
-import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
 import { ClassNameMap } from "@mui/material";
 import { useState, useEffect, FC } from "react";
 import {
@@ -51,13 +49,6 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
 }) => {
   const [displayImg, setDisplayImg] = useState<Buffer | string>("");
   const router: NextRouter = useRouter();
-  const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
-    size: avatarSize,
-    gap: 3,
-    thickness: 3,
-    gapColor: "#f4f7fa",
-    color: "linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)",
-  });
 
   const [state, setState] = useState<any>({});
 

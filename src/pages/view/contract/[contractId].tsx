@@ -20,7 +20,6 @@ import { useStyles } from "../../../modules/contract/ContractStyles";
 import { FavoriteBorderOutlined } from "@mui/icons-material";
 
 import JobDisplay from "../../../modules/market/components/JobDisplay";
-import { useGradientAvatarStyles } from "@mui-treasury/styles/avatar/gradient";
 
 import { useRouter } from "next/router";
 import { NextPage } from "next/types";
@@ -44,7 +43,6 @@ import { Result } from "ethers/lib/utils";
 import { create } from "ipfs-http-client";
 import fleek from "../../../fleek";
 import { ethers } from "ethers";
-import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
 
 import Dialog from '@mui/material/Dialog';
 
@@ -108,14 +106,6 @@ const ViewContract: NextPage<any> = () => {
   const [reviews, setReviews] = useState<any>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
-  const styles = useGradientAvatarStyles({
-    size: 50,
-    gap: 3,
-    thickness: 3,
-    gapColor: "#f4f7fa",
-    color: "linear-gradient(to bottom right, #feac5e, #c779d0, #4bc0c8)",
-  });
 
   const networkManager_getContractData = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -886,17 +876,9 @@ handleClose();
                         my={1}
                       >
                         <Box>
-                          <div
-                            style={{
-                              margin: "5px 0px",
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                            }}
-                            className={styles.root}
-                          >
+                      
                             <Avatar />
-                          </div>
+                        
                         </Box>
 
                         <Stack>
