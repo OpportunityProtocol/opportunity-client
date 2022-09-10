@@ -227,7 +227,7 @@ const TransactionTokenDialog: FC<
   const serviceCollectModule_isFamiliar = useContractRead(
     {
       addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface
+      contractInterface: NetworkManagerInterface,
       functionName: "isFamiliar",
       args: [userAddress, serviceId],
       enabled: true,

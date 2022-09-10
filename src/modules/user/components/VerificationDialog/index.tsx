@@ -36,6 +36,7 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 import {
+  FREE_FOLLOW_MODULE,
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
   ZERO_ADDRESS,
@@ -132,9 +133,9 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
 
   useEffect(() => {
     if (lensProfileId !== 0) {
-      lensHub_getProfile.refetch({
+   /*   lensHub_getProfile.refetch({
         throwOnError: true,
-      });
+      });*/
     }
   }, [lensProfileId]);
 
@@ -143,6 +144,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     contractInterface: NetworkManagerInterface,
     functionName: "getLensProfileIdFromAddress",
     enabled: false,
+    watch: false,
     chainId: CHAIN_ID,
     args: [userAddress],
     onSuccess: (data: Result) => {
@@ -161,7 +163,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
         handle: chosenLensHandle,
         imageURI:
           "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
-        followModule: ZERO_ADDRESS,
+        followModule: FREE_FOLLOW_MODULE,
         followModuleInitData: [],
         followNFTURI: "",
       },
@@ -182,7 +184,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
       }
     },
     onSettled(data, error) {
-      networkManager_getLensProfileIdFromAddress.refetch();
+     // networkManager_getLensProfileIdFromAddress.refetch();
       setRegistrationLoading(false);
       handleClose();
     },

@@ -42,8 +42,8 @@ import { Inbox, Mail } from "@mui/icons-material";
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat],
   [
-   // alchemyProvider({ alchemyId: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY }),
-  //  publicProvider(),
+   alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY, priority: 1, weight: 100 }),
+    publicProvider(),
     jsonRpcProvider({
       rpc: (chain) => ({
         http: "http://127.0.0.1:8545",

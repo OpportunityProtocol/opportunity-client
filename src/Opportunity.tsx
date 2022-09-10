@@ -45,10 +45,11 @@ import {
   userERC20BalanceChanged,
 } from "./modules/user/userReduxSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { DAI_ADDRESS, ZERO_ADDRESS } from "./constant";
+import { DAI_ADDRESS, NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "./constant";
 import { RootState } from "./store";
-import { DaiInterface } from "./abis";
+import { DaiInterface, NetworkManagerInterface } from "./abis";
 import { CHAIN_ID } from "./constant/provider";
+import VerificationDialog from "./modules/user/components/VerificationDialog";
 
 interface Props {
   /**
@@ -70,6 +71,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const userConnector = useSelector(selectUserConnector);
   const connected = useSelector(selectUserConnectionStatus);
 
+  const [verificationModal, setVerificationModal] = useState<boolean>(false)
   const [state, setState] = useState({
     displayedMarkets: [],
   });
@@ -177,13 +179,19 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
       </Box>
       <Divider />
       <Box>
-        <Stack my={1} direction="row" alignItems="center">
+    
           <CardContent>
+          <Stack my={1} direction="row" alignItems="center">
             <Button size="small" variant="contained" onClick={handleOnAddFunds}>
               Add funds
             </Button>
+
+            <Button size="small" variant="contained" onClick={() => setVerificationModal(true)}>
+              Register
+            </Button>
+            </Stack>
           </CardContent>
-        </Stack>
+
         <List disablePadding>
           <Divider />
           <ListItem divider sx={{ backgroundColor: "#fafafa" }}>
@@ -305,6 +313,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
           {children}
         </Box>
       </Box>
+
+      <VerificationDialog open={verificationModal} handleClose={() => setVerificationModal(false)} />
     </>
   );
 };

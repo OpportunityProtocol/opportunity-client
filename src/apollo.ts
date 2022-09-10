@@ -3,7 +3,7 @@ import { APOLLO_CLIENT_URI } from './constant';
 import { setContext } from '@apollo/client/link/context';
 
 const httpLink = new HttpLink({
-  uri: APOLLO_CLIENT_URI.replace("/graphql", ""),
+  uri: APOLLO_CLIENT_URI,
   fetchOptions: 'no-cors',
   fetch
 })
