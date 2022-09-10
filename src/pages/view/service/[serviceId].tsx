@@ -62,7 +62,7 @@ import VerifiedAvatar from "../../../modules/user/components/VerifiedAvatar";
 import { BigNumber, ethers } from "ethers";
 import TransactionTokenDialog from "../../../modules/market/components/TransactionTokenDialog";
 import { ConfirmationDialog } from "../../../common/components/ConfirmationDialog";
-import { MailOutline, Refresh } from "@material-ui/icons";
+import { MailOutline } from "@mui/icons-material";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_SERVICE_BY_ID } from "../../../modules/contract/ContractGQLQueries";
 import { getMetadata } from "../../../common/ipfs-helper";

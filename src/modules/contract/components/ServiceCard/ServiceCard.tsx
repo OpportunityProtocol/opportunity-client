@@ -51,7 +51,7 @@ import {
   selectVerificationStatus,
 } from "../../../user/userReduxSlice";
 
-import { Check } from "@material-ui/icons";
+import { Check } from "@mui/icons-material";
 
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import VerifiedAvatar from "../../../user/components/VerifiedAvatar";

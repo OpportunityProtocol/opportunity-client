@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FunctionComponent } from "react";
 
 import { alpha, InputBase, Paper, styled } from "@mui/material";
-import { Search } from "@material-ui/icons";
+import { Search } from "@mui/icons-material";
 
 const SearchBarV1StyledInputBase = styled(InputBase)(({ theme }) => ({
   "& .MuiInputBase-input": {

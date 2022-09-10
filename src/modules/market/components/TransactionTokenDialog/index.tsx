@@ -29,7 +29,7 @@ import {
 } from "@mui/material";
 import VerifiedAvatar from "../../../user/components/VerifiedAvatar";
 import TabPanel from "../../../../common/components/TabPanel/TabPanel";
-import { InfoRounded } from "@material-ui/icons";
+
 import {
   useContractRead,
   useContractWrite,

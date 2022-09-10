@@ -4,7 +4,7 @@ import { useStyles } from "./MarketDisplayStyles";
 import { Typography, CardContent, Grid, Divider } from "@mui/material";
 import ClickableCard from "../../../../common/components/ClickableCard/ClickableCard";
 import { NextRouter, useRouter } from "next/router";
-import { ClassNameMap } from "@material-ui/core/styles/withStyles";
+
 import {
   MARKET_DESCRIPTION_MAPPING,
   TOKEN_FACTORY_ADDRESS,
@@ -33,7 +33,7 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
   onSelect,
   marketDetails,
 }) => {
-  const classes: ClassNameMap<"marketTitle" | "primaryContentContainer"> =
+  const classes =
     useStyles();
   const router: NextRouter = useRouter();
 

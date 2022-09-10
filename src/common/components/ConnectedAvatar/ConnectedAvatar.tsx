@@ -55,10 +55,6 @@ import {
   useFeeData,
   usePrepareContractWrite,
 } from "wagmi";
-import { hexToDecimal } from "../../helper";
-import { DaiInterface } from "../../../abis";
-import { CHAIN_ID } from "../../../constant/provider";
-import { ExitToApp } from "@material-ui/icons";
 import { NextRouter, useRouter } from "next/router";
 
 const StyledBadge = styled(Badge, {

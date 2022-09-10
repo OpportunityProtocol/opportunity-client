@@ -44,7 +44,6 @@ import { Result } from "ethers/lib/utils";
 import { create } from "ipfs-http-client";
 import fleek from "../../../fleek";
 import { ethers } from "ethers";
-import { ClassNameMap } from "@material-ui/core/styles/withStyles";
 import { GradientAvatarClassKey } from "@mui-treasury/styles/avatar/gradient/gradientAvatar.styles";
 
 import Dialog from '@mui/material/Dialog';
@@ -110,7 +109,7 @@ const ViewContract: NextPage<any> = () => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  const styles: ClassNameMap<GradientAvatarClassKey> = useGradientAvatarStyles({
+  const styles = useGradientAvatarStyles({
     size: 50,
     gap: 3,
     thickness: 3,

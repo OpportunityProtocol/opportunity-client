@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import Moment from "react-moment";
 import { Card, Grid, styled, Typography, Button} from "@mui/material";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles({
   containerOwn: {
