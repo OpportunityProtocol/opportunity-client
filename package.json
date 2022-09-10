@@ -20,7 +20,6 @@
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",
     "@fleekhq/fleek-storage-js": "^1.0.21",
-    "@material-ui/icons": "^4.11.3",
     "@mui-treasury/styles": "^1.13.1",
     "@mui/icons-material": "^5.4.2",
     "@mui/lab": "^5.0.0-alpha.69",
