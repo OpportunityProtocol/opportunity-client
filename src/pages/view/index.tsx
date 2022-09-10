@@ -2,57 +2,40 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   Box,
-  Card,
   Divider,
   Container,
-  ListItemText,
   Grid,
   Tabs,
   Tab,
-  Pagination,
-  Button,
   Stack,
-  ListItemIcon,
   Typography,
   IconButton,
 } from "@mui/material";
 
-import { useStyles } from "../../modules/contract/ContractStyles";
-
 import JobDisplay from "../../modules/market/components/JobDisplay";
-import BountySubmission from "../../modules/market/components/BountySubmission/BountySubmission";
-import { FileUploader } from "react-drag-drop-files";
 import TabPanel from "../../common/components/TabPanel/TabPanel";
 
-import SearchBarV2 from "../../common/components/SearchBarV2/SearchBarV2";
 import ServiceCard from "../../modules/contract/components/ServiceCard/ServiceCard";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  selectLens,
   selectUserAddress,
-  selectVerificationStatus,
 } from "../../modules/user/userReduxSlice";
 import {
-  useContract,
   useContractEvent,
-  useContractRead,
-  useSigner,
 } from "wagmi";
-import { NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "../../constant";
+import { NETWORK_MANAGER_ADDRESS } from "../../constant";
 import { NetworkManagerInterface } from "../../abis";
-import { ethers, Event } from "ethers";
+import {  Event } from "ethers";
 
 import {
   RelationshipStruct,
   ServiceStruct,
 } from "../../typechain-types/NetworkManager";
-import { hexToDecimal } from "../../common/helper";
 import { QueryResult, useQuery } from "@apollo/client";
 import {
   GET_CONTRACTS_BY_EMPLOYER,
   GET_PURCHASED_SERVICES_BY_CLIENT,
   GET_SERVICE_BY_ID,
-  GET_SERVICES,
   GET_SERVICES_BY_CREATOR,
   GET_ACTIVE_SERVICES_BY_CREATOR,
   GET_CONTRACTS_BY_WORKER,

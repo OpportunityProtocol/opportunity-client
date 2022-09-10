@@ -19,13 +19,12 @@ import {
   DialogContentText,
   Chip,
 } from "@mui/material";
-import Link from "next/link";
-import { LineChart, Line, ResponsiveContainer } from "recharts";
+
+//import { LineChart, Line, ResponsiveContainer } from "recharts";
 
 import { timelineButtons } from "../../../modules/market/MarketConstants";
 import ServiceCard from "../../../modules/contract/components/ServiceCard/ServiceCard";
 import { useRouter } from "next/router";
-import UserCard from "../../../modules/user/components/UserCard/UserCard";
 import { NextPage } from "next";
 import {
   useAccount,
@@ -46,13 +45,12 @@ import {
 } from "../../../constant";
 import {
   FollowNFT,
-  InteractionLogicInterface,
   LensHubInterface,
   NetworkManagerInterface,
 } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
 import { hexToDecimal } from "../../../common/helper";
-import { Result, splitSignature } from "ethers/lib/utils";
+import { Result } from "ethers/lib/utils";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../../modules/user/UserGQLQueries";
 import InvestmentTable from "../../../modules/market/components/InvestmentTable";
@@ -664,7 +662,7 @@ const ProfilePage: NextPage<any> = () => {
                     +0.38
                   </Typography>
                 </Typography>
-                <ResponsiveContainer width="100%" height={350}>
+               {/* <ResponsiveContainer width="100%" height={350}>
                   <LineChart width={350} height={350} data={data}>
                     <Line
                       type="monotone"
@@ -673,7 +671,7 @@ const ProfilePage: NextPage<any> = () => {
                       strokeWidth={2}
                     />
                   </LineChart>
-                </ResponsiveContainer>
+            </ResponsiveContainer>*/}
                 <Stack
                   direction="row"
                   alignItems="center"

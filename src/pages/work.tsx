@@ -1,32 +1,16 @@
 import React, { ChangeEvent, Fragment, useContext, useState } from "react";
 import JobDisplay from "../modules/market/components/JobDisplay";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
 
 import {
   Grid,
-  Collapse,
   Container,
-  ListItem,
-  List,
-  ListItemButton,
-  ListItemText,
   Stack,
-  Checkbox,
-  Tabs,
-  Tab,
   Typography,
   Box,
-  CardContent,
-  Card,
   Divider,
 } from "@mui/material";
-import TabPanel from "../common/components/TabPanel/TabPanel";
-import SearchBarV2 from "../common/components/SearchBarV2/SearchBarV2";
 import ServiceCard from "../modules/contract/components/ServiceCard/ServiceCard";
 import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
-import { TrendingUp } from "@material-ui/icons";
-import { CheckBox, WorkOffRounded } from "@mui/icons-material";
 import SearchContext from "../context/SearchContext";
 import { NextPage } from "next";
 

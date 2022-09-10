@@ -18,10 +18,7 @@ import {
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { publicProvider } from 'wagmi/providers/public'
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
-import { InjectedConnector } from 'wagmi/connectors/injected'
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect'
-import { ALCHEMY_API_KEY, ALCHEMY_HTTPS } from '../constant';
 
 
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
@@ -96,13 +93,6 @@ function MyApp({ Component, pageProps }: AppProps) {
     return null;
   }
 
-  const { window } = pageProps;
-
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
   const drawer = (
     <div>
       <Toolbar />
@@ -134,8 +124,6 @@ function MyApp({ Component, pageProps }: AppProps) {
       </List>
     </div>
   );
-
-  const container = window !== undefined ? () => window().document.body : undefined;
 
 
   return (

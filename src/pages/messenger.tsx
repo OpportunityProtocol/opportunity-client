@@ -17,14 +17,6 @@ import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-import CircleIcon from "@mui/icons-material/Circle";
-import { styled, alpha } from "@mui/material/styles";
-
-import InputBase from "@mui/material/InputBase";
-import FormControl from "@mui/material/FormControl";
-import OutlinedInput from "@mui/material/OutlinedInput";
-import { InputLabel, Input } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
 import SearchIcon from '@mui/icons-material/Search';
 
 
@@ -49,27 +41,7 @@ import MessageForm from "../modules/user/components/Messenger/MessageForm";
 import Message from "../modules/user/components/Messenger/Message";
 import {
   useAccount,
-  useContractEvent,
-  useContractRead,
-  useContractWrite,
-  usePrepareContractWrite,
 } from "wagmi";
-
-const styles = createStyles({
-  button: {
-    margin: 10
-  },
-  buttonContainer: {
-    marginLeft: "10em",
-    display: "flex",
-    flexDirection: "row"
-  },
-  "@media (min-width: 960px)": {
-    buttonContainer: {
-      backgroundColor: "black"
-    }
-  }
-});
 
 
 const Messenger = () => {

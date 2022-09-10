@@ -1,56 +1,28 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { useStyles } from "../modules/market/MarketStyles";
 import {
-  Grid,
   Container,
-  CardContent,
   Typography,
   TableHead,
   TableRow,
-  Button,
   Box,
   Stack,
-  alpha,
-  Card,
-  CardHeader,
-  Divider,
-  getCardHeaderUtilityClass,
   Paper,
-  IconButton,
-  Menu,
-  InputBase,
-  Modal,
   Table,
-  TableBody,
   Chip,
-  FormControl,
-  InputLabel,
-  ButtonGroup,
 } from "@mui/material";
-import moment from "moment";
-import MarketDisplay from "../modules/market/components/MarketDisplay";
-import { ICarouselItemProps } from "../modules/market/MarketInterface";
-import JobDisplay from "../modules/market/components/JobDisplay";
+
+import { withStyles } from '@mui/styles'
 import ServiceCard from "../modules/contract/components/ServiceCard/ServiceCard";
 
 import { NextPage } from "next";
-import { hexToDecimal } from "../common/helper";
-import VerifiedAvatar from "../modules/user/components/VerifiedAvatar";
-import { ServiceStruct } from "../typechain-types/NetworkManager";
 import { QueryResult, useQuery } from "@apollo/client";
-import MenuIcon from "@mui/icons-material/Menu";
 import {
   GET_CONTRACTS,
   GET_SERVICES,
 } from "../modules/contract/ContractGQLQueries";
 import { GET_MARKETS } from "../modules/market/MarketGQLQueries";
 import { GET_VERIFIED_FREELANCERS } from "../modules/user/UserGQLQueries";
-import Carousel from "react-material-ui-carousel";
-import { loggedOutHeroCarouselItems } from "../modules/market/MarketConstants";
-import Masonry from "@mui/lab/Masonry";
-import { styled, withStyles } from "@mui/styles";
-import UserCard from "../modules/user/components/UserCard/UserCard";
-
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
 

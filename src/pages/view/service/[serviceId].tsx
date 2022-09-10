@@ -33,41 +33,31 @@ import Paper from "@mui/material/Paper";
 
 import { AccountCircleOutlined, ShareOutlined } from "@mui/icons-material";
 import { NextPage } from "next";
-import { NextRouter, useRouter, withRouter } from "next/router";
-import { ServiceStruct } from "../../../typechain-types/NetworkManager";
+import { NextRouter, withRouter } from "next/router";
 import {
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
-  useSignTypedData,
 } from "wagmi";
 import {
-  DAI_ADDRESS,
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
   ZERO_ADDRESS,
 } from "../../../constant";
 import {
-  DaiInterface,
   LensHubInterface,
-  NetworkManagerInterface,
-  ServiceCollectModuleInterface,
+  NetworkManagerInterface
 } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
 import {
   ProfileStructStruct,
-  PublicationStructStruct,
 } from "../../../typechain-types/ILensHub";
 import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../../common/helper";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import {
   selectUserAddress,
-  userLensDataStored,
 } from "../../../modules/user/userReduxSlice";
-import { create } from "ipfs-http-client";
-import fleek from "../../../fleek";
-import { PaymentProcessingDataStruct } from "../../../typechain-types/ServiceCollectModule";
 import VerifiedAvatar from "../../../modules/user/components/VerifiedAvatar";
 import { BigNumber, ethers } from "ethers";
 import TransactionTokenDialog from "../../../modules/market/components/TransactionTokenDialog";
@@ -75,7 +65,6 @@ import { ConfirmationDialog } from "../../../common/components/ConfirmationDialo
 import { MailOutline, Refresh } from "@material-ui/icons";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_SERVICE_BY_ID } from "../../../modules/contract/ContractGQLQueries";
-import { maxWidth } from "@mui/system";
 import { getMetadata } from "../../../common/ipfs-helper";
 
 interface IViewContractPage {
