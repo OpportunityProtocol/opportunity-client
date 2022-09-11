@@ -63,6 +63,7 @@ import {
 } from "firebase/firestore";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import { isConstValueNode } from "graphql";
+import { getJSONFromIPFSPinata } from "../../../common/ipfs-helper";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -148,13 +149,7 @@ const ViewContract: NextPage<any> = () => {
           });
 
           retVal = await ipfs.get(`/ipfs/${metadataString}`).next();
-        } else {
-          retVal = await fleek.getService(metadataString);
-        }
 
-        if (!retVal) {
-          throw new Error("Unable to retrieve service metadata data");
-        } else {
           const jsonString = Buffer.from(retVal.value).toString("utf8");
           const parsedString = jsonString.slice(
             jsonString.indexOf("{"),
@@ -163,8 +158,15 @@ const ViewContract: NextPage<any> = () => {
           const parsedData = JSON.parse(parsedString);
 
           setContractMetadata(parsedData);
+        } else {
+          retVal = await getJSONFromIPFSPinata(metadataString) //await fleek.getService(metadataString);
+
+          setContractMetadata(JSON.parse(retVal))
         }
-      } catch (error) {}
+  
+      } catch (error) {
+        setContractMetadata({})
+      }
     }
 
     if (metadataString) {

@@ -37,6 +37,7 @@ import fleek from "../../../../fleek";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../../../../modules/user/userReduxSlice";
 import { create } from "ipfs-http-client";
+import { generatePinataData, getJSONFromIPFSPinata, pinJSONToIPFSPinata } from "../../../../common/ipfs-helper";
 
 const Tags = ({ data }) => {
   return (
@@ -105,26 +106,28 @@ const Settings: NextPage<any> = () => {
         });
 
         retVal = await ipfs.get(`/ipfs/${ptr}`).next();
-      } else {
-        retVal = await fleek.getUser(ptr);
-      }
 
-      if (!retVal) {
-        throw new Error("Unable to retrieve user metadata");
-      } else {
         const jsonString = Buffer.from(retVal.value).toString("utf8");
         const parsedString = jsonString.slice(
           jsonString.indexOf("{"),
           jsonString.lastIndexOf("}") + 1
         );
         const parsedData = JSON.parse(parsedString);
-console.log(parsedData)
+
         setMetadataState({
           ...parsedData,
         });
+
+      } else {
+        retVal = await getJSONFromIPFSPinata(ptr) //await fleek.getUser(ptr);
+
+        setMetadataState({
+          ...JSON.parse(retVal)
+        })
       }
+
     } catch (error) {
-      alert("Error downloading metadata");
+     setMetadataState({})
     }
   };
 
@@ -262,10 +265,14 @@ console.log(parsedData)
 
       retVal = await (await ipfs.add(JSON.stringify(metadataState))).path;
     } else {
-      retVal = await fleek.uploadService(
+
+      const data = generatePinataData(String(userAddress), metadataState)
+      retVal = await pinJSONToIPFSPinata(data)
+
+      /*retVal = await fleek.uploadService(
         String(userAddress),
         JSON.stringify(metadataState)
-      );
+      );*/
     }
 
     await networkManager_updateUser.writeAsync({

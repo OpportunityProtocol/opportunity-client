@@ -69,6 +69,7 @@ import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import { ConfirmationDialog } from "../../../common/components/ConfirmationDialog";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../../../modules/user/userReduxSlice";
+import { getJSONFromIPFSPinata } from "../../../common/ipfs-helper";
 
 const data = [
   {
@@ -556,13 +557,7 @@ const ProfilePage: NextPage<any> = () => {
         });
 
         retVal = await ipfs.get(`/ipfs/${ptr}`).next();
-      } else {
-        retVal = await fleek.getUser(ptr);
-      }
 
-      if (!retVal) {
-        throw new Error("Unable to retrieve user metadata");
-      } else {
         const jsonString = Buffer.from(retVal.value).toString("utf8");
         const parsedString = jsonString.slice(
           jsonString.indexOf("{"),
@@ -577,9 +572,20 @@ const ProfilePage: NextPage<any> = () => {
             ...parsedData,
           },
         });
+      } else {
+        retVal = await getJSONFromIPFSPinata(ptr) //await fleek.getUser(ptr);
+
+        setProfileState({
+          ...profileState,
+          general: {
+            ...profileState.general,
+            ...JSON.parse(retVal)
+          }
+        })
       }
+
     } catch (error) {
-      console.log("Error downloading metadata from profile");
+  
     }
   };
 

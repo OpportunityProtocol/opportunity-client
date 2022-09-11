@@ -29,6 +29,7 @@ import { QueryResult, useQuery } from "@apollo/client";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../UserGQLQueries";
 import fleek from "../../../../fleek";
 import { create } from "ipfs-http-client";
+import { getJSONFromIPFSPinata } from "../../../../common/ipfs-helper";
 
 interface IVerifiedAvatarProps {
   avatarSize?: number;
@@ -103,13 +104,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
         });
 
         retVal = await ipfs.get(`/ipfs/${ptr}`).next();
-      } else {
-        retVal = await fleek.getUser(ptr);
-      }
 
-      if (!retVal) {
-        throw new Error("Unable to retrieve user metadata");
-      } else {
         const jsonString = Buffer.from(retVal.value).toString("utf8");
         const parsedString = jsonString.slice(
           jsonString.indexOf("{"),
@@ -120,7 +115,14 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
           ...state,
           ...parsedData,
         });
+      } else {
+        retVal = await getJSONFromIPFSPinata(ptr) //await fleek.getUser(ptr);
+        setState({
+          ...state,
+          ...JSON.parse(retVal)
+        })
       }
+
     } catch (error) {
       console.log("Error downloading metadata from profile");
     }

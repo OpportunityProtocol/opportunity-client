@@ -40,6 +40,10 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import apolloClient from "../apollo";
 import { SearchProvider } from "../context/SearchContext";
 import { Inbox, Mail } from "@mui/icons-material";
+import { PINATA_JWT } from "../constant";
+import axios from 'axios'
+import { generatePinataData, getJSONFromIPFSPinata, pinJSONToIPFSPinata } from "../common/ipfs-helper";
+
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat],
   [
@@ -92,6 +96,8 @@ const client = createClient({
     }
   },
 });
+
+
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

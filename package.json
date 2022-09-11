@@ -31,6 +31,7 @@
     "@tanstack/react-query": "^4.2.1",
     "@toruslabs/torus-embed": "^1.23.2",
     "@walletconnect/web3-provider": "^1.7.8",
+    "axios": "^0.27.2",
     "babel-eslint": "^10.1.0",
     "clsx": "^1.1.1",
     "connectkit": "^0.0.1",

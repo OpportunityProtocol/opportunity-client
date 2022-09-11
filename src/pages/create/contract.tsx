@@ -58,6 +58,7 @@ import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
 import { ClassNameMap } from "@mui/styles";
+import { generatePinataData, pinJSONToIPFSPinata } from "../../common/ipfs-helper";
 
 /**
  * Elijah Hampton
@@ -273,12 +274,17 @@ const CreateContractPage: NextPage = (): JSX.Element => {
           await ipfs.add(JSON.stringify(createContractForm))
         ).path;
       } else {
-        retVal = await fleek.uploadService(
+        const data = generatePinataData(String(accountData.address) +
+        ":" +
+        createContractForm.contract_title, createContractForm)
+        retVal = await pinJSONToIPFSPinata(data)
+
+        /*retVal = await fleek.uploadService(
           String(accountData.address) +
             ":" +
             createContractForm.contract_title,
           JSON.stringify(createContractForm)
-        );
+        );*/
       }
 
       setContractMetadataURI(retVal);

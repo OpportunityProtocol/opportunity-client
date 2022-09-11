@@ -40,6 +40,7 @@ import { FEE_COLLECT_MODULE, FOLLOWER_ONLY_REFERENCE_MODULE } from "../../consta
 import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
+import { generatePinataData, pinJSONToIPFSPinata } from "../../common/ipfs-helper";
 const Buffer = require("buffer").Buffer;
 
 /**
@@ -193,12 +194,18 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
         retVal = await (await ipfs.add(JSON.stringify(createServiceForm))).path;
       } else {
+        const data = generatePinataData(String(accountData.address) +
+        ":" +
+        createServiceForm.serviceTitle, createServiceForm)
+        retVal = await pinJSONToIPFSPinata(data)
+
+        /*
         retVal = await fleek.uploadService(
           String(accountData.address) +
             ":" +
             createServiceForm.serviceTitle,
           JSON.stringify(createServiceForm)
-        );
+        );*/
       }
 
       setServiceMetadataKey(retVal);

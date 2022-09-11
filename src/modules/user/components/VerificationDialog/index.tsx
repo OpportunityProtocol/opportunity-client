@@ -53,6 +53,7 @@ import BootstrapInput from "../../../../common/components/BootstrapInput/Bootstr
 import { create } from "ipfs-http-client";
 import fleek from "../../../../fleek";
 import Tag from "../../../../common/components/Tag";
+import { generatePinataData, pinJSONToIPFSPinata } from "../../../../common/ipfs-helper";
 
 interface IVerificationDialogProps {
   open: boolean;
@@ -200,17 +201,19 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     let retVal = "";
     try {
       if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
-        //https://ipfs.infura.io:5001/api/v0
         const ipfs = create({
           url: "/ip4/0.0.0.0/tcp/5001",
         });
 
         retVal = await (await ipfs.add(JSON.stringify(metadataState))).path;
       } else {
-        retVal = await fleek.uploadService(
+        const data = generatePinataData("metadata_" + String(userAddress), metadataState)
+        retVal = await pinJSONToIPFSPinata(data)
+
+       /* retVal = await fleek.uploadService(
           "metadata_" + String(userAddress),
           JSON.stringify(metadataState)
-        );
+        );*/
       }
     } catch (error) {
       alert("Error uploading metadata");
