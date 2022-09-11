@@ -51,8 +51,7 @@ const Contracts: NextPage<any> = () => {
   const [publishedServices, setPublishedServices] = useState<any>([]);
   const [purchasedServices, setPurchasedServices] = useState<any>([]);
   const [userActiveServices, setUserActiveServices] = useState<any>([]);
-  const [publishedContracts, setPublishedContracts] = useState<
-    Array<any>([]);
+  const [publishedContracts, setPublishedContracts] = useState<Array<any>>([]);
   const [workingContracts, setWorkingContracts] = useState<Array<any>>([]);
 
   const onRefresh = () => {

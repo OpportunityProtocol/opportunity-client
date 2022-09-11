@@ -53,7 +53,7 @@ const Messenger = () => {
 
 
   const { address, connector } = useAccount();
-  const user1 = (address.toLowerCase());
+  const user1 = String(address).toLowerCase();
 
   useEffect(() => {
     const usersRef = collection(db, "users", user1, "selectedUser");

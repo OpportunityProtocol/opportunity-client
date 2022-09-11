@@ -37,7 +37,7 @@ import { NextPage } from "next";
 import StepperComponent from "../../common/components/Stepper";
 import SearchBarV2 from "../../common/components/SearchBarV2/SearchBarV2";
 import MarketDisplay from "../../modules/market/components/MarketDisplay";
-import { DesktopDatePicker } from "@mui/lab";
+
 import { create } from "ipfs-http-client";
 import fleek from "../../fleek";
 import {
@@ -181,6 +181,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
           ...createContractForm,
           meta: {
             ...createContractForm.meta,
+            //@ts-ignore
             specific_langauges: e.target?.checked,
           },
         });
@@ -678,14 +679,15 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                   </Typography>
                 </Grid>
 
-                <Grid item>
-                  <DesktopDatePicker
+               <Grid item>
+                <h6>Missing Date Picker</h6>
+                 {/* <DesktopDatePicker
                     label="Date desktop"
                     inputFormat="MM/dd/yyyy"
                     value={createContractForm.deadline}
                     onChange={handleOnChangeDeadline}
                     renderInput={(params) => <TextField {...params} />}
-                  />
+                  /> */}
                 </Grid>
               </Grid>
             </CardContent>

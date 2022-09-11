@@ -64,7 +64,6 @@ interface IServiceCardProps {
   purchaseData?: any;
   data?: any;
   purchase?: boolean;
-  outlined: string;
   text?: boolean;
 }
 

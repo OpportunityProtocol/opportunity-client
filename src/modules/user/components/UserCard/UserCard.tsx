@@ -116,8 +116,6 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
           jsonString.lastIndexOf("}") + 1
         );
         const parsedData = JSON.parse(parsedString);
-        console.log(parsedData);
-        console.log("@@@@@@@@@@@@@@@@@@");
         setState({
           ...state,
           ...parsedData,
