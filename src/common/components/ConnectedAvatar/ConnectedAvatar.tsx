@@ -57,11 +57,10 @@ import {
 } from "wagmi";
 import { NextRouter, useRouter } from "next/router";
 
-const StyledBadge = styled(Badge, {
-  shouldForwardProp: (prop) => prop !== "connected",
-})(({ theme, connected }: { theme: Theme; connected: boolean }) => ({
+
+const StyledBadge = styled(Badge)(({ theme }: { theme: Theme }) => ({
   "& .MuiBadge-badge": {
-    display: connected === true ? "flex" : "none",
+    display: 'flex', //connected === true ? "flex" : "none",
     backgroundColor: "#44b700",
     color: "#44b700",
     bottom: 13,
@@ -89,35 +88,12 @@ const StyledBadge = styled(Badge, {
 }));
 
 const ConnectedAvatar: FC = () => {
-  const router: NextRouter = useRouter();
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [verificationDialogOpen, setVerificationDialogOpen] =
     useState<boolean>(false);
-  const dispatch = useDispatch();
-  const { disconnect } = useDisconnect();
-  const lensProfile = useSelector(selectLens);
-  const userAddress = useSelector(selectUserAddress);
-  const userBalance = useSelector(selectUserBalance);
-  const daiBalance = useSelector((state: RootState) =>
-    selectErc20Balance(state, DAI_ADDRESS)
-  );
-  const userConnector = useSelector(selectUserConnector);
-  const connected = useSelector(selectUserConnectionStatus);
-  const accountData = useAccount();
-
-  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handlePopoverClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
 
   return (
     <StyledBadge
-      connected={accountData.isConnected}
       overlap="circular"
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       variant="dot"

@@ -25,7 +25,8 @@ const useStyles = makeStyles((theme) => {
             '&:hover': {
                 color: 'rgb(147, 227, 178)'
             },
-        }
+        },
+        column: {}
     }
 })
 

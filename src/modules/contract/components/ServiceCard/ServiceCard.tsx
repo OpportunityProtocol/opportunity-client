@@ -23,10 +23,6 @@ import DAIIcon from "../../../../node_modules/cryptocurrency-icons/svg/color/dai
 import { NextRouter, useRouter } from "next/router";
 
 import {
-  PurchasedServiceMetadataStruct,
-  ServiceStruct,
-} from "../../../../typechain-types/NetworkManager";
-import {
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
@@ -55,13 +51,8 @@ import { Check } from "@mui/icons-material";
 
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import VerifiedAvatar from "../../../user/components/VerifiedAvatar";
-import { ProfileStructStruct } from "../../../../typechain-types/ILensHub";
 import { hexToDecimal } from "../../../../common/helper";
 import { CHAIN_ID } from "../../../../constant/provider";
-import {
-  activePublishedServiceDataAdded,
-  purchasedServiceDataAdded,
-} from "../../contractReduxSlice";
 import { ethers } from "ethers";
 import { GET_PURCHASED_SERVICE } from "../../ContractGQLQueries";
 import { getMetadata } from "../../../../common/ipfs-helper";
@@ -70,8 +61,8 @@ import moment from "moment";
 import { withStyles } from '@mui/styles'
 interface IServiceCardProps {
   id: string;
-  purchaseData?: PurchasedServiceMetadataStruct;
-  data?: ServiceStruct;
+  purchaseData?: any;
+  data?: any;
   purchase?: boolean;
   outlined: string;
   text?: boolean;
@@ -127,14 +118,13 @@ const ServiceCard = ({
   data,
   purchaseData,
   purchase = false,
-  outlined = true,
 }: IServiceCardProps) => {
   const cardStyles = useStyles();
   const router: NextRouter = useRouter();
-  const [loadedData, setLoadedData] = useState<ServiceStruct>(data);
+  const [loadedData, setLoadedData] = useState<any>(data);
 
   const [serviceOwnerLensData, setServiceOwnerLensData] =
-    useState<ProfileStructStruct>({});
+    useState<any>({});
   const [servicePubId, setServicePubId] = useState<number>(0);
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);

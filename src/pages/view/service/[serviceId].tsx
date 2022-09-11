@@ -49,9 +49,6 @@ import {
   NetworkManagerInterface
 } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
-import {
-  ProfileStructStruct,
-} from "../../../typechain-types/ILensHub";
 import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../../common/helper";
 import { useSelector } from "react-redux";
@@ -83,7 +80,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
   const [serviceOnwerLensProfile, setSeriviceOwnerLensProfile] =
-    useState<ProfileStructStruct>({});
+    useState<any>({});
   const [purchaseDialogIsOpen, setPurchaseDialogIsOpen] =
     useState<boolean>(false);
 

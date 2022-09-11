@@ -1,6 +1,17 @@
 import "../../styles/globals.css";
 import React, { useEffect, useState } from "react";
-import { Box, Container, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar } from "@mui/material";
+import {
+  Box,
+  Container,
+  Divider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+} from "@mui/material";
 import type { AppProps } from "next/app";
 import Opportunity from "../Opportunity";
 import theme from "../../material_theme";
@@ -15,14 +26,12 @@ import {
   chain,
 } from "wagmi";
 
-import { alchemyProvider } from 'wagmi/providers/alchemy'
-import { publicProvider } from 'wagmi/providers/public'
-import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet'
-import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
-
+import { alchemyProvider } from "wagmi/providers/alchemy";
+import { publicProvider } from "wagmi/providers/public";
+import { CoinbaseWalletConnector } from "wagmi/connectors/coinbaseWallet";
+import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
-
 
 import { ethers, getDefaultProvider } from "ethers";
 import { Provider as ReduxProvider } from "react-redux";
@@ -37,7 +46,11 @@ import { Inbox, Mail } from "@mui/icons-material";
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat],
   [
-   alchemyProvider({ apiKey: process.env.ALCHEMY_API_KEY, priority: 1, weight: 100 }),
+    alchemyProvider({
+      apiKey: process.env.ALCHEMY_API_KEY,
+      priority: 1,
+      weight: 100,
+    }),
     publicProvider(),
     jsonRpcProvider({
       rpc: (chain) => ({
@@ -54,11 +67,11 @@ const client = createClient({
     new CoinbaseWalletConnector({
       chains,
       options: {
-        appName: 'wagmi',
+        appName: "wagmi",
       },
     }),
   ],
-  
+
   webSocketProvider,
 
   provider(config) {
@@ -69,13 +82,13 @@ const client = createClient({
       });
     } else if (Number(process.env.NEXT_PUBLIC_CHAIN_ID) == 80001) {
       return new ethers.providers.AlchemyProvider(
-        config.chainId,
-        process.env.NEXT_PUBLIC_ALCHEMY_HTTPS
+        80001,
+        process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
       );
     } else if (Number(process.env.NEXT_PUBLIC_CHAIN_ID) == 137) {
       return new ethers.providers.AlchemyProvider(
-        config.chainId,
-        process.env.NEXT_PUBLIC_ALCHEMY_HTTPS
+        137,
+        process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
       );
     } else {
       return getDefaultProvider();
@@ -84,69 +97,22 @@ const client = createClient({
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [showChild, setShowChild] = useState(false);
-  useEffect(() => {
-    setShowChild(true);
-  }, []);
-
-  if (!showChild) {
-    return null;
-  }
-
-  const drawer = (
-    <div>
-      <Toolbar />
-      <Divider />
-      <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <Inbox /> : <Mail />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <Inbox /> : <Mail />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </div>
-  );
-
-
   return (
     <React.Fragment>
       <Header />
       <WagmiConfig client={client}>
-        <LocalizationProvider dateAdapter={AdapterMoment}>
           <ReduxProvider store={store}>
             <ThemeProvider theme={theme}>
               <CssBaseline />
               <ApolloProvider client={apolloClient}>
                 <SearchProvider>
-            
-                <Opportunity>
-         
-                  <Component {...pageProps} />
-                </Opportunity>
-               
+                  <Opportunity>
+                    <Component {...pageProps} />
+                  </Opportunity>
                 </SearchProvider>
               </ApolloProvider>
             </ThemeProvider>
           </ReduxProvider>
-        </LocalizationProvider>
       </WagmiConfig>
     </React.Fragment>
   );

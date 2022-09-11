@@ -27,10 +27,6 @@ import { NETWORK_MANAGER_ADDRESS } from "../../constant";
 import { NetworkManagerInterface } from "../../abis";
 import {  Event } from "ethers";
 
-import {
-  RelationshipStruct,
-  ServiceStruct,
-} from "../../typechain-types/NetworkManager";
 import { QueryResult, useQuery } from "@apollo/client";
 import {
   GET_CONTRACTS_BY_EMPLOYER,
@@ -56,8 +52,7 @@ const Contracts: NextPage<any> = () => {
   const [purchasedServices, setPurchasedServices] = useState<any>([]);
   const [userActiveServices, setUserActiveServices] = useState<any>([]);
   const [publishedContracts, setPublishedContracts] = useState<
-    Array<RelationshipStruct>
-  >([]);
+    Array<any>([]);
   const [workingContracts, setWorkingContracts] = useState<Array<any>>([]);
 
   const onRefresh = () => {
@@ -332,7 +327,7 @@ const Contracts: NextPage<any> = () => {
         <TabPanel index={0} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
-              {publishedServices.map((service: ServiceStruct, idx: number) => {
+              {publishedServices.map((service: any, idx: number) => {
                 return (
                   <Grid item xs={4} key={service.id}>
                     <ServiceCard id={Number(service.id)} data={service} />

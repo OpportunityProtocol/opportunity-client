@@ -245,7 +245,7 @@ const NavigationBar: FC = (): JSX.Element => {
           balance: ethBalance,
           erc20Balance: {
             [DAI_ADDRESS]: hexToDecimal(
-              BigNumber.from(Number(daiBalance))._hex
+              Number(BigNumber.from(Number(daiBalance))._hex)
             ),
           },
           connector: String(connectData.data?.connector.name),
@@ -432,7 +432,7 @@ const NavigationBar: FC = (): JSX.Element => {
                           fontSize: "11px",
                           bgcolor: "rgb(245, 245, 245)",
                         }}
-                        size="large"
+                        size="medium"
                         onClick={handleOnClickCreateIcon}
                         aria-controls={
                           createMenuIsOpen ? "create-menu" : undefined
@@ -485,7 +485,7 @@ const NavigationBar: FC = (): JSX.Element => {
                     >
                       <List>
                         <ListItemButton
-                          disabled={!userData.data?.verifiedUsers?.length > 0}
+                          disabled={userData.data?.verifiedUsers?.length > 0}
                           onClick={() => router.push("/create/contract")}
                         >
                           <ListItemText
@@ -505,7 +505,7 @@ const NavigationBar: FC = (): JSX.Element => {
 
                         <ListItemButton
                           onClick={() => router.push("/create/service")}
-                          disabled={!userData.data?.verifiedUsers?.length > 0}
+                          disabled={userData.data?.verifiedUsers?.length > 0}
                         >
                           <ListItemText
                             primary="Create a service"
@@ -526,7 +526,7 @@ const NavigationBar: FC = (): JSX.Element => {
                   </>
 
                   <>
-                    <Tooltip title="Help">
+            
                       <Chip
                         sx={{
                           fontWeight: "600",
@@ -541,10 +541,11 @@ const NavigationBar: FC = (): JSX.Element => {
                           />
                         }
                         label="Help"
-                        size="large"
-                        onClick={handleOnClickHelpIcon}
+                        
+                       // size="medium"
+                     //   onClick={handleOnClickHelpIcon}
                       />
-                    </Tooltip>
+               
 
                     <Menu
                       anchorEl={helpMenuAnchorEl}

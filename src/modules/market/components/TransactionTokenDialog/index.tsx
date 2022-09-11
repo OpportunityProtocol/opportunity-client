@@ -49,14 +49,11 @@ import {
   DaiInterface,
   ERC20Interface,
   NetworkManagerInterface,
-  ServiceCollectModuleInterface,
   TokenExchangeInterface,
   TokenFactoryInterface,
 } from "../../../../abis";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../../../user/userReduxSlice";
-import { TokenInfoStruct } from "../../../../typechain-types/ITokenFactory";
-import { ServiceStruct } from "../../../../typechain-types/NetworkManager";
 import { Result } from "ethers/lib/utils";
 import { BigNumber, BigNumberish } from "ethers";
 import { hexToDecimal } from "../../../../common/helper";

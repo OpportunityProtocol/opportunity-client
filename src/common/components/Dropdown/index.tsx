@@ -4,7 +4,8 @@ import {
     MenuItem,
     InputBase,
     Select,
-    FormControl
+    FormControl,
+    SelectChangeEvent
 } from '@mui/material'
 
 const BootstrapInput = styled(InputBase)(({ theme }) => ({
@@ -42,8 +43,8 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
 
 export default function CustomizedSelects() {
   const [age, setAge] = React.useState(0);
-  const handleChange = (event: { target: { value: string } }) => {
-    setAge(event.target.value);
+  const handleChange = (event: SelectChangeEvent<number>, child: React.ReactNode) => {
+    setAge(Number(event.target.value));
   };
   return (
     <div>

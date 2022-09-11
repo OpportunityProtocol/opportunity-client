@@ -51,14 +51,6 @@ import { DaiInterface, NetworkManagerInterface } from "./abis";
 import { CHAIN_ID } from "./constant/provider";
 import VerificationDialog from "./modules/user/components/VerificationDialog";
 
-interface Props {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * You won't need it on your project.
-   */
-  window?: () => Window;
-}
-
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
   const feeData = useFeeData();

@@ -101,14 +101,6 @@ const ExplorePage: NextPage = () => {
 
   const [value, setValue] = React.useState<Date | null>(new Date());
 
- 
-
-
-  
- 
-
-
-
   return (
     <Container
       maxWidth="xl"

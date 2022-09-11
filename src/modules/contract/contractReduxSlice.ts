@@ -1,36 +1,33 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { ZERO_ADDRESS } from '../../constant';
 import { RootState } from '../../store';
-import { PurchasedServiceMetadataStruct, RelationshipStruct, ServiceStruct } from '../../typechain-types/NetworkManager';
-
-type PurchasedServiceStruct = ServiceStruct & PurchasedServiceMetadataStruct
 
 interface ContractReducerState {
     /** Services **/
     //published
     publishedServicesIds: Array<number>;
-    publishedServicesById: { [serviceId: string]: ServiceStruct};
-    publishedServices: Array<ServiceStruct>;
+    publishedServicesById: { [serviceId: string]: any};
+    publishedServices: Array<any>;
 
     //purchased by another user and active
     activePublishedServicesIds: Array<number>;
-    activePublishedServicesById: { [serviceId: string]: PurchasedServiceStruct};
-    activePublishedServices: Array<PurchasedServiceStruct>;
+    activePublishedServicesById: { [serviceId: string]: any};
+    activePublishedServices: Array<any>;
     activePublishedServicesByPurchaseId: { [purchaseId: string]: any };
 
     //purchased
     purchasedServicesIds: Array<number>;
-    purchasedServicesById: { [serviceId: string]: ServiceStruct};
-    purchasedServices: Array<ServiceStruct>;
+    purchasedServicesById: { [serviceId: string]: any};
+    purchasedServices: Array<any>;
 
     /** Contracts **/
     publishedContractsIds: Array<number>;
-    publishedContractsById: { [contractId: string]: RelationshipStruct & any }
-    publishedContracts: Array<RelationshipStruct & any>;
+    publishedContractsById: { [contractId: string]: any }
+    publishedContracts: Array<any>;
 
     activeContractsIds: Array<number>;
-    activeContractsById: { [contractId: string]: RelationshipStruct & any};
-    activeContracts: Array<RelationshipStruct & any>;
+    activeContractsById: { [contractId: string]: any};
+    activeContracts: Array<any>;
 }
 
 const initialState: ContractReducerState = {

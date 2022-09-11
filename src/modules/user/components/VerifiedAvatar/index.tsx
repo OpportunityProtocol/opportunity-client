@@ -24,7 +24,6 @@ import { hexToDecimal } from "../../../../common/helper";
 import { useContractRead } from "wagmi";
 import { Result } from "ethers/lib/utils";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
-import { ProfileStructStruct } from "../../../../typechain-types/ILensHub";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../UserGQLQueries";
 import fleek from "../../../../fleek";
@@ -34,7 +33,7 @@ interface IVerifiedAvatarProps {
   avatarSize?: number;
   address: string;
   lensProfileId: number;
-  lensProfile: ProfileStructStruct;
+  lensProfile: any;
   showValue?: boolean;
   showHandle?: boolean;
 }
@@ -54,7 +53,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
 
   const [fallbackLensProfileId, setFallbackLensProfileId] = useState<number>(0);
   const [fallbackLensProfile, setFallbackLensProfile] =
-    useState<ProfileStructStruct>({});
+    useState<any>({});
 
   const lensHub_getProfile = useContractRead({
     addressOrName: LENS_HUB_PROXY,
