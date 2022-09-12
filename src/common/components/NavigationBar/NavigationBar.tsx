@@ -56,6 +56,7 @@ import {
   userWalletDataStored,
   userLensDataStored,
   selectUserAddress,
+  selectLens,
 } from "../../../modules/user/userReduxSlice";
 import { BigNumber } from "ethers";
 import {
@@ -96,14 +97,15 @@ const NavigationBar: FC = (): JSX.Element => {
   const [lensProfileId, setLensProfileId] = useState<Result | any>(0);
   const userAddress = useSelector(selectUserAddress);
   const connected = useSelector(selectUserConnectionStatus);
-
+  const userLensProfile = useSelector(selectLens)
+  
   const connectData = useConnect();
   const accountData = useAccount();
 
   const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     variables: {
       userAddress,
-    },
+    }
   });
 
   //getProfile
@@ -124,6 +126,8 @@ const NavigationBar: FC = (): JSX.Element => {
         imageURI,
         pubCount,
       } = data;
+      console.log('pubCount')
+      console.log(pubCount)
       dispatch(
         userLensDataStored({
           followModule,
@@ -138,25 +142,22 @@ const NavigationBar: FC = (): JSX.Element => {
     },
   });
 
-  useEffect(() => {
-    if (lensProfileId !== 0) {
-      lensHub_getProfile.refetch({
-        throwOnError: true,
-      });
-    }
-  }, [lensProfileId]);
-
   const networkManager_getLensProfileIdFromAddress = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "getLensProfileIdFromAddress",
     enabled: false,
+    watch: false,
     chainId: CHAIN_ID,
     args: [accountData?.address],
     onSuccess: (data: Result) => {
+      console.log(data)
+      console.log('get lens address')
       setLensProfileId(hexToDecimal(data._hex));
     },
-    onError: (error) => {},
+    onError: (error) => {
+      console.log(error)
+    },
   });
 
   const dai_balanceOf = useContractRead({
@@ -164,15 +165,20 @@ const NavigationBar: FC = (): JSX.Element => {
     contractInterface: JSON.stringify(DaiInterface),
     functionName: "balanceOf",
     enabled: false,
-    cacheTime: 50000,
-    watch: true,
+    watch: false,
     chainId: CHAIN_ID,
     args: [userAddress],
+    onSuccess(data) {
+      console.log('DAI CALL')
+      console.log(data)
+    },
     onError: (error: Error) => {},
   });
 
   const ethBalanceData = useBalance({
     addressOrName: accountData ? accountData.address : String(0),
+    enabled: false,
+    watch: false
   });
 
   const [helpMenuAnchorEl, setHelpMenuAnchorEl] = useState<null | HTMLElement>(
@@ -207,6 +213,8 @@ const NavigationBar: FC = (): JSX.Element => {
         })
         .then((updatedResults) => {
           if (updatedResults.isSuccess) {
+            console.log('Updated results')
+            console.log(updatedResults)
             setLensProfileId(updatedResults.data._hex);
           } else {
             setLensProfileId(0);
@@ -217,45 +225,59 @@ const NavigationBar: FC = (): JSX.Element => {
   };
 
   useEffect(() => {
-    async function handleOnIsConnected() {
-      let address: string = "Please connect a wallet",
-        connector: any = "",
-        ethBalance: string | number = 0,
-        daiBalance: Result | number = 0;
-
-      if (accountData.isConnected) {
-        address = accountData.address;
-        connector = accountData.connector;
-        onFetchLensProfileId();
-      }
-
-      if (ethBalanceData.isSuccess) {
-        ethBalance = ethBalanceData.data.formatted;
-      }
-
-      const result = await dai_balanceOf.refetch();
-      if (result.isSuccess) {
-        daiBalance = dai_balanceOf.data;
-      } else {
-        daiBalance = 0;
-      }
-
-      dispatch(
-        userWalletDataStored({
-          balance: ethBalance,
-          erc20Balance: {
-            [DAI_ADDRESS]: hexToDecimal(
-              Number(BigNumber.from(Number(daiBalance))._hex)
-            ),
-          },
-          connector: String(connectData.data?.connector.name),
-          address,
-          connected: accountData.isConnected,
-        })
-      );
+    if (lensProfileId !== 0) {
+      lensHub_getProfile.refetch({
+        throwOnError: true,
+      });
     }
+  }, [lensProfileId]);
+
+  console.log('CONNECT')
+  console.log(connectData)
+  console.log('ACCOUNT')
+  console.log(accountData)
+
+  async function handleOnIsConnected() {
+    let address: string = "Please connect a wallet",
+      connector: any = "",
+      ethBalance: string | number = 0,
+      daiBalance: Result | number = 0;
 
     if (accountData.isConnected) {
+      address = accountData.address;
+      connector = accountData.connector;
+      onFetchLensProfileId();
+    }
+
+    if (ethBalanceData.isSuccess) {
+      ethBalance = ethBalanceData.data.formatted;
+    }
+
+    const result = await dai_balanceOf.refetch();
+    if (result.isSuccess) {
+      daiBalance = hexToDecimal(dai_balanceOf.data?._hex)
+      console.log('DAI: ')
+      console.log(daiBalance)
+    } else {
+      daiBalance = 0;
+    }
+
+    dispatch(
+      userWalletDataStored({
+        balance: ethBalance,
+        erc20Balance: {
+          [DAI_ADDRESS]: daiBalance,
+        },
+        connector: { name: String(accountData.connector.name), network: await accountData.connector.getChainId() } ,
+        address,
+        connected: accountData.status,
+      })
+    );
+  }
+
+
+  useEffect(() => {
+    if (accountData.status == 'connected') {
       handleOnIsConnected();
     } else {
       dispatch(
@@ -268,9 +290,12 @@ const NavigationBar: FC = (): JSX.Element => {
         })
       );
     }
-  }, [accountData.isConnected]);
+  }, [accountData.status]);
 
-  const feeData = useFeeData();
+  const feeData = useFeeData({
+    enabled: false,
+    watch: false
+  });
   const [gasPrice, setGasPrice] = useState<string>("0");
 
   useEffect(() => {
@@ -280,24 +305,10 @@ const NavigationBar: FC = (): JSX.Element => {
   }, [feeData.isLoading]);
 
   useEffect(() => {
-    feeData.refetch();
+    console.log('Fetching fee data...')
+    feeData.refetch()
   }, []);
 
-  const searchContext = useContext(SearchContext);
-
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
-  const onChangeSearchQuery = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const onSearch = (e, query: string) => {
-    if (e.key === "Enter") {
-      searchContext.actionable.search(query);
-    }
-  };
 
   const [createMenuAnchorEl, setCreateMenuAnchorEl] =
     React.useState<null | HTMLElement>(null);
@@ -322,9 +333,9 @@ const NavigationBar: FC = (): JSX.Element => {
   useEffect(() => {
 
     if (accountData.isConnected) {
-
       handlesClose();
     }
+
   }, [accountData.isConnected]);
 
 
@@ -485,11 +496,11 @@ const NavigationBar: FC = (): JSX.Element => {
                     >
                       <List>
                         <ListItemButton
-                          disabled={userData.data?.verifiedUsers?.length > 0}
+                          disabled={userLensProfile?.profileId == 0}
                           onClick={() => router.push("/create/contract")}
                         >
                           <ListItemText
-                            primary="Create a contract"
+                            primary="Contract"
                             secondary="Create a contract if you're looking for a one time deal"
                             primaryTypographyProps={{
                               fontWeight: "bold",
@@ -505,10 +516,10 @@ const NavigationBar: FC = (): JSX.Element => {
 
                         <ListItemButton
                           onClick={() => router.push("/create/service")}
-                          disabled={userData.data?.verifiedUsers?.length > 0}
+                          disabled={userLensProfile?.profileId == 0}
                         >
                           <ListItemText
-                            primary="Create a service"
+                            primary="Service"
                             secondary="Publish a service and allow your peers to invest in its success"
                             primaryTypographyProps={{
                               fontWeight: "bold",

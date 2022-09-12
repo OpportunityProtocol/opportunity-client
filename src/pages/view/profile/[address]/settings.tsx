@@ -30,7 +30,7 @@ import { makeStyles } from "@mui/styles";
 import { NextRouter, useRouter } from "next/router";
 import { Cancel } from "@mui/icons-material";
 import { useContractWrite, usePrepareContractWrite } from "wagmi";
-import { NETWORK_MANAGER_ADDRESS } from "../../../../constant";
+import { NETWORK_MANAGER_ADDRESS, PINATA_JWT } from "../../../../constant";
 import { NetworkManagerInterface } from "../../../../abis";
 import { ethers } from "ethers";
 import fleek from "../../../../fleek";
@@ -87,9 +87,7 @@ const Settings: NextPage<any> = () => {
     certifications: [],
     skills: [],
     languages: [],
-    toggles: {
-      show_freelancer_stats: false,
-    },
+    show_freelancer_stats: 0,
   });
 
   useEffect(() => {
@@ -100,7 +98,7 @@ const Settings: NextPage<any> = () => {
     let retVal: any = {};
 
     try {
-      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+      if (!PINATA_JWT) {
         const ipfs = create({
           url: "/ip4/127.0.0.1/tcp/8080",
         });
@@ -122,7 +120,7 @@ const Settings: NextPage<any> = () => {
         retVal = await getJSONFromIPFSPinata(ptr) //await fleek.getUser(ptr);
 
         setMetadataState({
-          ...JSON.parse(retVal)
+          ...retVal
         })
       }
 
@@ -230,9 +228,7 @@ const Settings: NextPage<any> = () => {
   const handleOnChangeDisplayFreelancer = (e) => {
     setMetadataState({
       ...metadataState,
-      toggles: {
-        display_freelancer_stats: e.target.checked,
-      },
+      display_freelancer_stats:  e.target.checked == true ? 1 : 0
     });
   };
 
@@ -257,7 +253,7 @@ const Settings: NextPage<any> = () => {
 
   const handleUpdate = async () => {
     let retVal;
-    if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+    if (!PINATA_JWT) {
       //https://ipfs.infura.io:5001/api/v0
       const ipfs = create({
         url: "/ip4/0.0.0.0/tcp/5001",

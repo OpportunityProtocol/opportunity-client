@@ -46,7 +46,7 @@ import {
   useContractWrite,
   usePrepareContractWrite,
 } from "wagmi";
-import { NETWORK_MANAGER_ADDRESS, TOKEN_FACTORY_ADDRESS } from "../../constant";
+import { NETWORK_MANAGER_ADDRESS, PINATA_JWT, TOKEN_FACTORY_ADDRESS } from "../../constant";
 import { NetworkManagerInterface, TokenFactoryInterface } from "../../abis";
 import { BigNumber } from "ethers";
 import { Result } from "ethers/lib/utils";
@@ -65,19 +65,21 @@ import { generatePinataData, pinJSONToIPFSPinata } from "../../common/ipfs-helpe
  * @returns NextPage The CreateContractPage component
  */
 const CreateContractPage: NextPage = (): JSX.Element => {
+  const router: NextRouter = useRouter();
+  const classes: ClassNameMap<any> = useStyles();
+  const accountData: any = useAccount();
+  const marketsQuery: QueryResult = useQuery(GET_MARKETS);
+
   const [createContractForm, setCreateContractForm] = useState({
     contract_title: "",
     contract_description: "",
     contract_tags: "",
-    contract_market_id: -1,
     tags: [],
     contract_budget: 0,
-    deadline: new Date("2014-08-18T21:11:54"),
+    deadline: new Date("2014-08-18T21:11:54").toDateString(),
     contract_definition_of_done: "",
-    meta: {
-      duration: "quick",
-      specific_langauges: [],
-    },
+    duration: "quick",
+    specific_languages: []
   });
 
   const [createContractFormErrorState, setCreateContractFormErrorState] =
@@ -90,15 +92,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
       contractDefinitionOfDoneErrorMessage: "",
     });
 
-  const router: NextRouter = useRouter();
-  const classes: ClassNameMap<any> = useStyles();
-  const accountData: any = useAccount();
-  const marketsQuery: QueryResult = useQuery(GET_MARKETS);
-  const [contractMetadataURI, setContractMetadataURI] = useState<string>("");
-  const [marketDetails, setMarketDetails] = useState<any>({});
-
-  const createContractDialogOnOpen = (): void => {};
-  const [createContractDialogState, setCreateContractDialogState] =
+    const [createContractDialogState, setCreateContractDialogState] =
     useState<any>({
       loading: false,
       open: false,
@@ -106,6 +100,12 @@ const CreateContractPage: NextPage = (): JSX.Element => {
       error: false,
       errorMessage: "",
     });
+
+
+  const [contractMetadataURI, setContractMetadataURI] = useState<string>("");
+  const [marketDetails, setMarketDetails] = useState<any>({});
+
+  const createContractDialogOnOpen = (): void => { };
 
   const createContractDialogContent: Array<ReactNode> = [
     <DialogContent>
@@ -136,10 +136,51 @@ const CreateContractPage: NextPage = (): JSX.Element => {
     marketsQuery.refetch();
   }, []);
 
+  const networkManager_createContractPrepare = usePrepareContractWrite({
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    functionName: "createContract",
+    enabled: true,
+    args: [createContractForm.contract_market_id, contractMetadataURI],
+  });
+
+  const networkManager_createContract = useContractWrite({
+    ...networkManager_createContractPrepare.config,
+    onSuccess(data, variables, context) {
+  
+     
+    },
+    onSettled(data, error, variables, context) {
+      if (!error) {
+  
+        setCreateContractDialogState({
+          ...createContractDialogState,
+          loading: false,
+          success: true,
+          error: false,
+          errorMessage: "",
+        })
+  
+        setContractMetadataURI("");
+      }
+    },
+    onError(error, variables, context) {
+      setCreateContractDialogState({
+        ...createContractDialogState,
+        loading: false,
+        success: false,
+        error: true,
+        errorMessage: error.message,
+      });
+
+  
+    },
+  });
+
   const handleOnChangeDeadline = (newValue: Date | null) => {
     setCreateContractForm({
       ...createContractForm,
-      deadline: newValue,
+      deadline: newValue.toDateString(),
     });
   };
 
@@ -180,11 +221,8 @@ const CreateContractPage: NextPage = (): JSX.Element => {
       case "contractLanguageCheckbox":
         setCreateContractForm({
           ...createContractForm,
-          meta: {
-            ...createContractForm.meta,
-            //@ts-ignore
-            specific_langauges: e.target?.checked,
-          },
+          //@ts-ignore
+          specific_languages: e.target?.checked == false ? 0 : 1,
         });
         break;
     }
@@ -192,7 +230,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
 
   const onTagInputKeyPress = (e) => {
     if (e.code === "Space") {
-      if (createContractForm.tags.length >= 5) {
+      if (createContractForm?.tags?.length >= 5) {
         alert("No more tags");
         return;
       }
@@ -201,8 +239,8 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         return;
       }
 
-      const tag = createContractForm.contract_tags.trim();
-      const updatedTags = createContractForm.tags;
+      const tag = createContractForm?.contract_tags?.trim();
+      const updatedTags = createContractForm?.tags;
       updatedTags.push(tag);
       setCreateContractForm({
         ...createContractForm,
@@ -222,41 +260,8 @@ const CreateContractPage: NextPage = (): JSX.Element => {
     });
   };
 
-  const networkManager_createContractPrepare = usePrepareContractWrite({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    contractInterface: NetworkManagerInterface,
-    functionName: "createContract",
-    args: [createContractForm.contract_market_id, contractMetadataURI],
-    onSettled(data, error) {
-      if (error) {
-        setCreateContractDialogState({
-          ...createContractDialogState,
-          loading: false,
-          success: false,
-          error: true,
-          errorMessage: error.message,
-        });
-
-        alert(error.message);
-      } else {
-        setCreateContractDialogState({
-          ...createContractDialogState,
-          loading: false,
-          success: true,
-          error: false,
-          errorMessage: "",
-        });
-
-        setContractMetadataURI("");
-      }
-    },
-  });
-
-  const networkManager_createContract = useContractWrite(
-    networkManager_createContractPrepare.config
-  );
-
   const handleOnCreate = async () => {
+
     let retVal: string = "";
 
     setCreateContractDialogState({
@@ -265,7 +270,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
     });
 
     try {
-      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+      if (!PINATA_JWT) {
         const ipfs = create({
           url: "/ip4/0.0.0.0/tcp/5001",
         });
@@ -274,21 +279,22 @@ const CreateContractPage: NextPage = (): JSX.Element => {
           await ipfs.add(JSON.stringify(createContractForm))
         ).path;
       } else {
+        const tempFormData = JSON.parse(JSON.stringify(createContractForm))
         const data = generatePinataData(String(accountData.address) +
-        ":" +
-        createContractForm.contract_title, createContractForm)
+          ":" +
+          createContractForm.contract_title, tempFormData)
         retVal = await pinJSONToIPFSPinata(data)
 
-        /*retVal = await fleek.uploadService(
-          String(accountData.address) +
-            ":" +
-            createContractForm.contract_title,
-          JSON.stringify(createContractForm)
-        );*/
       }
+
+      await networkManager_createContract.write({
+        recklesslySetUnpreparedArgs: [createContractForm.contract_market_id, String(retVal)],
+      });
+      
 
       setContractMetadataURI(retVal);
     } catch (error) {
+
       setCreateContractDialogState({
         ...createContractDialogState,
         loading: false,
@@ -297,24 +303,8 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         errorMessage: "Error uploading metadata to IPFS",
       });
 
-      alert("Error uploading metadata to IPFS");
     }
 
-    if (String(retVal)) {
-      await networkManager_createContract.writeAsync({
-        recklesslySetUnpreparedArgs: [createContractForm.contract_market_id, String(retVal)],
-      });
-    } else {
-      setCreateContractDialogState({
-        ...createContractDialogState,
-        loading: false,
-        error: true,
-        success: false,
-        errorMessage: "Error retrieving IPFS metadata hash",
-      });
-
-      alert("Error retrieving ipfs metadata hash");
-    }
   };
 
   const onCloseCreateContractDialog = () => {
@@ -455,22 +445,19 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                     onClick={() =>
                       setCreateContractForm({
                         ...createContractForm,
-                        meta: {
-                          ...createContractForm.meta,
-                          duration: "quick",
-                        },
+                        duration: "quick",
                       })
                     }
                     variant="outlined"
                     sx={{
                       border:
-                        createContractForm.meta.duration === "quick"
+                        createContractForm.duration === "quick"
                           ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
                           : "none",
                     }}
                     className={clsx(
                       classes.marketTypeCard,
-                      createContractForm.meta.duration === "quick"
+                      createContractForm.duration === "quick"
                         ? classes.selectedCard
                         : null
                     )}
@@ -492,22 +479,19 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                     onClick={() =>
                       setCreateContractForm({
                         ...createContractForm,
-                        meta: {
-                          ...createContractForm.meta,
-                          duration: "short",
-                        },
+                        duration: "short"
                       })
                     }
                     variant="outlined"
                     sx={{
                       border:
-                        createContractForm.meta.duration === "short"
+                        createContractForm.duration === "short"
                           ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
                           : "none",
                     }}
                     className={clsx(
                       classes.marketTypeCard,
-                      createContractForm.meta.duration === "short"
+                      createContractForm.duration === "short"
                         ? classes.selectedCard
                         : null
                     )}
@@ -529,22 +513,19 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                     onClick={() =>
                       setCreateContractForm({
                         ...createContractForm,
-                        meta: {
-                          ...createContractForm.meta,
-                          duration: "long",
-                        },
+                        duration: "long"
                       })
                     }
                     variant="outlined"
                     sx={{
                       border:
-                        createContractForm.meta.duration === "long"
+                        createContractForm.duration === "long"
                           ? `4px solid ${alpha("rgb(98, 202, 161)", 0.6)}`
                           : "none",
                     }}
                     className={clsx(
                       classes.marketTypeCard,
-                      createContractForm.meta.duration === "long"
+                      createContractForm.duration === "long"
                         ? classes.selectedCard
                         : null
                     )}
@@ -601,7 +582,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                 helperText={
                   createContractFormErrorState.contractTitleErrorMessage
                 }
-                //inputProps={{ maxLength: 81 , minLength: 30 }}
+              //inputProps={{ maxLength: 81 , minLength: 30 }}
               />
 
               <TextField
@@ -622,7 +603,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                 helperText={
                   createContractFormErrorState.contractDescriptionErrorMessage
                 }
-                //inputProps={{ maxLength: 730 , minLength: 30 }}
+              //inputProps={{ maxLength: 730 , minLength: 30 }}
               />
 
               <Grid
@@ -653,6 +634,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                     size="small"
                     value={createContractForm.contract_budget}
                     placeholder="550.00"
+                    type='number'
                     id="contractBudget"
                     onChange={handleOnChangeCreateContractForm}
                     sx={{ width: 100 }}
@@ -685,9 +667,9 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                   </Typography>
                 </Grid>
 
-               <Grid item>
-                <h6>Missing Date Picker</h6>
-                 {/* <DesktopDatePicker
+                <Grid item>
+                  <h6>Missing Date Picker</h6>
+                  {/* <DesktopDatePicker
                     label="Date desktop"
                     inputFormat="MM/dd/yyyy"
                     value={createContractForm.deadline}
@@ -744,7 +726,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                 helperText={
                   createContractFormErrorState.contractDefinitionOfDoneErrorMessage
                 }
-                //inputProps={{ maxLength: 500 , minLength: 30 }}
+              //inputProps={{ maxLength: 500 , minLength: 30 }}
               />
             </CardContent>
           </Card>
@@ -799,7 +781,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                     spacing={2}
                     sx={{ margin: "0 0.2rem 0 0", display: "flex" }}
                   >
-                    {createContractForm.tags.map((tag, idx) => {
+                    {createContractForm.tags && createContractForm?.tags?.map((tag, idx) => {
                       return (
                         <Chip
                           key={tag}

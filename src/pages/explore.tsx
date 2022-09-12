@@ -25,6 +25,7 @@ import { GET_MARKETS } from "../modules/market/MarketGQLQueries";
 import { GET_VERIFIED_FREELANCERS } from "../modules/user/UserGQLQueries";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
+import JobDisplay from "../modules/market/components/JobDisplay";
 
 const MuiTableHead = withStyles((theme) => ({
   root: {
@@ -36,7 +37,7 @@ const MuiTableHead = withStyles((theme) => ({
 
 const TableHeaderCell = withStyles((theme) => ({
   root: {
-    color: "white",
+    color: "black",
     fontSize: "12px !important",
     padding: "10px !important",
     fontWeight: "bold",
@@ -106,8 +107,8 @@ const ExplorePage: NextPage = () => {
       maxWidth="xl"
       sx={{
         height: "100%",
-        overflow: "hidden",
-        padding: "0px 75px !important",
+        overflow: "scroll",
+        padding: "10px 75px !important",
       }}
     >
       <Box
@@ -234,7 +235,7 @@ const ExplorePage: NextPage = () => {
                   display: "flex",
                 }}
               >
-                <TableHeaderCell sx={{ width: 150, fontWeight: "bold" }}>
+                <TableHeaderCell sx={{  width: 150, fontWeight: "bold" }}>
                   Type
                 </TableHeaderCell>
                 <TableHeaderCell
@@ -258,6 +259,11 @@ const ExplorePage: NextPage = () => {
 
         <Box sx={{  }}>
           <Stack spacing={2}>
+            {
+              featuredContracts.map((data) => {
+                return <JobDisplay data={data} table />
+              })
+            }
             {services.map((row) => {
               return <ServiceCard />;
             })}

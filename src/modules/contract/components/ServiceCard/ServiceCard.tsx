@@ -55,7 +55,7 @@ import { hexToDecimal } from "../../../../common/helper";
 import { CHAIN_ID } from "../../../../constant/provider";
 import { ethers } from "ethers";
 import { GET_PURCHASED_SERVICE } from "../../ContractGQLQueries";
-import { getMetadata } from "../../../../common/ipfs-helper";
+import { getJSONFromIPFSPinata, getMetadata } from "../../../../common/ipfs-helper";
 import { ConfirmationDialog } from "../../../../common/components/ConfirmationDialog";
 import moment from "moment";
 import { withStyles } from '@mui/styles'
@@ -227,7 +227,7 @@ const ServiceCard = ({
 
   useEffect(() => {
     async function loadMetadata() {
-      const metadata = await getMetadata(data?.metadataPtr);
+      const metadata = await getJSONFromIPFSPinata(data?.metadataPtr);
       console.log(metadata);
       setServiceMetadata(metadata);
     }

@@ -47,11 +47,9 @@ import { RootState } from "../../../store";
 import { IoWalletSharp } from "react-icons/io5";
 import { FaEthereum } from "react-icons/fa";
 import {
-  useAccount,
   useConnect,
   useContractWrite,
   useDisconnect,
-  useContractRead,
   useFeeData,
   usePrepareContractWrite,
 } from "wagmi";

@@ -7,7 +7,7 @@ export async function getMetadata(metadataString: string) {
     let retVal: any = {};
 
     try {
-      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+      if (!PINATA_JWT) {
         const ipfs = create({
           url: "/ip4/127.0.0.1/tcp/8080",
         });
@@ -24,7 +24,7 @@ export async function getMetadata(metadataString: string) {
         return parsedData
       } else {
         retVal = await getJSONFromIPFSPinata(metadataString)  //await fleek.getService(metadataString);
-        return JSON.parse(retVal)
+        return retVal 
       }
 
     } catch (error) {
@@ -33,6 +33,7 @@ export async function getMetadata(metadataString: string) {
   }
 
 export async function pinJSONToIPFSPinata(data: string) {
+
   var config = {
     method: 'post',
     url: 'https://api.pinata.cloud/pinning/pinJSONToIPFS',
@@ -43,9 +44,16 @@ export async function pinJSONToIPFSPinata(data: string) {
     data
   };
   
+  
   const res = await axios(config);
   return res.data?.IpfsHash
 }
+
+const parsedKeys = [
+  'certifications',
+  'tags',
+  'skills'
+]
 
 export async function getJSONFromIPFSPinata(ipfsHash: string) {
   var config = {
@@ -58,18 +66,63 @@ export async function getJSONFromIPFSPinata(ipfsHash: string) {
   }
   
   const res = await axios(config);
-  return res.data.rows[0]?.metadata?.keyvalues
+
+  const data = res.data.rows[0]?.metadata?.keyvalues
+
+  for (const key in data) {
+    if (parsedKeys.includes(key)) {
+      data[key] = data[key].split(',')
+    }
+  }
+
+  return data
+} 
+
+var convertArrayToObject = function(array){
+  var thisEleObj = new Object();
+  if(typeof array == "object"){
+      for(var i in array){
+          var thisEle = convertArrayToObject(array[i]);
+          thisEleObj[i] = thisEle;
+      }
+  }else {
+      thisEleObj = array;
+  }
+  return thisEleObj;
+};
+
+function parseNested(str) {
+  try {
+      return JSON.parse(str, (_, val) => {
+          if (typeof val === 'string')
+              return parseNested(val)
+          return val
+      })
+  } catch (exc) {
+      return str
+  }
 }
 
 export function generatePinataData(name: string, data: object): string {
-  return JSON.stringify({
-    pinataOptions: {
-      cidVersion: 1
+  let tempData = data
+  for (const item in tempData) {
+    if (Array.isArray(tempData[item])) {
+      tempData[item] = tempData[item].join(',') //convertArrayToObject[tempData[item]]
+    }
+  }
+
+
+  
+  const stringified = JSON.stringify({
+    "pinataOptions": {
+      "cidVersion": 1
     },
-    pinataMetadata: {
-      name,
-      keyvalues: data
+    "pinataMetadata": {
+      "name": name,
+      "keyvalues": parseNested(JSON.stringify(tempData))
     },
-    pinataContent: {}
+    "pinataContent": parseNested(JSON.stringify(tempData))
   })
+
+  return stringified
 }

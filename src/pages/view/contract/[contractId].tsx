@@ -32,7 +32,7 @@ import {
   useContractWrite,
   usePrepareContractWrite,
 } from "wagmi";
-import { DAI_ADDRESS, NETWORK_MANAGER_ADDRESS } from "../../../constant";
+import { DAI_ADDRESS, NETWORK_MANAGER_ADDRESS, PINATA_JWT } from "../../../constant";
 import { DaiInterface, NetworkManagerInterface } from "../../../abis";
 import {
   MARKET_DESCRIPTION_MAPPING,
@@ -94,25 +94,32 @@ const contractDetailsSecondaryTypographyProps = {
  * @dev TODO: Add modal for inputting accepted solution pointer
  */
 const ViewContract: NextPage<any> = () => {
+  const { proposalPayout, proposalMessage, error } = data;
+
+  const classes = useStyles();
   const { address, connector } = useAccount();
   const router = useRouter();
+
   const { contractId } = router.query;
 
   const [contractData, setContractData] = useState<any>({});
   const [contractMetadata, setContractMetadata] = useState<any>({});
   const [metadataString, setMetadataString] = useState("");
   const [acceptedSolutionPtr, setAcceptedSolutionPtr] = useState<string>("");
-
-  const classes = useStyles();
   const [reviews, setReviews] = useState<any>([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [sendMessageopen, setSendmessageOpen] = React.useState(false);
+  const [data, setData] = useState({
+    proposalPayout: "",
+    proposalMessage: "",
+    error: null,
+  });
 
   const networkManager_getContractData = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "getContractData",
     enabled: false,
+    watch: false,
     chainId: CHAIN_ID,
     args: [contractId],
     onSuccess: (data: Result) => {
@@ -127,6 +134,7 @@ const ViewContract: NextPage<any> = () => {
     addressOrName: DAI_ADDRESS,
     contractInterface: DaiInterface,
     functionName: "approve",
+    enabled: true,
     args: [NETWORK_MANAGER_ADDRESS, 100000],
   });
 
@@ -143,7 +151,7 @@ const ViewContract: NextPage<any> = () => {
 
     async function getMetadata() {
       try {
-        if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+        if (!PINATA_JWT) {
           const ipfs = create({
             url: "/ip4/127.0.0.1/tcp/8080",
           });
@@ -161,9 +169,9 @@ const ViewContract: NextPage<any> = () => {
         } else {
           retVal = await getJSONFromIPFSPinata(metadataString) //await fleek.getService(metadataString);
 
-          setContractMetadata(JSON.parse(retVal))
+          setContractMetadata(retVal)
         }
-  
+
       } catch (error) {
         setContractMetadata({})
       }
@@ -173,17 +181,6 @@ const ViewContract: NextPage<any> = () => {
       getMetadata();
     }
   }, [metadataString]);
-
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
 
   const contractByIdQuery: QueryResult = useQuery(GET_CONTRACT_BY_ID, {
     variables: {
@@ -223,6 +220,7 @@ const ViewContract: NextPage<any> = () => {
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "grantProposalRequest",
+    enabled: true,
     args: [contractId, "0xBA77D43eE401A4C4a229C3649CCeDBfE2B517208", 100],
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
@@ -244,6 +242,7 @@ const ViewContract: NextPage<any> = () => {
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "releaseContract",
+    enabled: true,
     args: [contractId],
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
@@ -277,136 +276,75 @@ const ViewContract: NextPage<any> = () => {
       }
     },
   });
+
   const networkManager_resolveContract = useContractWrite(
     networkManager_releaseContractPrepare.config
   );
 
-  const [sendMessageopen, setSendmessageOpen] = React.useState(false);
-const handleOpen = () => setSendmessageOpen(true);
-const handleClose = () => setSendmessageOpen(false);
+  const handleOpen = () => setSendmessageOpen(true);
+  const handleClose = () => setSendmessageOpen(false);
 
+  const handleChanges = (e) => {
+    setData({ ...data, [e.target.name]: e.target.value });
+  };
 
-
-const [data, setData] = useState({
-  proposalPayout: "",
-  proposalMessage: "",
-  error: null,
-});
-
-const { proposalPayout, proposalMessage, error } = data;
-
-const handleChanges = (e) => {
-  setData({ ...data, [e.target.name]: e.target.value });
-};
-
-
-  
   const handleProposalSubmit = async (e) => {
     e.preventDefault();
-    setData({ ...data, error: null});
-    if (!proposalPayout || !proposalMessage ) {
+    setData({ ...data, error: null });
+    if (!proposalPayout || !proposalMessage) {
       setData({ ...data, error: "* All fields are required *" });
       return
     };
 
     try {
-
-
       const user1 = (address.toLowerCase());
-
       const user2 = ((contractData.employer).toLowerCase());
+      const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
 
-    
-   
+      const selectedRef1 = doc(db, "users", user1, "selectedUser", user2);
+      const selectedRef2 = doc(db, "users", user2, "selectedUser", user1);
 
-    const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
-
-    const selectedRef1 = doc(db, "users", user1, "selectedUser", user2);
-    const selectedRef2 = doc(db, "users", user2, "selectedUser", user1);
-
-    console.log(user2, 'user 2');
-    
-    console.log(user1, "user1");
-    await setDoc(selectedRef1, {
-
+      await setDoc(selectedRef1, {
         uid: user2,
         name: user2,
-      
-    
-    });
-    await setDoc(selectedRef2, {
+      });
 
-      uid: user1,
-      name: user1,
-      
-  
-  });
-    await addDoc(collection(db, "messages", id, "chat"), {
-      text: "",
-      from: user1,
-      to: user2,
-      createdAt: Timestamp.fromDate(new Date()),
-      proposalPayout,
-      proposalMessage,
-      Type: "Proposal",
+      await setDoc(selectedRef2, {
+        uid: user1,
+        name: user1,
+      });
 
-    });
-    setData({
-      proposalPayout,
-      proposalMessage,
-      error: null,
-});
+      await addDoc(collection(db, "messages", id, "chat"), {
+        text: "",
+        from: user1,
+        to: user2,
+        createdAt: Timestamp.fromDate(new Date()),
+        proposalPayout,
+        proposalMessage,
+        type: "Proposal",
+      });
 
-handleClose();
-  } catch(err) {
-    setData({ ...data, error: err.message });
-  }
+      setData({
+        proposalPayout,
+        proposalMessage,
+        error: null,
+      });
 
-  
-
+      handleClose();
+    } catch (err) {
+      setData({ ...data, error: err.message });
+    }
   };
-
-  
-
-
 
   const renderPrimaryButtonState = () => {
     if (
       String(address).toLowerCase() ==
       String(contractData?.employer).toLowerCase()
     ) {
-      
+
       switch (contractData?.ownership) {
         case 0: //unclaimed
           return (
-            <Stack>
-              {/* Temporary until proposal functionality is implemented. This interaction will take place from message screen. */}
-              <Stack direction="row" alignItems="center">
-                <Button
-                  variant="contained"
-                  size="large"
-                  sx={{ mb: 2 }}
-                  fullWidth
-                  disableElevation
-                  disableRipple
-                  onClick={() => dai_approve.write()}
-                >
-                  Increase Allowance
-                </Button>
-
-                <Button
-                  variant="contained"
-                  size="large"
-                  sx={{ mb: 2 }}
-                  fullWidth
-                  disableElevation
-                  disableRipple
-                  onClick={() => networkManager_grantProposalRequest.write()}
-                >
-                  Assign worker
-                </Button>
-              </Stack>
-
               <Button
                 variant="contained"
                 size="large"
@@ -418,7 +356,6 @@ handleClose();
               >
                 Awaiting Proposals
               </Button>
-            </Stack>
           );
         case 1: //claimed
           return (
@@ -557,147 +494,148 @@ handleClose();
 
     if (
       String(address).toLowerCase() !=
-        String(contractData?.employer).toLowerCase() &&
+      String(contractData?.employer).toLowerCase() &&
       String(address).toLowerCase() !=
-        String(contractData?.worker).toLowerCase() &&
+      String(contractData?.worker).toLowerCase() &&
       Number(contractData?.ownership) == 0
-      
-    ) { console.log(address);
-     console.log(contractData);
+
+    ) {
+      console.log(address);
+      console.log(contractData);
 
 
 
 
       return (
         <>
-        <Button
-          variant="contained"
-          size="large"
-          sx={{ mb: 2 }}
-          fullWidth
-          color="primary"
-          disableElevation
-          disableRipple
-          onClick={handleOpen}
-        >
-          Submit Proposal
-        </Button>
+          <Button
+            variant="contained"
+            size="large"
+            sx={{ mb: 2 }}
+            fullWidth
+            color="primary"
+            disableElevation
+            disableRipple
+            onClick={handleOpen}
+          >
+            Submit Proposal
+          </Button>
 
-        <Dialog
-        fullScreen
-        open={sendMessageopen}
-        onClose={handleClose}
-        TransitionComponent={Transition}
-     
-        sx={{
-            '& .MuiDialog-paper': {
-             
-              backgroundColor: '#fafafa'
-            },
-          }}
-    
-       
-      >
-        <Grid sx={{
-          maxWidth: '1300px',
-          width: '100%',
-          paddingRight: '15px',
-          paddingLeft: '15px',
-          marginRight: 'auto',
-          marginLeft: 'auto',
-          paddingTop: '10em',
-          paddingBottom: '10em',
-         
+          <Dialog
+            fullScreen
+            open={sendMessageopen}
+            onClose={handleClose}
+            TransitionComponent={Transition}
+
+            sx={{
+              '& .MuiDialog-paper': {
+
+                backgroundColor: '#fafafa'
+              },
+            }}
 
 
-        }}>
-        <Grid sx={{
-          justifyContent: 'center',
-          display: 'flex',
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          marginRight: '-15px',
-          marginLeft: '-15px',
+          >
+            <Grid sx={{
+              maxWidth: '1300px',
+              width: '100%',
+              paddingRight: '15px',
+              paddingLeft: '15px',
+              marginRight: 'auto',
+              marginLeft: 'auto',
+              paddingTop: '10em',
+              paddingBottom: '10em',
 
 
-        }}>
-        <Grid sx={{
-          position: 'relative',
-          width: '100%',
-          paddingRight: '15px',
-          paddingLeft: '15px',
-          flex: '0 0 83.33333%',
-          maxWidth: '83.33333%',
-          flexDirection: 'column',
 
-        }}>
+            }}>
+              <Grid sx={{
+                justifyContent: 'center',
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                marginRight: '-15px',
+                marginLeft: '-15px',
 
-<Grid sx={{
-          width: "100%",
-          boxShadow: '0px 21px 41px -13px rgba(0, 0, 0, 0.18)',
 
-        }}>
+              }}>
+                <Grid sx={{
+                  position: 'relative',
+                  width: '100%',
+                  paddingRight: '15px',
+                  paddingLeft: '15px',
+                  flex: '0 0 83.33333%',
+                  maxWidth: '83.33333%',
+                  flexDirection: 'column',
 
-  <Grid sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          marginRight: '0',
-          marginLeft: '0',
+                }}>
 
-        }}>
+                  <Grid sx={{
+                    width: "100%",
+                    boxShadow: '0px 21px 41px -13px rgba(0, 0, 0, 0.18)',
 
-       
-        <Grid sx={{ 
-        
-          paddingRight: '0',
-          paddingLeft: '0',
-          alignItems: 'stretch !important',
-          display: 'flex !important',
-          flex: '0 0 41.66667%',
-          maxWidth: '41.66667%',
-          position: 'relative',     
-          width: '100%',
-          flexDirection: 'column',
-          height: "100%",
+                  }}>
 
-        }}>
-       
-        
-      
-         
-        <Grid sx={{
-          marginTop: '-20px',
-          marginBottom: '-20px',
-          borderRadius: '5px',
-          background:  'rgb(217, 243, 232) !important',
-          width: '100% !important',
-          padding: '3rem !important',
-          height: '83%',
-          maxHeight: '83%',
-        }}> 
+                    <Grid sx={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      marginRight: '0',
+                      marginLeft: '0',
 
-       
-        <List >
-        <Grid sx={{ display: 'grid',  gridTemplateColumns: '1fr 1fr', alignItems: 'center', padding: '0px'}}>
-          <ListItem >
-            <ListItemText primary=" Title" secondary="Titania"  primaryTypographyProps={{fontWeight: '550'}}/>
-          </ListItem>
-          <ListItem >
-            <ListItemText primary="Description" secondary="Tethys" primaryTypographyProps={{fontWeight: '550'}} />
-          </ListItem>
-          <ListItem >
-            <ListItemText primary="Market Id" secondary="Tethys"  primaryTypographyProps={{fontWeight: '550'}}/>
-          </ListItem>
-          <ListItem >
-            <ListItemText primary="Budget" secondary="Tethys"  primaryTypographyProps={{fontWeight: '550'}}/>
-          </ListItem>
-          </Grid>
-          </List>
-          
-          <List sx={{padding: '0px'}}>
-          <ListItem >
-            <ListItemText primary="Definition of done" secondary="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit sem.
+                    }}>
+
+
+                      <Grid sx={{
+
+                        paddingRight: '0',
+                        paddingLeft: '0',
+                        alignItems: 'stretch !important',
+                        display: 'flex !important',
+                        flex: '0 0 41.66667%',
+                        maxWidth: '41.66667%',
+                        position: 'relative',
+                        width: '100%',
+                        flexDirection: 'column',
+                        height: "100%",
+
+                      }}>
+
+
+
+
+                        <Grid sx={{
+                          marginTop: '-20px',
+                          marginBottom: '-20px',
+                          borderRadius: '5px',
+                          background: 'rgb(217, 243, 232) !important',
+                          width: '100% !important',
+                          padding: '3rem !important',
+                          height: '83%',
+                          maxHeight: '83%',
+                        }}>
+
+
+                          <List >
+                            <Grid sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', padding: '0px' }}>
+                              <ListItem >
+                                <ListItemText primary=" Title" secondary="Titania" primaryTypographyProps={{ fontWeight: '550' }} />
+                              </ListItem>
+                              <ListItem >
+                                <ListItemText primary="Description" secondary="Tethys" primaryTypographyProps={{ fontWeight: '550' }} />
+                              </ListItem>
+                              <ListItem >
+                                <ListItemText primary="Market Id" secondary="Tethys" primaryTypographyProps={{ fontWeight: '550' }} />
+                              </ListItem>
+                              <ListItem >
+                                <ListItemText primary="Budget" secondary="Tethys" primaryTypographyProps={{ fontWeight: '550' }} />
+                              </ListItem>
+                            </Grid>
+                          </List>
+
+                          <List sx={{ padding: '0px' }}>
+                            <ListItem >
+                              <ListItemText primary="Definition of done" secondary="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit sem.
               Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque pellentesque
               tortor tortor, at convallis metus ornare ac. Aenean quis pellentesque nisl. Ut
               suscipit a nisi sed porttitor. Donec cursus velit diam, non accumsan urna aliquet.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit sem.
@@ -716,111 +654,111 @@ handleClose();
               tortor tortor, at convallis metus ornare ac. Aenean quis pellentesque nisl. Ut
               suscipit a nisi sed porttitor. Donec cursus velit diam, non accumsan urna aliquet
               hendrerit."
-               primaryTypographyProps={{fontWeight: '550', }}
-              
-               secondaryTypographyProps={{ height: ' 468px',overflow: 'scroll', }}/>
-          </ListItem>
-      
-        </List>
+                                primaryTypographyProps={{ fontWeight: '550', }}
 
-        
-        
+                                secondaryTypographyProps={{ height: ' 468px', overflow: 'scroll', }} />
+                            </ListItem>
 
-        </Grid>
-        
-
-        </Grid>
-        <Grid sx={{ 
-         
-          paddingRight: '0',
-          paddingLeft: '0',
-          alignItems: 'stretch !important',
-          display: 'flex !important',
-          flex: '0 0 58.33333%',
-          maxWidth: '58.33333%',
-          position: 'relative',     
-          width: '100%',
-          flexDirection: 'column',
-
-        }}>
-
-        <Grid sx={{
-          background: '#fff',
-          paddingLeft: '3rem !important',
-          paddingRight: '3rem !important',
-          paddingTop: '3rem !important',
-          width: '100% !important',
-        }}>
-        {error ? <Typography  sx={{padding: "0px", position: "absolute", right: "100px", top: "17px", color:"red"}} className="error">{error}</Typography> : null}
-        <CloseIcon
-              fontSize="large"
-              onClick={handleClose}
-              sx={{
-                padding: "0px",
-                height: "20px",
-                position: "absolute",
-                right: "17px",
-                top: "17px",
-                width: "20px",
-                cursor: "pointer",
-              }}
-            />
-         
-      <Typography sx={{
-        lineHeight: '1.5',
-        fontWeight: '400',
-        fontFamily: '"Poppins", Arial, sans-serif',
-        color: '#000',
-        fontSize: '1.75rem',
-
-      }}>Create Proposal</Typography>
+                          </List>
 
 
-    
-
-        <List >
-        
-        <ListItem  sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start'}}>
-            <ListItemText primary="Proposal Payout" secondary="Enter a proposed payout you would like to receive for this job." primaryTypographyProps={{fontWeight: '550'}} />
-            <FormControl >
-          
-          <Input id="outlined-basic" type="number" name="proposalPayout" value={proposalPayout} onChange={handleChanges} startAdornment={
-            <InputAdornment position="start">
-                <img src="/assets/images/dai.png" style={{ width: 20, height: 20 }} />
-            </InputAdornment>
-          }/>
-          
-        </FormControl>
-          </ListItem>
-          <ListItem  sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start'}}>
-            <ListItemText primary="Contract Proposal" secondary="Write a proposal detailing why you would be a good fit for this job." primaryTypographyProps={{fontWeight: '550'}}  />
-            <FormControl fullWidth sx={{ width:'100%' }}>
-          
-          <TextField id="outlined-basic" label="" name="proposalMessage" variant="outlined"  multiline
-          rows={16} type="text" value={proposalMessage} onChange={handleChanges} onSubmit={handleProposalSubmit}
-        />
-        </FormControl>
-          </ListItem>
-         
-         
-      
-        </List>
-        <Grid sx={{alignItems: 'center', display: 'flex', justifyContent: 'center', marginBottom: '11px'}}>
-          <Button size="large" type="submit" onClick={handleProposalSubmit} >
-            Send Proposal
-          </Button>
-        </Grid>
 
 
-        </Grid>
-        </Grid>
-        </Grid>
-        </Grid>
-        </Grid>
-        </Grid>
-        </Grid>
-      </Dialog>
-      </>
+                        </Grid>
+
+
+                      </Grid>
+                      <Grid sx={{
+
+                        paddingRight: '0',
+                        paddingLeft: '0',
+                        alignItems: 'stretch !important',
+                        display: 'flex !important',
+                        flex: '0 0 58.33333%',
+                        maxWidth: '58.33333%',
+                        position: 'relative',
+                        width: '100%',
+                        flexDirection: 'column',
+
+                      }}>
+
+                        <Grid sx={{
+                          background: '#fff',
+                          paddingLeft: '3rem !important',
+                          paddingRight: '3rem !important',
+                          paddingTop: '3rem !important',
+                          width: '100% !important',
+                        }}>
+                          {error ? <Typography sx={{ padding: "0px", position: "absolute", right: "100px", top: "17px", color: "red" }} className="error">{error}</Typography> : null}
+                          <CloseIcon
+                            fontSize="large"
+                            onClick={handleClose}
+                            sx={{
+                              padding: "0px",
+                              height: "20px",
+                              position: "absolute",
+                              right: "17px",
+                              top: "17px",
+                              width: "20px",
+                              cursor: "pointer",
+                            }}
+                          />
+
+                          <Typography sx={{
+                            lineHeight: '1.5',
+                            fontWeight: '400',
+                            fontFamily: '"Poppins", Arial, sans-serif',
+                            color: '#000',
+                            fontSize: '1.75rem',
+
+                          }}>Create Proposal</Typography>
+
+
+
+
+                          <List >
+
+                            <ListItem sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                              <ListItemText primary="Proposal Payout" secondary="Enter a proposed payout you would like to receive for this job." primaryTypographyProps={{ fontWeight: '550' }} />
+                              <FormControl >
+
+                                <Input id="outlined-basic" type="number" name="proposalPayout" value={proposalPayout} onChange={handleChanges} startAdornment={
+                                  <InputAdornment position="start">
+                                    <img src="/assets/images/dai.png" style={{ width: 20, height: 20 }} />
+                                  </InputAdornment>
+                                } />
+
+                              </FormControl>
+                            </ListItem>
+                            <ListItem sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+                              <ListItemText primary="Contract Proposal" secondary="Write a proposal detailing why you would be a good fit for this job." primaryTypographyProps={{ fontWeight: '550' }} />
+                              <FormControl fullWidth sx={{ width: '100%' }}>
+
+                                <TextField id="outlined-basic" label="" name="proposalMessage" variant="outlined" multiline
+                                  rows={16} type="text" value={proposalMessage} onChange={handleChanges} onSubmit={handleProposalSubmit}
+                                />
+                              </FormControl>
+                            </ListItem>
+
+
+
+                          </List>
+                          <Grid sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', marginBottom: '11px' }}>
+                            <Button size="large" type="submit" onClick={handleProposalSubmit} >
+                              Send Proposal
+                            </Button>
+                          </Grid>
+
+
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Dialog>
+        </>
       );
     }
   };
@@ -859,12 +797,12 @@ handleClose();
                       name: { first: string; last: string };
                       login: {
                         username:
-                          | boolean
-                          | React.ReactChild
-                          | React.ReactFragment
-                          | React.ReactPortal
-                          | null
-                          | undefined;
+                        | boolean
+                        | React.ReactChild
+                        | React.ReactFragment
+                        | React.ReactPortal
+                        | null
+                        | undefined;
                       };
                     },
                     idx: React.Key | null | undefined
@@ -878,9 +816,9 @@ handleClose();
                         my={1}
                       >
                         <Box>
-                      
-                            <Avatar />
-                        
+
+                          <Avatar />
+
                         </Box>
 
                         <Stack>

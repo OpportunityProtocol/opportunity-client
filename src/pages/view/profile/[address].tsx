@@ -41,6 +41,7 @@ import {
   LENS_HUB_PROXY,
   LENS_INTERACTION_LOGIC_ADDRESS,
   NETWORK_MANAGER_ADDRESS,
+  PINATA_JWT,
   ZERO_ADDRESS,
 } from "../../../constant";
 import {
@@ -237,6 +238,7 @@ const ProfilePage: NextPage<any> = () => {
     contractInterface: NetworkManagerInterface,
     functionName: "getLensProfileIdFromAddress",
     enabled: false,
+    watch: false,
     chainId: CHAIN_ID,
     args: [accountData?.address],
     onSuccess: (data: Result) => {
@@ -551,7 +553,7 @@ const ProfilePage: NextPage<any> = () => {
     let retVal: any = {};
 
     try {
-      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+      if (!PINATA_JWT) {
         const ipfs = create({
           url: "/ip4/127.0.0.1/tcp/8080",
         });
@@ -579,7 +581,7 @@ const ProfilePage: NextPage<any> = () => {
           ...profileState,
           general: {
             ...profileState.general,
-            ...JSON.parse(retVal)
+            ...retVal
           }
         })
       }

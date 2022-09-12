@@ -16,6 +16,7 @@ import { useState, useEffect, FC } from "react";
 import {
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
+  PINATA_JWT,
   ZERO_ADDRESS,
 } from "../../../../constant";
 import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
@@ -98,7 +99,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
     let retVal: any = {};
 
     try {
-      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+      if (!PINATA_JWT) {
         const ipfs = create({
           url: "/ip4/127.0.0.1/tcp/8080",
         });
@@ -119,7 +120,7 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
         retVal = await getJSONFromIPFSPinata(ptr) //await fleek.getUser(ptr);
         setState({
           ...state,
-          ...JSON.parse(retVal)
+          ...retVal
         })
       }
 

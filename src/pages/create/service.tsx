@@ -29,7 +29,7 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 import {
-  NETWORK_MANAGER_ADDRESS,
+  NETWORK_MANAGER_ADDRESS, PINATA_API_KEY, PINATA_JWT,
 } from "../../constant";
 import { NetworkManagerInterface, TokenFactoryInterface } from "../../abis";
 import { BigNumber } from "ethers";
@@ -57,24 +57,12 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     serviceTitle: "",
     serviceDescription: "",
     serviceTags: "",
-    marketId: 1,
     tags: [],
     serviceThumbnail: "",
     thumbnail: "",
-    offers: {
-      beginner: {
-        price: 0,
-        values: new Array(6).fill(""),
-      },
-      business: {
-        price: 0,
-        values: new Array(6).fill(""),
-      },
-      enterprise: {
-        price: 0,
-        values: new Array(6).fill(""),
-      },
-    },
+    beginner_offer: 0,
+    business_offer: 0,
+    enterprise_offer: 0
   });
 
   const [createServiceDialogState, setCreateServiceDialogState] = useState({
@@ -98,6 +86,18 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       enterprisePriceError: false,
       enterprisePriceErrorMessage: "",
     });
+
+    const [offers, setOffers] = useState<Array<string>>(new Array(6));
+    const [checkboxes, setCheckboxes] = useState<Array<boolean>>([]);
+    const [publishDialogIsOpen, setPublishDialogIsOpen] =
+      useState<boolean>(false);
+    const onOpenPublishDialog = () => {};
+    const [publishDialogIsLoading, setPublishDialogIsLoading] =
+      useState<boolean>(false);
+    const [publishServiceSuccessful, setPublishServiceSuccessful] =
+      useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    
 
   const onCloseCreateServiceDialog = () => {
     if (createServiceDialogState.success == true) {
@@ -128,54 +128,55 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       1,
       serviceMetadataKey,
       [
-        Number(createServiceForm.offers.beginner.price),
-        Number(createServiceForm.offers.business.price),
-        Number(createServiceForm.offers.enterprise.price),
+        Number(createServiceForm.beginner_offer),
+        Number(createServiceForm.business_offer),
+        Number(createServiceForm.enterprise_offer),
       ],
       FEE_COLLECT_MODULE,
       FOLLOWER_ONLY_REFERENCE_MODULE,
     ],
     overrides: {
       gasLimit: BigNumber.from("11643163"),
-    },
-    onSettled(data, error) {
-      if (error) {
-        setCreateServiceDialogState({
-          ...createServiceDialogState,
-          loading: false,
-          success: false,
-          error: true,
-          errorMessage: error.message,
-        });
-
-        alert(error.message);
-      } else {
-        setCreateServiceDialogState({
-          ...createServiceDialogState,
-          loading: false,
-          success: true,
-          error: false,
-          errorMessage: "",
-        });
-
-        setServiceMetadataKey("");
-      }
-    },
+    }
   });
 
-  const networkManager_createService = useContractWrite(
-    networkManager_createServicePrepare.config
-  );
+  const networkManager_createService = useContractWrite({
+    ...networkManager_createServicePrepare.config,
+    onError(error, variables, context) {
+      setCreateServiceDialogState({
+        ...createServiceDialogState,
+        loading: false,
+        success: false,
+        error: true,
+        errorMessage: error.message,
+      });
+    },
+    onSuccess(data, variables, context) {
+      
+    },
+    onSettled(data, error, variables, context) {
+      setCreateServiceDialogState({
+        ...createServiceDialogState,
+        loading: false,
+        success: true,
+        error: false,
+        errorMessage: "",
+      });
 
-  useEffect(() => {
-    if (!marketsQuery.loading && marketsQuery.data) {
-      setMarketDetails(marketsQuery.data?.markets);
+      setServiceMetadataKey("");
     }
-  }, [marketsQuery.loading]);
+});
 
-  useEffect(() => {
-    marketsQuery.refetch();
-  }, []);
+
+useEffect(() => {
+  if (!marketsQuery.loading && marketsQuery.data) {
+    setMarketDetails(marketsQuery.data?.markets);
+  }
+}, [marketsQuery.loading]);
+
+useEffect(() => {
+  marketsQuery.refetch();
+}, []);
 
   const handleOnPublish = async () => {
     let retVal: string = "";
@@ -186,26 +187,22 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     });
 
     try {
-      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
-        //https://ipfs.infura.io:5001/api/v0
+      if (!PINATA_JWT) {
         const ipfs = create({
           url: "/ip4/0.0.0.0/tcp/5001",
         });
 
         retVal = await (await ipfs.add(JSON.stringify(createServiceForm))).path;
       } else {
+        const deepCopyCreateServiceForm = JSON.parse(JSON.stringify(createServiceForm))
+        //TEMP - TODO:
+        deepCopyCreateServiceForm.serviceThumbnail =""
+        deepCopyCreateServiceForm.thumbnail = ""
+        ///
         const data = generatePinataData(String(accountData.address) +
         ":" +
-        createServiceForm.serviceTitle, createServiceForm)
+        createServiceForm.serviceTitle, deepCopyCreateServiceForm)
         retVal = await pinJSONToIPFSPinata(data)
-
-        /*
-        retVal = await fleek.uploadService(
-          String(accountData.address) +
-            ":" +
-            createServiceForm.serviceTitle,
-          JSON.stringify(createServiceForm)
-        );*/
       }
 
       setServiceMetadataKey(retVal);
@@ -227,9 +224,9 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           1,
           retVal,
           [
-            Number(createServiceForm.offers.beginner.price),
-            Number(createServiceForm.offers.business.price),
-            Number(createServiceForm.offers.enterprise.price),
+            Number(createServiceForm.beginner_offer),
+            Number(createServiceForm.business_offer),
+            Number(createServiceForm.enterprise_offer),
           ],
           FEE_COLLECT_MODULE,
           FOLLOWER_ONLY_REFERENCE_MODULE,
@@ -248,63 +245,14 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     }
   };
 
-  const handleOnChangeOffer = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    idx: number
-  ) => {
-    const beginnerValues = createServiceForm.offers.beginner.values.slice(0);
-    const businessValues = createServiceForm.offers.business.values.slice(0);
-    const enterpriseValues =
-      createServiceForm.offers.enterprise.values.slice(0);
-
-    beginnerValues[idx] = e.target.value;
-    businessValues[idx] = e.target.value;
-    enterpriseValues[idx] = e.target.value;
-
-    setCreateServiceForm({
-      ...createServiceForm,
-      offers: {
-        beginner: {
-          ...createServiceForm.offers.beginner,
-          values: beginnerValues,
-        },
-        business: {
-          ...createServiceForm.offers.business,
-          values: beginnerValues,
-        },
-        enterprise: {
-          ...createServiceForm.offers.enterprise,
-          values: beginnerValues,
-        },
-      },
-    });
-  };
-
   const handleOnChangePrice = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const value = +Number(e.target.value);
-    if (value < 1) {
+    if (value > 0) {
       setCreateServiceForm({
         ...createServiceForm,
-        offers: {
-          ...createServiceForm.offers,
-          [e.target.id]: {
-            price: createServiceForm.offers[e.target.id].price,
-            values: createServiceForm.offers[e.target.id].values,
-          },
-        },
-      });
-    } else {
-      setCreateServiceForm({
-        ...createServiceForm,
-        offers: {
-          ...createServiceForm.offers,
-          [e.target.id]: {
-            price: e.target.value,
-            values: createServiceForm.offers[e.target.id].values,
-          },
-        },
+          [e.target.name]: e.target.value
       });
     }
   };
@@ -356,18 +304,19 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
   const handleOnChangeFile = (e) => {
     let reader = new FileReader();
+
     reader.onloadend = () => {
-      const buffer = Buffer.from(reader.result);
+      const buffer: Buffer = Buffer.from(reader.result)
+
       setSelectedImage(e.target.files[0]);
       setCreateServiceForm({
         ...createServiceForm,
-        serviceThumbnail: buffer,
+        serviceThumbnail: buffer.toString(),
       });
     };
     reader.readAsArrayBuffer(e.target.files[0]);
   };
 
-  const [offers, setOffers] = useState<Array<string>>(new Array(6));
 
   const handleOnChangeOffers = (e, idx: number) => {
     const updatedArr = [...offers];
@@ -375,18 +324,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     setOffers(updatedArr);
   };
 
-  const [checkboxes, setCheckboxes] = useState<Array<boolean>>([]);
-
   const handleOnChangeCheckbox = (e, idx: number) => {};
-
-  const [publishDialogIsOpen, setPublishDialogIsOpen] =
-    useState<boolean>(false);
-  const onOpenPublishDialog = () => {};
-  const [publishDialogIsLoading, setPublishDialogIsLoading] =
-    useState<boolean>(false);
-  const [publishServiceSuccessful, setPublishServiceSuccessful] =
-    useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
 
   const publishDialogContent = [
     <DialogContent>
@@ -765,10 +703,11 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                     border: "0px solid #eee",
                     width: "100%",
                   }}
-                  id="beginner"
+                  id="beginner_offer"
+                  name="beginner_offer"
                   type="number"
                   onChange={handleOnChangePrice}
-                  value={`${createServiceForm.offers.beginner.price}`}
+                  value={`${createServiceForm.beginner_offer}`}
                   error={createServiceFormErrorState.beginnerPriceError}
                 />
               </Paper>
@@ -798,10 +737,11 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                     border: "0px solid #eee",
                     width: "100%",
                   }}
-                  id="business"
+                  id="business_offer"
+                  name="business_offer"
                   type="number"
                   onChange={handleOnChangePrice}
-                  value={`${createServiceForm.offers.business.price}`}
+                  value={`${createServiceForm.business_offer}`}
                   error={createServiceFormErrorState.businessPriceError}
                 />
               </Paper>
@@ -831,10 +771,11 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                     border: "0px solid #eee",
                     width: "100%",
                   }}
-                  id="enterprise"
+                  id="enterprise_offer"
+                  name="enterprise_offer"
                   type="number"
                   onChange={handleOnChangePrice}
-                  value={`${createServiceForm.offers.enterprise.price}`}
+                  value={`${createServiceForm.enterprise_offer}`}
                   error={createServiceFormErrorState.enterprisePriceError}
                 />
               </Paper>
@@ -851,9 +792,9 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           sx={{ mx: 1, width: 120, p: 1 }}
           variant="contained"
           /*disabled={
-            createServiceForm.offers.beginner.price === 0 ||
-            createServiceForm.offers.business.price === 0 ||
-            createServiceForm.offers.enterprise.price === 0 ||
+            createServiceForm.beginner_offer === 0 ||
+            createServiceForm.business_offer === 0 ||
+            createServiceForm.enterprise_offer === 0 ||
             createServiceForm.service_title >= 81 ||
             createServiceForm.service_description >= 730
           }*/

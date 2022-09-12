@@ -7,14 +7,17 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Chip,
+  TableCell,
   Card,
   CardContent,
   Typography,
   Grid,
   Stack,
   Divider,
+  TableRow,
+  Paper,
 } from "@mui/material";
-
+import { withStyles } from '@mui/styles'
 import { NextRouter, useRouter } from "next/router";
 import { IJobDisplayProps } from "../../MarketInterface";
 import { useAccount, useContractRead } from "wagmi";
@@ -27,7 +30,10 @@ import { CHAIN_ID } from "../../../../constant/provider";
 import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
 import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../../../common/helper";
-import { getMetadata } from "../../../../common/ipfs-helper";
+import { getJSONFromIPFSPinata, getMetadata } from "../../../../common/ipfs-helper";
+import moment from "moment";
+import { useSelector } from "react-redux";
+import { selectUserAddress } from "../../../user/userReduxSlice";
 
 /**
  * @author Elijah Hampton
@@ -36,7 +42,53 @@ import { getMetadata } from "../../../../common/ipfs-helper";
  * @dev This component temporarily fetches contract data from the blockchain instead of graphql to obtain the contract
  * metadata due to issues with graphql returning a different encoded format
  */
-const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text = false }) => {
+
+ const TableBodyCell = withStyles((theme) => ({
+  root: {
+    color: "black",
+    fontSize: "12px !important",
+    padding: "10px !important",
+  },
+}))(TableCell);
+
+const StatusChip = ({ status }: { status: string }) => {
+  const bgcolor = () => {
+    switch (status) {
+      case "Reclaimed":
+        return "rgba(255, 138, 0, .24)";
+      case "Dispute":
+        return "rgba(255, 0, 0, .19)";
+      case "Unclaimed":
+        return "rgba(36, 227, 32, 0.4)";
+      case "Claimed":
+      default:
+    }
+  };
+  const formStatus = () => {
+    switch (status) {
+      case "Reclaimed":
+        return "Pending Dispute";
+      default:
+        return status;
+    }
+  };
+
+  return (
+    <Chip
+      label={formStatus()}
+      sx={{
+        display: "flex",
+        borderRadius: 1,
+        fontSize: 10,
+        bgcolor: bgcolor(),
+        width: "80px",
+        height: "30px",
+      }}
+    />
+  );
+};
+
+const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
   const router: NextRouter = useRouter();
   const accountData = useAccount();
 
@@ -51,6 +103,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text = false }) => {
     contractInterface: NetworkManagerInterface,
     functionName: "getContractData",
     enabled: false,
+    watch: false,
     chainId: CHAIN_ID,
     args: [data?.id],
     onSuccess: (data: Result) => {
@@ -108,7 +161,9 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text = false }) => {
 
   useEffect(() => {
     async function loadMetadata() {
-      const metadata = await getMetadata(metadataString);
+      const metadata = await getJSONFromIPFSPinata(metadataString)
+      console.log("@@@@@@@@@@@@@@")
+      console.log(metadata)
       setContractMetadata(metadata);
     }
 
@@ -117,51 +172,99 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text = false }) => {
     }
   }, [metadataString]);
 
-  return text ? (
-    <Box>
-      {contractMetadata?.contract_title ? (
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography
-            fontWeight="normal"
-            fontSize={12}
-            color={(theme) => theme.palette.primary.main}
-          >
-            {contractMetadata?.contract_title}
-          </Typography>
+  const userAddress = useSelector(selectUserAddress)
 
-          <Box display="flex" alignItems="center">
-            <Typography pl={1} fontSize={13}>
-              2.50
-            </Typography>
+  return table ? (
+    <>
+    <TableRow
+      onClick={
+        userAddress
+          ? () => router.push(`/view/contract/${data?.id}`)
+          : () => {}
+      }
+      component={Paper}
+      variant="outlined"
+      sx={{
+        width: "100%",
+        minWidth: "100% !important",
+        display: "flex",
+        height: 130,
+        cursor: userAddress ? "pointer" : "auto",
+      }}
+    >
+      <TableBodyCell sx={{ width: 150, fontWeight: "bold" }}>
+        Contract
+      </TableBodyCell>
+      <TableBodyCell sx={{ width: "100% !important" }}>
+        <Box display="flex">
             <img
-              src="/assets/images/dai.svg"
-              style={{ width: 15, height: 20 }}
-            />
-          </Box>
-        </Stack>
-      ) : (
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography
-            fontWeight="medium"
-            fontSize={13}
-            color={(theme) => theme.palette.primary.main}
-          >
-            Unable to load contract title
-          </Typography>
-
-          <Box display="flex" alignItems="center">
-            <img
-              src="/assets/images/dai.svg"
-              style={{ width: 15, height: 20 }}
+              src=""
+              style={{
+                marginRight: 15,
+                borderRadius: 6,
+                width: 110,
+                height: 60,
+              }}
             />
 
-            <Typography pl={1} fontSize={12}>
-              2.50
+          <Box>
+            <Typography fontWeight="medium" fontSize={14}>
+              {contractMetadata?.contract_title
+                ? contractMetadata?.contract_title
+                : "Unable to title"}
+            </Typography>
+            <Typography paragraph fontSize={12}>
+              {contractMetadata?.contract_description
+                ? contractMetadata?.contract_description
+                : "Unable to description"}
+            </Typography>
+            <Typography fontSize={12}>
+              {contractMetadata?.contract_definition_of_done
+                ? contractMetadata?.contract_definition_of_done
+                : "Unable to requirements"}
             </Typography>
           </Box>
+        </Box>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          {contractMetadata?.tags &&
+          contractMetadata?.tags?.length > 0 ? (
+            contractMetadata?.tags?.map((tag) => {
+              return (
+                <Chip
+                  variant="filled"
+                  sx={{ fontSize: 12, padding: 1, backgroundColor: "#eee" }}
+                  label={tag}
+                  size="small"
+                />
+              );
+            })
+          ) : (
+            <Typography color="text.secondary" variant="caption">
+              Unable to load tags
+            </Typography>
+          )}
         </Stack>
-      )}
-    </Box>
+      </TableBodyCell>
+      <TableBodyCell sx={{ width: 150 }}>
+        <Stack direction="row" spacing={0.5}>
+          <img
+            src="/assets/images/dai.svg"
+            style={{ width: 18, height: 18 }}
+          />
+          <Typography variant="body2" fontSize={12}>
+          {contractMetadata?.contract_budget}
+          </Typography>
+        </Stack>
+      </TableBodyCell>
+      <TableBodyCell sx={{ width: 150 }}>
+        <StatusChip status="Unclaimed" />
+      </TableBodyCell>
+      <TableBodyCell sx={{ width: 150 }}>
+        {moment().format("h:mm A")}
+      </TableBodyCell>
+    </TableRow>
+
+  </>
   ) : (
     <Card
       onClick={
@@ -221,10 +324,10 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text = false }) => {
           {contractMetadata?.contract_description
             ? contractMetadata?.contract_description
             : "Unable to load description"}
-        </Box>
+          </Box> 
 
         <Grid
-          pb={2}z
+          pb={2}
           container
           direction="row"
           flexDirection="row"
@@ -270,8 +373,8 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, text = false }) => {
               variant="outlined"
               size="small"
               label={
-                contractMetadata?.meta?.duration
-                  ? contractMetadata?.meta?.duration
+                contractMetadata?.duration
+                  ? contractMetadata?.duration
                   : "Undefined"
               }
             />

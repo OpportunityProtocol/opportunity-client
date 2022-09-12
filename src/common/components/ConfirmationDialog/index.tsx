@@ -42,6 +42,11 @@ export const ConfirmationDialog: FC<
 }) => {
   const [activeStep, setActiveStep] = useState(0);
 
+  useEffect(() => {
+    console.log('Success:')
+    console.log(success)
+  }, [success])
+
   const steps = hasSigningStep
     ? ["Introduction", "Sign", "Execute"]
     : ["Introduction", "Execute"];

@@ -33,11 +33,11 @@ import {
   useContractWrite,
   useFeeData,
   usePrepareContractWrite,
-  useQuery,
 } from "wagmi";
-import { QueryResult } from "@apollo/client";
+import { QueryResult, useQuery } from "@apollo/client";
 import {
   selectErc20Balance,
+  selectLens,
   selectUserAddress,
   selectUserBalance,
   selectUserConnectionStatus,
@@ -53,9 +53,10 @@ import VerificationDialog from "./modules/user/components/VerificationDialog";
 
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
-  const feeData = useFeeData();
-  const accountData = useAccount();
+  const feeData = useFeeData({ enabled: false, watch: false });
+  const accountData = useAccount()
   const userAddress = useSelector(selectUserAddress);
+  const userLensData = useSelector(selectLens)
   const userBalance = useSelector(selectUserBalance);
   const daiBalance = useSelector((state: RootState) =>
     selectErc20Balance(state, DAI_ADDRESS)
@@ -101,6 +102,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     addressOrName: DAI_ADDRESS,
     contractInterface: DaiInterface,
     functionName: "mint(uint256)",
+    enabled: false
   });
 
   const dai_mint = useContractWrite(daiContractWritePrepare.config);
@@ -110,8 +112,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     contractInterface: DaiInterface,
     functionName: "balanceOf",
     enabled: false,
-    cacheTime: 50000,
-    watch: true,
+    watch: false,
     chainId: CHAIN_ID,
     args: [userAddress],
     onSuccess(data) {},
@@ -132,6 +133,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   };
 
 
+
+
   const drawerWidth = 320;
   const drawer = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -144,7 +147,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
         >
           <Box sx={{ flex: 1, flexGrow: 1 }}>
             <Typography fontSize={12} fontWeight="medium">
-              blockchainworker {userAddress && userAddress != ZERO_ADDRESS ? `(${userAddress})` : null }
+               {userLensData && userLensData?.handle ? userLensData?.handle  :  `(${userAddress})`}
             </Typography>
             <Typography fontSize={15} fontWeight="bold">
               Leslie Alexander
@@ -161,9 +164,9 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
             Markets
           </Typography>
           {state.displayedMarkets && state.displayedMarkets.length > 0 ? (
-            state.displayedMarkets.map((marketDeatils) => {
-              return <Typography>Market Details</Typography>;
-            })
+            state.displayedMarkets.map((marketDetails) => {
+              return <Typography variant='button' onClick={() => {}}>{marketDetails.name}</Typography>
+            }) 
           ) : (
             <Typography variant="caption">Error loading markets. Make sure you are connect to a network or refreshing the page</Typography>
           )}
@@ -192,7 +195,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
             </ListItemIcon>
             <ListItemText
               primary="MATIC Balance"
-              secondary={userBalance && userAddress != ZERO_ADDRESS ? userBalance : 'Connect a wallet'}
+              secondary={accountData.status == 'connected' ? userBalance : 'Connect a wallet'}
               primaryTypographyProps={{
                 fontSize: 10,
                 fontWeight: "medium",
@@ -210,7 +213,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
             </ListItemIcon>
             <ListItemText
               primary="DAI Balance"
-              secondary={daiBalance && userAddress != ZERO_ADDRESS ? daiBalance : 'Connect a wallet'}
+              secondary={accountData.status == 'connected' ? daiBalance : 'Connect a wallet'}
               primaryTypographyProps={{
                 fontSize: 10,
                 fontWeight: "medium",
@@ -225,7 +228,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
           <ListItem divider>
             <ListItemText
               primary="Web3/Wallet Provider"
-              secondary={userConnector && userAddress != ZERO_ADDRESS ? userConnector : 'Connect a wallet'}
+              secondary={accountData.status == 'connected' ? userConnector?.name : 'Connect a wallet'}
               primaryTypographyProps={{
                 fontSize: 10,
                 fontWeight: "medium",
@@ -240,7 +243,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
           <ListItem divider>
             <ListItemText
               primary="Network"
-              secondary={userConnector && userAddress != ZERO_ADDRESS ? userConnector : 'Connect a wallet'}
+              secondary={accountData.status == 'connected' ? userConnector?.network : 'Connect a wallet'}
               primaryTypographyProps={{
                 fontSize: 10,
                 fontWeight: "medium",
@@ -277,8 +280,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
         sx={{
           display: "flex",
           background: APP_BACKGROUND,
-          //   flexGrow: 1,
-          height: "100vh",
+             flexGrow: 1,
+        //  height: "100vh",
         }}
       >
         <NavigationBar />

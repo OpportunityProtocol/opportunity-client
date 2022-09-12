@@ -39,6 +39,7 @@ import {
   FREE_FOLLOW_MODULE,
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
+  PINATA_JWT,
   ZERO_ADDRESS,
 } from "../../../../constant";
 import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
@@ -94,9 +95,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     certifications: [],
     skills: [],
     languages: [],
-    toggles: {
-      show_freelancer_stats: false,
-    },
+    show_freelancer_stats: 0
   });
 
   //getProfile
@@ -134,9 +133,9 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
 
   useEffect(() => {
     if (lensProfileId !== 0) {
-   /*   lensHub_getProfile.refetch({
+      lensHub_getProfile.refetch({
         throwOnError: true,
-      });*/
+      });
     }
   }, [lensProfileId]);
 
@@ -156,6 +155,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
 
   const networkManager_registerWorkerPrepare = usePrepareContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
+    enabled: false,
     contractInterface: JSON.stringify(NetworkManagerInterface),
     functionName: "register",
     args: [
@@ -174,7 +174,9 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
     },
-    onSuccess: (data) => {},
+    onSuccess: (data) => {
+
+    },
     onError(error: Error) {
       if (String(error).includes("Taken")) {
         setChosenHandleErrorText(
@@ -185,7 +187,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
       }
     },
     onSettled(data, error) {
-     // networkManager_getLensProfileIdFromAddress.refetch();
+      networkManager_getLensProfileIdFromAddress.refetch();
       setRegistrationLoading(false);
       handleClose();
     },
@@ -200,13 +202,14 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
 
     let retVal = "";
     try {
-      if (process.env.NEXT_PUBLIC_CHAIN_ENV === "development") {
+      if (!PINATA_JWT) {
         const ipfs = create({
           url: "/ip4/0.0.0.0/tcp/5001",
         });
 
         retVal = await (await ipfs.add(JSON.stringify(metadataState))).path;
       } else {
+    
         const data = generatePinataData("metadata_" + String(userAddress), metadataState)
         retVal = await pinJSONToIPFSPinata(data)
 
@@ -306,9 +309,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
   const handleOnChangeDisplayFreelancer = (e) => {
     setMetadataState({
       ...metadataState,
-      toggles: {
-        display_freelancer_stats: e.target.checked,
-      },
+      display_freelancer_stats: e.target.checked == true ? 1 : 0
     });
   };
 

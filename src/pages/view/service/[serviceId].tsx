@@ -62,7 +62,7 @@ import { ConfirmationDialog } from "../../../common/components/ConfirmationDialo
 import { MailOutline } from "@mui/icons-material";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_SERVICE_BY_ID } from "../../../modules/contract/ContractGQLQueries";
-import { getMetadata } from "../../../common/ipfs-helper";
+import { getJSONFromIPFSPinata, getMetadata } from "../../../common/ipfs-helper";
 
 interface IViewContractPage {
   router: NextRouter;
@@ -128,6 +128,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     contractInterface: NetworkManagerInterface,
     functionName: "getLensProfileIdFromAddress",
     enabled: false,
+    watch: false,
     chainId: CHAIN_ID,
     args: serviceData?.creator,
     onSuccess: (data: Result) => {
@@ -172,7 +173,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   useEffect(() => {
     async function loadMetadata() {
       if (serviceData?.metadataPtr) {
-        const parsedData = await getMetadata(serviceData?.metadataPtr);
+        const parsedData = await getJSONFromIPFSPinata(serviceData?.metadataPtr) //getMetadata(serviceData?.metadataPtr);
         //@ts-ignore
         if (
           parsedData?.serviceThumbnail &&

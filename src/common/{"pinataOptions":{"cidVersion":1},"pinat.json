@@ -1,0 +1,22 @@
+{
+	"pinataOptions": { "cidVersion": 1 },
+	"pinataMetadata": {
+		"name": "metadata_0x7623ED3C60e2a37e9b511150cadf07490700043B",
+		"keyvalues": {
+			"display_name": "sdffsdfsfd",
+			"description": "fsfsdfsdfsdf",
+			"certifications": "sdf,sdf",
+			"skills": "dsf,dsf,sdf",
+			"languages": "English,Spanish",
+			"show_freelancer_stats": false
+		}
+	},
+	"pinataContent": {
+		"display_name": "sdffsdfsfd",
+		"description": "fsfsdfsdfsdf",
+		"certifications": "sdf,sdf",
+		"skills": "dsf,dsf,sdf",
+		"languages": "English,Spanish",
+		"show_freelancer_stats": false
+	}
+}
