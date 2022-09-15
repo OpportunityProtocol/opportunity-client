@@ -67,7 +67,7 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
             : "1px solid #eee",
       }}
       variant="outlined"
-      onClick={selectable ? () => handleOnSelect() : () => router.push("/jobs")}
+      onClick={selectable ? () => handleOnSelect() : () => router.push(`/view/market/${marketDetails?.id}`)}
     >
       <Box sx={{ width: "100%", height: small ? 100 : 200 }}>
         <img

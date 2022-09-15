@@ -45,12 +45,23 @@ import {
   userERC20BalanceChanged,
 } from "./modules/user/userReduxSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { DAI_ADDRESS, NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "./constant";
+import { DAI_ADDRESS, MARKET_DESCRIPTION_MAPPING, NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "./constant";
 import { RootState } from "./store";
 import { DaiInterface, NetworkManagerInterface } from "./abis";
 import { CHAIN_ID } from "./constant/provider";
 import VerificationDialog from "./modules/user/components/VerificationDialog";
 import Link from "next/link";
+
+const contractDetailsPrimaryTypographyProps = {
+  fontSize: 14,
+  fontWeight: "medium",
+  color: "rgb(33, 33, 33, .85)",
+};
+
+const contractDetailsSecondaryTypographyProps = {
+  color: "#808080",
+  fontSize: 12,
+};
 
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
@@ -70,11 +81,12 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     displayedMarkets: [],
   });
 
-  const APP_BACKGROUND: string = '#FAFAFA'
+  const APP_BACKGROUND: string = 'rgb(246, 247, 249)'
   // "linear-gradient(180deg, rgba(250,250,250,1) 35%, rgba(236,247,243,1) 75%, rgba(236,246,242,1) 100%)";
 
   const isPadded: boolean =
     router.pathname === "/" ||
+    router.pathname === "/dashboard" ||
     router.pathname === "/work" ||
     router.pathname.includes("/view/profile") ||
     router.pathname === "/contract/view/contract" ||
@@ -99,67 +111,16 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     }
   }, [marketsQuery.loading]);
 
-  const daiContractWritePrepare = usePrepareContractWrite({
-    addressOrName: DAI_ADDRESS,
-    contractInterface: DaiInterface,
-    functionName: "mint(uint256)",
-    enabled: false
-  });
 
-  const dai_mint = useContractWrite(daiContractWritePrepare.config);
-
-  const dai_balanceOf = useContractRead({
-    addressOrName: DAI_ADDRESS,
-    contractInterface: DaiInterface,
-    functionName: "balanceOf",
-    enabled: false,
-    watch: false,
-    chainId: CHAIN_ID,
-    args: [userAddress],
-    onSuccess(data) { },
-    onError: (error: Error) => { },
-  });
-
-  const dispatch = useDispatch();
-
-  const handleOnAddFunds = async () => {
-    await dai_mint.write();
-    const result = await dai_balanceOf.refetch();
-
-    dispatch(
-      userERC20BalanceChanged({
-        [DAI_ADDRESS]: Number(result.data._hex),
-      })
-    );
-  };
 
   const drawerWidth = 320;
   const drawer = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <Box component={CardContent}>
-        <Stack
-          sx={{ display: "flex" }}
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Box sx={{ flex: 1, flexGrow: 1 }}>
-            <Typography fontSize={12} fontWeight="medium">
-              {userLensData && userLensData?.handle ? userLensData?.handle : `Connect a wallet`}
-            </Typography>
-            <Typography fontSize={15} fontWeight="bold">
-              Leslie Alexander
-            </Typography>
-          </Box>
-
-
-        </Stack>
-      </Box>
       <Divider />
       <Box sx={{ height: "100%", flexGrow: 1, flex: 1 }}>
         <CardContent>
           <Box pb={1}>
-            <Typography fontSize={15} fontWeight="bold" sx={{ textTransform: 'capitalize' }}>
+            <Typography  fontSize={16} fontWeight="bold" sx={{ color: '#212121', textTransform: 'capitalize' }}>
               Markets
             </Typography>
           </Box>
@@ -168,13 +129,24 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
             {state.displayedMarkets && state.displayedMarkets.length > 0 ? (
               state.displayedMarkets.map((marketDetails) => {
                 return (
-                  <Box display='flex' alignItems='center' justifyContent='space-between'>
-                    <Typography onClick={() => router.push(`/markets/${marketDetails?.id}`)} style={{ cursor: 'pointer', fontSize: 12, fontWeight: 'bold', color: '#212121', /*'rgb(146, 146, 147)'*/ }} >{marketDetails.name}</Typography>
-                    <Typography sx={{ fontWeight: 'bold', fontSize: 12, color: '#212121', /*'rgb(146, 146, 147)'*/ }}>
-                      0
-                    </Typography>
-                  </Box>
+                  <List>
+                    <ListItem sx={{ '&:hover': { cursor: 'pointer' }}} disablePadding disableGutters onClick={() => router.push(`/view/markets/${marketDetails?.id}`)} secondaryAction={<Typography fontSize={12} fontWeight='bold'>0</Typography>}>
+                  <ListItemText
+                  
+                    primary={marketDetails?.name}
+                    secondary={MARKET_DESCRIPTION_MAPPING[marketDetails?.name]}
+                    primaryTypographyProps={
+                      contractDetailsPrimaryTypographyProps
+                    }
+                    secondaryTypographyProps={
+                      contractDetailsSecondaryTypographyProps
+                    }
+                    
+                  />
+                </ListItem>
 
+                  </List>
+  
                 )
               })
             ) : (
@@ -183,105 +155,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
           </Stack>
         </CardContent>
       </Box>
-      <Divider />
-      <Box>
-
-        <CardContent>
-          <Stack my={1} direction="row" alignItems="center">
-            <Button size="small" variant="contained" onClick={handleOnAddFunds}>
-              Add funds
-            </Button>
-
-            <Button size="small" variant="contained" onClick={() => setVerificationModal(true)}>
-              Register
-            </Button>
-          </Stack>
-        </CardContent>
-
-        <List disablePadding>
-          <Divider />
-          <ListItem divider sx={{ backgroundColor: "#fafafa" }}>
-            <ListItemIcon>
-              <FaEthereum size={18} />
-            </ListItemIcon>
-            <ListItemText
-              primary="MATIC Balance"
-              secondary={accountData.status == 'connected' ? userBalance : 0}
-              primaryTypographyProps={{
-                fontSize: 10,
-                fontWeight: "medium",
-              }}
-              secondaryTypographyProps={{
-                fontSize: 12,
-                fontWeight: "medium",
-              }}
-            />
-          </ListItem>
-
-          <ListItem divider sx={{ backgroundColor: "#fafafa" }}>
-            <ListItemIcon>
-              <FaEthereum size={18} />
-            </ListItemIcon>
-            <ListItemText
-              primary="DAI Balance"
-              secondary={accountData.status == 'connected' ? daiBalance : 0}
-              primaryTypographyProps={{
-                fontSize: 10,
-                fontWeight: "medium",
-              }}
-              secondaryTypographyProps={{
-                fontSize: 12,
-                fontWeight: "medium",
-              }}
-            />
-          </ListItem>
-
-          <ListItem divider>
-            <ListItemText
-              primary="Web3/Wallet Provider"
-              secondary={accountData.status == 'connected' ? userConnector?.name : '-'}
-              primaryTypographyProps={{
-                fontSize: 10,
-                fontWeight: "medium",
-              }}
-              secondaryTypographyProps={{
-                fontSize: 12,
-                fontWeight: "medium",
-              }}
-            />
-          </ListItem>
-
-          <ListItem divider>
-            <ListItemText
-              primary="Network"
-              secondary={accountData.status == 'connected' ? userConnector?.network : '-'}
-              primaryTypographyProps={{
-                fontSize: 10,
-                fontWeight: "medium",
-              }}
-              secondaryTypographyProps={{
-                fontSize: 12,
-                fontWeight: "medium",
-              }}
-            />
-          </ListItem>
-
-          <ListItem divider>
-            <ListItemText
-              primary="Gas Fee"
-              secondary={feeData.data?.formatted?.gasPrice && userAddress != ZERO_ADDRESS ? feeData.data?.formatted?.gasPrice : '-'}
-              primaryTypographyProps={{
-                fontSize: 10,
-                fontWeight: "medium",
-              }}
-              secondaryTypographyProps={{
-                fontSize: 12,
-                fontWeight: "medium",
-              }}
-            />
-          </ListItem>
-        </List>
-      </Box>
+    
+     
     </Box>
   );
 
@@ -296,22 +171,28 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
         }}
       >
         <NavigationBar />
-        <Drawer
-          variant="permanent"
-          sx={{
-            height: "100%",
-            width: drawerWidth,
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
-              width: drawerWidth,
-              boxSizing: "border-box",
+        {
+          (router.asPath.includes('/view/market') || router.pathname == '/') && (
+            <Drawer
+            variant="permanent"
+            sx={{
               height: "100%",
-            },
-          }}
-          open={true}
-        >
-          {drawer}
-        </Drawer>
+              width: drawerWidth,
+              flexShrink: 0,
+              "& .MuiDrawer-paper": {
+                borderRight: '1px solid #ddd',
+                width: drawerWidth,
+                boxSizing: "border-box",
+                height: "100%",
+              },
+            }}
+            open={true}
+          >
+            {drawer}
+          </Drawer>
+          )
+        }
+     
         <Box
           component="main"
           sx={{ paddingTop: isPadded ? "80px" : "0px", flexGrow: 1 }}

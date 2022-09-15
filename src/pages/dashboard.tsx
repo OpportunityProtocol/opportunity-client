@@ -40,6 +40,7 @@ import JobDisplay from "../modules/market/components/JobDisplay";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../modules/user/userReduxSlice";
 import { KeyboardArrowDown, Refresh } from "@mui/icons-material";
+import SearchBar from "../common/components/SearchBar/SearchBar";
 
 const MuiTableHead = withStyles((theme) => ({
   root: {
@@ -51,20 +52,21 @@ const MuiTableHead = withStyles((theme) => ({
 
 const TableHeaderCell = withStyles((theme) => ({
   root: {
-    color: "black",
-    fontSize: "12px !important",
+    color: "rgb(190, 190, 190)",
+    fontSize: "14px !important",
+    textTransform: 'capitalize',
     padding: "10px !important",
     fontWeight: "bold",
   },
 }))(TableCell);
 
 enum Persona {
+  CATALOG,
   WORKING,
   HIRING
 }
 
 enum ContractsViewingPersona {
-  ALL,
   CONTRACTS,
   SERVICES
 }
@@ -77,23 +79,13 @@ const ExplorePage: NextPage = () => {
     hiringJobs: []
   });
 
-  const [contractViewPersona, setContractViewPersona] = useState<any>(ContractsViewingPersona.ALL)
-
-  const [verifiedFreelancers, setVerifiedFreelancers] = useState<Array<any>>(
-    []
-  );
-
+  const [contractWorking, setContractsWorking] = useState<Array<any>>([])
+  const [servicesWorking, setServicesWorking] = useState<Array<any>>([])
+  const [contractsHiring, setContractsHiring] = useState<Array<any>>([])
+  const [servicesHired, setServicesHired] = useState<Array<any>>([])
+  const [createdServices, setCreatedServices] = useState<Array<any>>([])
+  const [contractViewPersona, setContractViewPersona] = useState<any>(ContractsViewingPersona.CONTRACTS)
   const userAddress = useSelector(selectUserAddress)
-
-  const [services, setServices] = useState([]);
-  const [featuredContracts, setFeaturedContracts] = useState<Array<any>>([]);
-
-  const getServices: QueryResult = useQuery(GET_SERVICES);
-  const contractsQuery: QueryResult = useQuery(GET_CONTRACTS);
-
-  const verifiedFreelancersQuery: QueryResult = useQuery(
-    GET_VERIFIED_FREELANCERS
-  );
 
   const servicesByCreatorQuery: QueryResult = useQuery(
     GET_SERVICES_BY_CREATOR,
@@ -155,41 +147,23 @@ const ExplorePage: NextPage = () => {
   const onChangePersona = (): void => {
     switch (state.persona) {
       case Persona.WORKING:
-        activeServicesByCreatorQuery.refetch()
-        workingContractsQuery.refetch()
+        if (contractViewPersona == ContractsViewingPersona.CONTRACTS) {
+          workingContractsQuery.refetch()
+        } else {
+          activeServicesByCreatorQuery.refetch()
+        }
         break;
       case Persona.HIRING:
-        purchasedServicesByClientQuery.refetch()
-        contractsCreatedByEmployerQuery.refetch()
+        if (contractViewPersona == ContractsViewingPersona.CONTRACTS) {
+          contractsCreatedByEmployerQuery.refetch()
+        } else {
+          purchasedServicesByClientQuery.refetch()
+        }
         break;
       default:
     }
   }
 
-  useEffect(() => {
-    if (!contractsQuery.loading && contractsQuery.data) {
-      setFeaturedContracts(contractsQuery.data.contracts);
-    }
-  }, [contractsQuery.loading]);
-
-  useEffect(() => {
-    if (!verifiedFreelancersQuery.loading && verifiedFreelancersQuery.data) {
-      setVerifiedFreelancers(verifiedFreelancersQuery.data.verifiedUsers);
-    }
-  }, [verifiedFreelancersQuery.loading]);
-
-  useEffect(() => {
-    if (!getServices.loading && getServices.data) {
-      setServices(getServices.data.services);
-    }
-  }, [getServices.loading]);
-
-  //prepare explore page
-  useEffect(() => {
-    contractsQuery.refetch();
-    verifiedFreelancersQuery.refetch();
-    getServices.refetch();
-  }, []);
 
   useEffect(() => {
     onChangePersona()
@@ -228,23 +202,19 @@ const ExplorePage: NextPage = () => {
             });
         }
 
-        workingContractsData.push(...activeServices);
+        setServicesWorking([...activeServices])
+
       }
     }
 
-    const workingContractsData = []
     syncActiveServices();
+  }, [activeServicesByCreatorQuery.loading,]);
+
+  useEffect(() => {
     if (!workingContractsQuery.loading && workingContractsQuery.data) {
-      workingContractsData.push(...workingContractsQuery.data.contracts);
+      setContractsWorking([...workingContractsQuery.data.contracts]);
     }
-
-    console.log(workingContractsData)
-
-    setState({
-      ...state,
-      workingJobs: workingContractsData
-    })
-  }, [activeServicesByCreatorQuery.loading, workingContractsQuery.loading]);
+  }, [workingContractsQuery.loading])
 
   //hiring
   useEffect(() => {
@@ -280,51 +250,61 @@ const ExplorePage: NextPage = () => {
             });
         }
 
-        hiringJobsData.push(...purchasedServices);
+        setServicesHired([...purchasedServices]);
       }
     }
 
-    const hiringJobsData = []
     syncPurchasedServices();
+  }, [purchasedServicesByClientQuery.loading]);
+
+  useEffect(() => {
     if (
       !contractsCreatedByEmployerQuery.loading &&
       contractsCreatedByEmployerQuery.data
     ) {
-      hiringJobsData.push(...contractsCreatedByEmployerQuery.data.contracts);
+      setContractsHiring([...contractsCreatedByEmployerQuery.data.contracts]);
     }
+  }, [contractsCreatedByEmployerQuery.loading])
 
-    setState({
-      ...state,
-      hiringJobs: hiringJobsData
-    })
+  useEffect(() => {
+    if (
+      !servicesByCreatorQuery.loading &&
+      servicesByCreatorQuery.data
+    ) {
+      setCreatedServices([ ...servicesByCreatorQuery.data.services ]);
+    }
+  }, [servicesByCreatorQuery.loading])
 
-  }, [purchasedServicesByClientQuery.loading, contractsCreatedByEmployerQuery.loading]);
-
-  const renderJobs = () => {
-    let jobs: Array<any> = []
+  const renderContracts = () => {
     switch (state.persona) {
       case Persona.HIRING:
-        jobs = state.hiringJobs
-        break;
+        return contractsHiring.map((item) => {
+          return <JobDisplay table data={item} />
+        })
       case Persona.WORKING:
-        jobs = state.workingJobs
-        break;
+        return contractWorking.map((item) => {
+          return <JobDisplay table data={item} />
+        })
+      case Persona.CATALOG: //services only
       default:
     }
+  }
 
-    switch (contractViewPersona) {
-      case ContractsViewingPersona.ALL:
-        return jobs.map((item) => {
-          return item?.__typename === 'Service' ? <ServiceCard id={item?.id} /> : <JobDisplay data={item} />
+  const renderServices = () => {
+    switch (state.persona) {
+      case Persona.HIRING:
+        return servicesHired.map((item) => {
+          return <ServiceCard id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
-      case ContractsViewingPersona.CONTRACTS:
-        return jobs.filter((item) => item?.__typename == 'Contract').map((item) => {
-          return <JobDisplay data={item} />
+      case Persona.WORKING:
+        return servicesWorking.map((item) => {
+          return <ServiceCard id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
-      case ContractsViewingPersona.SERVICES:
-        return jobs.filter((item) => item?.__typename == 'Service').map((item) => {
-          return <ServiceCard id={item?.id} data={item?.serviceData} purchaseData={item?.purchaseData} />
+      case Persona.CATALOG:
+        return createdServices.map((item) => {
+          return <ServiceCard id={item?.id} data={item} />
         })
+      default:
     }
   }
 
@@ -337,7 +317,7 @@ const ExplorePage: NextPage = () => {
         padding: "0px 20px !important",
       }}
     >
-     {/* <Box
+      {/* <Box
         sx={{
           //mt: 12,
           width: "100%",
@@ -354,52 +334,29 @@ const ExplorePage: NextPage = () => {
 
       <Box
         sx={{
-
-        //  mt: 3,
+          //  mt: 3,
           width: "100%",
         }}
       >
         <Stack
-        my={2}
+          my={2}
           direction="row"
           alignItems="center"
           justifyContent="space-between"
         >
-             <Typography
+          <Typography
             fontWeight="bold"
             fontSize={24}
             color="rgba(33, 33, 33, .85)"
           >
-            Work For You
+            Work Dashboard
           </Typography>
 
-
-            <SearchBarV1 placeholder="Try website designer..." />
-       
-      
-
-
+          <SearchBar placeholder='Search...' />
         </Stack>
 
-
         <Box my={2} mb={5} display='flex' alignItems='center' justifyContent='space-between'>
-        <Stack spacing={1} direction="row" alignItems="center">
-            <Chip
-              variant='outlined'
-              onClick={() => setContractViewPersona(ContractsViewingPersona.ALL)}
-              sx={{
-                fontSize: 12,
-                fontWeight: "medium",
-                border: '1px solid #ddd',
-                color: contractViewPersona === ContractsViewingPersona.ALL ? "white" : "black",
-                bgcolor: (theme) =>
-                  contractViewPersona === ContractsViewingPersona.ALL
-                    ? theme.palette.primary.dark
-                    : "transparent",
-              }}
-              clickable
-              label="All"
-            />
+          <Stack spacing={1} direction="row" alignItems="center">
             <Chip
               variant='outlined'
               onClick={() => setContractViewPersona(ContractsViewingPersona.CONTRACTS)}
@@ -436,22 +393,29 @@ const ExplorePage: NextPage = () => {
             />
           </Stack>
 
-
-        <Stack  spacing={1} direction="row" alignItems="center">
+          <Stack spacing={1} direction="row" alignItems="center">
             <Button sx={{ height: 25, borderRadius: 1 }} onClick={() => setState({ ...state, persona: Persona.WORKING })} size='small' variant={state.persona === Persona.WORKING ? 'contained' : 'outlined'}>
               Working
             </Button>
-            <Button sx={{ height: 25, borderRadius: 1 }} onClick={() => setState({ ...state, persona: Persona.HIRING })}  size='small' variant={state.persona === Persona.HIRING ? 'contained' : 'outlined'}>
+            <Button sx={{ height: 25, borderRadius: 1 }} onClick={() => setState({ ...state, persona: Persona.HIRING })} size='small' variant={state.persona === Persona.HIRING ? 'contained' : 'outlined'}>
               Hiring For
             </Button>
+            {
+              contractViewPersona == ContractsViewingPersona.SERVICES && (
+                <Button
+                  sx={{ height: 25, borderRadius: 1 }}
+                  onClick={() => setState({ ...state, persona: Persona.CATALOG })}
+                  size='small'
+                  variant={state.persona === Persona.CATALOG ? 'contained' : 'outlined'}>
+                  My Service Catalog
+                </Button>
+              )
+            }
             <IconButton size='small'>
               <Refresh fontSize='small' />
             </IconButton>
           </Stack>
-        
-         
         </Box>
-
 
         <Box sx={{ width: "100%", mb: 2 }}>
           <Table sx={{ width: "100%" }}>
@@ -460,33 +424,35 @@ const ExplorePage: NextPage = () => {
                 width: "100% !important",
                 ".MuiTableHead-root": {
                   width: "100% !important",
+                  borderRadius: 20
                 },
               }}
             >
               <TableRow
                 component={Paper}
+                elevation={0}
                 variant="outlined"
                 sx={{
                   width: "100%",
                   minWidth: "100% !important",
                   display: "flex",
+                  "& .MuiDrawer-paper": {
+                    borderRadius: 20
+                  },
                 }}
               >
-                <TableHeaderCell sx={{ width: 150, fontWeight: "bold" }}>
-                  Type
-                </TableHeaderCell>
                 <TableHeaderCell
-                  sx={{ width: "100% !important", fontWeight: "bold" }}
+                  sx={{ width: "100% !important", }}
                 >
                   Information
                 </TableHeaderCell>
-                <TableHeaderCell sx={{ width: 150, fontWeight: "bold" }}>
+                <TableHeaderCell sx={{ width: 150, }}>
                   Payout
                 </TableHeaderCell>
-                <TableHeaderCell sx={{ width: 150, fontWeight: "bold" }}>
+                <TableHeaderCell sx={{ width: 150,  }}>
                   Status
                 </TableHeaderCell>
-                <TableHeaderCell sx={{ width: 150, fontWeight: "bold" }}>
+                <TableHeaderCell sx={{ width: 150, }}>
                   Deadline
                 </TableHeaderCell>
               </TableRow>
@@ -494,12 +460,10 @@ const ExplorePage: NextPage = () => {
           </Table>
         </Box>
 
-    
-
         <Box sx={{}}>
           <Stack spacing={2}>
             {
-              renderJobs()
+              contractViewPersona === ContractsViewingPersona.CONTRACTS ? renderContracts() : renderServices()
             }
           </Stack>
         </Box>

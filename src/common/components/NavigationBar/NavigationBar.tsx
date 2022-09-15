@@ -80,8 +80,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
-import Metamaskconnect from "public/assets/images/coinbaseconnect.png";
-import Coinbaseconnect from "../../../../public/assets/images/coinbaseconnect.png";
 
 /**
  * Elijah Hampton
@@ -126,8 +124,6 @@ const NavigationBar: FC = (): JSX.Element => {
         imageURI,
         pubCount,
       } = data;
-      console.log('pubCount')
-      console.log(pubCount)
       dispatch(
         userLensDataStored({
           followModule,
@@ -151,13 +147,9 @@ const NavigationBar: FC = (): JSX.Element => {
     chainId: CHAIN_ID,
     args: [accountData?.address],
     onSuccess: (data: Result) => {
-      console.log(data)
-      console.log('get lens address')
       setLensProfileId(hexToDecimal(data._hex));
     },
-    onError: (error) => {
-      console.log(error)
-    },
+    onError: (error) => {},
   });
 
   const dai_balanceOf = useContractRead({
@@ -168,10 +160,7 @@ const NavigationBar: FC = (): JSX.Element => {
     watch: false,
     chainId: CHAIN_ID,
     args: [userAddress],
-    onSuccess(data) {
-      console.log('DAI CALL')
-      console.log(data)
-    },
+    onSuccess(data) {},
     onError: (error: Error) => {},
   });
 
@@ -213,8 +202,6 @@ const NavigationBar: FC = (): JSX.Element => {
         })
         .then((updatedResults) => {
           if (updatedResults.isSuccess) {
-            console.log('Updated results')
-            console.log(updatedResults)
             setLensProfileId(updatedResults.data._hex);
           } else {
             setLensProfileId(0);
@@ -231,11 +218,6 @@ const NavigationBar: FC = (): JSX.Element => {
       });
     }
   }, [lensProfileId]);
-
-  console.log('CONNECT')
-  console.log(connectData)
-  console.log('ACCOUNT')
-  console.log(accountData)
 
   async function handleOnIsConnected() {
     let address: string = "Please connect a wallet",
@@ -256,8 +238,6 @@ const NavigationBar: FC = (): JSX.Element => {
     const result = await dai_balanceOf.refetch();
     if (result.isSuccess) {
       daiBalance = hexToDecimal(dai_balanceOf.data?._hex)
-      console.log('DAI: ')
-      console.log(daiBalance)
     } else {
       daiBalance = 0;
     }
@@ -296,6 +276,7 @@ const NavigationBar: FC = (): JSX.Element => {
     enabled: false,
     watch: false
   });
+
   const [gasPrice, setGasPrice] = useState<string>("0");
 
   useEffect(() => {
@@ -305,11 +286,10 @@ const NavigationBar: FC = (): JSX.Element => {
   }, [feeData.isLoading]);
 
   useEffect(() => {
-    console.log('Fetching fee data...')
     feeData.refetch()
   }, []);
 
-
+  const [modelopen, setmodelOpen] = React.useState(false);
   const [createMenuAnchorEl, setCreateMenuAnchorEl] =
     React.useState<null | HTMLElement>(null);
   const createMenuIsOpen = Boolean(createMenuAnchorEl);
@@ -320,8 +300,6 @@ const NavigationBar: FC = (): JSX.Element => {
     setCreateMenuAnchorEl(null);
   };
 
-  const [modelopen, setmodelOpen] = React.useState(false);
-
   const handleClickOpen = () => {
     setmodelOpen(true);
   };
@@ -331,25 +309,22 @@ const NavigationBar: FC = (): JSX.Element => {
   };
 
   useEffect(() => {
-
     if (accountData.isConnected) {
       handlesClose();
     }
-
   }, [accountData.isConnected]);
-
 
   return (
     <React.Fragment>
       <AppBar
         variant="outlined"
         sx={{
-          width: `calc(100% - ${320}px)`, 
+          width: router.pathname.includes('/view/market') || router.pathname == '/' ? `calc(100% - ${320}px)` : '100%', 
           ml: `${320}px`,
           bgcolor: "#fff",
           border: 'none',
-          borderBottom: "1px solid #eee !important",
-          padding: '0px 20px',
+          borderBottom: "1px solid #ddd !important",
+         
         }}
       >
         <Toolbar className={classes.toolbar}>
@@ -375,7 +350,6 @@ const NavigationBar: FC = (): JSX.Element => {
                   />
                 </Stack>
              
-
                 <Stack
                   direction="row"
                   alignItems="center"
@@ -395,11 +369,27 @@ const NavigationBar: FC = (): JSX.Element => {
                       }
                       sx={{ fontWeight: "bold" }}
                     >
-                      Home
+                      Markets
                     </Typography>
                   </Link>
 
-       
+                  {accountData.isConnected && (
+                    <Link href="/dashboard">
+                      <Typography
+                        component={Button}
+                        fontSize={14}
+                        variant="button"
+                        color={
+                          router.pathname == "/dashboard"
+                            ? "primary"
+                            : "text.secondary"
+                        }
+                        fontWeight="bold"
+                      >
+                        Dashboard
+                      </Typography>
+                    </Link>
+                  )}
 
                   {accountData.isConnected && (
                     <Link href="/messenger">
@@ -418,8 +408,6 @@ const NavigationBar: FC = (): JSX.Element => {
                       </Typography>
                     </Link>
                   )}
-
-          
                 </Stack>
               </Grid>
 
@@ -535,9 +523,7 @@ const NavigationBar: FC = (): JSX.Element => {
                       </List>
                     </Menu>
                   </>
-
                   <>
-            
                       <Chip
                         sx={{
                           fontWeight: "600",
@@ -557,7 +543,6 @@ const NavigationBar: FC = (): JSX.Element => {
                      //   onClick={handleOnClickHelpIcon}
                       />
                
-
                     <Menu
                       anchorEl={helpMenuAnchorEl}
                       id="help-menu"

@@ -138,9 +138,9 @@ const Messenger = () => {
 
   return (
     <Container
-      maxWidth="lg"
+      maxWidth="xl"
       sx={{
-        height: "calc(100vh - 64px)",
+        height: "100vh",
         padding: "100px",
         justifyContent: "center",
         alignItems: "center",
@@ -154,7 +154,7 @@ const Messenger = () => {
           height: "100%",
         }}
       >
-        <Grid sx={{  position: 'relative', display: 'grid', gridTemplateColumns: '1fr  3fr', overflow: 'hidden', maxHeight: '100%' , width: '100vw'}} >
+        <Grid sx={{  position: 'relative', display: 'grid', gridTemplateColumns: '1fr  3fr', overflow: 'hidden', maxHeight: '100%' , width: '100%'}} >
          
         <Grid sx={{  borderRight: '1px solid #ddd', overflowY: 'auto', overflow: 'hidden'}}>
      

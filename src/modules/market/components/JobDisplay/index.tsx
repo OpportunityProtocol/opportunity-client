@@ -163,8 +163,6 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
   useEffect(() => {
     async function loadMetadata() {
       const metadata = await getJSONFromIPFSPinata(metadataString)
-      console.log("@@@@@@@@@@@@@@")
-      console.log(metadata)
       setContractMetadata(metadata);
     }
 
@@ -186,6 +184,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
       component={Paper}
       variant="outlined"
       sx={{
+        border: 'none !important',
         position: 'relative',
         width: "100%",
         minWidth: "100% !important",
@@ -194,9 +193,6 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
         cursor: userAddress ? "pointer" : "auto",
       }}
     >
-      <TableBodyCell sx={{ width: 150, fontWeight: "bold" }}>
-        Contract
-      </TableBodyCell>
       <TableBodyCell sx={{ width: "100% !important" }}>
         <Box display="flex">
             

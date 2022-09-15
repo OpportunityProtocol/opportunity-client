@@ -454,7 +454,8 @@ const ServiceCard = ({
             : () => {}
         }
         component={Paper}
-        variant="outlined"
+        elevation={0}
+        //variant="outlined"
         sx={{
           width: "100%",
           minWidth: "100% !important",
@@ -463,9 +464,6 @@ const ServiceCard = ({
           cursor: userAddress ? "pointer" : "auto",
         }}
       >
-        <TableBodyCell sx={{ width: 150, fontWeight: "bold" }}>
-          Service
-        </TableBodyCell>
         <TableBodyCell sx={{ width: "100% !important" }}>
           <Box display="flex">
             {errors?.metadataError ? (

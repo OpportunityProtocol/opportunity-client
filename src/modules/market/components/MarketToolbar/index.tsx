@@ -20,7 +20,7 @@ import { useStyles } from "./MarketToolbarStyles";
 import { FaEthereum } from "react-icons/fa";
 import { IoWalletSharp } from "react-icons/io5";
 import { useRouter } from "next/router";
-import Explore from "../../../../pages/explore";
+import Explore from "../../../../pages/dashboard";
 
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;

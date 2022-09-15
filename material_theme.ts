@@ -16,7 +16,7 @@ const theme = createTheme({
       main: "#ff",
       dark: "#6a3c55",
     },
-    divider: "#eee",
+    divider: "#ddd",
   },
   typography: {
     fontFamily: ["Manrope", "sans-serif"].join(","),
@@ -65,7 +65,7 @@ const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         outlined: {
-          border: "1px solid #eee",
+          border: "1px solid #ddd",
         },
       },
     },

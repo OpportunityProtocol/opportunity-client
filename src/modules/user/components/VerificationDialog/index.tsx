@@ -99,7 +99,6 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     languages: [],
     show_freelancer_stats: 0
   });
-  const [registerUserTxHash, setRegisterUserTxHash] = useState<string>("")
 
   //getProfile
   const lensHub_getProfile = useContractRead({
@@ -156,11 +155,9 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     onError: (error) => {},
   });
 
-  console.log(NETWORK_MANAGER_ADDRESS)
-
   const networkManager_registerWorkerPrepare = usePrepareContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
-    enabled: true,
+    enabled: false,
     contractInterface: JSON.stringify(NetworkManagerInterface),
     functionName: "register",
     args: [
@@ -186,9 +183,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     },
     mode: 'prepared',
     onSuccess: (data) => {
-      console.log(data)
       data.wait().then((data) => {
-        console.log(data)
         if (data?.status > 0) {
           networkManager_getLensProfileIdFromAddress.refetch();
           
@@ -201,15 +196,12 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
 
       })
       .catch((error) => {
-        console.log('real error')
-        console.log(error)
         setChosenHandleErrorText(error.nessage);
       })
 
       
     },
     onError(error: Error) {
-      console.log(error)
       if (String(error).includes("Taken")) {
         setChosenHandleErrorText(
           "This handle has already been taken. Try another."
@@ -223,6 +215,8 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
 
   const handleOnVerify = async () => {
     setRegistrationLoading(true);
+
+    await networkManager_registerWorkerPrepare.refetch()
 
     let retVal = "";
     try {
@@ -251,8 +245,6 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
       alert("Error uploading metadata");
       return;
     }
-
-    console.log(networkManager_registerWorker)
 
     await networkManager_registerWorker.writeAsync({
       recklesslySetUnpreparedArgs: [
