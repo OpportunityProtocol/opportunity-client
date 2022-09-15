@@ -28,12 +28,14 @@ import {
   Chip,
   FormControlLabel,
   Checkbox,
+  Divider,
   LinearProgress,
 } from "@mui/material";
 import {
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
+  useWaitForTransaction,
 } from "wagmi";
 import {
   FREE_FOLLOW_MODULE,
@@ -97,6 +99,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     languages: [],
     show_freelancer_stats: 0
   });
+  const [registerUserTxHash, setRegisterUserTxHash] = useState<string>("")
 
   //getProfile
   const lensHub_getProfile = useContractRead({
@@ -153,9 +156,11 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     onError: (error) => {},
   });
 
+  console.log(NETWORK_MANAGER_ADDRESS)
+
   const networkManager_registerWorkerPrepare = usePrepareContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
-    enabled: false,
+    enabled: true,
     contractInterface: JSON.stringify(NetworkManagerInterface),
     functionName: "register",
     args: [
@@ -164,20 +169,47 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
         handle: chosenLensHandle,
         imageURI:
           "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
-        followModule: FREE_FOLLOW_MODULE,
+        followModule: ZERO_ADDRESS,
         followModuleInitData: [],
-        followNFTURI: "",
+        followNFTURI:  "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
       },
       updatedPtr,
     ],
+
+  });
+
+  const networkManager_registerWorker = useContractWrite({
+    ...networkManager_registerWorkerPrepare.config,
     overrides: {
-      gasLimit: ethers.BigNumber.from("2000000"),
+      gasLimit: ethers.BigNumber.from("9000000"),
       gasPrice: 90000000000,
     },
+    mode: 'prepared',
     onSuccess: (data) => {
+      console.log(data)
+      data.wait().then((data) => {
+        console.log(data)
+        if (data?.status > 0) {
+          networkManager_getLensProfileIdFromAddress.refetch();
+          
+          handleClose();
+        } else {
+          setChosenHandleErrorText('Sorry. Something went wrong');
+        }
 
+        setRegistrationLoading(false);
+
+      })
+      .catch((error) => {
+        console.log('real error')
+        console.log(error)
+        setChosenHandleErrorText(error.nessage);
+      })
+
+      
     },
     onError(error: Error) {
+      console.log(error)
       if (String(error).includes("Taken")) {
         setChosenHandleErrorText(
           "This handle has already been taken. Try another."
@@ -186,16 +218,8 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
         setChosenHandleErrorText(error.message);
       }
     },
-    onSettled(data, error) {
-      networkManager_getLensProfileIdFromAddress.refetch();
-      setRegistrationLoading(false);
-      handleClose();
-    },
-  });
+});
 
-  const networkManager_registerWorker = useContractWrite(
-    networkManager_registerWorkerPrepare.config
-  );
 
   const handleOnVerify = async () => {
     setRegistrationLoading(true);
@@ -209,8 +233,9 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
 
         retVal = await (await ipfs.add(JSON.stringify(metadataState))).path;
       } else {
-    
-        const data = generatePinataData("metadata_" + String(userAddress), metadataState)
+        
+        const deepCopyMetadataState = JSON.parse(JSON.stringify(metadataState))
+        const data = generatePinataData("metadata_" + String(userAddress), deepCopyMetadataState)
         retVal = await pinJSONToIPFSPinata(data)
 
        /* retVal = await fleek.uploadService(
@@ -227,6 +252,8 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
       return;
     }
 
+    console.log(networkManager_registerWorker)
+
     await networkManager_registerWorker.writeAsync({
       recklesslySetUnpreparedArgs: [
         {
@@ -236,14 +263,10 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
             "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
           followModule: ZERO_ADDRESS,
           followModuleInitData: [],
-          followNFTURI: "",
+          followNFTURI:  "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
         },
         retVal,
       ],
-      recklesslySetUnpreparedOverrides: {
-        gasLimit: ethers.BigNumber.from("2000000"),
-        gasPrice: 90000000000,
-      },
     });
   };
 
@@ -317,13 +340,13 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     <Dialog
       fullWidth
       maxWidth="sm"
-      sx={{ height: 1000 }}
+      sx={{ height: '100vh' }}
       open={open}
       onClose={handleClose}
     >
       {registrationLoading ? <LinearProgress variant="indeterminate" /> : null}
       <DialogContent
-        sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+        sx={{ height: 'fit-content', overflow: 'visible', display: "flex", flexDirection: "column", alignItems: "center" }}
       >
         <Avatar
           src="/assets/images/writing.jpeg"
@@ -340,6 +363,8 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
           loop with your customers
         </DialogContentText>
       </DialogContent>
+
+      <Divider />
 
       <>
         <DialogContent
@@ -503,10 +528,10 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
                 onChange={handleOnChangeTextField}
                 size="small"
                 fullWidth
-                error={chosenHandleError}
+                error={chosenHandleErrorText}
               />
               <FormHelperText>
-                {chosenHandleError
+                {chosenHandleErrorText
                   ? chosenHandleErrorText
                   : "Choose a unique handle to identify your profile"}
               </FormHelperText>

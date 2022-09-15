@@ -16,7 +16,7 @@ const theme = createTheme({
       main: "#ff",
       dark: "#6a3c55",
     },
-    divider: "#ddd",
+    divider: "#eee",
   },
   typography: {
     fontFamily: ["Manrope", "sans-serif"].join(","),

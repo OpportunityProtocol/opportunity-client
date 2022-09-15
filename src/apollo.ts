@@ -11,7 +11,7 @@ const httpLink = new HttpLink({
 const client = new ApolloClient({
   link: httpLink,
   headers: {
-   'Access-Control-Allow-Origin': '*'
+    'Access-Control-Allow-Origin': '*'
   },
   cache: new InMemoryCache()
 })

@@ -120,6 +120,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
   const accountData = useAccount();
 
+
   const networkManager_createServicePrepare = usePrepareContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
@@ -143,6 +144,9 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const networkManager_createService = useContractWrite({
     ...networkManager_createServicePrepare.config,
     onError(error, variables, context) {
+      console.log("@@@@@@@@@@@@@@")
+      console.log(error)
+
       setCreateServiceDialogState({
         ...createServiceDialogState,
         loading: false,
@@ -152,9 +156,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       });
     },
     onSuccess(data, variables, context) {
-      
-    },
-    onSettled(data, error, variables, context) {
       setCreateServiceDialogState({
         ...createServiceDialogState,
         loading: false,
@@ -164,6 +165,9 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       });
 
       setServiceMetadataKey("");
+    },
+    onSettled(data, error, variables, context) {
+     
     }
 });
 

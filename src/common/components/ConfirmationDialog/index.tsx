@@ -153,7 +153,7 @@ export const ConfirmationDialog: FC<
       <Divider />
       {loading ? <LinearProgress variant="indeterminate" /> : null}
       {success ? (
-        <DialogContent>Your transaction was successful!</DialogContent>
+        <DialogContent>Your transaction was successfully submitted to the polygon network. Please check your wallet provider to see if your transaction was successful.</DialogContent>
       ) : (
         <DialogContent>
           {content && content.length > 0 ? content[activeStep] : null}

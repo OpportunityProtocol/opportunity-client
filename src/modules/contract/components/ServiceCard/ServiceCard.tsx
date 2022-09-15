@@ -529,7 +529,7 @@ const ServiceCard = ({
         </TableBodyCell>
       </TableRow>
 
-      {renderButtonState()}
+      {/*renderButtonState()*/}
       <ConfirmationDialog
         success={resolveServiceSuccessful}
         loading={resolveServiceLoading}

@@ -11,6 +11,7 @@ import {
   Card,
   CardContent,
   Typography,
+  Alert,
   Grid,
   Stack,
   Divider,
@@ -185,6 +186,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
       component={Paper}
       variant="outlined"
       sx={{
+        position: 'relative',
         width: "100%",
         minWidth: "100% !important",
         display: "flex",
@@ -197,13 +199,16 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
       </TableBodyCell>
       <TableBodyCell sx={{ width: "100% !important" }}>
         <Box display="flex">
-            <img
-              src=""
-              style={{
-                marginRight: 15,
-                borderRadius: 6,
-                width: 110,
-                height: 60,
+            
+            <Box
+         
+              sx={{
+                bgcolor: '#eee',
+                border: 'none',
+                marginRight: 2,
+                borderRadius: 1,
+                width: 120,
+                height: 108,
               }}
             />
 
@@ -216,23 +221,21 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
             <Typography paragraph fontSize={12}>
               {contractMetadata?.contract_description
                 ? contractMetadata?.contract_description
-                : "Unable to description"}
+                : "Unable to load description"}
             </Typography>
             <Typography fontSize={12}>
               {contractMetadata?.contract_definition_of_done
                 ? contractMetadata?.contract_definition_of_done
                 : "Unable to requirements"}
             </Typography>
-          </Box>
-        </Box>
-        <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack mt={0.5} direction="row" alignItems="center" spacing={1}>
           {contractMetadata?.tags &&
           contractMetadata?.tags?.length > 0 ? (
             contractMetadata?.tags?.map((tag) => {
               return (
                 <Chip
                   variant="filled"
-                  sx={{ fontSize: 12, padding: 1, backgroundColor: "#eee" }}
+                  sx={{ fontSize: 12, width: 'auto', height: 20, backgroundColor: "#eee" }}
                   label={tag}
                   size="small"
                 />
@@ -244,6 +247,9 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
             </Typography>
           )}
         </Stack>
+          </Box>
+        </Box>
+       
       </TableBodyCell>
       <TableBodyCell sx={{ width: 150 }}>
         <Stack direction="row" spacing={0.5}>
@@ -262,6 +268,10 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
       <TableBodyCell sx={{ width: 150 }}>
         {moment().format("h:mm A")}
       </TableBodyCell>
+
+      <Box component={Alert} sx={{borderTopLeftRadius: '10px !important', fontWeight: 'medium', borderRadius: 0, width: 200, height: 45, position: 'absolute', bottom: 0, right: 0}}>
+            Check requirements
+      </Box>
     </TableRow>
 
   </>
@@ -402,6 +412,8 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
           </CardContent>
         </>
       )}
+
+
     </Card>
   );
 };

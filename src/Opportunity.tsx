@@ -50,6 +50,7 @@ import { RootState } from "./store";
 import { DaiInterface, NetworkManagerInterface } from "./abis";
 import { CHAIN_ID } from "./constant/provider";
 import VerificationDialog from "./modules/user/components/VerificationDialog";
+import Link from "next/link";
 
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
@@ -69,8 +70,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     displayedMarkets: [],
   });
 
-  const APP_BACKGROUND: string =
-    "linear-gradient(180deg, rgba(250,250,250,1) 35%, rgba(236,247,243,1) 75%, rgba(236,246,242,1) 100%)";
+  const APP_BACKGROUND: string = '#FAFAFA'
+  // "linear-gradient(180deg, rgba(250,250,250,1) 35%, rgba(236,247,243,1) 75%, rgba(236,246,242,1) 100%)";
 
   const isPadded: boolean =
     router.pathname === "/" ||
@@ -115,8 +116,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     watch: false,
     chainId: CHAIN_ID,
     args: [userAddress],
-    onSuccess(data) {},
-    onError: (error: Error) => {},
+    onSuccess(data) { },
+    onError: (error: Error) => { },
   });
 
   const dispatch = useDispatch();
@@ -132,9 +133,6 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     );
   };
 
-
-
-
   const drawerWidth = 320;
   const drawer = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -147,35 +145,48 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
         >
           <Box sx={{ flex: 1, flexGrow: 1 }}>
             <Typography fontSize={12} fontWeight="medium">
-               {userLensData && userLensData?.handle ? userLensData?.handle  :  `(${userAddress})`}
+              {userLensData && userLensData?.handle ? userLensData?.handle : `Connect a wallet`}
             </Typography>
             <Typography fontSize={15} fontWeight="bold">
               Leslie Alexander
             </Typography>
           </Box>
 
-          <Chip variant="outlined" label="7.5%" icon={<TrendingUp sx={{ color: (theme) => theme.palette.primary.main }} />} />
+
         </Stack>
       </Box>
       <Divider />
       <Box sx={{ height: "100%", flexGrow: 1, flex: 1 }}>
         <CardContent>
-          <Typography fontSize={18} fontWeight="bold">
-            Markets
-          </Typography>
-          {state.displayedMarkets && state.displayedMarkets.length > 0 ? (
-            state.displayedMarkets.map((marketDetails) => {
-              return <Typography variant='button' onClick={() => {}}>{marketDetails.name}</Typography>
-            }) 
-          ) : (
-            <Typography variant="caption">Error loading markets. Make sure you are connect to a network or refreshing the page</Typography>
-          )}
+          <Box pb={1}>
+            <Typography fontSize={15} fontWeight="bold" sx={{ textTransform: 'capitalize' }}>
+              Markets
+            </Typography>
+          </Box>
+          <Stack>
+
+            {state.displayedMarkets && state.displayedMarkets.length > 0 ? (
+              state.displayedMarkets.map((marketDetails) => {
+                return (
+                  <Box display='flex' alignItems='center' justifyContent='space-between'>
+                    <Typography onClick={() => router.push(`/markets/${marketDetails?.id}`)} style={{ cursor: 'pointer', fontSize: 12, fontWeight: 'bold', color: '#212121', /*'rgb(146, 146, 147)'*/ }} >{marketDetails.name}</Typography>
+                    <Typography sx={{ fontWeight: 'bold', fontSize: 12, color: '#212121', /*'rgb(146, 146, 147)'*/ }}>
+                      0
+                    </Typography>
+                  </Box>
+
+                )
+              })
+            ) : (
+              <Typography variant="caption">Error loading markets. Make sure you are connect to a network or refreshing the page</Typography>
+            )}
+          </Stack>
         </CardContent>
       </Box>
       <Divider />
       <Box>
-    
-          <CardContent>
+
+        <CardContent>
           <Stack my={1} direction="row" alignItems="center">
             <Button size="small" variant="contained" onClick={handleOnAddFunds}>
               Add funds
@@ -184,8 +195,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
             <Button size="small" variant="contained" onClick={() => setVerificationModal(true)}>
               Register
             </Button>
-            </Stack>
-          </CardContent>
+          </Stack>
+        </CardContent>
 
         <List disablePadding>
           <Divider />
@@ -195,7 +206,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
             </ListItemIcon>
             <ListItemText
               primary="MATIC Balance"
-              secondary={accountData.status == 'connected' ? userBalance : 'Connect a wallet'}
+              secondary={accountData.status == 'connected' ? userBalance : 0}
               primaryTypographyProps={{
                 fontSize: 10,
                 fontWeight: "medium",
@@ -213,7 +224,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
             </ListItemIcon>
             <ListItemText
               primary="DAI Balance"
-              secondary={accountData.status == 'connected' ? daiBalance : 'Connect a wallet'}
+              secondary={accountData.status == 'connected' ? daiBalance : 0}
               primaryTypographyProps={{
                 fontSize: 10,
                 fontWeight: "medium",
@@ -228,7 +239,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
           <ListItem divider>
             <ListItemText
               primary="Web3/Wallet Provider"
-              secondary={accountData.status == 'connected' ? userConnector?.name : 'Connect a wallet'}
+              secondary={accountData.status == 'connected' ? userConnector?.name : '-'}
               primaryTypographyProps={{
                 fontSize: 10,
                 fontWeight: "medium",
@@ -243,7 +254,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
           <ListItem divider>
             <ListItemText
               primary="Network"
-              secondary={accountData.status == 'connected' ? userConnector?.network : 'Connect a wallet'}
+              secondary={accountData.status == 'connected' ? userConnector?.network : '-'}
               primaryTypographyProps={{
                 fontSize: 10,
                 fontWeight: "medium",
@@ -258,7 +269,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
           <ListItem divider>
             <ListItemText
               primary="Gas Fee"
-              secondary={feeData.data?.formatted?.gasPrice && userAddress != ZERO_ADDRESS ? feeData.data?.formatted?.gasPrice : 'Connect a wallet'}
+              secondary={feeData.data?.formatted?.gasPrice && userAddress != ZERO_ADDRESS ? feeData.data?.formatted?.gasPrice : '-'}
               primaryTypographyProps={{
                 fontSize: 10,
                 fontWeight: "medium",
@@ -280,8 +291,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
         sx={{
           display: "flex",
           background: APP_BACKGROUND,
-             flexGrow: 1,
-        //  height: "100vh",
+          flexGrow: 1,
+          height: "100vh",
         }}
       >
         <NavigationBar />
@@ -303,7 +314,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
         </Drawer>
         <Box
           component="main"
-          sx={{ paddingTop: isPadded ? "90px" : "0px", flexGrow: 1 }}
+          sx={{ paddingTop: isPadded ? "80px" : "0px", flexGrow: 1 }}
         >
           {children}
         </Box>

@@ -79,7 +79,8 @@ const CreateContractPage: NextPage = (): JSX.Element => {
     deadline: new Date("2014-08-18T21:11:54").toDateString(),
     contract_definition_of_done: "",
     duration: "quick",
-    specific_languages: []
+    specific_languages: [],
+    contract_market_id: 0
   });
 
   const [createContractFormErrorState, setCreateContractFormErrorState] =
@@ -280,17 +281,17 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         ).path;
       } else {
         const tempFormData = JSON.parse(JSON.stringify(createContractForm))
+        delete tempFormData['contract_market_id']
+
         const data = generatePinataData(String(accountData.address) +
           ":" +
           createContractForm.contract_title, tempFormData)
         retVal = await pinJSONToIPFSPinata(data)
-
       }
 
       await networkManager_createContract.write({
         recklesslySetUnpreparedArgs: [createContractForm.contract_market_id, String(retVal)],
       });
-      
 
       setContractMetadataURI(retVal);
     } catch (error) {
@@ -358,7 +359,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
             Can't find a market?{" "}
             <Typography component="span" color="primary" variant="button">
               Learn about market proposals.
-            </Typography>
+            </Typography> 
           </Typography>
         </Grid>
 

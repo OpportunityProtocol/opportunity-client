@@ -348,7 +348,7 @@ const NavigationBar: FC = (): JSX.Element => {
           ml: `${320}px`,
           bgcolor: "#fff",
           border: 'none',
-          borderBottom: "1px solid #ddd !important",
+          borderBottom: "1px solid #eee !important",
           padding: '0px 20px',
         }}
       >
