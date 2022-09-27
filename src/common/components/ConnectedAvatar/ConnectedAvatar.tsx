@@ -51,13 +51,16 @@ import {
   useConnect,
   useContractRead,
   useContractWrite,
+  useDeprecatedContractWrite,
   useDisconnect,
   useFeeData,
   usePrepareContractWrite,
+  useSigner,
 } from "wagmi";
 import { NextRouter, useRouter } from "next/router";
 import { DaiInterface } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
+import { FormatTypes } from "ethers/lib/utils";
 
 
 const StyledBadge = styled(Badge, {
@@ -122,14 +125,30 @@ const ConnectedAvatar: FC = () => {
 
   const open = Boolean(anchorEl);
 
-  const daiContractWritePrepare = usePrepareContractWrite({
-    addressOrName: DAI_ADDRESS,
-    contractInterface: DaiInterface,
-    functionName: "mint(uint256)",
-    enabled: false
-  });
+  const { data: signer } = useSigner()
 
-  const dai_mint = useContractWrite(daiContractWritePrepare.config);
+  const daiWrite = useDeprecatedContractWrite({
+    addressOrName: DAI_ADDRESS,
+    contractInterface: new ethers.utils.Interface(DaiInterface).format(FormatTypes.full).splice(12, 1),
+    functionName: "mint",
+    chainId: CHAIN_ID,
+    args: [userAddress, String(100 * (10**18))],
+    signerOrProvider: signer,
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+      from: userAddress
+    },
+    onMutate({ args, overrides }) {
+   
+    },
+    onError(error, variables, context) {
+   
+    },
+    onSettled(data, error, variables, context) {
+    
+    },
+  });
 
   const dai_balanceOf = useContractRead({
     addressOrName: DAI_ADDRESS,
@@ -146,7 +165,10 @@ const ConnectedAvatar: FC = () => {
   const dispatch = useDispatch();
 
   const handleOnAddFunds = async () => {
-    await dai_mint.write();
+    // await daiContractWritePrepare.refetch()
+
+    await daiWrite.write()
+
     const result = await dai_balanceOf.refetch();
 
     dispatch(
@@ -158,25 +180,25 @@ const ConnectedAvatar: FC = () => {
 
   return (
     <StyledBadge
-    connected={connected}
-    overlap="circular"
-    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-    variant="dot"
+      connected={connected}
+      overlap="circular"
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      variant="dot"
     >
       <IconButton onClick={handlePopoverOpen}>
 
-   
-      <Avatar
-        sx={{ cursor: "pointer", width: 35, height: 35 }}
-        alt="Remy Sharp"
-        src="/assets/stock/profile_three.jpeg"
-      />
-   </IconButton>
+
+        <Avatar
+          sx={{ cursor: "pointer", width: 35, height: 35 }}
+          alt="Remy Sharp"
+          src="/assets/stock/profile_three.jpeg"
+        />
+      </IconButton>
 
       <Popover
         aria-owns={open ? "mouse-over-connected-avatar-popover" : undefined}
         aria-haspopup="true"
- 
+
         style={{ position: "absolute" }}
         id="mouse-over-connected-avatar-popover"
         open={open}
@@ -191,32 +213,32 @@ const ConnectedAvatar: FC = () => {
         <Box sx={{ width: 360, border: '1px solid #bdbdbd' }}>
 
           <CardContent>
-          <Box>
-        <Stack
-          sx={{ display: "flex" }}
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Box sx={{ flex: 1, flexGrow: 1 }}>
-            <Typography fontSize={12} fontWeight="medium">
-              {userLensData && userLensData?.handle ? userLensData?.handle : `Connect a wallet`}
-            </Typography>
-            <Typography fontSize={15} fontWeight="bold">
-              Leslie Alexander
-            </Typography>
-          </Box>
+            <Box>
+              <Stack
+                sx={{ display: "flex" }}
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Box sx={{ flex: 1, flexGrow: 1 }}>
+                  <Typography fontSize={12} fontWeight="medium">
+                    {userLensData && userLensData?.handle ? userLensData?.handle : `Connect a wallet`}
+                  </Typography>
+                  <Typography fontSize={15} fontWeight="bold">
+                    Leslie Alexander
+                  </Typography>
+                </Box>
 
 
-        </Stack>
-      </Box>
+              </Stack>
+            </Box>
 
             <Stack my={1} direction="row" alignItems="center">
               <Button size="small" variant="contained" onClick={handleOnAddFunds}>
                 Add funds
               </Button>
 
-              <Button size="small" variant="contained" onClick={() => setVerificationModal(true)}>
+              <Button size="small" variant="contained" onClick={() => setVerificationDialogOpen(true)}>
                 Register
               </Button>
             </Stack>
@@ -308,7 +330,7 @@ const ConnectedAvatar: FC = () => {
         </Box>
       </Popover>
 
-
+      <VerificationDialog open={verificationDialogOpen} handleClose={() => setVerificationDialogOpen(false)} />
     </StyledBadge>
   );
 };

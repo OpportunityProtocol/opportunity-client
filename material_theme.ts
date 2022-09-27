@@ -19,7 +19,7 @@ const theme = createTheme({
     divider: "#ddd",
   },
   typography: {
-    fontFamily: ["Manrope", "sans-serif"].join(","),
+   // fontFamily: ["Manrope", "sans-serif"].join(","),
     button: {
       textTransform: "none",
     },

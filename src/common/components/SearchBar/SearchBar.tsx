@@ -21,7 +21,7 @@ const styles = (theme) => ({
     height: theme.spacing(5),
     display: "flex",
     justifyContent: "space-between",
-    minWidth: 320,
+    width: 320,
   },
   iconButton: {
     color: theme.palette.action.active,

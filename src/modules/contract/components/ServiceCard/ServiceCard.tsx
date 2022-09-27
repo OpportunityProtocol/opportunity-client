@@ -23,18 +23,22 @@ import DAIIcon from "../../../../node_modules/cryptocurrency-icons/svg/color/dai
 import { NextRouter, useRouter } from "next/router";
 
 import {
+  useContract,
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
+  useProvider,
   useQuery,
   useSignTypedData,
 } from "wagmi";
 import {
+  DAI_ADDRESS,
+  FEE_COLLECT_MODULE,
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
   ZERO_ADDRESS,
 } from "../../../../constant";
-import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
+import { DaiInterface, LensHubInterface, NetworkManagerInterface } from "../../../../abis";
 import { Result } from "ethers/lib/utils";
 import fleek from "../../../../fleek";
 import { create } from "ipfs-http-client";
@@ -64,7 +68,7 @@ interface IServiceCardProps {
   purchaseData?: any;
   data?: any;
   purchase?: boolean;
-  text?: boolean;
+  table: boolean;
 }
 
 const TableBodyCell = withStyles((theme) => ({
@@ -117,9 +121,12 @@ const ServiceCard = ({
   data,
   purchaseData,
   purchase = false,
+  table = false
 }: IServiceCardProps) => {
   const cardStyles = useStyles();
   const router: NextRouter = useRouter();
+  const provider = useProvider()
+
   const [loadedData, setLoadedData] = useState<any>(data);
 
   const [serviceOwnerLensData, setServiceOwnerLensData] =
@@ -133,16 +140,56 @@ const ServiceCard = ({
     metadataError: false,
   });
 
+  const [resolveServiceSuccessful, setResolveServiceSuccessful] =
+  useState<boolean>(false);
+const [resolveServiceLoading, setResolveServiceLoading] =
+  useState<boolean>(false);
+const [resolveServiceDialogIsOpen, setResolveServiceDialogIsOpen] =
+  useState<boolean>(false);
+
   const dispatch = useDispatch();
-
   const userAddress = useSelector(selectUserAddress);
+  const signTypedData = useSignTypedData({
+    onSettled(data, error) {},
+    onError(error) {},
+  });
 
-  const networkManager_resolveServicePrepare = usePrepareContractWrite({
+  const { write: approveDai } = useContractWrite({
+    addressOrName: DAI_ADDRESS,
+    contractInterface: DaiInterface,
+    mode: "recklesslyUnprepared",
+    functionName: "approve",
+    args: [FEE_COLLECT_MODULE, typeof loadedData?.offers == 'object' ? 10000 : 10000],
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+    },
+    onSuccess(data, variables, context) {
+
+    },
+    onError(error, variables, context) {
+
+    },
+    onSettled(data, error, variables, context) {
+      if (!error) {
+        onResolveService()
+      }
+    },
+  })
+
+  const { write: resolveService } = useContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
+    enabled: false,
+    mode: "recklesslyUnprepared",
     functionName: "resolveService",
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+    },
     onSettled: (data, error) => {
       if (error) {
+
         setResolveServiceSuccessful(false);
       } else {
         setResolveServiceSuccessful(true);
@@ -150,20 +197,10 @@ const ServiceCard = ({
 
       setResolveServiceLoading(false);
     },
-    overrides: {
-      from: userAddress,
-      gasLimit: ethers.BigNumber.from("2000000"),
-      gasPrice: 90000000000,
+    onError(error, variables, context) {
+  
     },
-    args: [
-      Number(loadedData?.id),
-      Number(purchaseData?.purchaseId),
-      { v: 0, r: 0, s: 0 },
-    ],
-  });
-  const networkManager_resolveService = useContractWrite(
-    networkManager_resolveServicePrepare.config
-  );
+});
 
   const lensHub_getProfile = useContractRead({
     addressOrName: LENS_HUB_PROXY,
@@ -178,40 +215,40 @@ const ServiceCard = ({
     },
   });
 
-  //fetch lens profile among  lens profile id change
-  useEffect(() => {
-    lensHub_getProfile.refetch({
-      throwOnError: true,
-    });
-  }, [serviceOwnerLensProfileId]);
-
   const networkManager_getLensProfileIdFromAddress = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "getLensProfileIdFromAddress",
-    enabled: false,
+    enabled: true,
     chainId: CHAIN_ID,
     args: [loadedData?.creator ? loadedData?.creator : ZERO_ADDRESS],
     onSuccess: (data: Result) => {
-      setServiceOwnerLensProfileId(hexToDecimal(data._hex));
+      setServiceOwnerLensProfileId(Number(data._hex));
     },
     onError: (error) => {},
   });
 
   const handleOnNavigateToServicePage = () => {
     router.push({
-      pathname: "/view/service/1",
+      pathname: `/view/service/${loadedData?.id}`,
       query: {
         ...loadedData,
         id: Number(loadedData.id),
         offers: [
-          Number(loadedData.offers[0]),
-          Number(loadedData.offers[1]),
-          Number(loadedData.offers[2]),
+          serviceMetadata?.beginner_offer,
+          serviceMetadata?.business_offer,
+          serviceMetadata?.enterprise_offer,
         ],
       },
     });
   };
+
+  //fetch lens profile among  lens profile id change
+  useEffect(() => {
+      lensHub_getProfile.refetch({
+        throwOnError: true,
+      });
+  }, [serviceOwnerLensProfileId]);
 
   useEffect(() => {
     if (serviceOwnerLensProfileId !== 0) {
@@ -228,24 +265,11 @@ const ServiceCard = ({
   useEffect(() => {
     async function loadMetadata() {
       const metadata = await getJSONFromIPFSPinata(data?.metadataPtr);
-      console.log(metadata);
       setServiceMetadata(metadata);
     }
 
     loadMetadata();
   }, [data?.metadataPtr]);
-
-  const signTypedData = useSignTypedData({
-    onSettled(data, error) {},
-    onError(error) {},
-  });
-
-  const [resolveServiceSuccessful, setResolveServiceSuccessful] =
-    useState<boolean>(false);
-  const [resolveServiceLoading, setResolveServiceLoading] =
-    useState<boolean>(false);
-  const [resolveServiceDialogIsOpen, setResolveServiceDialogIsOpen] =
-    useState<boolean>(false);
 
   const getDomain = () => {
     return {
@@ -256,19 +280,33 @@ const ServiceCard = ({
     };
   };
 
+  const { data: userLensSigNonce } = useContractRead({
+    addressOrName: LENS_HUB_PROXY,
+    contractInterface: LensHubInterface,
+    functionName: "sigNonces",
+    args: [userAddress],
+    enabled: true,
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+    },
+    onSettled(data, error) {
+  
+    },
+  })
+
+
+
+  const abiencoder = ethers.utils.defaultAbiCoder;
   const getValues = async () => {
-    const nonce =
-      await new ethers.providers.JsonRpcProvider().getTransactionCount(
-        userAddress
-      );
     return {
-      profileId: serviceOwnerLensProfileId,
-      pubId: servicePubId,
-      data: [],
-      nonce,
-      deadline: 0,
-    };
-  };
+      profileId: Number(serviceOwnerLensProfileId),
+      pubId: Number(data?.pubId),
+      data: abiencoder.encode(["uint256", "uint256"], [DAI_ADDRESS, 100]),
+      nonce: Number(userLensSigNonce),
+      deadline: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+    }
+  }
 
   const getTypes = () => {
     return {
@@ -279,26 +317,27 @@ const ServiceCard = ({
         { name: "nonce", type: "uint256" },
         { name: "deadline", type: "uint256" },
       ],
-    };
-  };
+    }
+  }
 
   const onSign = async () => {
     const domain = getDomain();
     const types = getTypes();
     const value = await getValues();
+
     await signTypedData.signTypedData({ domain, types, value });
-  };
+  }
 
   const onResolveService = async () => {
     if (signTypedData.isSuccess) {
       const splitSignature: ethers.Signature =
         await ethers.utils.splitSignature(signTypedData.data);
 
-      await networkManager_resolveService.writeAsync({
+      resolveService({
         recklesslySetUnpreparedArgs: [
-          Number(loadedData?.id),
+          Number(data?.id),
           Number(purchaseData?.purchaseId),
-          { v: splitSignature.v, r: splitSignature.r, s: splitSignature.s },
+          { v: splitSignature.v, r: splitSignature.r, s: splitSignature.s, deadline: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
         ],
       });
     }
@@ -411,7 +450,7 @@ const ServiceCard = ({
                 <Button
                   fullWidth
                   variant="outlined"
-                  onClick={() => networkManager_resolveService.write()}
+                  onClick={() => setResolveServiceDialogIsOpen(true)}
                 >
                   Confirm
                 </Button>
@@ -446,6 +485,8 @@ const ServiceCard = ({
   };
 
   return (
+    table ?
+    (
     <>
       <TableRow
         onClick={
@@ -454,9 +495,11 @@ const ServiceCard = ({
             : () => {}
         }
         component={Paper}
-        elevation={0}
+      //  elevation={0}
         //variant="outlined"
         sx={{
+          boxShadow:  '0px 1px 3px 0px #eee, 0px 1px 1px 0px #eee, 0px 2px 1px -1px #eee',
+        //  border: '1px solid #ddd',
           width: "100%",
           minWidth: "100% !important",
           display: "flex",
@@ -467,7 +510,7 @@ const ServiceCard = ({
         <TableBodyCell sx={{ width: "100% !important" }}>
           <Box display="flex">
             {errors?.metadataError ? (
-              <img src="" style={{ height: 60, width: 110 }} />
+              <img src="" style={{ height: 110, width: 110 }} />
             ) : (
               <img
                 src={URL.createObjectURL(new Blob([displayImg]))}
@@ -475,23 +518,26 @@ const ServiceCard = ({
                   marginRight: 15,
                   borderRadius: 6,
                   width: 110,
-                  height: 60,
+                  height: 110,
                 }}
               />
             )}
 
             <Box>
               <Typography fontWeight="medium" fontSize={14}>
-                {serviceMetadata?.service_title
-                  ? serviceMetadata?.service_title
+                {serviceMetadata?.serviceTitle
+                  ? serviceMetadata?.serviceTitle
                   : "Unable to load service title"}
               </Typography>
-            </Box>
-          </Box>
-          <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography paragraph fontWeight="medium" fontSize={12}>
+                {serviceMetadata?.serviceDescription
+                  ? serviceMetadata?.serviceDescription
+                  : "Unable to load service description"}
+              </Typography>
+              <Stack direction="row" alignItems="center" spacing={1}>
             {serviceMetadata?.tags &&
-            serviceMetadata?.service_tags?.length > 0 ? (
-              serviceMetadata?.service_tags?.map((tag) => {
+            serviceMetadata?.tags?.length > 0 ? (
+              serviceMetadata?.tags?.map((tag) => {
                 return (
                   <Chip
                     variant="filled"
@@ -507,6 +553,9 @@ const ServiceCard = ({
               </Typography>
             )}
           </Stack>
+            </Box>
+          </Box>
+       
         </TableBodyCell>
         <TableBodyCell sx={{ width: 150 }}>
           <Stack direction="row" spacing={0.5}>
@@ -534,13 +583,119 @@ const ServiceCard = ({
         open={resolveServiceDialogIsOpen}
         onOpen={() => {}}
         onClose={() => setResolveServiceDialogIsOpen(false)}
-        hasSigningStep={true}
+        hasSigningStep={false}
         content={confirmationDialogContent}
         signAction={onSign}
-        primaryAction={onResolveService}
+        primaryAction={approveDai}
         primaryActionTitle="Confirm"
       />
-    </>
+    </>)
+    :
+    (
+      <Card variant="outlined" className={cx(cardStyles.root)}>
+      <CardActionArea
+        onClick={handleOnNavigateToServicePage}
+        sx={{ height: 250, width: "100%" }}
+      >
+        {errors.metadataError ? (
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            sx={{ width: "100%", height: "100%" }}
+          >
+            <BrokenImageIcon
+              sx={{ color: "#dbdbdb", width: 100, height: 100 }}
+              fontSize="large"
+            />
+          </Box>
+        ) : (
+          <CardMedia
+            image={URL.createObjectURL(new Blob([displayImg]))}
+            sx={{ height: "100%", width: "100%" }}
+          />
+        )}
+      </CardActionArea>
+
+      <CardContent>
+        <Box
+          display="flex"
+          alignItems="flex-start"
+          justifyContent="space-between"
+        >
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="flex-start"
+          >
+            <Avatar />
+          </Stack>
+        </Box>
+
+        <Box>
+        <Typography
+          fontWeight="medium"
+          fontSize={14}
+          color="#616161"
+          style={{
+            paddingTop: "10px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
+          {serviceMetadata?.serviceTitle}
+        </Typography>
+        <Typography
+          paragraph
+          fontWeight="medium"
+          fontSize={12}
+          color="#616161"
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+          }}
+        >
+          {serviceMetadata?.serviceDescription}
+        </Typography>
+        </Box>
+
+        <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Typography fontWeight="medium" fontSize={13} color="rgb(94, 94, 94)">
+            Price:
+          </Typography>
+
+          <Stack direction="row" alignItems="center" spacing={0.5}>
+            <img
+              src="/assets/images/dai.svg"
+              style={{ width: 15, height: 20 }}
+            />
+            <Typography fontSize={13}>
+              {Math.random().toPrecision(2)}{" "}
+            </Typography>
+          </Stack>
+        </Stack>
+      </CardContent>
+      {renderButtonState()}
+      <ConfirmationDialog
+      success={resolveServiceSuccessful}
+      loading={resolveServiceLoading}
+      open={resolveServiceDialogIsOpen}
+      onOpen={() => {}}
+      onClose={() => setResolveServiceDialogIsOpen(false)}
+      hasSigningStep={true}
+      content={confirmationDialogContent}
+      signAction={onSign}
+      primaryAction={approveDai}
+      primaryActionTitle="Confirm"
+    />
+    </Card>
+    )
   );
 };
 

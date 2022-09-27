@@ -40,11 +40,14 @@ import {
   usePrepareContractWrite,
 } from "wagmi";
 import {
+  DAI_ADDRESS,
+  FEE_COLLECT_MODULE,
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
   ZERO_ADDRESS,
 } from "../../../constant";
 import {
+  DaiInterface,
   LensHubInterface,
   NetworkManagerInterface
 } from "../../../abis";
@@ -188,34 +191,58 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       }
     }
 
-    loadMetadata();
+    loadMetadata()
   }, [serviceData?.metadataPtr]);
 
-  const networkManager_purchaseServicePrepare = usePrepareContractWrite({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    contractInterface: NetworkManagerInterface,
-    functionName: "purchaseServiceOffering",
-    onSuccess(data) {
-      setSuccessfulPaymentAlertVisible(true);
-    },
-    onError(error) {},
-    args: [serviceData.id, ZERO_ADDRESS, purchaseIndex, collectSig],
+  const { write: approveDai } = useContractWrite({
+    addressOrName: DAI_ADDRESS,
+    contractInterface: DaiInterface,
+    mode: "recklesslyUnprepared",
+    functionName: "approve",
+    args: [NETWORK_MANAGER_ADDRESS, typeof serviceData?.offers == 'object' ? serviceData?.offers[0]+100 : 0],
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
     },
-  });
+    onSuccess(data, variables, context) {
+      console.log(data)
+    },
+    onError(error, variables, context) {
+      console.log(error)
+    },
+    onSettled(data, error, variables, context) {
+      if (!error) {
+     purchaseService({
+        recklesslySetUnpreparedArgs: [serviceData.id, BigNumber.from("0")],
+        recklesslySetUnpreparedOverrides: {
+          gasLimit: ethers.BigNumber.from("2000000"),
+          gasPrice: 90000000000,  
+        }
+      })
+      }
+    },
+  })
 
-  const networkManager_purchaseService = useContractWrite(
-    networkManager_purchaseServicePrepare.config
-  );
+
+  const { write: purchaseService } = useContractWrite({
+    mode: "recklesslyUnprepared",
+    addressOrName: NETWORK_MANAGER_ADDRESS,
+    contractInterface: NetworkManagerInterface,
+    enabled: false,
+    functionName: "purchaseServiceOffering",
+    args: [serviceData?.pubId, BigNumber.from("0")],
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+    },
+    onSuccess(data) {
+      setSuccessfulPaymentAlertVisible(true);
+    },
+    onError(error) {},
+});
 
 
-  const onPurchase = async () => {
-    await networkManager_purchaseService.writeAsync({
-      recklesslySetUnpreparedArgs: [serviceData.id, BigNumber.from("0")],
-    });
-  };
+  const onPurchase = async () => approveDai()
 
   const lensHub_commentPrepare = usePrepareContractWrite({
     addressOrName: LENS_HUB_PROXY,
@@ -550,7 +577,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                         24/7 Support
                       </Typography>
                     </Box>
-
+                 
                     <Button
                       variant="contained"
                       fullWidth
@@ -722,6 +749,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                         24/7 Support
                       </Typography>
                     </Box>
+                    
 
                     <Button
                       variant="contained"

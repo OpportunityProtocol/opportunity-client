@@ -15,12 +15,13 @@ import {
   Grid,
   Stack,
   Divider,
+  CardActions,
+  Button,
   TableRow,
   Paper,
 } from "@mui/material";
 import { withStyles } from '@mui/styles'
 import { NextRouter, useRouter } from "next/router";
-import { IJobDisplayProps } from "../../MarketInterface";
 import { useAccount, useContractRead } from "wagmi";
 import {
   LENS_HUB_PROXY,
@@ -89,7 +90,13 @@ const StatusChip = ({ status }: { status: string }) => {
   );
 };
 
-const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
+interface IJobDisplayProps {
+  data: any;
+  table?: boolean;
+  showStatus: boolean;
+}
+
+const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatus = false }) => {
   const router: NextRouter = useRouter();
   const accountData = useAccount();
 
@@ -156,6 +163,8 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
     }
   }, [contractOwnerData?.lensProfileId]);
 
+  console.log(contractMetadata)
+
   useEffect(() => {
     networkManager_getLensProfileIdFromAddress.refetch();
   }, [data?.employer]);
@@ -182,9 +191,10 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
           : () => {}
       }
       component={Paper}
-      variant="outlined"
+   //   variant="outlined"
       sx={{
-        border: 'none !important',
+        boxShadow:  '0px 1px 3px 0px #eee, 0px 1px 1px 0px #eee, 0px 2px 1px -1px #eee',
+       // border: 'none !important',
         position: 'relative',
         width: "100%",
         minWidth: "100% !important",
@@ -280,12 +290,13 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
       }
       key={Math.random()}
       square
-      variant="elevation"
+     // variant="outlined"
       sx={{
-        boxShadow: "0 19px 38px #eee, 0 15px 12px #eee",
+        boxShadow:  '0px 1px 3px 0px #eee, 0px 1px 1px 0px #eee, 0px 2px 1px -1px #eee',
+      //  boxShadow: "0 19px 38px #eee, 0 15px 12px #eee",
         cursor: accountData.address ? "pointer" : "auto",
         width: "100%",
-        height: 210,
+        height: 'auto',
         "&:hover": {
           color: (theme) => theme.palette.primary.main,
         },
@@ -294,7 +305,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
       <CardContent
         sx={{
           display: "flex",
-          height: "100%",
+          height: 210,
           flexDirection: "column",
           justifyContent: "space-evenly",
         }}
@@ -317,7 +328,6 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
           paragraph
           color="rgb(90, 104,119)"
           fontSize={13}
-          pt={1.5}
           fontWeight="medium"
           sx={{
             display: "-webkit-box",
@@ -366,13 +376,22 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
           alignItems="center"
           justifyContent="space-between"
         >
-          <Grid item>
-            <Typography fontSize={13} fontWeight="medium">
-              {contractMetadata?.contract_budget
+          <Grid item sx={{ display: 'flex', alignItems: 'center'}}>
+              <Typography mr={0.5} component='span' fontSize={13} fontWeight='medium'>
+                Budget: {" "}
+              </Typography>
+  
+              <Stack direction='row' alignItems='center'>
+                  <Typography fontSize={13} fontWeight='medium'>
+                  {contractMetadata?.contract_budget
                 ? contractMetadata?.contract_budget
                 : 0}{" "}
-              DAI Budget
-            </Typography>
+                  </Typography>
+                  <img
+                  src="/assets/images/dai.svg"
+                  style={{ margin: '3px 3px', width: 15, height: 20 }}
+                />
+                </Stack>
           </Grid>
           <Grid item>
             <Chip
@@ -388,26 +407,31 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false }) => {
         </Grid>
       </CardContent>
 
-      {router.pathname.includes("/contract/view/contract") && (
-        <>
-          <Divider />
-          <CardContent>
-            <Box display="flex" alignItems="center" justifyContent="center">
-              <Typography fontSize={13} color="text.secondary">
-                Status:{" "}
-                <Typography
-                  fontSize={13}
-                  fontWeight="medium"
-                  component="span"
-                  color="green"
-                >
-                  Resolved
-                </Typography>
-              </Typography>
-            </Box>
-          </CardContent>
-        </>
-      )}
+{
+  showStatus && (
+    <>
+    <Divider />
+    <CardContent>
+      <Box display="flex" alignItems="center" justifyContent="center">
+        <Typography fontSize={13} color="text.secondary">
+          Status:{" "}
+          <Typography
+            fontSize={13}
+            fontWeight="medium"
+            component="span"
+            color="green"
+          >
+            Resolved
+          </Typography>
+        </Typography>
+      </Box>
+    </CardContent>
+  </>
+  )
+}
+      
+    
+    
 
 
     </Card>

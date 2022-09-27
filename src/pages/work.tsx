@@ -24,7 +24,7 @@ const Work: NextPage<any> = () => {
   const searchContext = useContext(SearchContext);
 
   const onChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    console.log(e.target.value);
+
     e.preventDefault();
     setSearchQuery(e.target.value);
   };

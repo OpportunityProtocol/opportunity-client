@@ -54,6 +54,19 @@ const GET_CONTRACTS_BY_WORKER = gql`
   }
 `
 
+const GET_CONTRACTS_BY_MARKET_ID = gql`
+query GetContractsByMarketID($id: ID!) {
+  contracts(where: { marketId: $id} ) {
+    id
+    employer
+    marketId
+    metadata
+    worker
+    ownership
+  }
+}
+`
+
 const GET_SERVICES = gql`
   query GetServices {
     services {
@@ -158,4 +171,17 @@ const GET_SERVICES_BY_CREATOR = gql`
   }
 `
 
-export { GET_CONTRACTS_BY_EMPLOYER, GET_CONTRACTS_BY_WORKER ,GET_ACTIVE_SERVICES_BY_CREATOR, GET_PURCHASED_SERVICES_BY_CLIENT, GET_SERVICES_BY_CREATOR, GET_CONTRACTS, GET_PURCHASED_SERVICES, GET_SERVICES, GET_CONTRACT_BY_ID, GET_SERVICE_BY_ID, GET_PURCHASED_SERVICE }
+const GET_SERVICES_BY_MARKET_ID = gql`
+query GetServicesByMarketID($id: ID!) {
+  services(where: { marketId: $id } ) {
+    id
+    marketId
+    creator
+    metadataPtr
+    pubId
+    offers
+  }
+}
+`
+
+export {GET_SERVICES_BY_MARKET_ID, GET_CONTRACTS_BY_MARKET_ID, GET_CONTRACTS_BY_EMPLOYER, GET_CONTRACTS_BY_WORKER ,GET_ACTIVE_SERVICES_BY_CREATOR, GET_PURCHASED_SERVICES_BY_CLIENT, GET_SERVICES_BY_CREATOR, GET_CONTRACTS, GET_PURCHASED_SERVICES, GET_SERVICES, GET_CONTRACT_BY_ID, GET_SERVICE_BY_ID, GET_PURCHASED_SERVICE }

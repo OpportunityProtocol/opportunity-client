@@ -14,9 +14,4 @@ interface ICarouselItemProp {
     index: number,
   }
 
-  interface IJobDisplayProps {
-    data: any;
-    table?: boolean;
-  }
-
-  export type { ICarouselItemProp, ICarouselItemProps, IJobDisplayProps }
+  export type { ICarouselItemProp, ICarouselItemProps }

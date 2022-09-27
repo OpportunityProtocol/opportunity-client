@@ -101,6 +101,7 @@ const TransactionTokenDialog: FC<
 
   const [buyingEnabled, setBuyingEnabled] = useState<boolean>(false)
   const feeData = useFeeData();
+  const provider = useProvider({ chainId: CHAIN_ID})
 
   const [tokenInfo, setTokenInfo] = useState<any>({
     exists: false,
@@ -110,7 +111,6 @@ const TransactionTokenDialog: FC<
     address: ZERO_ADDRESS
   });
 
-
   const [serviceData, setServiceData] = useState<any>({});
 
   const serviceDataQuery = useQuery(GET_SERVICE_BY_ID, {
@@ -118,130 +118,6 @@ const TransactionTokenDialog: FC<
       serviceId: serviceId,
     },
   });
-
-  const tokenAddress = tokenInfo?.address
-
-  useEffect(() => {
-    if (!serviceDataQuery.loading && serviceDataQuery.data) {
-      setServiceData(serviceDataQuery.data.service);
-    }
-  }, [serviceDataQuery.loading]);
-
-  const userAddress = useSelector(selectUserAddress);
-
-  useEffect(() => {
-    networkManager_getProtocolFee.refetch();
-  }, []);
-
-  useEffect(() => {
-    if (serviceId >= 0) {
-      serviceDataQuery.refetch();
-      tokenInfoQuery.refetch();
-      serviceCollectModule_isFamiliar.refetch()
-    }
-  }, [serviceId]);
-
-  useEffect(() => {
-    if (Number(serviceData?.marketId) && serviceId >= -1) {
-      tokenFactory_getMarketsDetailsById.refetch();
-    }
-  }, [serviceData?.marketId, serviceId]);
-
-  const networkManager_getProtocolFee = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-    functionName: "getProtocolFee",
-      enabled: false,
-      watch: false,
-      chainId: CHAIN_ID,
-      args: [],
-      onSuccess(data: Result) {
-        setProtocolFee(hexToDecimal(data._hex));
-      },
-    }
-  );
-
-  const tokenExchange_buyTokensPrepare = usePrepareContractWrite(
-    {
-      addressOrName: TOKEN_EXCHANGE_ADDRESS,
-      contractInterface: TokenExchangeInterface,
-    functionName: "buyTokens",
-      args: [
-        tokenAddress,
-        numTokens,
-        fallbackAmount,
-        desiredCost,
-        userAddress,
-      ],
-      overrides: {
-        gasLimit: BigNumber.from("900000"),
-      },
-    }
-  )
-
-  const tokenExchange_buyTokens = useContractWrite(tokenExchange_buyTokensPrepare.config);
-
-  const onBuy = async () => {
-    await dai_approve.writeAsync().then(() => {
-      tokenExchange_buyTokens.write();
-    })
-  }
-
-  const tokenExchange_sellTokensPrepare = usePrepareContractWrite(
-    {
-      addressOrName: TOKEN_EXCHANGE_ADDRESS,
-      contractInterface: TokenExchangeInterface,
-    functionName: "sellTokens",
-      args: [tokenAddress, numTokens, 0, userAddress],
-      overrides: {
-        gasLimit: BigNumber.from("900000"),
-      },
-    }
-  )
-
-  const tokenExchange_sellTokens = useContractWrite(tokenExchange_sellTokensPrepare.config);
-
-  const tokenExchange_getCostForBuyingTokens = useContractRead(
-    {
-      addressOrName: TOKEN_EXCHANGE_ADDRESS,
-      contractInterface: TokenExchangeInterface,
-    functionName: "getCostForBuyingTokens",
-      args: [tokenAddress, numTokens],
-      enabled: false,
-      watch: false,
-      cacheTime: 30000,
-      chainId: CHAIN_ID,
-      overrides: {
-        gasLimit: BigNumber.from("900000"),
-      },
-      onSuccess(data) {
-        setCostForBuying(hexToDecimal(data._hex));
-      },
-    }
-  );
-
-  const serviceCollectModule_isFamiliar = useContractRead(
-    {
-      addressOrName: NETWORK_MANAGER_ADDRESS,
-      contractInterface: NetworkManagerInterface,
-      functionName: "isFamiliar",
-      args: [userAddress, serviceId],
-      enabled: true,
-      watch: true,
-      cacheTime: 30000,
-      chainId: CHAIN_ID,
-      overrides: {
-        gasLimit: BigNumber.from("900000"),
-      },
-      onSuccess(data) {
-        setBuyingEnabled(true)
-      },
-      onError(err) {
-        setBuyingEnabled(true)
-      },
-    }
-  )
 
   const marketDetailsQuery: QueryResult = useQuery(GET_MARKET_DETAILS_BY_ID, {
     variables: {
@@ -256,25 +132,108 @@ const TransactionTokenDialog: FC<
     },
   });
 
-  useEffect(() => {
-    if (!tokenInfoQuery.loading && tokenInfoQuery.data) {
-      setTokenInfo(tokenInfoQuery.data.serviceTokens[0]);
-      getBalance()
-    }
-  }, [tokenInfoQuery.loading]);
+  const userAddress = useSelector(selectUserAddress);
 
+  const tokenAddress = tokenInfo?.address
+  console.log(tokenAddress)
 
-  useEffect(() => {
-    if (!marketDetailsQuery.loading && marketDetailsQuery.data) {
-      setTokenMarketDetails(marketDetailsQuery.data.market);
+  const { refetch: refetchServiceTokenBalance } = useContractRead({
+    addressOrName: tokenAddress,
+    contractInterface: DaiInterface,
+    functionName: "balanceOf",
+    enabled: true,
+    watch: false,
+    chainId: CHAIN_ID,
+    args: [userAddress],
+    onSuccess(data: Result) {
+      setBalance(Number(data?._hex))
+    },
+    onError(error) {
     }
-  }, [marketDetailsQuery.loading]);
+  });
+
+  const networkManager_getProtocolFee = useContractRead({
+      addressOrName: NETWORK_MANAGER_ADDRESS,
+      contractInterface: NetworkManagerInterface,
+      functionName: "getProtocolFee",
+      enabled: false,
+      watch: false,
+      chainId: CHAIN_ID,
+      args: [],
+      onSuccess(data: Result) {
+        setProtocolFee(hexToDecimal(data._hex));
+        setBuyingEnabled(true)
+      },
+      onError(error) {
+        setBuyingEnabled(false)
+      }
+    });
+
+  const { write: buyTokens } = useContractWrite({
+    addressOrName: TOKEN_EXCHANGE_ADDRESS,
+    contractInterface: TokenExchangeInterface,
+    functionName: "buyTokens",
+    mode: "recklesslyUnprepared",
+    args: [
+      tokenAddress,
+      numTokens,
+      fallbackAmount,
+      desiredCost,
+      userAddress,
+    ],
+    onSuccess(data, variables, context) {
+      
+    },
+    onError(error, variables, context) {
+      alert(error)
+    },
+    overrides: {
+      gasLimit: BigNumber.from("900000"),
+    },
+  })
+
+  const tokenExchange_sellTokensPrepare = usePrepareContractWrite(
+    {
+      addressOrName: TOKEN_EXCHANGE_ADDRESS,
+      contractInterface: TokenExchangeInterface,
+      functionName: "sellTokens",
+      args: [tokenAddress, numTokens, 0, userAddress],
+      overrides: {
+        gasLimit: BigNumber.from("900000"),
+      },
+    }
+  )
+
+  const tokenExchange_sellTokens = useContractWrite(tokenExchange_sellTokensPrepare.config);
+
+  const tokenExchange_getCostForBuyingTokens = useContractRead(
+    {
+      addressOrName: TOKEN_EXCHANGE_ADDRESS,
+      contractInterface: TokenExchangeInterface,
+      functionName: "getCostForBuyingTokens",
+      args: [tokenAddress, numTokens],
+      enabled: false,
+      watch: false,
+      cacheTime: 30000,
+      chainId: CHAIN_ID,
+      overrides: {
+        gasLimit: BigNumber.from("900000"),
+      },
+      onSuccess(data) {
+        setCostForBuying(hexToDecimal(data._hex));
+        setBuyingEnabled(true)
+      }, 
+      onError(err) {
+        setBuyingEnabled(false)
+      },
+    }
+  );
 
   const tokenExchange_getPriceForSellingTokens = useContractRead(
     {
       addressOrName: TOKEN_EXCHANGE_ADDRESS,
       contractInterface: TokenExchangeInterface,
-    functionName: "getPriceForSellingTokens",
+      functionName: "getPriceForSellingTokens",
       args: [tokenAddress, numTokens],
       enabled: false,
       watch: false,
@@ -288,7 +247,7 @@ const TransactionTokenDialog: FC<
         setCostForSelling(hexToDecimal(data._hex));
       },
       onError(err) {
-     
+
       },
     }
   );
@@ -297,7 +256,7 @@ const TransactionTokenDialog: FC<
     {
       addressOrName: TOKEN_FACTORY_ADDRESS,
       contractInterface: TokenFactoryInterface,
-    functionName: "getMarketDetailsByID",
+      functionName: "getMarketDetailsByID",
       args: [Number(serviceData?.marketId)],
       enabled: false,
       watch: false,
@@ -308,23 +267,73 @@ const TransactionTokenDialog: FC<
       },
       onSuccess(data) {
         setTokenMarketDetails(data);
+        setBuyingEnabled(true)
       },
       onError(err) {
-
+        setBuyingEnabled(false)
       },
     }
   );
 
-  const dai_approvePrepare = usePrepareContractWrite(
-    {
-      addressOrName: DAI_ADDRESS,
-      contractInterface: DaiInterface,
+  const { write: approveServiceToken, isSuccess: approveServiceTokenIsSuccess } = useContractWrite({
+    addressOrName: DAI_ADDRESS,
+    contractInterface: DaiInterface,
     functionName: "approve",
-      args: [TOKEN_EXCHANGE_ADDRESS, costForBuying + 100],
-    }
-  )
+    mode: "recklesslyUnprepared",
+    args: [TOKEN_EXCHANGE_ADDRESS, costForBuying + 100],
+    overrides: {
+      gasLimit: BigNumber.from("900000"),
+    },
+    onSuccess(data, variables, context) {
+      buyTokens()
+    },
+    onError(error, variables, context) {
+      alert(error)
+    },
+  })
 
-  const dai_approve = useContractWrite(dai_approvePrepare.config);
+  useEffect(() => {
+    if (!serviceDataQuery.loading && serviceDataQuery.data) {
+      setServiceData(serviceDataQuery.data.service);
+    }
+  }, [serviceDataQuery.loading]);
+
+  useEffect(() => {
+    networkManager_getProtocolFee.refetch();
+  }, []);
+
+  useEffect(() => {
+    if (serviceId >= 0) {
+      serviceDataQuery.refetch();
+      tokenInfoQuery.refetch();
+    }
+  }, [serviceId]);
+
+  useEffect(() => {
+    if (Number(serviceData?.marketId) && serviceId >= -1) {
+      tokenFactory_getMarketsDetailsById.refetch();
+    }
+  }, [serviceData?.marketId, serviceId]);
+
+  useEffect(() => {
+    if (!tokenInfoQuery.loading && tokenInfoQuery.data) {
+      setTokenInfo(tokenInfoQuery.data.serviceTokens[0]);
+      refetchServiceTokenBalance()
+    }
+  }, [tokenInfoQuery.loading]);
+
+
+  useEffect(() => {
+    if (!marketDetailsQuery.loading && marketDetailsQuery.data) {
+      setTokenMarketDetails(marketDetailsQuery.data.market);
+    }
+  }, [marketDetailsQuery.loading]);
+
+  const onBuy = async () => {
+    approveServiceToken?.({
+      recklesslySetUnpreparedArgs: [TOKEN_EXCHANGE_ADDRESS, costForBuying + 100],
+    })
+  }
 
   const handleOnChangeNumTokensToBuy = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -382,24 +391,20 @@ const TransactionTokenDialog: FC<
   };
 
 
-  const getBalance = async () => {
-    if (tokenAddress != ZERO_ADDRESS) {
-    setBalance(await new ethers.Contract(tokenAddress, DaiInterface, signer.data.provider).balanceOf(userAddress))
-    }
-  }
-  
+
   const onRefresh = () => {
-    switch(tabValue) {
+    switch (tabValue) {
       case 0:
-        getBalance()
         networkManager_getProtocolFee.refetch();
+        break;
       case 1:
-        getBalance()
         networkManager_getProtocolFee.refetch();
         tokenExchange_getPriceForSellingTokens.refetch();
+        break;
       default:
-        getBalance()
     }
+
+    refetchServiceTokenBalance()
   }
 
   return (
@@ -521,7 +526,7 @@ const TransactionTokenDialog: FC<
                 </Stack>
 
                 <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
-                <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
                     Protocol Fee
                   </Typography>
 
@@ -531,19 +536,19 @@ const TransactionTokenDialog: FC<
                 </Stack>
 
                 <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
-                <Typography fontSize={12} fontWeight='bold' color='#212121'>
+                  <Typography fontSize={12} fontWeight='bold' color='#212121'>
                     Total Cost
                   </Typography>
 
                   <Typography fontSize={12} fontWeight='bold' color='#212121'>
-                  {costForBuying + protocolFee} DAI
+                    {costForBuying + protocolFee} DAI
                   </Typography>
                 </Stack>
 
                 <Divider />
 
                 <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
-                <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
                     Gas fee
                   </Typography>
 
@@ -556,7 +561,7 @@ const TransactionTokenDialog: FC<
                 Prices, fees and balance will refresh in {" "}
                 <Countdown
                   onComplete={() => {
-                    getBalance()
+                    refetchServiceTokenBalance()
                     networkManager_getProtocolFee.refetch();
                     tokenExchange_getPriceForSellingTokens.refetch();
                     setCountdown(Date.now() + 30000);
@@ -632,7 +637,7 @@ const TransactionTokenDialog: FC<
             <Divider />
 
             <Box>
-            <Typography variant="subtitle2" pb={1.5}>
+              <Typography variant="subtitle2" pb={1.5}>
                 Purchase Summary
               </Typography>
 
@@ -649,16 +654,16 @@ const TransactionTokenDialog: FC<
               >
                 <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
                   <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
-                    Earnings:  
+                    Earnings:
                   </Typography>
 
                   <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
-                  {returnFromSelling} DAI
+                    {returnFromSelling} DAI
                   </Typography>
                 </Stack>
 
                 <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
-                <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
                     Protocol Fee
                   </Typography>
 
@@ -668,19 +673,19 @@ const TransactionTokenDialog: FC<
                 </Stack>
 
                 <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
-                <Typography fontSize={12} fontWeight='bold' color='#212121'>
+                  <Typography fontSize={12} fontWeight='bold' color='#212121'>
                     Total Earned
                   </Typography>
 
                   <Typography fontSize={12} fontWeight='bold' color='#212121'>
-                  {returnFromSelling - protocolFee} DAI
+                    {returnFromSelling - protocolFee} DAI
                   </Typography>
                 </Stack>
 
                 <Divider />
 
                 <Stack py={0.5} direction='row' alignItems='center' justifyContent='space-between'>
-                <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
+                  <Typography fontSize={12} fontWeight='bold' color='rgb(96, 99, 104)'>
                     Gas fee
                   </Typography>
 
@@ -694,7 +699,7 @@ const TransactionTokenDialog: FC<
                 Prices, fees and balance will refresh in{" "}
                 <Countdown
                   onComplete={() => {
-                    getBalance()
+                    refetchServiceTokenBalance()
                     networkManager_getProtocolFee.refetch();
                     tokenExchange_getPriceForSellingTokens.refetch();
                     setCountdown(Date.now() + 30000);

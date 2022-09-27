@@ -144,8 +144,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const networkManager_createService = useContractWrite({
     ...networkManager_createServicePrepare.config,
     onError(error, variables, context) {
-      console.log("@@@@@@@@@@@@@@")
-      console.log(error)
+ 
 
       setCreateServiceDialogState({
         ...createServiceDialogState,

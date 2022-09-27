@@ -81,7 +81,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     displayedMarkets: [],
   });
 
-  const APP_BACKGROUND: string = 'rgb(246, 247, 249)'
+  const APP_BACKGROUND: string = 'rgba(255, 255, 255, 0.1)' //'rgb(246, 247, 249)'
   // "linear-gradient(180deg, rgba(250,250,250,1) 35%, rgba(236,247,243,1) 75%, rgba(236,246,242,1) 100%)";
 
   const isPadded: boolean =
@@ -195,13 +195,14 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
      
         <Box
           component="main"
-          sx={{ paddingTop: isPadded ? "80px" : "0px", flexGrow: 1 }}
+          sx={{ flexGrow: 1 }}
         >
+          <Toolbar />
           {children}
         </Box>
       </Box>
 
-      <VerificationDialog open={verificationModal} handleClose={() => setVerificationModal(false)} />
+   
     </>
   );
 };

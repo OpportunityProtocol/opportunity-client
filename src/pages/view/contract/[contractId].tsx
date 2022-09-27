@@ -500,10 +500,6 @@ const ViewContract: NextPage<any> = () => {
       Number(contractData?.ownership) == 0
 
     ) {
-      console.log(address);
-      console.log(contractData);
-
-
 
 
       return (

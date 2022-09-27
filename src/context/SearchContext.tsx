@@ -46,16 +46,6 @@ const SearchProvider = ({ children }) => {
       },
     });
 
-    console.log("Before ");
-    switch (searchState?.query.filter) {
-      case SearchFilter.ANY:
-        console.log("HI");
-        await contractQuery.refetch();
-        await servicesQuery.refetch();
-        break;
-      default:
-    }
-
     //search query
   };
 

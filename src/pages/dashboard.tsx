@@ -9,12 +9,15 @@ import {
   CardContent,
   Button,
   Box,
-  Stack,
   Alert,
   Paper,
   IconButton,
   Table,
+  Stack,
   Chip,
+  Divider,
+  List,
+  Grid,
 } from "@mui/material";
 
 import { withStyles } from '@mui/styles'
@@ -39,7 +42,7 @@ import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
 import JobDisplay from "../modules/market/components/JobDisplay";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../modules/user/userReduxSlice";
-import { KeyboardArrowDown, Refresh } from "@mui/icons-material";
+import { KeyboardArrowDown, Refresh, TableRows, ViewModule } from "@mui/icons-material";
 import SearchBar from "../common/components/SearchBar/SearchBar";
 
 const MuiTableHead = withStyles((theme) => ({
@@ -110,6 +113,8 @@ const ExplorePage: NextPage = () => {
       },
     }
   );
+
+  console.log(purchasedServicesByClientQuery)
 
   const contractsCreatedByEmployerQuery: QueryResult = useQuery(
     GET_CONTRACTS_BY_EMPLOYER,
@@ -285,24 +290,36 @@ const ExplorePage: NextPage = () => {
         return contractWorking.map((item) => {
           return <JobDisplay table data={item} />
         })
-      case Persona.CATALOG: //services only
+      case Persona.CATALOG: //services only but for now render hiring and change contract option to hiring
+      setState({
+        ...state,
+        persona: Persona.HIRING
+      })
+      
+      return contractsHiring.map((item) => {
+        return <JobDisplay table data={item} />
+      })
+
+
       default:
     }
   }
+
+  console.log(servicesHired)
 
   const renderServices = () => {
     switch (state.persona) {
       case Persona.HIRING:
         return servicesHired.map((item) => {
-          return <ServiceCard id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+          return <ServiceCard  id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
       case Persona.WORKING:
         return servicesWorking.map((item) => {
-          return <ServiceCard id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+          return <ServiceCard  id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
       case Persona.CATALOG:
         return createdServices.map((item) => {
-          return <ServiceCard id={item?.id} data={item} />
+          return <ServiceCard table={true} id={item?.id} data={item} />
         })
       default:
     }
@@ -314,7 +331,7 @@ const ExplorePage: NextPage = () => {
       sx={{
         height: "100%",
         overflow: "scroll",
-        padding: "0px 20px !important",
+        padding: "0px 0px !important",
       }}
     >
       {/* <Box
@@ -334,28 +351,38 @@ const ExplorePage: NextPage = () => {
 
       <Box
         sx={{
+          height: '100%',
           //  mt: 3,
           width: "100%",
+          backgroundColor: 'rgba(255, 255, 255, 0.2)'
         }}
       >
+        <Box sx={{ bgcolor: 'white', px: 5, py: 2 }}>
+        <Container maxWidth='lg' sx={{ width: "100%", my: 2, px: 5 }}>
+
         <Stack
           my={2}
           direction="row"
           alignItems="center"
           justifyContent="space-between"
         >
+          <Box>
           <Typography
-            fontWeight="bold"
+            fontWeight="600"
             fontSize={24}
-            color="rgba(33, 33, 33, .85)"
           >
             Work Dashboard
           </Typography>
+          <Typography variant='body2' color='text.secondary' fontWeight='medium'>
+            The homeplace for asynchronous work between users and DAOs
+          </Typography>
+          </Box>
 
-          <SearchBar placeholder='Search...' />
+
+          
         </Stack>
 
-        <Box my={2} mb={5} display='flex' alignItems='center' justifyContent='space-between'>
+        <Box   display='flex' alignItems='center' justifyContent='space-between'>
           <Stack spacing={1} direction="row" alignItems="center">
             <Chip
               variant='outlined'
@@ -411,14 +438,52 @@ const ExplorePage: NextPage = () => {
                 </Button>
               )
             }
-            <IconButton size='small'>
-              <Refresh fontSize='small' />
-            </IconButton>
+
           </Stack>
         </Box>
+        </Container>
+        </Box>
+<Divider />
+        <Container maxWidth='lg' sx={{ height: '100%', width: "100%", my: 2, px: 5 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={8}>
+            <Box py={1} display='flex' alignItems='center' justifyContent='space-between'>
+              <Typography fontWeight='bold'>
+                Your incoming gigs
+              </Typography>
 
-        <Box sx={{ width: "100%", mb: 2 }}>
-          <Table sx={{ width: "100%" }}>
+              <Stack spacing={1} direction='row' alignItems='center'>
+              <SearchBar placeholder='Search...' />
+              <IconButton size='small'>
+              <TableRows fontSize='small' />
+              </IconButton>
+
+              <IconButton size='small'>
+              <ViewModule fontSize='small' />
+              </IconButton>
+                
+                
+                <IconButton size='small'>
+              <Refresh fontSize='small' />
+            </IconButton>
+              </Stack>
+            </Box>
+            <Box sx={{}}>
+          <Stack spacing={2}>
+            {
+              contractViewPersona === ContractsViewingPersona.CONTRACTS ? renderContracts() : renderServices()
+            }
+          </Stack>
+        </Box>
+            </Grid>
+
+            <Grid xs={4} item sx={{ display: 'flex' }}>
+              <Paper variant='outlined' sx={{ height: '100%', flexGrow: 1}}>
+
+              </Paper>
+            </Grid>
+          </Grid>
+        {/*  <Table sx={{ width: "100%" }}>
             <MuiTableHead
               sx={{
                 width: "100% !important",
@@ -457,16 +522,8 @@ const ExplorePage: NextPage = () => {
                 </TableHeaderCell>
               </TableRow>
             </MuiTableHead>
-          </Table>
-        </Box>
-
-        <Box sx={{}}>
-          <Stack spacing={2}>
-            {
-              contractViewPersona === ContractsViewingPersona.CONTRACTS ? renderContracts() : renderServices()
-            }
-          </Stack>
-        </Box>
+              </Table>*/}
+        </Container>
       </Box>
     </Container>
   );

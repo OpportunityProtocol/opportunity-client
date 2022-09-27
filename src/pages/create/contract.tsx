@@ -319,7 +319,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
 
     setContractMetadataURI("");
 
-    router.push("/view");
+    router.push("/dashboard");
   };
 
   return (

@@ -183,8 +183,6 @@ const ProfilePage: NextPage<any> = () => {
 
   const { address } = router.query;
 
-  console.log(router.query);
-
   const verifiedUserQuery: QueryResult = useQuery(
     GET_VERIFIED_FREELANCER_BY_ADDRESS,
     {
@@ -193,8 +191,6 @@ const ProfilePage: NextPage<any> = () => {
       },
     }
   );
-
-  console.log(verifiedUserQuery);
 
   //contracts created
   const contractsByEmployerQuery: QueryResult = useQuery(
