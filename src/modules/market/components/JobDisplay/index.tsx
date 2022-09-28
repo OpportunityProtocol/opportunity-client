@@ -45,7 +45,7 @@ import { selectUserAddress } from "../../../user/userReduxSlice";
  * metadata due to issues with graphql returning a different encoded format
  */
 
- const TableBodyCell = withStyles((theme) => ({
+const TableBodyCell = withStyles((theme) => ({
   root: {
     color: "black",
     fontSize: "12px !important",
@@ -135,7 +135,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
         lensProfileId: hexToDecimal(data?._hex),
       });
     },
-    onError: (error) => {},
+    onError: (error) => { },
   });
 
   const lensHub_getProfile = useContractRead({
@@ -184,30 +184,30 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
 
   return table ? (
     <>
-    <TableRow
-      onClick={
-        userAddress
-          ? () => router.push(`/view/contract/${data?.id}`)
-          : () => {}
-      }
-      component={Paper}
-   //   variant="outlined"
-      sx={{
-        boxShadow:  '0px 1px 3px 0px #eee, 0px 1px 1px 0px #eee, 0px 2px 1px -1px #eee',
-       // border: 'none !important',
-        position: 'relative',
-        width: "100%",
-        minWidth: "100% !important",
-        display: "flex",
-        height: 130,
-        cursor: userAddress ? "pointer" : "auto",
-      }}
-    >
-      <TableBodyCell sx={{ width: "100% !important" }}>
-        <Box display="flex">
-            
+      <TableRow
+        onClick={
+          userAddress
+            ? () => router.push(`/view/contract/${data?.id}`)
+            : () => { }
+        }
+        component={Paper}
+        //   variant="outlined"
+        sx={{
+          boxShadow: '0px 1px 3px 0px #eee, 0px 1px 1px 0px #eee, 0px 2px 1px -1px #eee',
+          // border: 'none !important',
+          position: 'relative',
+          width: "100%",
+          minWidth: "100% !important",
+          display: "flex",
+          height: 130,
+          cursor: userAddress ? "pointer" : "auto",
+        }}
+      >
+        <TableBodyCell sx={{ width: "100% !important" }}>
+          <Box display="flex">
+
             <Box
-         
+
               sx={{
                 bgcolor: '#eee',
                 border: 'none',
@@ -218,82 +218,85 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
               }}
             />
 
-          <Box>
-            <Typography fontWeight="medium" fontSize={14}>
-              {contractMetadata?.contract_title
-                ? contractMetadata?.contract_title
-                : "Unable to title"}
-            </Typography>
-            <Typography paragraph fontSize={12}>
-              {contractMetadata?.contract_description
-                ? contractMetadata?.contract_description
-                : "Unable to load description"}
-            </Typography>
-            <Typography fontSize={12}>
-              {contractMetadata?.contract_definition_of_done
-                ? contractMetadata?.contract_definition_of_done
-                : "Unable to requirements"}
-            </Typography>
-            <Stack mt={0.5} direction="row" alignItems="center" spacing={1}>
-          {contractMetadata?.tags &&
-          contractMetadata?.tags?.length > 0 ? (
-            contractMetadata?.tags?.map((tag) => {
-              return (
-                <Chip
-                  variant="filled"
-                  sx={{ fontSize: 12, width: 'auto', height: 20, backgroundColor: "#eee" }}
-                  label={tag}
-                  size="small"
-                />
-              );
-            })
-          ) : (
-            <Typography color="text.secondary" variant="caption">
-              Unable to load tags
-            </Typography>
-          )}
-        </Stack>
+            <Box>
+              <Typography fontWeight="medium" fontSize={14}>
+                {contractMetadata?.contract_title
+                  ? contractMetadata?.contract_title
+                  : "Unable to title"}
+              </Typography>
+              <Typography paragraph fontSize={12}>
+                {contractMetadata?.contract_description
+                  ? contractMetadata?.contract_description
+                  : "Unable to load description"}
+              </Typography>
+              <Typography fontSize={12}>
+                {contractMetadata?.contract_definition_of_done
+                  ? contractMetadata?.contract_definition_of_done
+                  : "Unable to requirements"}
+              </Typography>
+              <Stack mt={0.5} direction="row" alignItems="center" spacing={1}>
+                {contractMetadata?.tags &&
+                  contractMetadata?.tags?.length > 0 ? (
+                  contractMetadata?.tags?.map((tag) => {
+                    return (
+                      <Chip
+                        variant="filled"
+                        sx={{ fontSize: 12, width: 'auto', height: 20, backgroundColor: "#eee" }}
+                        label={tag}
+                        size="small"
+                      />
+                    );
+                  })
+                ) : (
+                  <Typography color="text.secondary" variant="caption">
+                    Unable to load tags
+                  </Typography>
+                )}
+              </Stack>
+            </Box>
           </Box>
+
+        </TableBodyCell>
+        <TableBodyCell sx={{ width: 150 }}>
+          <Stack direction="row" spacing={0.5}>
+            <img
+              src="/assets/images/dai.svg"
+              style={{ width: 18, height: 18 }}
+            />
+            <Typography variant="body2" fontSize={12}>
+              {contractMetadata?.contract_budget}
+            </Typography>
+          </Stack>
+        </TableBodyCell>
+        <TableBodyCell sx={{ width: 150 }}>
+          <StatusChip status="Unclaimed" />
+        </TableBodyCell>
+        <TableBodyCell sx={{ width: 150 }}>
+          {moment().format("h:mm A")}
+        </TableBodyCell>
+
+        <Box component={Alert} sx={{ borderTopLeftRadius: '10px !important', fontWeight: 'medium', borderRadius: 0, width: 200, height: 45, position: 'absolute', bottom: 0, right: 0 }}>
+          Check requirements
         </Box>
-       
-      </TableBodyCell>
-      <TableBodyCell sx={{ width: 150 }}>
-        <Stack direction="row" spacing={0.5}>
-          <img
-            src="/assets/images/dai.svg"
-            style={{ width: 18, height: 18 }}
-          />
-          <Typography variant="body2" fontSize={12}>
-          {contractMetadata?.contract_budget}
-          </Typography>
-        </Stack>
-      </TableBodyCell>
-      <TableBodyCell sx={{ width: 150 }}>
-        <StatusChip status="Unclaimed" />
-      </TableBodyCell>
-      <TableBodyCell sx={{ width: 150 }}>
-        {moment().format("h:mm A")}
-      </TableBodyCell>
+      </TableRow>
 
-      <Box component={Alert} sx={{borderTopLeftRadius: '10px !important', fontWeight: 'medium', borderRadius: 0, width: 200, height: 45, position: 'absolute', bottom: 0, right: 0}}>
-            Check requirements
-      </Box>
-    </TableRow>
-
-  </>
+    </>
   ) : (
+    <Grid xs={12} md={6} lg={4}>
     <Card
       onClick={
         accountData.address
           ? () => router.push(`/view/contract/${data?.id}`)
-          : () => {}
+          : () => { }
       }
       key={Math.random()}
       square
-     // variant="outlined"
+      // variant="outlined"
       sx={{
-        boxShadow:  '0px 1px 3px 0px #eee, 0px 1px 1px 0px #eee, 0px 2px 1px -1px #eee',
-      //  boxShadow: "0 19px 38px #eee, 0 15px 12px #eee",
+        boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+        WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+        MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+        //  boxShadow: "0 19px 38px #eee, 0 15px 12px #eee",
         cursor: accountData.address ? "pointer" : "auto",
         width: "100%",
         height: 'auto',
@@ -340,7 +343,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
           {contractMetadata?.contract_description
             ? contractMetadata?.contract_description
             : "Unable to load description"}
-          </Box> 
+        </Box>
 
         <Grid
           pb={2}
@@ -376,22 +379,22 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
           alignItems="center"
           justifyContent="space-between"
         >
-          <Grid item sx={{ display: 'flex', alignItems: 'center'}}>
-              <Typography mr={0.5} component='span' fontSize={13} fontWeight='medium'>
-                Budget: {" "}
+          <Grid item sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography mr={0.5} component='span' fontSize={13} fontWeight='medium'>
+              Budget: {" "}
+            </Typography>
+
+            <Stack direction='row' alignItems='center'>
+              <Typography fontSize={13} fontWeight='medium'>
+                {contractMetadata?.contract_budget
+                  ? contractMetadata?.contract_budget
+                  : 0}{" "}
               </Typography>
-  
-              <Stack direction='row' alignItems='center'>
-                  <Typography fontSize={13} fontWeight='medium'>
-                  {contractMetadata?.contract_budget
-                ? contractMetadata?.contract_budget
-                : 0}{" "}
-                  </Typography>
-                  <img
-                  src="/assets/images/dai.svg"
-                  style={{ margin: '3px 3px', width: 15, height: 20 }}
-                />
-                </Stack>
+              <img
+                src="/assets/images/dai.svg"
+                style={{ margin: '3px 3px', width: 15, height: 20 }}
+              />
+            </Stack>
           </Grid>
           <Grid item>
             <Chip
@@ -407,34 +410,30 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
         </Grid>
       </CardContent>
 
-{
-  showStatus && (
-    <>
-    <Divider />
-    <CardContent>
-      <Box display="flex" alignItems="center" justifyContent="center">
-        <Typography fontSize={13} color="text.secondary">
-          Status:{" "}
-          <Typography
-            fontSize={13}
-            fontWeight="medium"
-            component="span"
-            color="green"
-          >
-            Resolved
-          </Typography>
-        </Typography>
-      </Box>
-    </CardContent>
-  </>
-  )
-}
-      
-    
-    
-
-
+      {
+        showStatus && (
+          <>
+            <Divider />
+            <CardContent>
+              <Box display="flex" alignItems="center" justifyContent="center">
+                <Typography fontSize={13} color="text.secondary">
+                  Status:{" "}
+                  <Typography
+                    fontSize={13}
+                    fontWeight="medium"
+                    component="span"
+                    color="green"
+                  >
+                    Resolved
+                  </Typography>
+                </Typography>
+              </Box>
+            </CardContent>
+          </>
+        )
+      }
     </Card>
+    </Grid>
   );
 };
 

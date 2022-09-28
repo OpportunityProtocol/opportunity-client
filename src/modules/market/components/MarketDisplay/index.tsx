@@ -59,76 +59,81 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
       </Typography>
     </Box>
   ) : (
-    <ClickableCard
-      sx={{
-        border: (theme) =>
-          selected
-            ? `2px solid ${theme.palette.primary.main}`
-            : "1px solid #eee",
-      }}
-      variant="outlined"
-      onClick={selectable ? () => handleOnSelect() : () => router.push(`/view/market/${marketDetails?.id}`)}
-    >
-      <Box sx={{ width: "100%", height: small ? 100 : 200 }}>
-        <img
-          style={{ width: "100%", height: "100%" }}
-          src="/assets/images/carousel_two.jpeg"
-        />
-      </Box>
-      <Divider />
-      <CardContent className={classes.primaryContentContainer}>
-        <Grid
-          container
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Grid item>
+    <Grid item xs={12} md={6} lg={4}>
+      <ClickableCard
+        sx={{
+          boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+          WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+          MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+          border: (theme) =>
+            selected
+              ? `2px solid ${theme.palette.primary.main}`
+              : "1px solid #eee",
+        }}
+        variant="outlined"
+        onClick={selectable ? () => handleOnSelect() : () => router.push(`/view/market/${marketDetails?.id}`)}
+      >
+        <Box sx={{ width: "100%", height: 150 }}>
+          <img
+            style={{ width: "100%", height: "100%" }}
+            src="/assets/images/carousel_two.jpeg"
+          />
+        </Box>
+        <Divider />
+        <CardContent className={classes.primaryContentContainer}>
+          <Grid
+            container
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Grid item>
+              <Typography
+                sx={{
+                  color: "black",
+                  height: 25,
+                  fontSize: small ? 12 : 16,
+                  fontWeight: (theme) => theme.typography.fontWeightBold,
+                }}
+              >
+                {marketDetails?.name
+                  ? marketDetails?.name
+                  : "Unable to load market name"}
+              </Typography>
+            </Grid>
+
+            <Grid item />
+          </Grid>
+          {showDescription && (
             <Typography
               sx={{
-                color: "black",
-                height: 25,
-                fontSize: small ? 12 : 16,
-                fontWeight: (theme) => theme.typography.fontWeightBold,
+                py: 1,
+                fontSize: small ? 10 : 13,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
               }}
+              color="text.secondary"
             >
-              {marketDetails?.name
-                ? marketDetails?.name
-                : "Unable to load market name"}
+              {MARKET_DESCRIPTION_MAPPING[marketDetails?.name]}
             </Typography>
-          </Grid>
+          )}
 
-          <Grid item />
-        </Grid>
-        {showDescription && (
-          <Typography
-            sx={{
-              py: 1,
-              fontSize: small ? 10 : 13,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-            }}
-            color="text.secondary"
-          >
-            {MARKET_DESCRIPTION_MAPPING[marketDetails?.name]}
-          </Typography>
-        )}
-
-        {isShowingStats && (
-          <Typography
-            color="#49A882"
-            pt={2}
-            variant="body2"
-            sx={{ height: 25 }}
-          >
-            {Math.floor(Math.random() * 3200)} contracts and services available
-          </Typography>
-        )}
-      </CardContent>
-    </ClickableCard>
+          {isShowingStats && (
+            <Typography
+              color="#49A882"
+              pt={2}
+              variant="body2"
+              sx={{ height: 25 }}
+            >
+              {Math.floor(Math.random() * 3200)} contracts and services available
+            </Typography>
+          )}
+        </CardContent>
+      </ClickableCard>
+    </Grid>
   );
 };
 

@@ -38,19 +38,23 @@ import {
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import User from "../modules/user/components/Messenger/User";
 import MessageForm from "../modules/user/components/Messenger/MessageForm";
-import Message from "../modules/user/components/Messenger/Message";
+import { IMessageProp, ProposalMessage, RegularMessage } from "../modules/user/components/Messenger/Message";
 import {
   useAccount,
 } from "wagmi";
+import { NextPage } from "next";
 
+enum MessageType {
+  ContractProposal,
+  Regular
+}
 
-const Messenger = () => {
-  const [users, setUsers] = useState([]);
-  const [chat, setChat] = useState({});
-  const [text, setText] = useState("");
-  const [img, setImg] = useState("");
-  const [msgs, setMsgs] = useState([]);
-
+const Messenger: NextPage<any> = () => {
+  const [users, setUsers] = useState<Array<any>>([]);
+  const [chat, setChat] = useState<any>({});
+  const [text, setText] = useState<string>("");
+  const [img, setImg] = useState<string>("");
+  const [msgs, setMsgs] = useState<Array<any>>([]);
 
   const { address, connector } = useAccount();
   const user1 = String(address).toLowerCase();
@@ -72,11 +76,8 @@ const Messenger = () => {
 
   const selectUser = async (user) => {
     setChat(user);
-
     const user2 = user.uid;
-
     const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
-
     const msgsRef = collection(db, "messages", id, "chat");
     const q = query(msgsRef, orderBy("createdAt", "asc"));
 
@@ -101,10 +102,9 @@ const Messenger = () => {
     e.preventDefault();
 
     const user2 = chat.uid;
-
     const id = user1 > user2 ? `${user1 + user2}` : `${user2 + user1}`;
-
     let url;
+
     if (img) {
       const imgRef = ref(
         storage,
@@ -136,6 +136,17 @@ const Messenger = () => {
     setImg("");
   };
 
+  const renderMessage = (idx: number, msg: IMessageProp) => {
+    switch (msg?.type) {
+      case MessageType.Regular:
+        return <RegularMessage key={idx} msg={msg} user1={user1} />
+      case MessageType.ContractProposal:
+        return <ProposalMessage key={idx} msg={msg} user1={user1} />
+      default:
+        return <RegularMessage key={idx} msg={msg} user1={user1} />
+    }
+  }
+
   return (
     <Container
       maxWidth="xl"
@@ -146,7 +157,7 @@ const Messenger = () => {
         alignItems: "center",
       }}
     >
-     <Paper
+      <Paper
         sx={{
           bgcolor: "background.paper",
           display: "flex",
@@ -154,614 +165,87 @@ const Messenger = () => {
           height: "100%",
         }}
       >
-        <Grid sx={{  position: 'relative', display: 'grid', gridTemplateColumns: '1fr  3fr', overflow: 'hidden', maxHeight: '100%' , width: '100%'}} >
-         
-        <Grid sx={{  borderRight: '1px solid #ddd', overflowY: 'auto', overflow: 'hidden'}}>
-     
-         
-           <Grid
-              
-                
-                  container
-                  direction='column'
-                  alignItems="center"
-                  alignContent="center"
-                  justifyContent='space-between'
-                  sx={{ bgcolor: "", marginLeft: "0px" , padding: '15px', marginTop: '20px', borderBottom: '1px solid #ddd', height: '25%' }}
-                >
+        <Grid sx={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr  3fr', overflow: 'hidden', maxHeight: '100%', width: '100%' }} >
+          <Grid sx={{ borderRight: '1px solid #ddd', overflowY: 'auto', overflow: 'hidden' }}>
+            <Grid
+              container
+              direction='column'
+              alignItems="center"
+              alignContent="center"
+              justifyContent='space-between'
+              sx={{ bgcolor: "", marginLeft: "0px", padding: '15px', marginTop: '20px', borderBottom: '1px solid #ddd', height: '25%' }}
+            >
 
-      <Avatar
-              alt="Remy Sharp"
-              src="/static/images/avatar/1.jpg"
-              sx={{
-                width: 85,
-                height: 85,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            />
-
-            <Typography sx={{ fontSize: "20px" , marginBottom: '20px'}}>Elijah Hampton</Typography>
-
-        </Grid>
-
-      
-        <Grid sx={{  overflow: 'scroll', maxHeight: '473px' , marginTop: '10px'}}>
-     
-        {users.map((user) => (
-          <User
-            key={user.uid}
-            user={user}
-            selectUser={selectUser}
-            user1={user1}
-            chat={chat}
-          />
-        ))}
-        </Grid>
-      </Grid>
-      <Grid sx={{ position: 'relative' , width: '100%' }}>
-        {chat ? (
-          <>
-          <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ padding: '15px', borderBottom: '1px solid #ddd'}} >
-                        <Stack direction="row" alignItems='center'>
-                        
-                        <Avatar
-                            alt=''
-                            src="/static/images/avatar/1.jpg"
-                            sx={{
-                            width: 40,
-                            height: 40,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            marginRight: "15px",
-                            }}
-                        />
-                        <Typography display='flex' sx={{ fontSize: "20px" }}>
-                              {chat.name}
-                        </Typography>
-                        </Stack>
-                        <Button sx={{ fontSize: "14px" }} ><SearchIcon /></Button>
-                  </Box>
-                
-            <Grid sx={{ height: 'calc(100vh - 395px)', overflowY: 'auto' , borderBottom: '1px solid #ddd', overflowX: 'hidden'}}>
-              {msgs.length
-                ? msgs.map((msg, i) => (
-                    <Message key={i} msg={msg} user1={user1} />
-                  ))
-                : null}
+              <Avatar
+                alt="Remy Sharp"
+                src="/static/images/avatar/1.jpg"
+                sx={{
+                  width: 85,
+                  height: 85,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              />
+              <Typography sx={{ fontSize: "20px", marginBottom: '20px' }}>Elijah Hampton</Typography>
             </Grid>
-          
-            <MessageForm
-              handleSubmit={handleSubmit}
-              text={text}
-              setText={setText}
-              setImg={setImg}
-            />
-          </>
-        ) : (
-          <Typography sx={{ fontSize: '20px', color: 'grey', textAlign: 'center' }}>Select a user to start conversation</Typography>
-        )}
-      </Grid>
-    </Grid>
+            <Grid sx={{ overflow: 'scroll', maxHeight: '473px', marginTop: '10px' }}>
 
+              {users.map((user) => (
+                <User
+                  key={user.uid}
+                  user={user}
+                  selectUser={selectUser}
+                  user1={user1}
+                  chat={chat}
+                />
+              ))}
+            </Grid>
+          </Grid>
+          <Grid sx={{ position: 'relative', width: '100%' }}>
+            {chat ? (
+              <>
+                <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ padding: '15px', borderBottom: '1px solid #ddd' }} >
+                  <Stack direction="row" alignItems='center'>
+
+                    <Avatar
+                      alt=''
+                      src="/static/images/avatar/1.jpg"
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginRight: "15px",
+                      }}
+                    />
+                    <Typography display='flex' sx={{ fontSize: "20px" }}>
+                      {chat.name}
+                    </Typography>
+                  </Stack>
+                  <Button sx={{ fontSize: "14px" }} ><SearchIcon /></Button>
+                </Box>
+
+                <Grid sx={{ height: 'calc(100vh - 395px)', overflowY: 'auto', borderBottom: '1px solid #ddd', overflowX: 'hidden' }}>
+                  {msgs.length
+                    ? msgs.map((msg, idx) => renderMessage(idx, msg))
+                    : null}
+                </Grid>
+
+                <MessageForm
+                  handleSubmit={handleSubmit}
+                  text={text}
+                  setText={setText}
+                  setImg={setImg}
+                />
+              </>
+            ) : (
+              <Typography sx={{ fontSize: '20px', color: 'grey', textAlign: 'center' }}>Select a user to start conversation</Typography>
+            )}
+          </Grid>
+        </Grid>
       </Paper>
-    
     </Container>
   );
 }
 
 export default Messenger;
-
-
-/* <Grid
-container
-sx={{ bgcolor: "red", height: "100%" }}
-justifyContent="space-between"
->
-<Grid
-  item
-  xs={12}
-  container
-  direction="row"
-  alignItems="center"
-  justifyContent="flex-start"
-  spacing={1}
-  sx={{ bgcolor: "yellow", marginLeft: "0px" }}
->
-  <Avatar
-    alt="N"
-    src="/static/images/avatar/1.jpg"
-    sx={{
-      width: 35,
-      height: 35,
-      justifyContent: "center",
-      alignItems: "center",
-      marginRight: "10px",
-    }}
-  />
-  <Typography sx={{ fontSize: "18px" }}>
-    Nathan Farley
-  </Typography>
-</Grid>
-<Grid item sx={{ bgcolor: "" }}>
-  <Button>View Profile</Button>
-</Grid>
-<Divider sx={{ marginTop: "10px" }} />
-<Grid
-  item
-  xs={12}
-  sx={{
-    bgcolor: "blue",
-    display: "flex",
-    flexGrow: 1,
-    overflow: "scroll",
-  }}
->
-  H
-</Grid>
-<Divider />
-<Grid
-  item
-  xs={12}
-  sx={{
-    bgcolor: "",
-    maxHeight: "100%",
-    height: "100%",
-    alignSelf: "flex-end",
-  }}
->
-  <Box
-    component="form"
-    noValidate
-    autoComplete="off"
-    sx={{
-      maxHeight: "44px",
-      p: "2px 4px",
-      display: "flex",
-      alignItems: "center",
-    }}
-  >
-    <InputBase
-      sx={{ ml: 1, flex: 1 }}
-      placeholder="Write a message"
-      inputProps={{ "aria-label": "Write a message" }}
-    />
-    <IconButton
-      type="submit"
-      sx={{ p: "10px" }}
-      aria-label="search"
-    >
-      <SendIcon />
-    </IconButton>
-  </Box>
-</Grid>
-</Grid>
-
-
-<Stack direction="column"  spacing={2} display='flex' justifyContent="space-between">
-                  <Box display="flex" justifyContent="space-between" alignItems='space-between' >
-                        <Stack direction="row" alignItems='center'>
-                        <Avatar
-                            alt="N"
-                            src="/static/images/avatar/1.jpg"
-                            sx={{
-                            width: 40,
-                            height: 40,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            marginRight: "10px",
-                            }}
-                        />
-                        <Typography display='flex' sx={{ fontSize: "18px" }}>
-                              Nathan Farley
-                        </Typography>
-                        </Stack>
-                        <Button sx={{ fontSize: "14px" }} >View Profile</Button>
-                  </Box>
-                  <Divider />
-                  <Stack  direction="row" alignItems="stretch" sx={{ flexGrow: 2 }} >
-                  <Typography  alignItems="stretch"  sx={{ fontSize: "18px" }}>
-                              Nathan Farley
-                        </Typography>
-                  </Stack>
-                  <Divider />
-                  
-                  <Box
-    component="form"
-    noValidate
-    autoComplete="off"
-    sx={{
-      maxHeight: "20px",
-      p: "2px 4px",
-      display: "flex",
-      alignItems: "center",
-    }}
-  >
-    <InputBase
-      sx={{ ml: 1, flex: 1 }}
-      placeholder="Write a message"
-      inputProps={{ "aria-label": "Write a message" }}
-    />
-    <IconButton
-      type="submit"
-      sx={{ p: "10px" }}
-      aria-label="search"
-    >
-      <SendIcon />
-    </IconButton>
-  </Box>
-                  
-              </Stack>
-             
-
-  <Paper
-        sx={{
-          bgcolor: "background.paper",
-          display: "flex",
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <Grid
-          container
-          direction="row"
-          sx={{ flexWrap: "no-wrap", maxheight: "100%" }}
-        >
-          <Grid
-            item
-            container
-            pt={4}
-            pb={2}
-            xs={3.5}
-            direction="column"
-            justifyContent="space-around"
-            alignItems="center"
-            sx={{
-              bgcolor: "",
-              height: "100%",
-              width: "100%",
-              flexWrap: "no-wrap",
-              borderRight: " 1px solid #ECEEF0",
-            }}
-          >
-            <Avatar
-              alt="Remy Sharp"
-              src="/static/images/avatar/1.jpg"
-              sx={{
-                width: 85,
-                height: 85,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            />
-
-            <Typography sx={{ fontSize: "20px" }}>Elijah Hampton</Typography>
-
-            <Divider sx={{ width: "90%" }} />
-            <Tabs
-              orientation="vertical"
-              variant="scrollable"
-              value={value}
-              onChange={handleChange}
-              visibleScrollbar={false}
-              scrollButtons={false}
-              sx={{
-                maxHeight: "500px",
-                overflow: "scroll",
-                flexWrap: "no-wrap",
-                width: "100%",
-                paddingLeft: "15%",
-              }}
-            >
-              <Tab
-                icon={
-                  <Avatar
-                    alt="N"
-                    src="/static/images/avatar/1.jpg"
-                    sx={{ width: 35, height: 35 }}
-                  />
-                }
-                iconPosition="start"
-                label="Nathan Farley"
-                {...a11yProps(0)}
-                sx={{
-                  justifyContent: "flex-start",
-                  flexDirection: "row",
-                  fontSize: "16px",
-                  borderBottom: " 3px solid #ECEEF0",
-                }}
-              />
-
-              <Tab
-                icon={
-                  <Avatar
-                    alt="K"
-                    src="/static/images/avatar/1.jpg"
-                    sx={{ width: 35, height: 35 }}
-                  />
-                }
-                iconPosition="start"
-                label="Kendra Gonzales"
-                {...a11yProps(1)}
-                sx={{
-                  justifyContent: "flex-start",
-                  flexDirection: "row",
-                  fontSize: "16px",
-                }}
-              />
-
-              <Tab
-                icon={
-                  <Avatar
-                    alt="J"
-                    src="/static/images/avatar/1.jpg"
-                    sx={{ width: 35, height: 35 }}
-                  />
-                }
-                iconPosition="start"
-                label="James Bond"
-                {...a11yProps(2)}
-                sx={{
-                  justifyContent: "flex-start",
-                  flexDirection: "row",
-                  fontSize: "16px",
-                }}
-              />
-
-              <Tab
-                icon={
-                  <Avatar
-                    alt="J"
-                    src="/static/images/avatar/1.jpg"
-                    sx={{ width: 35, height: 35 }}
-                  />
-                }
-                iconPosition="start"
-                label="Jason Statham"
-                {...a11yProps(3)}
-                sx={{
-                  justifyContent: "flex-start",
-                  flexDirection: "row",
-                  fontSize: "16px",
-                }}
-              />
-
-              <Tab
-                icon={
-                  <Avatar
-                    alt="S"
-                    src="/static/images/avatar/1.jpg"
-                    sx={{ width: 35, height: 35 }}
-                  />
-                }
-                iconPosition="start"
-                label="Shu Qi"
-                {...a11yProps(4)}
-                sx={{
-                  justifyContent: "flex-start",
-                  flexDirection: "row",
-                  fontSize: "16px",
-                }}
-              />
-
-              <Tab
-                icon={
-                  <Avatar
-                    alt="S"
-                    src="/static/images/avatar/1.jpg"
-                    sx={{ width: 35, height: 35 }}
-                  />
-                }
-                iconPosition="start"
-                label="Item Six"
-                {...a11yProps(5)}
-                sx={{
-                  justifyContent: "flex-start",
-                  flexDirection: "row",
-                  fontSize: "16px",
-                }}
-              />
-
-              <Tab
-                icon={
-                  <Avatar
-                    alt="I"
-                    src="/static/images/avatar/1.jpg"
-                    sx={{ width: 35, height: 35 }}
-                  />
-                }
-                iconPosition="start"
-                label="Item Seven"
-                {...a11yProps(6)}
-                sx={{
-                  justifyContent: "flex-start",
-                  flexDirection: "row",
-                  fontSize: "16px",
-                }}
-              />
-
-              <Tab
-                icon={
-                  <Avatar
-                    alt="E"
-                    src="/static/images/avatar/1.jpg"
-                    sx={{ width: 35, height: 35 }}
-                  />
-                }
-                iconPosition="start"
-                label="Item Eight"
-                {...a11yProps(7)}
-                sx={{
-                  justifyContent: "flex-start",
-                  flexDirection: "row",
-                  fontSize: "16px",
-                }}
-              />
-            </Tabs>
-          </Grid>
-
-          <Grid item xs={8.5} sx={{ height: "100%" }}>
-            <TabPanel value={value} index={0}>
-              <Grid
-                container
-                sx={{ bgcolor: "", maxHeight: "100%" }}
-                justifyContent="space-between"
-              >
-                <Grid
-                  item
-                  xs
-                  container
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="flex-start"
-                  alignContent="center"
-                  spacing={1}
-                  sx={{ bgcolor: "", marginLeft: "0px" }}
-                >
-                  <Avatar
-                    alt="N"
-                    src="/static/images/avatar/1.jpg"
-                    sx={{
-                      width: 35,
-                      height: 35,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginRight: "5px",
-                    }}
-                  />
-                  <Typography>Nathan Farley</Typography>
-                </Grid>
-                <Grid item sx={{ bgcolor: "" }}>
-                  <Button>View Profile</Button>
-                </Grid>
-                <Divider sx={{ marginTop: "10px" }} />
-                <Grid
-                  item
-                  xs={12}
-                  sx={{ bgcolor: "", height: "650px", overflow: "scroll" }}
-                 />
-                <Divider />
-                <Grid item xs={12} sx={{ bgcolor: "", maxHeight: "44px" }}>
-                  <Box
-                    component="form"
-                    noValidate
-                    autoComplete="off"
-                    sx={{
-                      maxHeight: "44px",
-                      p: "2px 4px",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <InputBase
-                      sx={{ ml: 1, flex: 1 }}
-                      placeholder="Write a message"
-                      inputProps={{ "aria-label": "Write a message" }}
-                    />
-                    <IconButton
-                      type="submit"
-                      sx={{ p: "10px" }}
-                      aria-label="search"
-                    >
-                      <SendIcon />
-                    </IconButton>
-                  </Box>
-                </Grid>
-              </Grid>
-          <Grid item xs={8.5} sx={{ minHeight: "100%" }}>
-            <TabPanel value={value} index={0} maxHeight="379px" sx={{ minHeight: "100%", height:"100%", maxHeigh:"100%" }} height="739px">
-                  <Grid  container  direction="column" justifyContent="space-between" sx={{ bgcolor: "red", height:"100%" }} spacing={1}>
-                      <Grid item container direction='row' justifyContent='space-between' alignItems='center'  sx={{ bgcolor: "blue" }}>
-                          <Grid item  direction="row" display="flex" alignItems='center'  sx={{ bgcolor: "green" }}> 
-                              <Avatar
-                                  alt="N"
-                                  src="/static/images/avatar/1.jpg"
-                                  sx={{
-                                  width: 40,
-                                  height: 40,
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                  marginRight: "10px",
-                                  }}
-                              />
-                              <Typography display='flex' sx={{ fontSize: "18px" }}>
-                                    Nathan Farley
-                              </Typography>
-                          </Grid>
-                              <Button sx={{ fontSize: "14px" }}>View Profile</Button>
-                      </Grid>
-                      <Grid item >
-                      <Divider />
-                      </Grid >
-                      <Grid item sx={{ bgcolor: "yellow", maxHeight: '10%', height: '10%' , minHeight: "10%"}}> 
-
-                      </Grid>
-                      <Grid item >
-                      <Divider />
-                      </Grid >
-                      
-                      <Grid item justifyContent="center" sx={{ bgcolor: "pink", position: "absolute", width:'56%', top: '84%'}}>
-                      <Divider sx={{ marginTop: "10px", marginBottom: "10px"}}/>
-                      <Box
-                      
-    component="form"
-    noValidate
-    autoComplete="off"
-    sx={{
-      maxHeight: "20px",
-      p: "2px 4px",
-      display: "flex",
-      alignItems: "center",
-    }}
-  >
-    <InputBase
-      sx={{ ml: 1, flex: 1 }}
-      placeholder="Write a message"
-      inputProps={{ "aria-label": "Write a message" }}
-    />
-    <IconButton
-      type="submit"
-      sx={{ p: "10px" }}
-      aria-label="search"
-    >
-      <SendIcon />
-    </IconButton>
-  </Box>
-
-                      </Grid>
-
-
-
-
-                  </Grid>
-              
-
-              
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-              Item One
-            </TabPanel>
-            <TabPanel value={value} index={2}>
-              Item Three
-            </TabPanel>
-            <TabPanel value={value} index={3}>
-              Item Four
-            </TabPanel>
-            <TabPanel value={value} index={4}>
-              Item Five
-            </TabPanel>
-            <TabPanel value={value} index={5}>
-              Item Six
-            </TabPanel>
-            <TabPanel value={value} index={6}>
-              Item Seven
-            </TabPanel>
-            <TabPanel value={value} index={7}>
-              Item Eight
-            </TabPanel>
-          </Grid>
-        </Grid>
-      </Paper>
-
-
-*/

@@ -100,7 +100,6 @@ const ConnectedAvatar: FC = () => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [verificationDialogOpen, setVerificationDialogOpen] =
     useState<boolean>(false);
-  const router: NextRouter = useRouter();
   const feeData = useFeeData({ enabled: false, watch: false });
   const accountData = useAccount()
 
@@ -125,59 +124,6 @@ const ConnectedAvatar: FC = () => {
 
   const open = Boolean(anchorEl);
 
-  const { data: signer } = useSigner()
-
-  const daiWrite = useDeprecatedContractWrite({
-    addressOrName: DAI_ADDRESS,
-    contractInterface: new ethers.utils.Interface(DaiInterface).format(FormatTypes.full).splice(12, 1),
-    functionName: "mint",
-    chainId: CHAIN_ID,
-    args: [userAddress, String(100 * (10**18))],
-    signerOrProvider: signer,
-    overrides: {
-      gasLimit: ethers.BigNumber.from("2000000"),
-      gasPrice: 90000000000,
-      from: userAddress
-    },
-    onMutate({ args, overrides }) {
-   
-    },
-    onError(error, variables, context) {
-   
-    },
-    onSettled(data, error, variables, context) {
-    
-    },
-  });
-
-  const dai_balanceOf = useContractRead({
-    addressOrName: DAI_ADDRESS,
-    contractInterface: DaiInterface,
-    functionName: "balanceOf",
-    enabled: false,
-    watch: false,
-    chainId: CHAIN_ID,
-    args: [userAddress],
-    onSuccess(data) { },
-    onError: (error: Error) => { },
-  });
-
-  const dispatch = useDispatch();
-
-  const handleOnAddFunds = async () => {
-    // await daiContractWritePrepare.refetch()
-
-    await daiWrite.write()
-
-    const result = await dai_balanceOf.refetch();
-
-    dispatch(
-      userERC20BalanceChanged({
-        [DAI_ADDRESS]: Number(result.data._hex),
-      })
-    );
-  };
-
   return (
     <StyledBadge
       connected={connected}
@@ -186,8 +132,6 @@ const ConnectedAvatar: FC = () => {
       variant="dot"
     >
       <IconButton onClick={handlePopoverOpen}>
-
-
         <Avatar
           sx={{ cursor: "pointer", width: 35, height: 35 }}
           alt="Remy Sharp"
@@ -228,20 +172,9 @@ const ConnectedAvatar: FC = () => {
                     Leslie Alexander
                   </Typography>
                 </Box>
-
-
               </Stack>
             </Box>
 
-            <Stack my={1} direction="row" alignItems="center">
-              <Button size="small" variant="contained" onClick={handleOnAddFunds}>
-                Add funds
-              </Button>
-
-              <Button size="small" variant="contained" onClick={() => setVerificationDialogOpen(true)}>
-                Register
-              </Button>
-            </Stack>
           </CardContent>
 
           <List disablePadding>
@@ -330,7 +263,9 @@ const ConnectedAvatar: FC = () => {
         </Box>
       </Popover>
 
-      <VerificationDialog open={verificationDialogOpen} handleClose={() => setVerificationDialogOpen(false)} />
+      <VerificationDialog open={verificationDialogOpen} handleClose={(event, reason) => {
+        setVerificationDialogOpen(false)
+      }} />
     </StyledBadge>
   );
 };

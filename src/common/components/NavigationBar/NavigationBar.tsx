@@ -33,7 +33,9 @@ import {
   useBalance,
   useConnect,
   useContractRead,
+  useDeprecatedContractWrite,
   useFeeData,
+  useSigner,
 } from "wagmi";
 import {
   DAI_ADDRESS,
@@ -48,7 +50,7 @@ import {
 } from "../../../abis";
 
 import { hexToDecimal } from "../../helper";
-import { Result } from "ethers/lib/utils";
+import { FormatTypes, Result } from "ethers/lib/utils";
 import VerificationDialog from "../../../modules/user/components/VerificationDialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -57,8 +59,9 @@ import {
   userLensDataStored,
   selectUserAddress,
   selectLens,
+  userERC20BalanceChanged,
 } from "../../../modules/user/userReduxSlice";
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import {
   AddCircleOutline,
   Book,
@@ -81,30 +84,49 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
 
-/**
- * Elijah Hampton
- * @returns JSX.Element The NavigationBar component
- */
+
 const NavigationBar: FC = (): JSX.Element => {
   const classes = useStyles();
   const router = useRouter();
+  const connectData = useConnect();
+  const accountData = useAccount();
   const dispatch = useDispatch();
+  const { data: signer } = useSigner()
+  const feeData = useFeeData({
+    enabled: false,
+    watch: false
+  });
+  const ethBalanceData = useBalance({
+    addressOrName: accountData ? accountData.address : String(0),
+    enabled: false,
+    watch: false
+  });
 
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [gasPrice, setGasPrice] = useState<string>("0");
   const [verificationDialogOpen, setVerificationDialogOpen] =
     useState<boolean>(false);
   const [lensProfileId, setLensProfileId] = useState<Result | any>(0);
+  const [modelopen, setmodelOpen] = React.useState(false);
+  const [createMenuAnchorEl, setCreateMenuAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+  const [helpMenuAnchorEl, setHelpMenuAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
+
   const userAddress = useSelector(selectUserAddress);
   const connected = useSelector(selectUserConnectionStatus);
   const userLensProfile = useSelector(selectLens)
-  
-  const connectData = useConnect();
-  const accountData = useAccount();
 
   const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     variables: {
       userAddress,
     }
   });
+
+  const open = Boolean(anchorEl);
+  const helpMenuIsOpen = Boolean(helpMenuAnchorEl);
+  const createMenuIsOpen = Boolean(createMenuAnchorEl);
 
   //getProfile
   const lensHub_getProfile = useContractRead({
@@ -149,7 +171,7 @@ const NavigationBar: FC = (): JSX.Element => {
     onSuccess: (data: Result) => {
       setLensProfileId(hexToDecimal(data._hex));
     },
-    onError: (error) => {},
+    onError: (error) => { },
   });
 
   const dai_balanceOf = useContractRead({
@@ -160,39 +182,79 @@ const NavigationBar: FC = (): JSX.Element => {
     watch: false,
     chainId: CHAIN_ID,
     args: [userAddress],
-    onSuccess(data) {},
-    onError: (error: Error) => {},
+    onSuccess(data) { },
+    onError: (error: Error) => { },
   });
 
-  const ethBalanceData = useBalance({
-    addressOrName: accountData ? accountData.address : String(0),
-    enabled: false,
-    watch: false
+
+  const daiWrite = useDeprecatedContractWrite({
+    addressOrName: DAI_ADDRESS,
+    contractInterface: new ethers.utils.Interface(DaiInterface).format(FormatTypes.full).splice(12, 1),
+    functionName: "mint",
+    chainId: CHAIN_ID,
+    args: [userAddress, String(100 * (10 ** 18))],
+    signerOrProvider: signer,
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+      from: userAddress
+    },
+    onMutate({ args, overrides }) {
+
+    },
+    onError(error, variables, context) {
+
+    },
+    onSettled(data, error, variables, context) {
+
+    },
   });
 
-  const [helpMenuAnchorEl, setHelpMenuAnchorEl] = useState<null | HTMLElement>(
-    null
-  );
-  const helpMenuIsOpen = Boolean(helpMenuAnchorEl);
+  useEffect(() => {
+    if (accountData?.status == 'connected') {
+      ethBalanceData.refetch()
+    }
+  }, [accountData?.status])
 
-  const handleOnClickHelpIcon = (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    setHelpMenuAnchorEl(event.currentTarget);
-  };
+  useEffect(() => {
+    if (lensProfileId !== 0) {
+      lensHub_getProfile.refetch({
+        throwOnError: true,
+      });
+    }
+  }, [lensProfileId]);
 
-  const handleOnCloseHelpMenu = () => {
-    setHelpMenuAnchorEl(null);
-  };
+  useEffect(() => {
+    if (accountData.status == 'connected') {
+      handleOnIsConnected();
+    } else {
+      dispatch(
+        userWalletDataStored({
+          balance: 0,
+          erc20Balance: {},
+          connector: null,
+          address: ZERO_ADDRESS,
+          connected: false,
+        })
+      );
+    }
+  }, [accountData.status]);
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  useEffect(() => {
+    if (!feeData.isLoading && feeData.data) {
+      setGasPrice(feeData.data.formatted.gasPrice);
+    }
+  }, [feeData.isLoading]);
+
+  useEffect(() => {
+    feeData.refetch()
+  }, []);
+
+  useEffect(() => {
+    if (accountData.isConnected) {
+      handlesClose();
+    }
+  }, [accountData.isConnected]);
 
   const onFetchLensProfileId = () => {
     if (accountData.address && accountData.address != ZERO_ADDRESS) {
@@ -207,17 +269,9 @@ const NavigationBar: FC = (): JSX.Element => {
             setLensProfileId(0);
           }
         })
-        .catch((error) => {});
+        .catch((error) => { });
     }
   };
-
-  useEffect(() => {
-    if (lensProfileId !== 0) {
-      lensHub_getProfile.refetch({
-        throwOnError: true,
-      });
-    }
-  }, [lensProfileId]);
 
   async function handleOnIsConnected() {
     let address: string = "Please connect a wallet",
@@ -237,7 +291,7 @@ const NavigationBar: FC = (): JSX.Element => {
 
     const result = await dai_balanceOf.refetch();
     if (result.isSuccess) {
-      daiBalance = hexToDecimal(dai_balanceOf.data?._hex)
+      daiBalance = Number(dai_balanceOf.data?._hex)
     } else {
       daiBalance = 0;
     }
@@ -248,51 +302,31 @@ const NavigationBar: FC = (): JSX.Element => {
         erc20Balance: {
           [DAI_ADDRESS]: daiBalance,
         },
-        connector: { name: String(accountData.connector.name), network: await accountData.connector.getChainId() } ,
+        connector: { name: String(accountData.connector.name), network: await accountData.connector.getChainId() },
         address,
         connected: accountData.status,
       })
     );
   }
 
+  const handleOnClickHelpIcon = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    setHelpMenuAnchorEl(event.currentTarget);
+  };
 
-  useEffect(() => {
-    if (accountData.status == 'connected') {
-      handleOnIsConnected();
-    } else {
-      dispatch(
-        userWalletDataStored({
-          balance: 0,
-          erc20Balance: {},
-          connector: null,
-          address: ZERO_ADDRESS,
-          connected: false,
-        })
-      );
-    }
-  }, [accountData.status]);
+  const handleOnCloseHelpMenu = () => {
+    setHelpMenuAnchorEl(null);
+  };
 
-  const feeData = useFeeData({
-    enabled: false,
-    watch: false
-  });
 
-  const [gasPrice, setGasPrice] = useState<string>("0");
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
-  useEffect(() => {
-    if (!feeData.isLoading && feeData.data) {
-      setGasPrice(feeData.data.formatted.gasPrice);
-    }
-  }, [feeData.isLoading]);
-
-  useEffect(() => {
-    feeData.refetch()
-  }, []);
-
-  const [modelopen, setmodelOpen] = React.useState(false);
-  const [createMenuAnchorEl, setCreateMenuAnchorEl] =
-    React.useState<null | HTMLElement>(null);
-  const createMenuIsOpen = Boolean(createMenuAnchorEl);
   const handleOnClickCreateIcon = (event: React.MouseEvent<HTMLElement>) => {
     setCreateMenuAnchorEl(event.currentTarget);
   };
@@ -308,29 +342,35 @@ const NavigationBar: FC = (): JSX.Element => {
     setmodelOpen(false);
   };
 
-  useEffect(() => {
-    if (accountData.isConnected) {
-      handlesClose();
-    }
-  }, [accountData.isConnected]);
+  const handleOnAddFunds = async () => {
+    await daiWrite.write()
+
+    const result = await dai_balanceOf.refetch();
+
+    dispatch(
+      userERC20BalanceChanged({
+        [DAI_ADDRESS]: Number(result.data._hex),
+      })
+    );
+  };
 
   return (
     <React.Fragment>
       <AppBar
         variant="outlined"
         sx={{
-          width: router.pathname.includes('/view/market') || router.pathname == '/' ? `calc(100% - ${320}px)` : '100%', 
+          width: router.pathname.includes('/view/market') || router.pathname == '/' ? `calc(100% - ${320}px)` : '100%',
           ml: `${320}px`,
           bgcolor: "#fff",
           border: 'none',
           borderBottom: "1px solid #ddd !important",
-         
+
         }}
       >
         <Toolbar className={classes.toolbar}>
           <Container
             maxWidth="xl"
-            sx={{  display: "flex", flexDirection: "column", bgcolor: "#fff" }}
+            sx={{ display: "flex", flexDirection: "column", bgcolor: "#fff" }}
           >
             <Grid
               width="100%"
@@ -342,73 +382,14 @@ const NavigationBar: FC = (): JSX.Element => {
               justifyContent="space-between"
             >
               <Grid item sx={{ display: "flex", alignItems: "center" }}>
-                <Stack direction="row" alignItems="center" sx={{  }}>
+                <Stack direction="row" alignItems="center" sx={{}}>
                   <img
                     className={classes.clickableBrand}
                     src="/assets/logo.svg"
                     style={{ width: 40, height: 40 }}
                   />
                 </Stack>
-             
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  spacing={1.5}
-                  ml={1.7}
-                >
-                  <Link href="/">
-                    <Typography
-                      variant="button"
-                      fontSize={14}
-                      component={Button}
-                      disableRipple
-                      disableFocusRipple
-                      disableTouchRipple
-                      color={
-                        router.pathname == "/" ? "primary" : "text.secondary"
-                      }
-                      sx={{ fontWeight: "bold" }}
-                    >
-                      Markets
-                    </Typography>
-                  </Link>
 
-                  {accountData.isConnected && (
-                    <Link href="/dashboard">
-                      <Typography
-                        component={Button}
-                        fontSize={14}
-                        variant="button"
-                        color={
-                          router.pathname == "/dashboard"
-                            ? "primary"
-                            : "text.secondary"
-                        }
-                        fontWeight="bold"
-                      >
-                        Dashboard
-                      </Typography>
-                    </Link>
-                  )}
-
-                  {accountData.isConnected && (
-                    <Link href="/messenger">
-                      <Typography
-                        component={Button}
-                        fontSize={14}
-                        variant="button"
-                        color={
-                          router.pathname == "/messenger"
-                            ? "primary"
-                            : "text.secondary"
-                        }
-                        fontWeight="bold"
-                      >
-                        Messenger
-                      </Typography>
-                    </Link>
-                  )}
-                </Stack>
               </Grid>
 
               <Grid
@@ -420,18 +401,64 @@ const NavigationBar: FC = (): JSX.Element => {
                 }}
               >
                 <Stack direction="row" alignItems="center" spacing={1}>
-                  <>
-                    <Tooltip title="Create">
+                  {
+                    userData.data?.handle && (
                       <Chip
-                        clickable
-                        label="Create"
                         sx={{
-                          fontWeight: "600",
+                          fontWeight: "medium",
                           border: "1px solid #ddd",
                           fontSize: "11px",
                           bgcolor: "rgb(245, 245, 245)",
                         }}
-                        size="medium"
+                        icon={
+                          <HelpOutline
+                            fontSize="small"
+                            sx={{ color: "rgb(158, 158, 166)" }}
+                          />
+                        }
+                        label="Register"
+                        size='small'
+                        onClick={() => setVerificationDialogOpen(true)}
+                      />
+                    )
+                  }
+
+                  {
+                    accountData?.status === 'connected' && (
+                      <Chip
+                        sx={{
+                          fontWeight: "medium",
+                          border: "1px solid #ddd",
+                          fontSize: "11px",
+                          bgcolor: "rgb(245, 245, 245)",
+                        }}
+                        icon={
+                          <HelpOutline
+                            fontSize="small"
+                            sx={{ color: "rgb(158, 158, 166)" }}
+                          />
+                        }
+                        label="Add Funds"
+                        size='small'
+                        onClick={handleOnAddFunds}
+                      />
+                    )
+                  }
+
+
+
+                  <>
+                    <Tooltip title="Create">
+                      <Chip
+                        size='small'
+                        clickable
+                        label="Create"
+                        sx={{
+                          fontWeight: "medium",
+                          border: "1px solid #ddd",
+                          fontSize: "11px",
+                          bgcolor: "rgb(245, 245, 245)",
+                        }}
                         onClick={handleOnClickCreateIcon}
                         aria-controls={
                           createMenuIsOpen ? "create-menu" : undefined
@@ -523,26 +550,28 @@ const NavigationBar: FC = (): JSX.Element => {
                       </List>
                     </Menu>
                   </>
+
+
+
                   <>
-                      <Chip
-                        sx={{
-                          fontWeight: "600",
-                          border: "1px solid #ddd",
-                          fontSize: "11px",
-                          bgcolor: "rgb(245, 245, 245)",
-                        }}
-                        icon={
-                          <HelpOutline
-                            fontSize="small"
-                            sx={{ color: "rgb(158, 158, 166)" }}
-                          />
-                        }
-                        label="Help"
-                        
-                       // size="medium"
-                     //   onClick={handleOnClickHelpIcon}
-                      />
-               
+                    <Chip
+                      sx={{
+                        fontWeight: "medium",
+                        border: "1px solid #ddd",
+                        fontSize: "11px",
+                        bgcolor: "rgb(245, 245, 245)",
+                      }}
+                      icon={
+                        <HelpOutline
+                          fontSize="small"
+                          sx={{ color: "rgb(158, 158, 166)" }}
+                        />
+                      }
+                      label="Help"
+                      size='small'
+                      onClick={handleOnClickHelpIcon}
+                    />
+
                     <Menu
                       anchorEl={helpMenuAnchorEl}
                       id="help-menu"
@@ -630,6 +659,8 @@ const NavigationBar: FC = (): JSX.Element => {
                       onClick={handleClickOpen}
                     />
                   )}
+
+
                 </Stack>
               </Grid>
             </Grid>
@@ -673,9 +704,7 @@ const NavigationBar: FC = (): JSX.Element => {
             </DialogTitle>
 
             <div>
-
               {connectData.connectors.slice(-2, 1).map((connector) => (
-
                 <Button
                   variant="outlined"
                   disabled={!connector.ready}
@@ -734,17 +763,12 @@ const NavigationBar: FC = (): JSX.Element => {
                   OR
                 </Typography>
               </Divider>
-
-
               {connectData.connectors.slice(1).map((connector) => (
-
                 <Button
                   variant="outlined"
                   disabled={!connector.ready}
                   key={connector.id}
-
                   onClick={() => connectData.connect({ connector })}
-
                   sx={{
                     paddingLeft: "24px",
                     paddingRight: "122px",
@@ -780,10 +804,7 @@ const NavigationBar: FC = (): JSX.Element => {
                   </Typography>
                 </Button>
               ))}
-
-
               {connectData.error && <div>{connectData.error.message}</div>}
-
             </div>
           </DialogContent>
         </Dialog>

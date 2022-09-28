@@ -276,7 +276,7 @@ const ExplorePage: NextPage = () => {
       !servicesByCreatorQuery.loading &&
       servicesByCreatorQuery.data
     ) {
-      setCreatedServices([ ...servicesByCreatorQuery.data.services ]);
+      setCreatedServices([...servicesByCreatorQuery.data.services]);
     }
   }, [servicesByCreatorQuery.loading])
 
@@ -284,38 +284,38 @@ const ExplorePage: NextPage = () => {
     switch (state.persona) {
       case Persona.HIRING:
         return contractsHiring.map((item) => {
-          return <JobDisplay table data={item} />
+          return <JobDisplay data={item} />
         })
       case Persona.WORKING:
-        return contractWorking.map((item) => {
-          return <JobDisplay table data={item} />
-        })
+        return contractWorking?.length > 0 ?
+          contractWorking.map((item) => {
+            return <JobDisplay data={item} />
+          }) :
+          <Typography p={2} color='text.secondary'>
+            Sorry, no results found.
+          </Typography>
       case Persona.CATALOG: //services only but for now render hiring and change contract option to hiring
-      setState({
-        ...state,
-        persona: Persona.HIRING
-      })
-      
-      return contractsHiring.map((item) => {
-        return <JobDisplay table data={item} />
-      })
+        setState({
+          ...state,
+          persona: Persona.HIRING
+        })
 
-
+        return contractsHiring.map((item) => {
+          return <JobDisplay data={item} />
+        })
       default:
     }
   }
-
-  console.log(servicesHired)
 
   const renderServices = () => {
     switch (state.persona) {
       case Persona.HIRING:
         return servicesHired.map((item) => {
-          return <ServiceCard  id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+          return <ServiceCard table id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
       case Persona.WORKING:
         return servicesWorking.map((item) => {
-          return <ServiceCard  id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+          return <ServiceCard table id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
       case Persona.CATALOG:
         return createdServices.map((item) => {
@@ -329,25 +329,22 @@ const ExplorePage: NextPage = () => {
     <Container
       maxWidth="xl"
       sx={{
-        height: "100%",
         overflow: "scroll",
         padding: "0px 0px !important",
       }}
     >
-      {/* <Box
+      <Box
         sx={{
-          //mt: 12,
           width: "100%",
           height: 120,
-
-          position: "relative",
+          px: 2.5
         }}
       >
         <img
           src="/assets/images/project_management.jpg"
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          style={{ textAlign: 'center', width: "100%", height: "100%", objectFit: "cover" }}
         />
-      </Box>*/}
+      </Box>
 
       <Box
         sx={{
@@ -357,133 +354,129 @@ const ExplorePage: NextPage = () => {
           backgroundColor: 'rgba(255, 255, 255, 0.2)'
         }}
       >
-        <Box sx={{ bgcolor: 'white', px: 5, py: 2 }}>
-        <Container maxWidth='lg' sx={{ width: "100%", my: 2, px: 5 }}>
+        <Box sx={{ bgcolor: 'white', py: 2 }}>
+          <Container maxWidth='lg' sx={{ width: "100%", my: 2, px: 5 }}>
 
-        <Stack
-          my={2}
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Box>
-          <Typography
-            fontWeight="600"
-            fontSize={24}
-          >
-            Work Dashboard
-          </Typography>
-          <Typography variant='body2' color='text.secondary' fontWeight='medium'>
-            The homeplace for asynchronous work between users and DAOs
-          </Typography>
-          </Box>
+            <Stack
+              my={2}
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Box>
+                <Typography
+                  fontWeight="600"
+                  fontSize={24}
+                >
+                  Work Dashboard
+                </Typography>
+                <Typography variant='body2' color='text.secondary' fontWeight='medium'>
+                  The homeplace for asynchronous work between users and DAOs
+                </Typography>
+              </Box>
 
 
-          
-        </Stack>
 
-        <Box   display='flex' alignItems='center' justifyContent='space-between'>
-          <Stack spacing={1} direction="row" alignItems="center">
-            <Chip
-              variant='outlined'
-              onClick={() => setContractViewPersona(ContractsViewingPersona.CONTRACTS)}
-              sx={{
-                fontSize: 12,
-                fontWeight: "medium",
-                border: '1px solid #ddd',
-                color:
-                  contractViewPersona === ContractsViewingPersona.CONTRACTS ? "white" : "black",
-                bgcolor: (theme) =>
-                  contractViewPersona === ContractsViewingPersona.CONTRACTS
-                    ? theme.palette.primary.dark
-                    : "transparent",
-              }}
-              clickable
-              label="Contracts"
-            />
-            <Chip
-              variant='outlined'
-              onClick={() => setContractViewPersona(ContractsViewingPersona.SERVICES)}
-              sx={{
-                fontSize: 12,
-                fontWeight: "medium",
-                border: '1px solid #ddd',
-                color:
-                  contractViewPersona === ContractsViewingPersona.SERVICES ? "white" : "black",
-                bgcolor: (theme) =>
-                  contractViewPersona === ContractsViewingPersona.SERVICES
-                    ? theme.palette.primary.dark
-                    : "transparent",
-              }}
-              clickable
-              label="Services"
-            />
-          </Stack>
+            </Stack>
 
-          <Stack spacing={1} direction="row" alignItems="center">
-            <Button sx={{ height: 25, borderRadius: 1 }} onClick={() => setState({ ...state, persona: Persona.WORKING })} size='small' variant={state.persona === Persona.WORKING ? 'contained' : 'outlined'}>
-              Working
-            </Button>
-            <Button sx={{ height: 25, borderRadius: 1 }} onClick={() => setState({ ...state, persona: Persona.HIRING })} size='small' variant={state.persona === Persona.HIRING ? 'contained' : 'outlined'}>
-              Hiring For
-            </Button>
-            {
-              contractViewPersona == ContractsViewingPersona.SERVICES && (
-                <Button
-                  sx={{ height: 25, borderRadius: 1 }}
-                  onClick={() => setState({ ...state, persona: Persona.CATALOG })}
-                  size='small'
-                  variant={state.persona === Persona.CATALOG ? 'contained' : 'outlined'}>
-                  My Service Catalog
+            <Box display='flex' alignItems='center' justifyContent='space-between'>
+              <Stack spacing={1} direction="row" alignItems="center">
+                <Chip
+                  variant='outlined'
+                  onClick={() => setContractViewPersona(ContractsViewingPersona.CONTRACTS)}
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: "medium",
+                    border: '1px solid #ddd',
+                    color:
+                      contractViewPersona === ContractsViewingPersona.CONTRACTS ? "white" : "black",
+                    bgcolor: (theme) =>
+                      contractViewPersona === ContractsViewingPersona.CONTRACTS
+                        ? theme.palette.primary.dark
+                        : "transparent",
+                  }}
+                  clickable
+                  label="Contracts"
+                />
+                <Chip
+                  variant='outlined'
+                  onClick={() => setContractViewPersona(ContractsViewingPersona.SERVICES)}
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: "medium",
+                    border: '1px solid #ddd',
+                    color:
+                      contractViewPersona === ContractsViewingPersona.SERVICES ? "white" : "black",
+                    bgcolor: (theme) =>
+                      contractViewPersona === ContractsViewingPersona.SERVICES
+                        ? theme.palette.primary.dark
+                        : "transparent",
+                  }}
+                  clickable
+                  label="Services"
+                />
+              </Stack>
+
+              <Stack spacing={1} direction="row" alignItems="center">
+                <Button sx={{ height: 25, borderRadius: 1 }} onClick={() => setState({ ...state, persona: Persona.WORKING })} size='small' variant={state.persona === Persona.WORKING ? 'contained' : 'outlined'}>
+                  Working
                 </Button>
-              )
-            }
+                <Button sx={{ height: 25, borderRadius: 1 }} onClick={() => setState({ ...state, persona: Persona.HIRING })} size='small' variant={state.persona === Persona.HIRING ? 'contained' : 'outlined'}>
+                  Hiring For
+                </Button>
+                {
+                  contractViewPersona == ContractsViewingPersona.SERVICES && (
+                    <Button
+                      sx={{ height: 25, borderRadius: 1 }}
+                      onClick={() => setState({ ...state, persona: Persona.CATALOG })}
+                      size='small'
+                      variant={state.persona === Persona.CATALOG ? 'contained' : 'outlined'}>
+                      My Service Catalog
+                    </Button>
+                  )
+                }
 
-          </Stack>
-        </Box>
-        </Container>
-        </Box>
-<Divider />
-        <Container maxWidth='lg' sx={{ height: '100%', width: "100%", my: 2, px: 5 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={8}>
-            <Box py={1} display='flex' alignItems='center' justifyContent='space-between'>
-              <Typography fontWeight='bold'>
-                Your incoming gigs
-              </Typography>
-
-              <Stack spacing={1} direction='row' alignItems='center'>
-              <SearchBar placeholder='Search...' />
-              <IconButton size='small'>
-              <TableRows fontSize='small' />
-              </IconButton>
-
-              <IconButton size='small'>
-              <ViewModule fontSize='small' />
-              </IconButton>
-                
-                
-                <IconButton size='small'>
-              <Refresh fontSize='small' />
-            </IconButton>
               </Stack>
             </Box>
-            <Box sx={{}}>
-          <Stack spacing={2}>
-            {
-              contractViewPersona === ContractsViewingPersona.CONTRACTS ? renderContracts() : renderServices()
-            }
-          </Stack>
+          </Container>
         </Box>
+        <Divider />
+        <Container maxWidth='lg' sx={{ height: '100%', width: "100%", my: 2, px: 5 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Box py={1} display='flex' alignItems='center' justifyContent='space-between'>
+                <Typography fontWeight='bold'>
+                  Your incoming gigs
+                </Typography>
+
+                <Stack spacing={1} direction='row' alignItems='center'>
+                  <SearchBar placeholder='Search...' />
+                  <IconButton size='small'>
+                    <TableRows fontSize='small' />
+                  </IconButton>
+
+                  <IconButton size='small'>
+                    <ViewModule fontSize='small' />
+                  </IconButton>
+
+
+                  <IconButton size='small'>
+                    <Refresh fontSize='small' />
+                  </IconButton>
+                </Stack>
+              </Box>
+              <Box sx={{}}>
+                <Grid container direction='row' spacing={2}>
+                  {
+                    contractViewPersona === ContractsViewingPersona.CONTRACTS ? renderContracts() : renderServices()
+                  }
+                </Grid>
+              </Box>
             </Grid>
 
-            <Grid xs={4} item sx={{ display: 'flex' }}>
-              <Paper variant='outlined' sx={{ height: '100%', flexGrow: 1}}>
 
-              </Paper>
-            </Grid>
           </Grid>
-        {/*  <Table sx={{ width: "100%" }}>
+          {/*  <Table sx={{ width: "100%" }}>
             <MuiTableHead
               sx={{
                 width: "100% !important",

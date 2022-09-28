@@ -121,7 +121,7 @@ const Market = () => {
                 <Grid item xs={4} key={service.id}>
                   <ServiceCard
                   purchase={false}
-                  table={false}
+                  table={true}
                     id={service.id}
                     data={service}
                   />

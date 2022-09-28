@@ -61,7 +61,7 @@ import { generatePinataData, pinJSONToIPFSPinata } from "../../../../common/ipfs
 
 interface IVerificationDialogProps {
   open: boolean;
-  handleClose: () => void;
+  handleClose: (event: any, reason: any) => void;
 }
 
 const ITEM_HEIGHT = 48;
@@ -78,7 +78,7 @@ const MenuProps = {
 const selectedLanguages = ["English", "Spanish"];
 
 const VerificationDialog: FC<IVerificationDialogProps> = ({
-  open = true,
+  open,
   handleClose,
 }) => {
   const [lensProfileId, setLensProfileId] = useState<number>(0);
@@ -158,39 +158,6 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     onError: (error) => { },
   });
 
-  const { config: networkManager_registerConfig, refetch: refetchRegisterConfig, data: registerPreparationData } = usePrepareContractWrite({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    enabled: false,
-    contractInterface: NetworkManagerInterface,
-    functionName: "register",
-    args: [
-      {
-        to: NETWORK_MANAGER_ADDRESS,
-        handle: chosenLensHandle,
-        imageURI:
-          "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
-        followModule: ZERO_ADDRESS,
-        followModuleInitData: [],
-        followNFTURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
-      },
-      updatedPtr,
-    ],
-    overrides: {
-      gasLimit: ethers.BigNumber.from("9000000"),
-      gasPrice: 90000000000,
-    },
-    onSuccess(data) {
-      setRegistrationButtonEnabled(true)
-    },
-    onError(err) {
-
-      setRegistrationButtonEnabled(false)
-    },
-  });
-
- 
-
-
   const { write, isError, error, data: registerData, isSuccess } = useContractWrite({
     mode: "recklesslyUnprepared",
     addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -242,10 +209,6 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     },
   });
 
-
-  useEffect(() => {
-    refetchRegisterConfig()
-  }, [page])
 
 
   const handleOnVerify = async () => {
@@ -376,7 +339,7 @@ return (
     maxWidth="sm"
     sx={{ height: '100vh' }}
     open={open}
-    onClose={handleClose}
+    onClose={(event, reason) => handleClose(event, reason)}
   >
     {registrationLoading ? <LinearProgress variant="indeterminate" /> : null}
     <DialogContent
@@ -587,7 +550,7 @@ return (
 
       <DialogActions>
         {page === 0 ? (
-          <Button onClick={handleClose}>Close</Button>
+          <Button onClick={() => handleClose("","")}>Close</Button>
         ) : (
           <Button disabled={registrationLoading} onClick={() => setPage(0)}>
             Back

@@ -86,6 +86,10 @@ const contractDetailsSecondaryTypographyProps = {
   fontSize: 12,
 };
 
+enum MessageType {
+  ContractProposal
+}
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 /**
  *
@@ -94,7 +98,7 @@ const contractDetailsSecondaryTypographyProps = {
  * @dev TODO: Add modal for inputting accepted solution pointer
  */
 const ViewContract: NextPage<any> = () => {
-  const { proposalPayout, proposalMessage, error } = data;
+
 
   const classes = useStyles();
   const { address, connector } = useAccount();
@@ -105,7 +109,7 @@ const ViewContract: NextPage<any> = () => {
   const [contractData, setContractData] = useState<any>({});
   const [contractMetadata, setContractMetadata] = useState<any>({});
   const [metadataString, setMetadataString] = useState("");
-  const [acceptedSolutionPtr, setAcceptedSolutionPtr] = useState<string>("");
+  const [acceptedSolutionPtr, setAcceptedSolutionPtr] = useState<string>("dsfsdfsdfsdf");
   const [reviews, setReviews] = useState<any>([]);
   const [sendMessageopen, setSendmessageOpen] = React.useState(false);
   const [data, setData] = useState({
@@ -113,7 +117,9 @@ const ViewContract: NextPage<any> = () => {
     proposalMessage: "",
     error: null,
   });
+  const { proposalPayout, proposalMessage, error } = data;
 
+  //convert to gql
   const networkManager_getContractData = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
@@ -216,28 +222,6 @@ const ViewContract: NextPage<any> = () => {
     },
   });
 
-  const networkManager_grantProposalRequestPrepare = usePrepareContractWrite({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    contractInterface: NetworkManagerInterface,
-    functionName: "grantProposalRequest",
-    enabled: true,
-    args: [contractId, "0xBA77D43eE401A4C4a229C3649CCeDBfE2B517208", 100],
-    overrides: {
-      gasLimit: ethers.BigNumber.from("2000000"),
-      gasPrice: 90000000000,
-    },
-    onSettled(data, error) {
-      if (error) {
-      } else {
-        contractByIdQuery.refetch();
-      }
-    },
-  });
-
-  const networkManager_grantProposalRequest = useContractWrite(
-    networkManager_grantProposalRequestPrepare.config
-  );
-
   const networkManager_releaseContractPrepare = usePrepareContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
@@ -260,26 +244,18 @@ const ViewContract: NextPage<any> = () => {
     networkManager_releaseContractPrepare.config
   );
 
-  const networkManager_resolveContractPrepare = usePrepareContractWrite({
+  const { write: resolveContract } = useContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "resolveContract",
+    chainId: CHAIN_ID,
     args: [contractId, acceptedSolutionPtr],
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
     },
-    onSettled(data, error) {
-      if (error) {
-      } else {
-        contractByIdQuery.refetch();
-      }
-    },
   });
 
-  const networkManager_resolveContract = useContractWrite(
-    networkManager_releaseContractPrepare.config
-  );
 
   const handleOpen = () => setSendmessageOpen(true);
   const handleClose = () => setSendmessageOpen(false);
@@ -315,13 +291,14 @@ const ViewContract: NextPage<any> = () => {
       });
 
       await addDoc(collection(db, "messages", id, "chat"), {
-        text: "",
+        text: proposalMessage,
         from: user1,
         to: user2,
         createdAt: Timestamp.fromDate(new Date()),
+        data: { proposalPayout, proposalMessage, contractId: contractId, proposedWorker: address },
         proposalPayout,
         proposalMessage,
-        type: "Proposal",
+        type: MessageType.ContractProposal,
       });
 
       setData({
@@ -367,7 +344,7 @@ const ViewContract: NextPage<any> = () => {
               color="primary"
               disableElevation
               disableRipple
-              onClick={() => networkManager_resolveContract.write()}
+              onClick={resolveContract}
             >
               Accept Work
             </Button>
@@ -760,7 +737,7 @@ const ViewContract: NextPage<any> = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ minHeight: "100vh" }}>
+    <Container maxWidth="lg">
       <Grid
         container
         direction="row"

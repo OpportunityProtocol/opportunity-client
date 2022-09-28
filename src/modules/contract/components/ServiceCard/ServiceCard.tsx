@@ -4,6 +4,7 @@ import {
   Card,
   Avatar,
   CardContent,
+  Grid,
   CardMedia,
   Button,
   Box,
@@ -487,7 +488,7 @@ const [resolveServiceDialogIsOpen, setResolveServiceDialogIsOpen] =
   return (
     table ?
     (
-    <>
+    <Grid item xs={12} md={6} lg={4}>
       <TableRow
         onClick={
           userAddress
@@ -495,13 +496,12 @@ const [resolveServiceDialogIsOpen, setResolveServiceDialogIsOpen] =
             : () => {}
         }
         component={Paper}
-      //  elevation={0}
-        //variant="outlined"
         sx={{
-          boxShadow:  '0px 1px 3px 0px #eee, 0px 1px 1px 0px #eee, 0px 2px 1px -1px #eee',
-        //  border: '1px solid #ddd',
+          boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+          WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+          MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
           width: "100%",
-          minWidth: "100% !important",
+        //  minWidth: "100% !important",
           display: "flex",
           height: 130,
           cursor: userAddress ? "pointer" : "auto",
@@ -589,10 +589,15 @@ const [resolveServiceDialogIsOpen, setResolveServiceDialogIsOpen] =
         primaryAction={approveDai}
         primaryActionTitle="Confirm"
       />
-    </>)
+    </Grid>)
     :
     (
-      <Card variant="outlined" className={cx(cardStyles.root)}>
+      <Grid item xs={12} md={6} lg={4}>
+      <Card variant="outlined" className={cx(cardStyles.root)} sx={{
+        boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+        WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+        MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+      }}>
       <CardActionArea
         onClick={handleOnNavigateToServicePage}
         sx={{ height: 250, width: "100%" }}
@@ -695,6 +700,7 @@ const [resolveServiceDialogIsOpen, setResolveServiceDialogIsOpen] =
       primaryActionTitle="Confirm"
     />
     </Card>
+    </Grid>
     )
   );
 };

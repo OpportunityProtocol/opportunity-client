@@ -713,7 +713,7 @@ const ProfilePage: NextPage<any> = () => {
         alignItems="flex-start"
         justifyContent="space-between"
       >
-        <Grid item xs={7.5}>
+        <Grid item xs={8.5}>
           <Box sx={{ width: "100%" }}>
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
               <Tabs
@@ -727,7 +727,7 @@ const ProfilePage: NextPage<any> = () => {
                   icon={<EditOutlined fontSize="small" />}
                   iconPosition="start"
                 />
-                <Tab label="Services (0)" {...a11yProps(1)} />
+                <Tab  label="Services (0)" {...a11yProps(1)} />
                 <Tab label="Contracts (0)" {...a11yProps(2)} />
                 <Tab label="Endorsements (0)" {...a11yProps(3)} />
                 <Tab label="Reviews (0)" {...a11yProps(4)} />
@@ -793,7 +793,7 @@ const ProfilePage: NextPage<any> = () => {
           </Box>
         </Grid>
 
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <Stack
             pb={2}
             direction="row"
@@ -981,9 +981,9 @@ const ProfilePage: NextPage<any> = () => {
               {profileState?.general?.languages &&
               profileState?.general?.languages?.length ? (
                 <Stack direction="row" alignItems="center" spacing={2}>
-                  {profileState?.general?.languages.map((cert) => {
+                  {/*profileState?.general?.languages.map((cert) => {
                     return <Chip label={cert} size="small" />;
-                  })}
+                  })*/}
                 </Stack>
               ) : (
                 <Typography>No languages</Typography>
