@@ -18,6 +18,7 @@ import {
   Tab,
   DialogContentText,
   Chip,
+  alpha,
 } from "@mui/material";
 
 //import { LineChart, Line, ResponsiveContainer } from "recharts";
@@ -135,7 +136,7 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ pt: 3 }}>
           <Typography>{children}</Typography>
         </Box>
       )}
@@ -243,7 +244,7 @@ const ProfilePage: NextPage<any> = () => {
         lensProfileId: hexToDecimal(data._hex),
       });
     },
-    onError: (error) => {},
+    onError: (error) => { },
   });
 
   //getProfile
@@ -449,8 +450,8 @@ const ProfilePage: NextPage<any> = () => {
 
   const { data, isError, isLoading, isSuccess, error, signTypedData } =
     useSignTypedData({
-      onSettled(data, error) {},
-      onError(error) {},
+      onSettled(data, error) { },
+      onError(error) { },
     });
 
   const onSign = async () => {
@@ -583,7 +584,7 @@ const ProfilePage: NextPage<any> = () => {
       }
 
     } catch (error) {
-  
+
     }
   };
 
@@ -626,18 +627,186 @@ const ProfilePage: NextPage<any> = () => {
   ];
 
   return (
-    <Container maxWidth="lg">
-      <Box py={6}>
-        <Typography
-          fontWeight="bold"
-          color="rgba(33, 33, 33, .85)"
-          fontSize={30}
+    <Container maxWidth="lg" sx={{ height: '100vh' }}>
+      <Box mb={2}>
+        <Stack pb={2} direction='row' alignItems='center' justifyContent='space-between'>
+          <Box display='flex' alignItems='center'>
+            {profileState?.general?.imageURI ? (
+              <img
+                src={profileState?.general?.imageURI}
+                style={{ width: 70, height: 70, borderRadius: 70 }}
+              />
+            ) : (
+              <Jazzicon
+                diameter={80}
+                seed={jsNumberForAddress(String(address))}
+              />
+            )}
+            <Box px={2}>
+
+         
+            <Typography
+              fontWeight="bold"
+              color="rgba(33, 33, 33, .85)"
+              fontSize={25}
+              
+            >
+              {profileState?.general?.display_name} 
+            </Typography>
+            <Typography fontSize={18}>
+            {profileState.verifiedFreelancerData?.handle}
+            </Typography>
+            </Box>
+          </Box>
+
+          <Stack spacing={2} direction='row' alignItems='center'>
+
+            {String(
+              profileState.verifiedFreelancerData?.address
+            ).toLowerCase() != String(address).toLowerCase() ? (
+              <>
+                <Button
+                  disabled={profileState.interactions.followers.includes(
+                    userAddress
+                  )}
+                  variant="contained"
+                  onClick={() => setConnectDialogIsOpen(true)}
+                >
+                  Connect
+                </Button>
+              </>
+            ) : null}
+
+            <Button
+              startIcon={<Settings />}
+              variant="outlined"
+              color="primary"
+              onClick={() =>
+                router.push(
+                  `/view/profile/${userAddress}/settings?metadata=${verifiedUserQuery?.data?.verifiedUsers[0]?.metadata}`
+                )
+              }
+            >
+              Settings
+            </Button>
+          </Stack>
+        </Stack>
+        <Box
+          sx={{ width: "100%", py: 1 }}
+          component={Stack}
+          alignItems="center"
+          direction="row"
+          spacing={1}
+
         >
-          {profileState?.general?.display_name}
-        </Typography>
+          <Box>
+            <Stack spacing={0.5} direction='row' alignItems="center">
+              <Typography
+                textAlign="center"
+                fontWeight="medium"
+                fontSize={12}
+                variant='body2'
+              >
+                Followers:
+              </Typography>
+
+              <Typography fontSize={12} variant='body2' fontWeight="medium">
+                {profileState?.interactions?.followers.length}
+              </Typography>
+            </Stack>
+          </Box>
+
+          <Box>
+            <Stack spacing={0.5} direction='row' alignItems="center">
+              <Typography
+                textAlign="center"
+                fontWeight="medium"
+                fontSize={12}
+                variant='body2'
+              >
+                Following:
+              </Typography>
+              {" "}
+              <Typography fontSize={12} variant='body2' fontWeight="medium">
+                {profileState.interactions.following.length}
+              </Typography>
+            </Stack>
+          </Box>
+        </Box>
       </Box>
 
-      {profileState?.general?.display_freelancer_metrics ? (
+      <Stack spacing={2} sx={{ my: 2, width: '100%', display: 'flex' }} direction='row' alignItems='flex-start'>
+        <Box component={CardContent} icon={() => null} sx={{ maxHeight: 200, flex: 1, bgcolor: alpha("#b8e0d0", 0.15) }}>
+        <Typography fontWeight="bold" py={1} fontSize={12}>
+              About me
+            </Typography>
+
+          <Box>
+            {profileState?.general?.description ? (
+              <Typography paragraph variant='body2' color="text.secondary">
+                {profileState?.general?.description}
+              </Typography>
+            ) : (
+              <Typography>No description</Typography>
+            )}
+          </Box>
+        </Box>
+
+        <Box icon={() => null} sx={{ height: 200, flex: 1, bgcolor: alpha("#b8e0d0", 0.15) }} component={CardContent}>
+          <Stack >
+            <Typography fontWeight="bold" py={1} fontSize={12}>
+              Certifications:
+            </Typography>
+
+            {profileState?.general?.certifications &&
+              profileState?.general?.certifications?.length ? (
+              <Stack direction="row" alignItems="center" spacing={2}>
+                {profileState?.general?.certifications.map((cert) => {
+                  return <Chip sx={{ borderRadius: 1, border: '1px solid #ddd' }} key={cert} label={cert} size="small" />;
+                })}
+              </Stack>
+            ) : (
+              <Typography>No certifications</Typography>
+            )}
+          </Stack>
+
+          <Stack>
+            <Typography fontWeight="bold" py={1} fontSize={12}>
+              Skills:
+            </Typography>
+
+            {profileState?.general?.skills &&
+              profileState?.general?.skills?.length ? (
+              <Stack direction="row" alignItems="center" spacing={2}>
+                {profileState?.general?.skills.map((cert) => {
+                  return <Chip key={cert} sx={{ borderRadius: 1, border: '1px solid #ddd' }} label={cert} size="small" />;
+                })}
+              </Stack>
+            ) : (
+              <Typography>No skills</Typography>
+            )}
+          </Stack>
+
+          <Stack >
+            <Typography fontWeight="bold" py={1} fontSize={12}>
+              Languages:
+            </Typography>
+
+            {profileState?.general?.languages &&
+              profileState?.general?.languages?.length ? (
+              <Stack direction="row" alignItems="center" spacing={2}>
+                {/*profileState?.general?.languages.map((cert) => {
+                    return <Chip label={cert} size="small" />;
+                  })*/}
+              </Stack>
+            ) : (
+              <Typography>No languages</Typography>
+            )}
+          </Stack>
+        </Box>
+      </Stack>
+
+      {/*profileState?.general?.display_freelancer_metrics ? (
         <Grid
           mt={2}
           mb={5}
@@ -666,7 +835,7 @@ const ProfilePage: NextPage<any> = () => {
                     +0.38
                   </Typography>
                 </Typography>
-               {/* <ResponsiveContainer width="100%" height={350}>
+                 <ResponsiveContainer width="100%" height={350}>
                   <LineChart width={350} height={350} data={data}>
                     <Line
                       type="monotone"
@@ -675,7 +844,7 @@ const ProfilePage: NextPage<any> = () => {
                       strokeWidth={2}
                     />
                   </LineChart>
-            </ResponsiveContainer>*/}
+            </ResponsiveContainer>
                 <Stack
                   direction="row"
                   alignItems="center"
@@ -705,7 +874,7 @@ const ProfilePage: NextPage<any> = () => {
             </Card>
           </Grid>
         </Grid>
-      ) : null}
+                    ) : null*/}
 
       <Grid
         container
@@ -713,7 +882,7 @@ const ProfilePage: NextPage<any> = () => {
         alignItems="flex-start"
         justifyContent="space-between"
       >
-        <Grid item xs={8.5}>
+        <Grid item xs={12}>
           <Box sx={{ width: "100%" }}>
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
               <Tabs
@@ -722,15 +891,13 @@ const ProfilePage: NextPage<any> = () => {
                 aria-label="basic tabs example"
               >
                 <Tab
-                  label="Posts"
+                  label="All Activity"
                   {...a11yProps(0)}
-                  icon={<EditOutlined fontSize="small" />}
-                  iconPosition="start"
                 />
-                <Tab  label="Services (0)" {...a11yProps(1)} />
-                <Tab label="Contracts (0)" {...a11yProps(2)} />
-                <Tab label="Endorsements (0)" {...a11yProps(3)} />
-                <Tab label="Reviews (0)" {...a11yProps(4)} />
+                <Tab label="Worked Services (0)" {...a11yProps(1)} />
+                <Tab label="Worked Contracts (0)" {...a11yProps(2)} />
+                <Tab label="Published Services (0)" {...a11yProps(3)} />
+                <Tab label="Published Contracts(0)" {...a11yProps(4)} />
               </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
@@ -745,7 +912,7 @@ const ProfilePage: NextPage<any> = () => {
                 spacing={/*3*/ 0}
               >
                 {profileState?.servicesCreated &&
-                profileState?.servicesCreated?.length > 0 ? (
+                  profileState?.servicesCreated?.length > 0 ? (
                   profileState?.servicesCreated.map((service) => {
                     return (
                       <ServiceCard
@@ -772,7 +939,7 @@ const ProfilePage: NextPage<any> = () => {
                 spacing={/*3*/ 0}
               >
                 {profileState.contractsCreated &&
-                profileState.contractsCreated.length > 0 ? (
+                  profileState.contractsCreated.length > 0 ? (
                   profileState?.contractsCreated.map((contract) => {
                     return <JobDisplay data={contract} />;
                   })
@@ -793,208 +960,11 @@ const ProfilePage: NextPage<any> = () => {
           </Box>
         </Grid>
 
-        <Grid item xs={3}>
-          <Stack
-            pb={2}
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Typography fontSize={20} fontWeight="medium">
-              Overview
-            </Typography>
 
-            <Button
-              startIcon={<Settings />}
-              variant="outlined"
-              color="primary"
-              onClick={() =>
-                router.push(
-                  `/view/profile/${userAddress}/settings?metadata=${verifiedUserQuery?.data?.verifiedUsers[0]?.metadata}`
-                )
-              }
-            >
-              Settings
-            </Button>
-          </Stack>
-
-          <Card variant="outlined" className={classes.marginBottom}>
-            <CardContent>
-              <Stack spacing={1.5} alignItems="center">
-                {profileState?.general?.imageURI ? (
-                  <img
-                    src={profileState?.general?.imageURI}
-                    style={{ width: 70, height: 70, borderRadius: 70 }}
-                  />
-                ) : (
-                  <Jazzicon
-                    diameter={70}
-                    seed={jsNumberForAddress(String(address))}
-                  />
-                )}
-
-                <Box py={0.5} textAlign="center">
-                  <Typography fontWeight="medium">
-                    {profileState?.general?.display_name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="rgb(94, 94, 94)"
-                    fontSize={14}
-                  >
-                    {profileState.verifiedFreelancerData?.handle}
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{ width: "100%", height: 50, pt: 1 }}
-                  component={Stack}
-                  alignItems="center"
-                  direction="row"
-                  justifyContent="space-evenly"
-                  spacing={5}
-                >
-                  <Box>
-                    <Stack alignItems="center">
-                      <Typography
-                        textAlign="center"
-                        fontWeight="medium"
-                        fontSize={12}
-                      >
-                        Followers
-                      </Typography>
-                      <Typography fontWeight="bold">
-                        {profileState?.interactions?.followers.length}
-                      </Typography>
-                    </Stack>
-                  </Box>
-
-                  <Box>
-                    <Stack alignItems="center">
-                      <Typography
-                        textAlign="center"
-                        fontWeight="medium"
-                        fontSize={12}
-                      >
-                        Following
-                      </Typography>
-                      <Typography fontWeight="bold">
-                        {profileState.interactions.following.length}
-                      </Typography>
-                    </Stack>
-                  </Box>
-                </Box>
-                {String(
-                  profileState.verifiedFreelancerData?.address
-                ).toLowerCase() === String(address).toLowerCase() ? (
-                  <>
-                    <Divider sx={{ my: 2, width: "100%" }} />
-                    <Button
-                      sx={{ mt: 2 }}
-                      fullWidth
-                      disabled={profileState.interactions.followers.includes(
-                        userAddress
-                      )}
-                      variant="contained"
-                      onClick={() => setConnectDialogIsOpen(true)}
-                    >
-                      Connect
-                    </Button>
-                    {process.env.NEXT_PUBLIC_CHAIN_ENV === "development" ? (
-                      <Typography color="red" fontSize={12}>
-                        Warning: No follow verification in development.
-                      </Typography>
-                    ) : null}
-                    <Typography textAlign="start" py={1} variant="caption">
-                      {" "}
-                      Get suggestions on {
-                        profileState?.general?.display_name
-                      }{" "}
-                      latest services and contracts by connecting.{" "}
-                    </Typography>
-                  </>
-                ) : null}
-              </Stack>
-            </CardContent>
-          </Card>
-
-          <Card variant="outlined" className={classes.marginBottom}>
-            <CardContent>
-              <Typography fontWeight="medium" py={1}>
-                Description
-              </Typography>
-
-              {profileState?.general?.description ? (
-                <Typography variant="caption" color="#9E9E9E">
-                  {profileState?.general?.description}
-                </Typography>
-              ) : (
-                <Typography>No description</Typography>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card variant="outlined" className={classes.marginBottom}>
-            <CardContent>
-              <Typography fontWeight="medium" py={1}>
-                Certifications
-              </Typography>
-
-              {profileState?.general?.certifications &&
-              profileState?.general?.certifications?.length ? (
-                <Stack direction="row" alignItems="center" spacing={2}>
-                  {profileState?.general?.certifications.map((cert) => {
-                    return <Chip label={cert} size="small" />;
-                  })}
-                </Stack>
-              ) : (
-                <Typography>No certifications</Typography>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card variant="outlined" className={classes.marginBottom}>
-            <CardContent>
-              <Typography fontWeight="medium" py={1}>
-                Skills
-              </Typography>
-
-              {profileState?.general?.skills &&
-              profileState?.general?.skills?.length ? (
-                <Stack direction="row" alignItems="center" spacing={2}>
-                  {profileState?.general?.skills.map((cert) => {
-                    return <Chip label={cert} size="small" />;
-                  })}
-                </Stack>
-              ) : (
-                <Typography>No skills</Typography>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card variant="outlined" className={classes.marginBottom}>
-            <CardContent>
-              <Typography fontWeight="medium" py={1}>
-                Languages
-              </Typography>
-
-              {profileState?.general?.languages &&
-              profileState?.general?.languages?.length ? (
-                <Stack direction="row" alignItems="center" spacing={2}>
-                  {/*profileState?.general?.languages.map((cert) => {
-                    return <Chip label={cert} size="small" />;
-                  })*/}
-                </Stack>
-              ) : (
-                <Typography>No languages</Typography>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
       </Grid>
       <ConfirmationDialog
         open={connectDialogIsOpen}
-        onOpen={() => {}}
+        onOpen={() => { }}
         onClose={() => {
           setConnectDialogIsOpen(false);
         }}

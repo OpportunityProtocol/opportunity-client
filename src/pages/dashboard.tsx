@@ -311,15 +311,15 @@ const ExplorePage: NextPage = () => {
     switch (state.persona) {
       case Persona.HIRING:
         return servicesHired.map((item) => {
-          return <ServiceCard table id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+          return <ServiceCard table={false} id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
       case Persona.WORKING:
         return servicesWorking.map((item) => {
-          return <ServiceCard table id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+          return <ServiceCard table={false} id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
       case Persona.CATALOG:
         return createdServices.map((item) => {
-          return <ServiceCard table={true} id={item?.id} data={item} />
+          return <ServiceCard table={false} id={item?.id} data={item} />
         })
       default:
     }

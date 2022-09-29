@@ -19,7 +19,7 @@ const theme = createTheme({
     divider: "#ddd",
   },
   typography: {
-   // fontFamily: ["Manrope", "sans-serif"].join(","),
+   fontFamily: ["Open Sans", "sans-serif"].join(","),
     button: {
       textTransform: "none",
     },
@@ -52,13 +52,19 @@ const theme = createTheme({
       },
     },
     MuiTab: {
+      defaultProps: {
+        disableFocusRipple: true,
+        disableRipple: true,
+        disableTouchRipple: true
+      },
       styleOverrides: {
         root: {
-          backgroundColor: "#f9f9fb",
+          fontWeight: '600'
+        /*  backgroundColor: "#f9f9fb",
           border: "1px solid #EFF2F6",
           "&.Mui-selected": {
             backgroundColor: "#ffffff !important",
-          },
+          },*/
         },
       },
     },

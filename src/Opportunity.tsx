@@ -92,7 +92,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
               <List>
                 <ListItem sx={{ my: 1, '&:hover': { cursor: 'pointer' } }} disablePadding disableGutters >
                   <ListItemIcon>
-                    <Public fontSize='small' sx={{ color: router.pathname === '/' ? "#49A882" : '#aaa' }} />
+                    <Public fontSize='small' sx={{ color: (router.pathname === '/' || router.pathname.includes('/market')) ? "#49A882" : '#aaa' }} />
                   </ListItemIcon>
                   <Link href="/">
                     <ListItemText
@@ -100,7 +100,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
                       primaryTypographyProps={
                         {
                           fontWeight: 'medium',
-                          color: router.pathname === '/' ? 'primary' : '#aaa',
+                          color: (router.pathname === '/' || router.pathname.includes('/market')) ? 'primary' : '#aaa',
                           fontSize: 14
 
                         }
@@ -112,7 +112,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
                 {accountData.isConnected && (
                   <ListItem sx={{ my: 1, '&:hover': { cursor: 'pointer' } }} disablePadding disableGutters >
                     <ListItemIcon>
-                      <Dashboard fontSize='small' sx={{ color: router.pathname === '/dashboard' ? "#49A882" : '#aaa', }} />
+                      <Dashboard fontSize='small' sx={{ color: router.pathname.includes('/dashboard') ? "#49A882" : '#aaa', }} />
                     </ListItemIcon>
                     <Link href="/dashboard">
                       <ListItemText
@@ -120,7 +120,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
                         primaryTypographyProps={
                           {
                             fontWeight: 'medium',
-                            color: router.pathname === '/dashboard' ? 'primary' : '#aaa',
+                            color: router.pathname.includes('/dashboard') ? 'primary' : '#aaa',
                             fontSize: 14
 
                           }
@@ -221,7 +221,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
           display: "flex",
           background: APP_BACKGROUND,
           flexGrow: 1,
-          height: "100vh",
+         height: "100%",
         }}
       >
         <NavigationBar />

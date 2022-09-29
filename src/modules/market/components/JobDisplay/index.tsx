@@ -299,7 +299,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
         //  boxShadow: "0 19px 38px #eee, 0 15px 12px #eee",
         cursor: accountData.address ? "pointer" : "auto",
         width: "100%",
-        height: 'auto',
+        height: '200px',
         "&:hover": {
           color: (theme) => theme.palette.primary.main,
         },
@@ -333,6 +333,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
           fontSize={13}
           fontWeight="medium"
           sx={{
+            height: 30,
             display: "-webkit-box",
             overflow: "hidden",
             WebkitBoxOrient: "vertical",
@@ -397,6 +398,11 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
             </Stack>
           </Grid>
           <Grid item>
+            <Stack direction='row' alignItems='center'>
+              <Typography fontSize={12}>
+                Predicted Duration:
+              </Typography>
+              &nbsp;
             <Chip
               variant="outlined"
               size="small"
@@ -406,6 +412,8 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
                   : "Undefined"
               }
             />
+            </Stack>
+            
           </Grid>
         </Grid>
       </CardContent>

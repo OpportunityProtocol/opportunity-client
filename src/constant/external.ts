@@ -2,3 +2,4 @@ export const APOLLO_CLIENT_URI = 'https://api.thegraph.com/subgraphs/name/elijah
 export const PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY
 export const PINATA_API_SECRET = process.env.NEXT_PUBLIC_PINATA_API_SECRET
 export const PINATA_JWT = process.env.NEXT_PUBLIC_PINATA_JWT
+export const LENS_API = process.env.NEXT_PUBLIC_LENS_API
