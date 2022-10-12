@@ -236,9 +236,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   useEffect(() => {
     async function loadMetadata() {
       if (serviceData?.metadataPtr) {
-        console.log('HEEYYY')
         const parsedData = await getJSONFromIPFSPinata(serviceData?.metadataPtr)
-        console.log(parsedData)
         //@ts-ignore
         if (
           parsedData?.serviceThumbnail &&

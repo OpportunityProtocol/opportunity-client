@@ -151,9 +151,6 @@ const ProfilePage: NextPage<any> = () => {
   const [following, setFollowing] = useState<Array<any>>([])
   const [followers, setFollowers] = useState<Array<any>>([])
 
-  console.log(following)
-  console.log(followers)
-
   const [profileState, setProfileState] = useState<any>({
     general: {},
     lensProfileId: 0,
@@ -177,8 +174,6 @@ const ProfilePage: NextPage<any> = () => {
       },
     }
   );
-
-  console.log(verifiedUserQuery)
 
   //contracts created
   const contractsByEmployerQuery: QueryResult = useQuery(
@@ -391,8 +386,6 @@ const ProfilePage: NextPage<any> = () => {
 
     } catch (error) { console.log(error) }
   };
-
-  console.log(profileState)
 
   return (
     <Container maxWidth="lg" sx={{ height: 'calc(100vh - 65px)', }}>

@@ -135,7 +135,6 @@ const TransactionTokenDialog: FC<
   const userAddress = useSelector(selectUserAddress);
 
   const tokenAddress = tokenInfo?.address
-  console.log(tokenAddress)
 
   const { refetch: refetchServiceTokenBalance } = useContractRead({
     addressOrName: tokenAddress,

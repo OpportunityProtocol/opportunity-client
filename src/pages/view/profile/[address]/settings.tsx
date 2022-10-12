@@ -78,7 +78,6 @@ const Settings: NextPage<any> = () => {
     "Spanish",
   ]);
 
-  console.log(router)
   const [tags, SetTags] = useState([]);
 
   const [metadataState, setMetadataState] = useState<object>({

@@ -18,7 +18,7 @@ const theme = createTheme({
     divider: "#ddd",
   },
   typography: {
-   fontFamily: ["Open Sans", "sans-serif"].join(","),
+    fontFamily: ["Open Sans", "sans-serif"].join(","),
     button: {
       textTransform: "none",
     },
@@ -60,11 +60,6 @@ const theme = createTheme({
         root: {
           fontWeight: '600',
           fontSize: 13,
-        /*  backgroundColor: "#f9f9fb",
-          border: "1px solid #EFF2F6",
-          "&.Mui-selected": {
-            backgroundColor: "#ffffff !important",
-          },*/
         },
       },
     },
@@ -95,7 +90,6 @@ const theme = createTheme({
           fontSize: 12,
           fontWeight: "bold",
           backgroundColor: "transparent",
-          // border: '1px solid #d1d1d1',
           borderRadius: 0,
         },
       },

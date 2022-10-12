@@ -114,8 +114,6 @@ const ExplorePage: NextPage = () => {
     }
   );
 
-  console.log(purchasedServicesByClientQuery)
-
   const contractsCreatedByEmployerQuery: QueryResult = useQuery(
     GET_CONTRACTS_BY_EMPLOYER,
     {

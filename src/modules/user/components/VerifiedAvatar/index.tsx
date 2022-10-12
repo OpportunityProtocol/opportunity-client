@@ -115,8 +115,6 @@ const VerifiedAvatar: FC<IVerifiedAvatarProps> = ({
         });
 
       } else {
-        console.log('GETTT ITTTTT')
-        console.log(ptr.slice(10))
         retVal = await fleek.getUser(ptr.slice(10)); //await getJSONFromIPFSPinata(ptr) 
         
         setState({

@@ -252,8 +252,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         retVal = await (await ipfs.add(JSON.stringify(createServiceForm))).path;
       } else {
         const deepCopyCreateServiceForm = JSON.parse(JSON.stringify(createServiceForm))
-        console.log(deepCopyCreateServiceForm)
-        //TEMP - TODO:
+
         deepCopyCreateServiceForm.serviceThumbnail = ""
         deepCopyCreateServiceForm.thumbnail = ""
         ///
