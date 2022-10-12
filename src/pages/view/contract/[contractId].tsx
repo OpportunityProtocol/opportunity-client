@@ -173,7 +173,7 @@ const ViewContract: NextPage<any> = () => {
 
           setContractMetadata(parsedData);
         } else {
-          retVal = await getJSONFromIPFSPinata(metadataString) //await fleek.getService(metadataString);
+          retVal = await fleek.getContract(String(metadataString.slice(13))) //getJSONFromIPFSPinata(metadataString) //await fleek.getService(metadataString);
 
           setContractMetadata(retVal)
         }

@@ -434,8 +434,8 @@ const TransactionTokenDialog: FC<
           <Tabs
             value={tabValue}
             onChange={handleOnChangeTab}
-            textColor="primary"
-            indicatorColor="primary"
+            textColor="secondary"
+            indicatorColor="secondary"
           >
             <Tab {...a11yProps(0)} label="Buy tokens" />
             <Tab {...a11yProps(1)} label="Sell tokens" />

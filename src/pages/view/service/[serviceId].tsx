@@ -56,6 +56,7 @@ import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../../common/helper";
 import { useSelector } from "react-redux";
 import {
+  selectLens,
   selectUserAddress,
 } from "../../../modules/user/userReduxSlice";
 import VerifiedAvatar from "../../../modules/user/components/VerifiedAvatar";
@@ -64,8 +65,44 @@ import TransactionTokenDialog from "../../../modules/market/components/Transacti
 import { ConfirmationDialog } from "../../../common/components/ConfirmationDialog";
 import { MailOutline } from "@mui/icons-material";
 import { QueryResult, useQuery } from "@apollo/client";
-import { GET_SERVICE_BY_ID } from "../../../modules/contract/ContractGQLQueries";
+import { GET_SERVICES_BY_CREATOR, GET_SERVICE_BY_ID } from "../../../modules/contract/ContractGQLQueries";
 import { getJSONFromIPFSPinata, getMetadata } from "../../../common/ipfs-helper";
+import ServiceCard from "../../../modules/contract/components/ServiceCard/ServiceCard";
+
+const confirmationDialogContent = [
+  <DialogContentText id="alert-dialog-description">
+    <Typography fontSize={20} fontWeight="bold" py={1}>
+      {" "}
+      You are about to purchase a service which will require three actions:
+    </Typography>
+
+    <ul>
+      <li>
+        {" "}
+        <Typography>Signing a transaction</Typography>
+      </li>
+      <li>
+        {" "}
+        <Typography>Approving the funds</Typography>
+      </li>
+      <li>
+        <Typography>Executing the transaction</Typography>
+      </li>
+    </ul>
+  </DialogContentText>,
+
+  <DialogContentText id="alert-dialog-description">
+    <Box py={2}>
+      <Typography fontSize={20} fontWeight="bold" py={1}>
+        Confirm purchase
+      </Typography>
+      <Typography variant="subtitle2">
+        Your wallet will prompt you to sign the transaction. Only accept
+        transaction from addresses you trust.
+      </Typography>
+    </Box>
+  </DialogContentText>,
+];
 
 interface IViewContractPage {
   router: NextRouter;
@@ -82,10 +119,11 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const [collectSig, setCollectSig] = useState({});
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
-  const [serviceOnwerLensProfile, setSeriviceOwnerLensProfile] =
+  const [serviceOwnerLensProfile, setServiceOwnerLensProfile] =
     useState<any>({});
   const [purchaseDialogIsOpen, setPurchaseDialogIsOpen] =
     useState<boolean>(false);
+    const [additionalServices, setAdditionalServices]= useState([])
 
   const [tokenTransactionDialogOpen, setTokenTransactionDialogOpen] =
     useState<boolean>(false);
@@ -103,6 +141,15 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       serviceId: router.query.serviceId,
     },
   });
+
+  const servicesByCreatorQuery: QueryResult = useQuery(GET_SERVICES_BY_CREATOR, {
+    skip: true,
+    variables: {
+      creator: serviceData?.creator
+    }
+  })
+
+
 
   const renderPackageInformation = (idx: number) => {
     try {
@@ -125,6 +172,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     }
   };
 
+
   //get user lens profile id
   const networkManager_getLensProfileIdFromAddress = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -137,7 +185,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     onSuccess: (data: Result) => {
       setServiceOwnerLensProfileId(hexToDecimal(data._hex));
     },
-    onError: (error) => {},
+    onError: (error) => { },
   });
 
   //get user lens profile
@@ -150,9 +198,9 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     chainId: CHAIN_ID,
     args: [serviceOwnerLensProfileId],
     onSuccess: (data: Result) => {
-      setSeriviceOwnerLensProfile(data);
+      setServiceOwnerLensProfile(data);
     },
-    onError: (error) => {},
+    onError: (error) => { },
   });
 
   useEffect(() => {
@@ -161,10 +209,22 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   }, [router.query.serviceId]);
 
   useEffect(() => {
+    if (serviceData?.creator && String(serviceData?.creator).toLowerCase() != ZERO_ADDRESS) {
+      servicesByCreatorQuery.refetch()
+    }
+  }, [serviceData?.creator])
+
+  useEffect(() => {
     if (!serviceQueryById.loading && serviceQueryById.data) {
       setServiceData(serviceQueryById.data.service);
     }
-  });
+  }, []);
+
+  useEffect(() => {
+    if (!servicesByCreatorQuery.loading && servicesByCreatorQuery.data) {
+      setAdditionalServices(servicesByCreatorQuery.data.services);
+    }
+  }, []);
 
   //fetch lens profile among  lens profile id change
   useEffect(() => {
@@ -176,7 +236,9 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   useEffect(() => {
     async function loadMetadata() {
       if (serviceData?.metadataPtr) {
-        const parsedData = await getJSONFromIPFSPinata(serviceData?.metadataPtr) //getMetadata(serviceData?.metadataPtr);
+        console.log('HEEYYY')
+        const parsedData = await getJSONFromIPFSPinata(serviceData?.metadataPtr)
+        console.log(parsedData)
         //@ts-ignore
         if (
           parsedData?.serviceThumbnail &&
@@ -199,30 +261,29 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     contractInterface: DaiInterface,
     mode: "recklesslyUnprepared",
     functionName: "approve",
-    args: [NETWORK_MANAGER_ADDRESS, typeof serviceData?.offers == 'object' ? serviceData?.offers[0]+100 : 0],
+    args: [NETWORK_MANAGER_ADDRESS, typeof serviceData?.offers == 'object' ? serviceData?.offers[0] + 100 : 0],
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
     },
     onSuccess(data, variables, context) {
-      console.log(data)
+
     },
     onError(error, variables, context) {
-      console.log(error)
+
     },
     onSettled(data, error, variables, context) {
       if (!error) {
-     purchaseService({
-        recklesslySetUnpreparedArgs: [serviceData.id, BigNumber.from("0")],
-        recklesslySetUnpreparedOverrides: {
-          gasLimit: ethers.BigNumber.from("2000000"),
-          gasPrice: 90000000000,  
-        }
-      })
+        purchaseService({
+          recklesslySetUnpreparedArgs: [serviceData.id, BigNumber.from("0")],
+          recklesslySetUnpreparedOverrides: {
+            gasLimit: ethers.BigNumber.from("2000000"),
+            gasPrice: 90000000000,
+          }
+        })
       }
     },
   })
-
 
   const { write: purchaseService } = useContractWrite({
     mode: "recklesslyUnprepared",
@@ -238,15 +299,15 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     onSuccess(data) {
       setSuccessfulPaymentAlertVisible(true);
     },
-    onError(error) {},
-});
-
+    onError(error) { },
+  });
 
   const onPurchase = async () => approveDai()
 
-  const lensHub_commentPrepare = usePrepareContractWrite({
+  const { writeAsync: comment } = useContractWrite({
     addressOrName: LENS_HUB_PROXY,
     contractInterface: LensHubInterface,
+    mode: "recklesslyUnprepared",
     functionName: "comment",
     args: [],
     overrides: {
@@ -258,12 +319,24 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     },
   });
 
-  const lensHub_comment = useContractWrite(lensHub_commentPrepare.config);
+  const userLensData = useSelector(selectLens)
+  const abiencoder = ethers.utils.defaultAbiCoder;
 
-  const onSubmitReview = async () => {
+  const onSubmitReview = () => {
     setLoadingReviewTx(true);
-    await lensHub_comment
-      .writeAsync()
+    comment({
+      recklesslySetUnpreparedArgs: [{
+        profileId: Number(userLensData.profileId),
+        contentURI: "",
+        profileIdPointed: Number(serviceOwnerLensProfileId),
+        pubIdPointed: Number(serviceData?.id),
+        referenceModuleData: [],
+        collectModule: ZERO_ADDRESS,
+        collectModuleInitData: [], //abiencoder.encode([], []),
+        referenceModule: ZERO_ADDRESS,
+        referenceModuleInitData: []
+      }]
+    })
       .catch((error) => {
         setReviewError(true);
       })
@@ -273,41 +346,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   };
 
   const [buyingEnabled, setBuyingEnabled] = useState<boolean>(false);
-
-  const confirmationDialogContent = [
-    <DialogContentText id="alert-dialog-description">
-      <Typography fontSize={20} fontWeight="bold" py={1}>
-        {" "}
-        You are about to purchase a service which will require three actions:
-      </Typography>
-
-      <ul>
-        <li>
-          {" "}
-          <Typography>Signing a transaction</Typography>
-        </li>
-        <li>
-          {" "}
-          <Typography>Approving the funds</Typography>
-        </li>
-        <li>
-          <Typography>Executing the transaction</Typography>
-        </li>
-      </ul>
-    </DialogContentText>,
-
-    <DialogContentText id="alert-dialog-description">
-      <Box py={2}>
-        <Typography fontSize={20} fontWeight="bold" py={1}>
-          Confirm purchase
-        </Typography>
-        <Typography variant="subtitle2">
-          Your wallet will prompt you to sign the transaction. Only accept
-          transaction from addresses you trust.
-        </Typography>
-      </Box>
-    </DialogContentText>,
-  ];
 
   return (
     <Container maxWidth="lg">
@@ -327,11 +365,8 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
             <Card
               elevation={0}
               sx={{
-                //border: '1px solid #ddd',
                 width: "100%",
                 py: 2,
-                //  bgcolor: "transparent !important",
-                //  flexDirection: "column",
               }}
             >
               <CardContent
@@ -341,111 +376,77 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
                   justifyContent: "space-between",
                 }}
               >
-                <Stack spacing={3}>
-                  <Stack>
-                    <VerifiedAvatar
-                      address={serviceData?.creator}
-                      lensProfile={serviceOnwerLensProfile}
-                      lensProfileId={serviceOwnerLensProfileId}
-                      showHandle={false}
-                      showValue={false}
-                    />
-                  </Stack>
-
-                  <Stack spacing={0.3}>
-                    <Typography fontWeight="bold" fontSize={20} maxWidth={60}>
-                      {serviceMetadata?.serviceTitle
-                        ? serviceMetadata?.serviceTitle
-                        : "Unable to load title"}
-                    </Typography>
-                    <Typography
-                      paragraph
-                      fontSize={16}
-                      fontWeight="normal"
-                      color="rgb(0, 0, 0, 0.52)"
-                    >
-                      {serviceMetadata?.serviceDescription
-                        ? serviceMetadata?.serviceDescription
-                        : "Unable to load description"}
-                    </Typography>
-                  </Stack>
-
-                  <Stack
-                    my={2}
-                    direction="row"
-                    alignItems="center"
-                    spacing={5}
-                    sx={{ width: "100%" }}
-                  >
-                    <Box textAlign="start">
+                <Stack sx={{ width: '100%' }} direction='row' justifyContent='space-between' alignItems='flex-start'>
+                  <Stack spacing={3}>
+                    <Stack>
+                      <Avatar sx={{ width: 90, height: 90 }} src={serviceOwnerLensProfile?.imageURI} />
                       <Typography
-                        pb={1}
-                        fontWeight="bold"
-                        fontSize={13}
-                        color="rgba(0,0,0,.56)"
-                      >
-                        Confidence
+                        fontWeight="600"
+                        color="black"
+                        fontSize={23}
+                        py={1}>
+                        {serviceOwnerLensProfile?.handle}
                       </Typography>
+                      <Chip sx={{ py: 1, height: 15, borderRadius: 1, color: '#757575', maxWidth: 100, fontSize: 10 }} size='small' variant='filled' label={serviceData?.creator} />
+                    </Stack>
 
-                      <Stack spacing={1} direction="row" alignItems="center">
-                        <img
-                          src="/assets/images/dai.svg"
-                          style={{ width: 20, height: 25 }}
-                        />
-                        <Typography
-                          fontWeight="medium"
-                          fontSize={13}
-                          color="primary"
+                    <Stack spacing={0.3}>
+                      <Typography fontWeight="700" fontSize={20} maxWidth={300}>
+                        {serviceMetadata?.serviceTitle
+                          ? serviceMetadata?.serviceTitle
+                          : "Unable to load title"}
+                      </Typography>
+                      <Typography paragraph variant='body2' color="text.secondary">
+                        {serviceMetadata?.serviceDescription
+                          ? serviceMetadata?.serviceDescription
+                          : "Unable to load description"}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                  <Card sx={{ pr: 2, bgcolor: 'rgb(246, 248, 250)' }} variant='outlined'>
+                    <CardContent>
+                      <Box>
+                        <Stack
+
+                          direction="row"
+                          alignItems="center"
+                          spacing={5}
+                          sx={{ width: "100%" }}
                         >
-                          $12,434 value locked{" "}
-                          <span>
-                            {" "}
+                          <Box textAlign="start">
                             <Typography
-                              component="span"
-                              fontSize={12}
-                              color="secondary.main"
+                              pb={1}
+                              color='text.primary'
+                              // fontWeight="600"
+                              fontSize={14}
+                              variant='subtitle2'
                             >
-                              {" "}
-                              +5.4%{" "}
+                              Service Value
                             </Typography>
-                          </span>
-                        </Typography>
-                      </Stack>
-                    </Box>
 
-                    <Box textAlign="start">
-                      <Typography
-                        pb={1}
-                        fontWeight="bold"
-                        fontSize={13}
-                        color="rgba(0,0,0,.56)"
-                      >
-                        Date Posted
-                      </Typography>
+                            <Stack spacing={1} direction="row" alignItems="center">
+                              <img
+                                src="/assets/images/dai.svg"
+                                style={{ width: 20, height: 25 }}
+                              />
 
-                      <Typography
-                        fontWeight="bold"
-                        fontSize={13}
-                        color="primary"
-                      >
-                        {new Date().toDateString()}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Stack>
+                              <Typography
 
-                <Stack direction="row" alignItems="center" my={3}>
-                  <IconButton fontSize="large">
-                    <MailOutline />
-                  </IconButton>
+                                fontSize={13}
+                                color="primary"
+                              >
+                                $12,434 {" "}
+                                <Typography fontSize={13} color='text.primary' component='span'>
+                                  value locked
+                                </Typography>
+                              </Typography>
+                            </Stack>
+                          </Box>
 
-                  <IconButton fontSize="large">
-                    <AccountCircleOutlined />
-                  </IconButton>
-
-                  <IconButton fontSize="large">
-                    <ShareOutlined />
-                  </IconButton>
+                        </Stack>
+                      </Box>
+                    </CardContent>
+                  </Card>
                 </Stack>
               </CardContent>
             </Card>
@@ -494,292 +495,105 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
 
           <Box>
             <Typography
-              fontWeight="bold"
-              color="rgba(33,33,33,.85)"
-              fontSize={22}
+              fontWeight="600"
+              py={2}
+              fontSize={20}
             >
-              Offers
-            </Typography>
-
-            <Typography color="text.secondary" paragraph>
-              Choose an offer
+              Offer Details
             </Typography>
           </Box>
-
-          <Grid spacing={3} container item direction="row" alignItems="center">
-            <Grid item xs={4}>
-              <Card
-                sx={{
-                  height: 400,
-                  boxShadow:
-                    "0px 3px 5px -1px #eee, 0px 5px 8px 0px #eee, 0px 1px 14px 0px #eee",
-                }}
-                elevation={5}
+          <Card
+            sx={{
+              boxShadow:
+                "0px 3px 5px -1px #eee, 0px 5px 8px 0px #eee, 0px 1px 14px 0px #eee",
+            }}
+          >
+            <CardContent>
+              <Stack
+                spacing={4}
+                sx={{ height: "100%" }}
+                alignItems="center"
               >
-                <CardContent>
-                  <Stack
-                    spacing={4}
-                    sx={{ height: "100%" }}
-                    alignItems="center"
+                {renderPackageInformation(0)}
+                <Box component={Stack} spacing={1} sx={{ height: 150 }}>
+                  <Typography
+                    textAlign="center"
+                    color="rgb(33, 33, 33)"
+                    fontSize={13}
+                    fontWeight="medium"
                   >
-                    {renderPackageInformation(0)}
-
-                    <Chip
-                      component={Paper}
-                      elevation={2}
-                      label="Basic"
-                      variant="filled"
-                      sx={{
-                        backgroundColor: (theme) => theme.palette.primary.main,
-                        color: "white",
-                      }}
-                    />
-
-                    <Box component={Stack} spacing={1} sx={{ height: 150 }}>
-                      <Typography
-                        textAlign="center"
-                        color="rgb(33, 33, 33)"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        25 Analytics Campaign
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="rgb(33, 33, 33)"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        1,300 keywords
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="#ccc"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        25 Social Media Reviews
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="#ccc"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        1 Free Optimization
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="#ccc"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        24/7 Support
-                      </Typography>
-                    </Box>
-                 
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      size="large"
-                      onClick={() => {
-                        setPurchaseDialogIsOpen(true);
-                        setPurchaseIndex(0);
-                      }}
-                    >
-                      Purchase
-                    </Button>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={4}>
-              <Card
-                sx={{
-                  height: 400,
-                  boxShadow:
-                    "0px 3px 5px -1px #eee, 0px 5px 8px 0px #eee, 0px 1px 14px 0px #eee",
-                }}
-              >
-                <CardContent>
-                  <Stack
-                    spacing={4}
-                    sx={{ height: "100%" }}
-                    alignItems="center"
+                    25 Analytics Campaign
+                  </Typography>
+                  <Typography
+                    textAlign="center"
+                    color="rgb(33, 33, 33)"
+                    fontSize={13}
+                    fontWeight="medium"
                   >
-                    {renderPackageInformation(1)}
-
-                    <Chip
-                      component={Paper}
-                      elevation={2}
-                      label="Premium"
-                      variant="filled"
-                      sx={{
-                        backgroundColor: (theme) => theme.palette.primary.main,
-                        color: "white",
-                      }}
-                    />
-
-                    <Box component={Stack} spacing={1} sx={{ height: 150 }}>
-                      <Typography
-                        textAlign="center"
-                        color="rgb(33, 33, 33)"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        25 Analytics Campaign
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="rgb(33, 33, 33)"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        1,300 keywords
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="rgb(33, 33, 33)"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        25 Social Media Reviews
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="#ccc"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        1 Free Optimization
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="#ccc"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        24/7 Support
-                      </Typography>
-                    </Box>
-
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      size="large"
-                      onClick={() => {
-                        setPurchaseDialogIsOpen(true);
-                        setPurchaseIndex(1);
-                      }}
-                    >
-                      Purchase
-                    </Button>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={4}>
-              <Card
-                sx={{
-                  height: 400,
-                  boxShadow:
-                    "0px 3px 5px -1px #eee, 0px 5px 8px 0px #eee, 0px 1px 14px 0px #eee",
-                }}
-              >
-                <CardContent>
-                  <Stack
-                    spacing={4}
-                    sx={{ height: "100%" }}
-                    alignItems="center"
+                    1,300 keywords
+                  </Typography>
+                  <Typography
+                    textAlign="center"
+                    color="rgb(33, 33, 33)"
+                    fontSize={13}
+                    fontWeight="medium"
                   >
-                    {renderPackageInformation(2)}
+                    25 Social Media Reviews
+                  </Typography>
+                  <Typography
+                    textAlign="center"
+                    color="rgb(33, 33, 33)"
+                    fontSize={13}
+                    fontWeight="medium"
+                  >
+                    1 Free Optimization
+                  </Typography>
+                  <Typography
+                    textAlign="center"
+                    color="rgb(33, 33, 33)"
+                    fontSize={13}
+                    fontWeight="medium"
+                  >
+                    24/7 Support
+                  </Typography>
+                </Box>
 
-                    <Chip
-                      component={Paper}
-                      elevation={2}
-                      label="Enterprise"
-                      variant="filled"
-                      sx={{
-                        backgroundColor: (theme) => theme.palette.primary.main,
-                        color: "white",
-                      }}
-                    />
 
-                    <Box component={Stack} spacing={1} sx={{ height: 150 }}>
-                      <Typography
-                        textAlign="center"
-                        color="rgb(33, 33, 33)"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        25 Analytics Campaign
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="rgb(33, 33, 33)"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        1,300 keywords
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="rgb(33, 33, 33)"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        25 Social Media Reviews
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="rgb(33, 33, 33)"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        1 Free Optimization
-                      </Typography>
-                      <Typography
-                        textAlign="center"
-                        color="rgb(33, 33, 33)"
-                        fontSize={13}
-                        fontWeight="medium"
-                      >
-                        24/7 Support
-                      </Typography>
-                    </Box>
-                    
-
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      size="large"
-                      onClick={() => {
-                        setPurchaseDialogIsOpen(true);
-                        setPurchaseIndex(2);
-                      }}
-                    >
-                      Purchase
-                    </Button>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  onClick={() => {
+                    setPurchaseDialogIsOpen(true);
+                    setPurchaseIndex(0);
+                  }}
+                >
+                  Purchase
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
           <Box my={5}>
             <Typography
-              fontSize={22}
-              fontWeight="bold"
-              color="rgba(33,33,33,.85)"
-              py={1}
+              fontWeight="600"
+              py={2}
+              fontSize={20}
             >
-              Other services provided by @janicecoleman007
+              Other services provided by {serviceOwnerLensProfile?.handle}
             </Typography>
-            <Typography color="text.secondary" paragraph>
-              @janicecoleman007 has not posted other services.
-            </Typography>
+            <Stack spacing={2} direction='row' alignItems='center'>
+                  {
+                    additionalServices && additionalServices.length > 0 ? 
+                    additionalServices.map((service) => {
+                      return <ServiceCard id={service?.id} data={service} />
+                    })
+                    :
+                    <Typography color="text.secondary" paragraph>
+                    {serviceOwnerLensProfile?.handle} has not posted other services.
+                  </Typography>
+                  }
+            </Stack>
+
           </Box>
 
           <Box my={5}>
@@ -789,22 +603,22 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
               alignItems="center"
             >
               <Typography
-                fontWeight="bold"
-                fontSize={22}
-                color="rgba(33,33,33,.85)"
+                fontWeight="600"
+                py={2}
+                fontSize={20}
               >
-                Reviews
+                Comments and Reviews
               </Typography>
 
               <Button
                 variant="text"
                 onClick={() => setReviewDialogVisible(true)}
               >
-                Leave a comment
+                Comment
               </Button>
             </Stack>
             <Typography color="text.secondary" paragraph>
-              0 reviews for @janicecoleman007's services
+              0 reviews for {serviceOwnerLensProfile?.handle}'s services
             </Typography>
           </Box>
         </Grid>
@@ -817,7 +631,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       />
       <ConfirmationDialog
         open={purchaseDialogIsOpen}
-        onOpen={() => {}}
+        onOpen={() => { }}
         onClose={() => {
           setPurchaseDialogIsOpen(false);
         }}
@@ -876,7 +690,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
           >
             Cancel
           </Button>
-          <Button onClick={onSubmitReview} disabled={review.length < 25}>
+          <Button onClick={onSubmitReview}>
             Submit Review
           </Button>
         </DialogActions>

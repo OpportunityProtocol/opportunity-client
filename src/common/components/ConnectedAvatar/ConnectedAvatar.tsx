@@ -61,6 +61,7 @@ import { NextRouter, useRouter } from "next/router";
 import { DaiInterface } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
 import { FormatTypes } from "ethers/lib/utils";
+import { UseDisconnectConfig } from "wagmi/dist/declarations/src/hooks/accounts/useDisconnect";
 
 
 const StyledBadge = styled(Badge, {
@@ -100,19 +101,18 @@ const ConnectedAvatar: FC = () => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [verificationDialogOpen, setVerificationDialogOpen] =
     useState<boolean>(false);
-  const feeData = useFeeData({ enabled: false, watch: false });
-  const accountData = useAccount()
 
-  const { disconnect } = useDisconnect();
-
-  const userAddress = useSelector(selectUserAddress);
-  const userBalance = useSelector(selectUserBalance);
-  const daiBalance = useSelector((state: RootState) =>
+  const userAddress: string = useSelector(selectUserAddress);
+  const userBalance: number = useSelector(selectUserBalance);
+  const daiBalance: number = useSelector((state: RootState) =>
     selectErc20Balance(state, DAI_ADDRESS)
   );
-  const userLensData = useSelector(selectLens)
-  const userConnector = useSelector(selectUserConnector);
-  const connected = useSelector(selectUserConnectionStatus);
+  const userLensData: any = useSelector(selectLens)
+  const userConnector: any = useSelector(selectUserConnector);
+  const connected: boolean = useSelector(selectUserConnectionStatus);
+
+  const feeData = useFeeData({ enabled: false, watch: false });
+  const accountData = useAccount()
 
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -133,7 +133,7 @@ const ConnectedAvatar: FC = () => {
     >
       <IconButton onClick={handlePopoverOpen}>
         <Avatar
-          sx={{ cursor: "pointer", width: 35, height: 35 }}
+          sx={{ cursor: "pointer", width: 25, height: 25 }}
           alt="Remy Sharp"
           src="/assets/stock/profile_three.jpeg"
         />

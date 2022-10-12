@@ -15,6 +15,13 @@ import {
   DialogContentText,
   DialogContent,
   FormHelperText,
+  Tabs,
+  Tab,
+  TextFieldProps,
+  OutlinedInputProps,
+  alpha,
+  Theme,
+  CardActions,
 } from "@mui/material";
 import { NextPage } from "next";
 import { Fragment, ChangeEvent, createRef, useEffect, useState } from "react";
@@ -36,12 +43,60 @@ import { BigNumber } from "ethers";
 import { create } from "ipfs-http-client";
 import { NextRouter, useRouter } from "next/router";
 import BootstrapInput from "../../common/components/BootstrapInput/BootstrapInput";
-import { FEE_COLLECT_MODULE, FOLLOWER_ONLY_REFERENCE_MODULE } from "../../constant/contracts";
+import { FEE_COLLECT_MODULE, FOLLOWER_ONLY_REFERENCE_MODULE, FREE_COLLECT_MODULE } from "../../constant/contracts";
 import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
 import { generatePinataData, pinJSONToIPFSPinata } from "../../common/ipfs-helper";
+import { a11yProps } from "../../common/components/TabPanel/helper";
+import TabPanel from "../../common/components/TabPanel/TabPanel";
+import { styled } from "@mui/styles";
 const Buffer = require("buffer").Buffer;
+
+const StyledTextField = styled(TextField)({
+  '& label.Mui-focused': {
+    color: '#212121',
+  },
+  '& .MuiInput-underline:after': {
+    borderBottomColor: 'none',
+    border: 'none'
+  },
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: 'none',
+      border: '1px solid #ddd',
+      // backgroundColor: 'rgb(239, 247, 238)'
+    },
+    '&:hover fieldset': {
+      //  borderColor: 'none',
+      border: '1px solid #ddd',
+    },
+    '&.Mui-focused fieldset': {
+      // borderColor: 'none',
+      border: '1px solid #ddd',
+    },
+  },
+});
+
+const SummaryKey = styled(Typography)(
+  ({ theme }: { theme?: Theme }) => ({
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.palette.text.secondary
+  })
+)
+
+const SummaryValue = styled(Typography)(
+  ({ theme }: { theme?: Theme }) => ({
+    fontSize: 14,
+  })
+)
+
+const SummarySectionTitle = styled(Typography)(
+  ({ theme }: { theme?: Theme }) => ({
+    fontWeight: '600',
+  })
+)
 
 /**
  * Elijah Hampton
@@ -87,17 +142,17 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       enterprisePriceErrorMessage: "",
     });
 
-    const [offers, setOffers] = useState<Array<string>>(new Array(6));
-    const [checkboxes, setCheckboxes] = useState<Array<boolean>>([]);
-    const [publishDialogIsOpen, setPublishDialogIsOpen] =
-      useState<boolean>(false);
-    const onOpenPublishDialog = () => {};
-    const [publishDialogIsLoading, setPublishDialogIsLoading] =
-      useState<boolean>(false);
-    const [publishServiceSuccessful, setPublishServiceSuccessful] =
-      useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false);
-    
+  const [offers, setOffers] = useState<Array<string>>(new Array(6));
+  const [checkboxes, setCheckboxes] = useState<Array<boolean>>([]);
+  const [publishDialogIsOpen, setPublishDialogIsOpen] =
+    useState<boolean>(false);
+  const onOpenPublishDialog = () => { };
+  const [publishDialogIsLoading, setPublishDialogIsLoading] =
+    useState<boolean>(false);
+  const [publishServiceSuccessful, setPublishServiceSuccessful] =
+    useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
 
   const onCloseCreateServiceDialog = () => {
     if (createServiceDialogState.success == true) {
@@ -119,7 +174,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const fileRef = createRef();
 
   const accountData = useAccount();
-
 
   const networkManager_createServicePrepare = usePrepareContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -144,7 +198,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const networkManager_createService = useContractWrite({
     ...networkManager_createServicePrepare.config,
     onError(error, variables, context) {
- 
+
 
       setCreateServiceDialogState({
         ...createServiceDialogState,
@@ -166,20 +220,20 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       setServiceMetadataKey("");
     },
     onSettled(data, error, variables, context) {
-     
+
     }
-});
+  });
 
 
-useEffect(() => {
-  if (!marketsQuery.loading && marketsQuery.data) {
-    setMarketDetails(marketsQuery.data?.markets);
-  }
-}, [marketsQuery.loading]);
+  useEffect(() => {
+    if (!marketsQuery.loading && marketsQuery.data) {
+      setMarketDetails(marketsQuery.data?.markets);
+    }
+  }, [marketsQuery.loading]);
 
-useEffect(() => {
-  marketsQuery.refetch();
-}, []);
+  useEffect(() => {
+    marketsQuery.refetch();
+  }, []);
 
   const handleOnPublish = async () => {
     let retVal: string = "";
@@ -198,18 +252,19 @@ useEffect(() => {
         retVal = await (await ipfs.add(JSON.stringify(createServiceForm))).path;
       } else {
         const deepCopyCreateServiceForm = JSON.parse(JSON.stringify(createServiceForm))
+        console.log(deepCopyCreateServiceForm)
         //TEMP - TODO:
-        deepCopyCreateServiceForm.serviceThumbnail =""
+        deepCopyCreateServiceForm.serviceThumbnail = ""
         deepCopyCreateServiceForm.thumbnail = ""
         ///
-        const data = generatePinataData(String(accountData.address) +
-        ":" +
-        createServiceForm.serviceTitle, deepCopyCreateServiceForm)
-        retVal = await pinJSONToIPFSPinata(data)
+
+        retVal = await fleek.uploadService(String(accountData.address) + ":" + createServiceForm.serviceTitle, JSON.stringify(deepCopyCreateServiceForm)) //await pinJSONToIPFSPinata(data)
       }
 
       setServiceMetadataKey(retVal);
     } catch (error) {
+      console.log(error)
+
       setCreateServiceDialogState({
         ...createServiceDialogState,
         loading: false,
@@ -255,7 +310,7 @@ useEffect(() => {
     if (value > 0) {
       setCreateServiceForm({
         ...createServiceForm,
-          [e.target.name]: e.target.value
+        [e.target.name]: e.target.value
       });
     }
   };
@@ -327,7 +382,7 @@ useEffect(() => {
     setOffers(updatedArr);
   };
 
-  const handleOnChangeCheckbox = (e, idx: number) => {};
+  const handleOnChangeCheckbox = (e, idx: number) => { };
 
   const publishDialogContent = [
     <DialogContent>
@@ -351,8 +406,10 @@ useEffect(() => {
     </DialogContent>,
   ];
 
+  const [tabValue, setTabValue] = useState<number>(0);
+
   return (
-    <Container component={Stack} spacing={5} maxWidth="xl">
+    <Container component={Stack} spacing={2} maxWidth="xl">
       <Box>
         <Typography fontWeight="600" fontSize={25}>
           Create a service
@@ -365,32 +422,38 @@ useEffect(() => {
         </Typography>
       </Box>
 
-      <Grid
-        container
-        display="flex"
-        alignItems="flex-start"
-        justifyContent="space-between"
-      >
-        <Grid item xs={4}>
-          <Box width={600} maxWidth={600}>
-            <Typography fontWeight="700" fontSize={18} color="text.primary">
-              Select a market
+      <Box sx={{ width: "100%" }}>
+        <Tabs
+          value={tabValue}
+          onChange={(e, val) => setTabValue(val)}
+          textColor="secondary"
+          indicatorColor="secondary"
+        >
+          <Tab {...a11yProps(0)} label="Select a market" />
+          <Tab {...a11yProps(1)} label="Basic Information" />
+
+          <Tab {...a11yProps(1)} label="Summary" />
+        </Tabs>
+        <Divider sx={{ borderBottom: "1px solid #eee" }} />
+      </Box>
+
+      <TabPanel index={0} value={tabValue}>
+        <Box width={600} maxWidth={600}>
+
+          <Typography color="text.secondary" fontWeight="500" fontSize={14}>
+            Select or search for the appropriate market to deploy your
+            contract.
+          </Typography>
+          <Typography variant="caption">
+            Can't find a market?{" "}
+            <Typography component="span" color="primary" variant="button">
+              Learn about market proposals.
             </Typography>
-            <Typography color="text.secondary" fontWeight="500" fontSize={14}>
-              Select or search for the appropriate market to deploy your
-              contract.
-            </Typography>
-            <Typography variant="caption">
-              Can't find a market?{" "}
-              <Typography component="span" color="primary" variant="button">
-                Learn about market proposals.
-              </Typography>
-            </Typography>
-          </Box>
-        </Grid>
+          </Typography>
+        </Box>
 
         <Grid item xs={6}>
-          <Card sx={{ width: "100%" }} variant="outlined">
+          <Card variant='outlined' sx={{ width: "100%", border: 'none' }}>
             <CardContent>
               <Grid
                 container
@@ -398,105 +461,40 @@ useEffect(() => {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                {marketDetails.slice(0, 6).map((details) => {
+                {marketDetails.map((details) => {
                   return (
-                    <Grid item xs={2.9}>
-                      <MarketDisplay
-                        small
-                        marketDetails={details}
-                        isShowingStats={false}
-                        selected={details?.id === selectedMarketId}
-                        selectable
-                        onSelect={() => setSelectedMarketId(details?.id)}
-                        showDescription={false}
-                        showStats={false}
-                      />
-                    </Grid>
+
+                    <MarketDisplay
+                      small
+                      marketDetails={details}
+                      isShowingStats={false}
+                      selected={details?.id === selectedMarketId}
+                      selectable
+                      onSelect={() => setSelectedMarketId(details?.id)}
+                    />
+
                   );
                 })}
               </Grid>
             </CardContent>
           </Card>
         </Grid>
-      </Grid>
+      </TabPanel>
 
-      <Divider />
+      <TabPanel index={1} value={tabValue}>
+        <Box sx={{ width: '75%' }}>
 
-      <Grid
-        container
-        justifyContent="space-between"
-        display="flex"
-        alignItems="flex-start"
-      >
-        <Grid item xs={4}>
-          <Typography fontWeight="700" color="text.primary" fontSize={18}>
-            Basic Information
-          </Typography>
-          <Typography color="text.secondary" fontWeight="500" fontSize={14}>
+          <Typography color="text.secondary" fontWeight="500" fontSize={14} pb={2}>
             Fill out basic information that will help readers better understand
             the contract.
           </Typography>
-        </Grid>
 
-        <Grid item xs={6}>
-          <Card variant="outlined" sx={{ width: "100%" }}>
-            <CardContent>
-              <Stack spacing={2}>
-                <TextField
-                  margin="normal"
-                  sx={{ width: "100%" }}
-                  variant="outlined"
-                  label="Service Title"
-                  aria-label="Pick a title for your service"
-                  name="serviceTitle"
-                  type="text"
-                  onChange={handleOnChangeCreateServiceForm}
-                />
-
-                <TextField
-                  margin="normal"
-                  rows={6}
-                  multiline
-                  sx={{ width: "100%" }}
-                  variant="outlined"
-                  label="Service Description"
-                  aria-label="Pick a title for your service"
-                  name="serviceDescription"
-                  type="text"
-                  onChange={handleOnChangeCreateServiceForm}
-                />
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <Divider />
-
-      <Grid
-        container
-        justifyContent="space-between"
-        display="flex"
-        alignItems="flex-start"
-      >
-        <Grid item xs={4}>
-          <Typography
-            fontWeight="700"
-            fontSize={18}
-            py={1}
-            color="text.primary"
-          >
-            Add a thumbnail
-          </Typography>
-        </Grid>
-
-        <Grid item xs={6}>
-          <Card variant="outlined" sx={{ width: "100%" }}>
+          <Card variant="outlined" sx={{ border: 'none', backgroundColor: '#eee', width: "100%" }}>
             <CardContent>
               <Box
                 sx={{
                   width: "100%",
-                  border: "dashed 1px #B3B3B3",
+                  //border: "dashed 1px #B3B3B3",
 
                   height: 400,
                 }}
@@ -549,272 +547,274 @@ useEffect(() => {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
 
-      <Divider />
 
-      <Card variant="outlined">
-        <CardContent>
-          <Typography fontWeight="700" fontSize={18} color="text.primary">
-            Add tags
-          </Typography>
-          <Typography color="text.secondary" fontWeight="500" fontSize={14}>
-            Increase the relevancy of your contract with tags. Try (budget:low,
-            quick-job)
-          </Typography>
-          <Typography
-            variant="caption"
-            fontWeight="500"
-            color="#757575"
-            width={350}
-          >
-            Tags are separated by spaces
-          </Typography>
 
-          <Paper
-            component="form"
-            variant="outlined"
-            sx={{
-              mt: 2,
-              p: "10px 4px",
-              display: "flex",
-              alignItems: "center",
-              width: 600,
-            }}
-          >
-            <InputBase
-              placeholder="Try shorttermjob..."
-              name="serviceTags"
-              aria-label="serviceTags"
-              type="text"
-              value={createServiceForm.serviceTags}
-              sx={{ ml: 1, flex: 1 }}
-              onKeyPress={onTagInputKeyPress}
-              onChange={handleOnChangeCreateServiceForm}
-              startAdornment={
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  sx={{ margin: "0 0.2rem 0 0", display: "flex" }}
+          <Card elevation={0} sx={{ mb: 3, width: "100%" }}>
+
+            <Stack spacing={2}>
+              <StyledTextField
+                margin="normal"
+                sx={{ width: "100%" }}
+                variant="outlined"
+                label="Service Title"
+                aria-label="Pick a title for your service"
+                name="serviceTitle"
+                type="text"
+                onChange={handleOnChangeCreateServiceForm}
+              />
+
+              <StyledTextField
+                margin="normal"
+                rows={6}
+                multiline
+                sx={{ width: "100%" }}
+                variant="outlined"
+                label="Service Description"
+                aria-label="Pick a title for your service"
+                name="serviceDescription"
+                type="text"
+                onChange={handleOnChangeCreateServiceForm}
+              />
+            </Stack>
+
+          </Card>
+
+          <Stack spacing={3}>
+            <Card variant="outlined">
+              <CardContent>
+                <Typography fontWeight="700" fontSize={18} color="text.primary">
+                  Add tags
+                </Typography>
+                <Typography color="text.secondary" fontWeight="500" fontSize={14}>
+                  Increase the relevancy of your contract with tags. Try (budget:low,
+                  quick-job)
+                </Typography>
+                <Typography
+                  variant="caption"
+                  fontWeight="500"
+                  color="#757575"
+                  width={350}
                 >
-                  {createServiceForm.tags.map((tag, idx) => {
-                    return (
-                      <Chip
-                        key={tag}
-                        label={tag}
-                        size="small"
-                        onDelete={() => handleOnDeleteTag(idx)}
-                      />
-                    );
-                  })}
-                </Stack>
-              }
-            />
-          </Paper>
-        </CardContent>
-      </Card>
+                  Tags are separated by spaces
+                </Typography>
 
-      <Card sx={{ width: "100%" }} variant="outlined">
-        <CardContent>
-          <Typography
-            fontWeight="700"
-            fontSize={18}
-            py={1}
-            color="text.primary"
-          >
-            Offers (Max 6)
-          </Typography>
-          <Typography
-            color="text.secondary"
-            fontWeight="500"
-            maxWidth={600}
-            fontSize={14}
-          >
-            Fill out your offers and the associated packages they will be
-            included in. If a package (i.e. enterprise) has no checkboxes
-            checked it will not be included.
-          </Typography>
-          <Box pt={2}>
-            {new Array(6).fill(1).map((value, idx, arr) => {
-              return (
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
+                <Paper
+                  component="form"
+                  variant="outlined"
+                  sx={{
+                    mt: 2,
+                    p: "10px 4px",
+                    display: "flex",
+                    alignItems: "center",
+                    width: 600,
+                  }}
                 >
-                  <TextField
-                    sx={{ width: 600 }}
-                    label={`Offer ${idx + 1}`}
-                    name="service-beginner-price-input"
-                    margin="normal"
-                    value={offers[idx]}
-                    onChange={(e) => handleOnChangeOffers(e, idx)}
+                  <InputBase
+                    placeholder="Try shorttermjob..."
+                    name="serviceTags"
+                    aria-label="serviceTags"
+                    type="text"
+                    value={createServiceForm.serviceTags}
+                    sx={{ ml: 1, flex: 1 }}
+                    onKeyPress={onTagInputKeyPress}
+                    onChange={handleOnChangeCreateServiceForm}
+                    startAdornment={
+                      <Stack
+                        direction="row"
+                        spacing={2}
+                        sx={{ margin: "0 0.2rem 0 0", display: "flex" }}
+                      >
+                        {createServiceForm.tags.map((tag, idx) => {
+                          return (
+                            <Chip
+                              key={tag}
+                              label={tag}
+                              size="small"
+                              onDelete={() => handleOnDeleteTag(idx)}
+                            />
+                          );
+                        })}
+                      </Stack>
+                    }
                   />
+                </Paper>
+              </CardContent>
+            </Card>
 
-                  <Stack spacing={2} direction="row" alignItems="center">
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          defaultChecked
-                          onChange={(e) => handleOnChangeCheckbox(e, idx)}
-                        />
-                      }
-                      label="Beginner"
-                    />
-                    <FormControlLabel
-                      control={<Checkbox defaultChecked />}
-                      label="Business"
-                    />
-                    <FormControlLabel
-                      control={<Checkbox defaultChecked />}
-                      label="Enterprise"
-                    />
-                  </Stack>
-                </Stack>
-              );
-            })}
-          </Box>
-        </CardContent>
-        <Divider />
-        <CardContent>
-          <Stack
-            sx={{ display: "flex" }}
-            spacing={2}
-            direction="row"
-            alignItems="center"
-            justifyContent="space-evenly"
-          >
-            <FormControl sx={{ flexGrow: 1 }}>
-              <InputLabel>Beginner Price</InputLabel>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: "7px 8px",
-                  display: "flex",
-                  alignItems: "center",
-                  border: "1px solid #eee",
-                }}
-              >
-                <img
-                  src="/assets/images/dai.svg"
-                  style={{ width: 15, height: 20 }}
-                />
-                <InputBase
+            <Box>
+              <Typography pb={2} color="text.secondary" fontWeight="500" fontSize={14}>
+                Fill out basic information that will help readers better understand
+                the contract.
+              </Typography>
+              <FormControl>
+                <InputLabel>Beginner Price</InputLabel>
+                <Paper
+                  elevation={0}
                   sx={{
-                    marginLeft: 1,
-                    border: "0px solid #eee",
-                    width: "100%",
+                    p: "7px 8px",
+                    display: "flex",
+                    alignItems: "center",
+                    border: "1px solid #eee",
                   }}
-                  id="beginner_offer"
-                  name="beginner_offer"
-                  type="number"
-                  onChange={handleOnChangePrice}
-                  value={`${createServiceForm.beginner_offer}`}
-                  error={createServiceFormErrorState.beginnerPriceError}
-                />
-              </Paper>
-              <FormHelperText>
-                {createServiceFormErrorState.beginnerPriceErrorMessage}
-              </FormHelperText>
-            </FormControl>
-
-            <FormControl sx={{ flexGrow: 1 }}>
-              <InputLabel>Business Price</InputLabel>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: "7px 8px",
-                  display: "flex",
-                  alignItems: "center",
-                  border: "1px solid #eee",
-                }}
-              >
-                <img
-                  src="/assets/images/dai.svg"
-                  style={{ width: 15, height: 20 }}
-                />
-                <InputBase
-                  sx={{
-                    marginLeft: 1,
-                    border: "0px solid #eee",
-                    width: "100%",
-                  }}
-                  id="business_offer"
-                  name="business_offer"
-                  type="number"
-                  onChange={handleOnChangePrice}
-                  value={`${createServiceForm.business_offer}`}
-                  error={createServiceFormErrorState.businessPriceError}
-                />
-              </Paper>
-              <FormHelperText>
-                {createServiceFormErrorState.businessPriceErrorMessage}
-              </FormHelperText>
-            </FormControl>
-
-            <FormControl sx={{ flexGrow: 1 }}>
-              <InputLabel>Enterprise Price</InputLabel>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: "7px 8px",
-                  display: "flex",
-                  alignItems: "center",
-                  border: "1px solid #eee",
-                }}
-              >
-                <img
-                  src="/assets/images/dai.svg"
-                  style={{ width: 15, height: 20 }}
-                />
-                <InputBase
-                  sx={{
-                    marginLeft: 1,
-                    border: "0px solid #eee",
-                    width: "100%",
-                  }}
-                  id="enterprise_offer"
-                  name="enterprise_offer"
-                  type="number"
-                  onChange={handleOnChangePrice}
-                  value={`${createServiceForm.enterprise_offer}`}
-                  error={createServiceFormErrorState.enterprisePriceError}
-                />
-              </Paper>
-              <FormHelperText>
-                {createServiceFormErrorState.enterprisePriceErrorMessage}
-              </FormHelperText>
-            </FormControl>
+                >
+                  <img
+                    src="/assets/images/dai.svg"
+                    style={{ width: 15, height: 20 }}
+                  />
+                  <InputBase
+                    sx={{
+                      marginLeft: 1,
+                      border: "0px solid #eee",
+                      width: "100%",
+                    }}
+                    id="beginner_offer"
+                    name="beginner_offer"
+                    type="number"
+                    onChange={handleOnChangePrice}
+                    value={`${createServiceForm.beginner_offer}`}
+                    error={createServiceFormErrorState.beginnerPriceError}
+                  />
+                </Paper>
+                <FormHelperText>
+                  {createServiceFormErrorState.beginnerPriceErrorMessage}
+                </FormHelperText>
+              </FormControl>
+            </Box>
           </Stack>
-        </CardContent>
-      </Card>
+        </Box>
+      </TabPanel>
 
-      <Stack direction="row" alignItems="center" justifyContent="flex-end">
-        <Button
-          sx={{ mx: 1, width: 120, p: 1 }}
-          variant="contained"
-          /*disabled={
-            createServiceForm.beginner_offer === 0 ||
-            createServiceForm.business_offer === 0 ||
-            createServiceForm.enterprise_offer === 0 ||
-            createServiceForm.service_title >= 81 ||
-            createServiceForm.service_description >= 730
-          }*/
-          onClick={() => {
-            setCreateServiceDialogState({
-              ...createServiceDialogState,
-              open: true,
-            });
-          }}
-        >
-          Publish
-        </Button>
-      </Stack>
+      <TabPanel index={2} value={tabValue}>
+        <Box sx={{ width: '70%' }}>
+          <Card variant='outlined'>
+            <CardContent>
+              <Box>
+
+                <SummarySectionTitle>
+                  Service Sumary
+                </SummarySectionTitle>
+                <Stack sx={{ my: 2 }} spacing={2}>
+
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Title:
+                    </SummaryKey>
+                    <SummaryValue>
+                      {createServiceForm.serviceTitle}
+                    </SummaryValue>
+                  </Stack>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Description:
+                    </SummaryKey>
+                    <SummaryValue>
+                      {createServiceForm.serviceDescription}
+                    </SummaryValue>
+                  </Stack>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Price:
+                    </SummaryKey>
+                    <SummaryValue>
+                      {createServiceForm.beginner_offer}
+                    </SummaryValue>
+                  </Stack>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Market:
+                    </SummaryKey>
+                    <SummaryValue>
+                      {selectedMarketId}
+                    </SummaryValue>
+                  </Stack>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      CollectModule:
+                    </SummaryKey>
+                    <SummaryValue>
+                      {FREE_COLLECT_MODULE}
+                    </SummaryValue>
+                  </Stack>
+
+
+                </Stack>
+              </Box>
+
+
+              <Box>
+                <SummarySectionTitle>
+                  Fees
+                </SummarySectionTitle>
+                <Stack spacing={2} sx={{ my: 2 }}>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Protocol Fee:
+                    </SummaryKey>
+                    <SummaryValue>
+                      0
+                    </SummaryValue>
+                  </Stack>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Estimated Profit:
+                    </SummaryKey>
+                    <SummaryValue>
+                      0
+                    </SummaryValue>
+                  </Stack>
+
+
+                </Stack>
+              </Box>
+              <Divider />
+              <Typography variant='caption'>
+                Here is a cool caption
+              </Typography>
+
+            </CardContent>
+            <CardActions>
+              <Stack sx={{ width: '100%' }} direction="row" alignItems="center" justifyContent="flex-end">
+                <Button
+                  sx={{ mx: 1, width: 120, p: 1 }}
+                  variant="contained"
+                  /*disabled={
+                    createServiceForm.beginner_offer === 0 ||
+                    createServiceForm.business_offer === 0 ||
+                    createServiceForm.enterprise_offer === 0 ||
+                    createServiceForm.service_title >= 81 ||
+                    createServiceForm.service_description >= 730
+                  }*/
+                  onClick={() => {
+                    setCreateServiceDialogState({
+                      ...createServiceDialogState,
+                      open: true,
+                    });
+                  }}
+                >
+                  Publish
+                </Button>
+              </Stack>
+            </CardActions>
+          </Card>
+
+
+
+
+
+        </Box>
+      </TabPanel>
 
       <ConfirmationDialog
         open={createServiceDialogState.open}
-        onOpen={() => {}}
+        onOpen={() => { }}
         onClose={onCloseCreateServiceDialog}
         primaryAction={handleOnPublish}
         primaryActionTitle="Publish"

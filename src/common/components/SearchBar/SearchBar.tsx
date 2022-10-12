@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 
 import {
+  alpha,
     IconButton,
     Input,
     Paper,
@@ -47,6 +48,8 @@ const styles = (theme) => ({
     }),
   },
   input: {
+    fontSize: 12,
+    fontWeight: '600',
     width: "100%",
   },
   searchContainer: {
@@ -151,7 +154,7 @@ const SearchBar = React.forwardRef(
     }));
 
     return (
-      <Paper elevation={0} sx={{ border: '1px solid #ddd' }} className={classNames(classes.root, className)} style={style}>
+      <Paper elevation={0} sx={{ backgroundColor: alpha("#b8e0d0", 0.2), border: 'none', borderRadius: 5 }} className={classNames(classes.root, className)} style={style}>
         <div className={classes.searchContainer}>
           <Input
             {...inputProps}

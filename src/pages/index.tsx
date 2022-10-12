@@ -1,6 +1,5 @@
 import type { NextPage } from 'next'
-import Explore from './dashboard';
-import MarketHome from './view/market';
+import Explore from './explore'
 
-const Home: NextPage = () => <MarketHome />
+const Home: NextPage = () => <Explore />
 export default Home

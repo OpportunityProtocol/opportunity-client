@@ -1,17 +1,6 @@
 import "../../styles/globals.css";
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Container,
-  Divider,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-} from "@mui/material";
+
 import type { AppProps } from "next/app";
 import Opportunity from "../Opportunity";
 import theme from "../../material_theme";
@@ -24,6 +13,7 @@ import {
   defaultChains,
   configureChains,
   chain,
+  useSigner,
 } from "wagmi";
 
 import { alchemyProvider } from "wagmi/providers/alchemy";
@@ -36,13 +26,8 @@ import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { ethers, getDefaultProvider } from "ethers";
 import { Provider as ReduxProvider } from "react-redux";
 import { store } from "../store";
-import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
-import apolloClient from "../apollo";
-import { SearchProvider } from "../context/SearchContext";
-import { Inbox, Mail } from "@mui/icons-material";
-import { PINATA_JWT } from "../constant";
-import axios from 'axios'
-import { generatePinataData, getJSONFromIPFSPinata, pinJSONToIPFSPinata } from "../common/ipfs-helper";
+import {  ApolloProvider } from "@apollo/react-hooks";
+import apolloClient from '../apollo'
 
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat],
@@ -108,11 +93,11 @@ function MyApp({ Component, pageProps }: AppProps) {
             <ThemeProvider theme={theme}>
               <CssBaseline />
               <ApolloProvider client={apolloClient}>
-                <SearchProvider>
+        
                   <Opportunity>
                     <Component {...pageProps} />
                   </Opportunity>
-                </SearchProvider>
+          
               </ApolloProvider>
             </ThemeProvider>
           </ReduxProvider>
@@ -121,4 +106,4 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default MyApp;
+export default MyApp

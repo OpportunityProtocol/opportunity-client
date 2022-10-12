@@ -1,8 +1,4 @@
 import { chain } from 'wagmi'
-import CoinbaseWalletSDK from '@coinbase/wallet-sdk';
-import Torus from '@toruslabs/torus-embed';
-import WalletConnectProvider from '@walletconnect/web3-provider';
-import Fortmatic from 'fortmatic';
 
 export const ALCHEMY_API_KEY=process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
 export const ALCHEMY_HTTPS=process.env.NEXT_PUBLIC_ALCHEMY_HTTPS

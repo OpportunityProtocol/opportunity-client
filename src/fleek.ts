@@ -14,32 +14,43 @@ interface IFleekApi {
 }
 
 const getIndividualUserFileData = async (key: string): Promise<any> => {
-  const myFile = await fleekStorage.get({
+  const { hash, data: dataAsUint8 } = await fleekStorage.get({
     apiKey: process.env.NEXT_PUBLIC_FLEEK_STORAGE_API_KEY,
     apiSecret: process.env.NEXT_PUBLIC_FLEEK_STORAGE_API_SECRET,
     key: String(USER_DATA_FOLDER + key),
     getOptions: ["data", "bucket", "key", "hash", "publicUrl"],
   });
+
+
+  const fileData = await fleekStorage.getFileFromHash({ hash })
+
+  return fileData
 };
 
 const getIndividualServiceFileData = async (key: string): Promise<any> => {
-  const myFile = await fleekStorage.get({
+  const { hash, data: dataAsUint8 }  = await fleekStorage.get({
     apiKey: process.env.NEXT_PUBLIC_FLEEK_STORAGE_API_KEY,
     apiSecret: process.env.NEXT_PUBLIC_FLEEK_STORAGE_API_SECRET,
     key: String(SERVICE_DATA_FOLDER + key),
     getOptions: ["data", "bucket", "key", "hash", "publicUrl"],
   });
+
+  const fileData = await fleekStorage.getFileFromHash({ hash })
+
+  return fileData
 };
 
 const getIndividualContractFileData = async (key: string): Promise<any> => {
-  const { data } = await fleekStorage.get({
+  const { hash, data: dataAsUint8 } = await fleekStorage.get({
     apiKey: process.env.NEXT_PUBLIC_FLEEK_STORAGE_API_KEY,
     apiSecret: process.env.NEXT_PUBLIC_FLEEK_STORAGE_API_SECRET,
     key: String(CONTRACT_DATA_FOLDER + key),
     getOptions: ["data", "bucket", "key", "hash", "publicUrl"],
   });
 
-  return data;
+  const fileData = await fleekStorage.getFileFromHash({ hash })
+
+  return fileData
 };
 
 const uploadUserData = async (

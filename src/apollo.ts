@@ -1,4 +1,4 @@
-import { ApolloClient, createHttpLink, InMemoryCache, ApolloProvider, gql, HttpLink, ApolloLink, NormalizedCacheObject } from '@apollo/client';
+import { createHttpLink, InMemoryCache, HttpLink, ApolloClient, ApolloProvider, gql, ApolloLink, NormalizedCacheObject } from '@apollo/client';
 import { APOLLO_CLIENT_URI, LENS_API } from './constant';
 import { setContext } from '@apollo/client/link/context';
 
@@ -8,7 +8,13 @@ const httpLink = new HttpLink({
   fetch
 })
 
-const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
+const lensLink = new HttpLink({
+  uri: LENS_API,
+  fetchOptions: 'no-cors',
+  fetch
+})
+
+const client = new ApolloClient({
   link: httpLink,
   headers: {
     'Access-Control-Allow-Origin': '*'
@@ -16,10 +22,10 @@ const client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
   cache: new InMemoryCache()
 })
 
-const lens_client: ApolloClient<NormalizedCacheObject> = new ApolloClient({
-  uri: LENS_API,
+const lens_client = new ApolloClient({
+  link: lensLink,
   headers: {
-    'Access-Control-Allow-Origin': '*'
+    'Access-Control-Allow-Origin': 'https://api-sandbox-mumbai.lens.dev'
   },
   cache: new InMemoryCache(),
 })

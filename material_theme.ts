@@ -12,9 +12,8 @@ const theme = createTheme({
       secondary: "rgba(33, 33, 33, .85)",
     },
     secondary: {
-      light: "#edc2d7",
-      main: "#ff",
-      dark: "#6a3c55",
+      main: "#212121",
+
     },
     divider: "#ddd",
   },
@@ -34,7 +33,7 @@ const theme = createTheme({
     },
     MuiTabs: {
       defaultProps: {
-        indicatorColor: "primary",
+        indicatorColor: "secondary",
       },
       styleOverrides: {
         root: {
@@ -59,7 +58,8 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: {
-          fontWeight: '600'
+          fontWeight: '600',
+          fontSize: 13,
         /*  backgroundColor: "#f9f9fb",
           border: "1px solid #EFF2F6",
           "&.Mui-selected": {

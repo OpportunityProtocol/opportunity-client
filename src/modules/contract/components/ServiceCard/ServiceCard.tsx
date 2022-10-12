@@ -5,6 +5,7 @@ import {
   Avatar,
   CardContent,
   Grid,
+  Skeleton,
   CardMedia,
   Button,
   CardActions,
@@ -129,6 +130,7 @@ const ServiceCard = ({
   const provider = useProvider()
 
   const [loadedData, setLoadedData] = useState<any>(data);
+  const [loading, setLoading] = useState(false)
 
   const [serviceOwnerLensData, setServiceOwnerLensData] =
     useState<any>({});
@@ -265,11 +267,15 @@ const ServiceCard = ({
 
   useEffect(() => {
     async function loadMetadata() {
-      const metadata = await getJSONFromIPFSPinata(data?.metadataPtr);
+      const metadata = await getJSONFromIPFSPinata(data?.metadataPtr).finally(() => setLoading(false))
       setServiceMetadata(metadata);
     }
 
-    loadMetadata();
+    if (data?.metadataPtr) {
+      setLoading(true)
+      loadMetadata();
+    }
+
   }, [data?.metadataPtr]);
 
   const getDomain = () => {
@@ -486,139 +492,20 @@ const ServiceCard = ({
   };
 
   return (
-    table ?
-      (
-        <Grid item xs={12} md={6} lg={4} sx={{ width: '100%' }}>
-          <Box
-            onClick={
-              userAddress
-                ? () => router.push(`/view/service/${data?.id}`)
-                : () => { }
-            }
-            component={Card}
-            sx={{
-              position: 'relative',
-              boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-              WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-              MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-              width: "100%",
-              height: '200px',
-              //  display: "flex",
-              // height: 130,
-              cursor: userAddress ? "pointer" : "auto",
-            }}
-          >
-            <Box sx={{ display: 'flex' }} alignItems='center'>
-              {errors?.metadataError ? (
-                <img src="" style={{ height: 110, width: 110 }} />
-              ) : (
-                <img
-                  src={URL.createObjectURL(new Blob([displayImg]))}
-                  style={{
-                    marginRight: 15,
-                    borderRadius: 6,
-                    width: 110,
-                    height: 110,
-                  }}
-                />
-              )}
+    <Grid item xs={12} md={6} lg={4}>
+      <Card variant="outlined" className={cx(cardStyles.root)} sx={{
+        boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+        WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+        MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+      }}>
+        <CardActionArea
+          onClick={handleOnNavigateToServicePage}
+          sx={{ height: 250, width: "100%" }}
+        >
+          {
+            loading ? <Skeleton sx={{ width: '100%', height: '100%' }} variant='rectangular' /> :
 
-              <Box>
-                <Typography fontWeight="bold" fontSize={14}>
-                  {serviceMetadata?.serviceTitle
-                    ? serviceMetadata?.serviceTitle
-                    : "Unable to load service title"}
-                </Typography>
-                <Typography paragraph fontWeight="medium" fontSize={12}>
-                  {serviceMetadata?.serviceDescription
-                    ? serviceMetadata?.serviceDescription
-                    : "Unable to load service description"}
-                </Typography>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  {serviceMetadata?.tags &&
-                    serviceMetadata?.tags?.length > 0 ? (
-                    serviceMetadata?.tags?.map((tag) => {
-                      return (
-                        <Chip
-                          variant="filled"
-                          sx={{ fontSize: 12, padding: 1, backgroundColor: "#eee" }}
-                          label={tag}
-                          size="small"
-                        />
-                      );
-                    })
-                  ) : (
-                    <Typography color="text.secondary" variant="caption">
-                      Unable to load tags
-                    </Typography>
-                  )}
-                </Stack>
-              </Box>
-            </Box>
-
-            <Box sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-              <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography fontSize={12}>
-                    Cost: &nbsp;
-                  </Typography>
-                  <Stack direction="row" spacing={0.5}>
-                    <img
-                      src="/assets/images/dai.svg"
-                      style={{ width: 18, height: 18 }}
-                    />
-                    <Typography variant="body2" fontSize={12}>
-                      $25.99
-                    </Typography>
-                  </Stack>
-                </Box>
-
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Typography fontSize={12}>
-                    Created: &nbsp;
-                  </Typography> {moment().format("h:mm A")}
-                </Box>
-              </Box>
-
-              {purchase ? renderButtonState() : null}
-            </Box>
-
-
-
-            <Box sx={{ position: 'absolute', top: 0, right: 0 }}>
-              <StatusChip status="Unclaimed" />
-            </Box>
-          </Box>
-
-
-
-          <ConfirmationDialog
-            success={resolveServiceSuccessful}
-            loading={resolveServiceLoading}
-            open={resolveServiceDialogIsOpen}
-            onOpen={() => { }}
-            onClose={() => setResolveServiceDialogIsOpen(false)}
-            hasSigningStep={false}
-            content={confirmationDialogContent}
-            signAction={onSign}
-            primaryAction={approveDai}
-            primaryActionTitle="Confirm"
-          />
-
-        </Grid>)
-      :
-      (
-        <Grid item xs={12} md={6} lg={4}>
-          <Card variant="outlined" className={cx(cardStyles.root)} sx={{
-            boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-            WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-            MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-          }}>
-            <CardActionArea
-              onClick={handleOnNavigateToServicePage}
-              sx={{ height: 250, width: "100%" }}
-            >
-              {errors.metadataError ? (
+              errors.metadataError ? (
                 <Box
                   display="flex"
                   alignItems="center"
@@ -636,89 +523,97 @@ const ServiceCard = ({
                   sx={{ height: "100%", width: "100%" }}
                 />
               )}
-            </CardActionArea>
+        </CardActionArea>
 
-            <CardContent>
-              <Box
-                display="flex"
-                alignItems="flex-start"
-                justifyContent="space-between"
+        <CardContent sx={{ width: '100%' }}>
+          <Box
+            display="flex"
+            alignItems="flex-start"
+            justifyContent="space-between"
+          >
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="flex-start"
+            >
+              <Avatar />
+              <Typography px={2}>
+                {serviceOwnerLensData?.handle}
+              </Typography>
+            </Stack>
+
+            <Box sx={{ width: '100%' }}>
+              <Typography
+                fontWeight="medium"
+                fontSize={14}
+                color="#616161"
+                style={{
+                  width: '100%',
+                  paddingTop: "10px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                }}
               >
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="flex-start"
-                >
-                  <Avatar />
-                </Stack>
-              </Box>
+                {loading ? <Skeleton variant='text' component='h3' sx={{ width: '100%' }} /> : serviceMetadata?.serviceTitle ? serviceMetadata?.serviceTitle : 'Unable to load title'}
+              </Typography>
 
-              <Box>
-                <Typography
-                  fontWeight="medium"
-                  fontSize={14}
-                  color="#616161"
-                  style={{
-                    paddingTop: "10px",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                  }}
-                >
-                  {serviceMetadata?.serviceTitle}
-                </Typography>
-                <Typography
-                  paragraph
-                  fontWeight="medium"
-                  fontSize={12}
-                  color="#616161"
-                  style={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                  }}
-                >
-                  {serviceMetadata?.serviceDescription}
-                </Typography>
-              </Box>
+              <Typography
+                paragraph
+                fontWeight="medium"
+                fontSize={12}
+                color="#616161"
+                style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                }}
+              >
+                {loading ? <Skeleton variant='text' component='h6' sx={{ height: 45, width: '100% !important' }} /> : serviceMetadata?.serviceDescription ? serviceMetadata?.serviceDescription : 'Unable to load description'}
+              </Typography>
+            </Box>
+
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Typography fontWeight="medium" fontSize={13} color="rgb(94, 94, 94)">
+                Price:
+              </Typography>
 
               <Stack direction="row" alignItems="center" spacing={0.5}>
-                <Typography fontWeight="medium" fontSize={13} color="rgb(94, 94, 94)">
-                  Price:
+                <img
+                  src="/assets/images/dai.svg"
+                  style={{ width: 15, height: 20 }}
+                />
+                <Typography fontSize={13}>
+                  {Math.random().toPrecision(2)}{" "}
                 </Typography>
-
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <img
-                    src="/assets/images/dai.svg"
-                    style={{ width: 15, height: 20 }}
-                  />
-                  <Typography fontSize={13}>
-                    {Math.random().toPrecision(2)}{" "}
-                  </Typography>
-                </Stack>
               </Stack>
-            </CardContent>
-            {renderButtonState()}
-            <ConfirmationDialog
-              success={resolveServiceSuccessful}
-              loading={resolveServiceLoading}
-              open={resolveServiceDialogIsOpen}
-              onOpen={() => { }}
-              onClose={() => setResolveServiceDialogIsOpen(false)}
-              hasSigningStep={true}
-              content={confirmationDialogContent}
-              signAction={onSign}
-              primaryAction={approveDai}
-              primaryActionTitle="Confirm"
-            />
-          </Card>
-        </Grid>
-      )
-  );
+            </Stack>
+          </Box>
+
+
+
+
+        </CardContent>
+        {renderButtonState()}
+        <ConfirmationDialog
+          success={resolveServiceSuccessful}
+          loading={resolveServiceLoading}
+          open={resolveServiceDialogIsOpen}
+          onOpen={() => { }}
+          onClose={() => setResolveServiceDialogIsOpen(false)}
+          hasSigningStep={true}
+          content={confirmationDialogContent}
+          signAction={onSign}
+          primaryAction={approveDai}
+          primaryActionTitle="Confirm"
+        />
+      </Card>
+    </Grid>
+  )
 };
 
 export { type IServiceCardProps };

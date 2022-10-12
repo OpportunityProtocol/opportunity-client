@@ -137,16 +137,13 @@ const CreateContractPage: NextPage = (): JSX.Element => {
     marketsQuery.refetch();
   }, []);
 
-  const networkManager_createContractPrepare = usePrepareContractWrite({
+  const networkManager_createContract = useContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "createContract",
     enabled: true,
     args: [createContractForm.contract_market_id, contractMetadataURI],
-  });
-
-  const networkManager_createContract = useContractWrite({
-    ...networkManager_createContractPrepare.config,
+    mode: "recklesslyUnprepared",
     onSuccess(data, variables, context) {
 
 
@@ -283,19 +280,16 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         const tempFormData = JSON.parse(JSON.stringify(createContractForm))
         delete tempFormData['contract_market_id']
 
-        const data = generatePinataData(String(accountData.address) +
-          ":" +
-          createContractForm.contract_title, tempFormData)
-        retVal = await pinJSONToIPFSPinata(data)
+        retVal = await fleek.uploadContract(String(accountData.address) + ":" + createContractForm.contract_title, JSON.stringify(tempFormData)) //await pinJSONToIPFSPinata(data)
       }
 
-      await networkManager_createContract.write({
+      await networkManager_createContract?.write({
         recklesslySetUnpreparedArgs: [createContractForm.contract_market_id, String(retVal)],
       });
 
       setContractMetadataURI(retVal);
     } catch (error) {
-
+console.log(error)
       setCreateContractDialogState({
         ...createContractDialogState,
         loading: false,
@@ -369,25 +363,25 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                 {marketDetails && marketDetails?.length ? (
                   marketDetails.slice(0, 6).map((details) => {
                     return (
-                  
-                        <MarketDisplay
-                          small
-                          marketDetails={details}
-                          isShowingStats={false}
-                          selected={
-                            details?.id === createContractForm.contract_market_id
-                          }
-                          selectable
-                          onSelect={() =>
-                            setCreateContractForm({
-                              ...createContractForm,
-                              contract_market_id: details?.id,
-                            })
-                          }
-                          showDescription={false}
-                          showStats={false}
-                        />
-                    
+
+                      <MarketDisplay
+                        small
+                        marketDetails={details}
+                        isShowingStats={false}
+                        selected={
+                          details?.id === createContractForm.contract_market_id
+                        }
+                        selectable
+                        onSelect={() =>
+                          setCreateContractForm({
+                            ...createContractForm,
+                            contract_market_id: details?.id,
+                          })
+                        }
+                        showDescription={false}
+                        showStats={false}
+                      />
+
                     );
                   })
                 ) : (
@@ -800,7 +794,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
           </CardContent>
         </Card>
 
-        {/*  <Card variant="outlined">
+          <Card variant="outlined">
         <CardContent>
           <Box>
             <Box pb={1}>
@@ -837,7 +831,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
             </FormGroup>
           </Box>
         </CardContent>
-              </Card> */}
+              </Card> 
 
         <Stack justifyContent="flex-end" direction="row">
           <Button
