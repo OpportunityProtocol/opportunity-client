@@ -23,7 +23,7 @@ export async function getMetadata(metadataString: string) {
         const parsedData = JSON.parse(parsedString);
         return parsedData
       } else {
-        retVal = await getJSONFromIPFSPinata(metadataString)  //await fleek.getService(metadataString);
+        retVal = await fleek.getService(metadataString); //getJSONFromIPFSPinata(metadataString)  
         return retVal 
       }
 

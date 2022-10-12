@@ -12,6 +12,7 @@ import {
   CardContent,
   Typography,
   Alert,
+  Skeleton,
   Grid,
   Stack,
   Divider,
@@ -36,6 +37,7 @@ import { getJSONFromIPFSPinata, getMetadata } from "../../../../common/ipfs-help
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../../../user/userReduxSlice";
+import fleek from "../../../../fleek";
 
 /**
  * @author Elijah Hampton
@@ -105,6 +107,9 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
   });
   const [contractMetadata, setContractMetadata] = useState({});
   const [metadataString, setMetadataString] = useState("");
+  const [loading, setLoading] = useState(false)
+
+  const userAddress = useSelector(selectUserAddress)
 
   const networkManager_getContractData = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -163,284 +168,199 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
     }
   }, [contractOwnerData?.lensProfileId]);
 
-  console.log(contractMetadata)
-
   useEffect(() => {
     networkManager_getLensProfileIdFromAddress.refetch();
   }, [data?.employer]);
 
   useEffect(() => {
     async function loadMetadata() {
-      const metadata = await getJSONFromIPFSPinata(metadataString)
+      const metadata = await fleek.getContract(String(metadataString).slice(13))
       setContractMetadata(metadata);
     }
 
     if (metadataString) {
-      loadMetadata();
+      setLoading(true)
+      loadMetadata().finally(() => setLoading(false))
     }
   }, [metadataString]);
 
-  const userAddress = useSelector(selectUserAddress)
 
-  return table ? (
-    <>
-      <TableRow
-        onClick={
-          userAddress
-            ? () => router.push(`/view/contract/${data?.id}`)
-            : () => { }
-        }
-        component={Paper}
-        //   variant="outlined"
+  return (
+    <Grid xs={12} md={6} lg={4}>
+      <Card
+        onClick={() => router.push(`/view/contract/${data?.id}`)}
+        key={Math.random()}
+
+        square
+        // variant="outlined"
         sx={{
-          boxShadow: '0px 1px 3px 0px #eee, 0px 1px 1px 0px #eee, 0px 2px 1px -1px #eee',
-          // border: 'none !important',
-          position: 'relative',
+          boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+          WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+          MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+          cursor: "pointer",
           width: "100%",
-          minWidth: "100% !important",
-          display: "flex",
-          height: 130,
-          cursor: userAddress ? "pointer" : "auto",
+          height: '200px',
+          "&:hover": {
+            color: (theme) => theme.palette.primary.main,
+          },
         }}
       >
-        <TableBodyCell sx={{ width: "100% !important" }}>
-          <Box display="flex">
+        <CardContent
+          sx={{
+            display: "flex",
+            height: 210,
+            flexDirection: "column",
+            justifyContent: "space-evenly",
+          }}
+        >
+          {
+            loading ? <Skeleton variant='text' component='h3' /> :
 
-            <Box
 
-              sx={{
-                bgcolor: '#eee',
-                border: 'none',
-                marginRight: 2,
-                borderRadius: 1,
-                width: 120,
-                height: 108,
-              }}
-            />
+              contractMetadata?.contract_title ? (
+                <Typography fontWeight="600">
+                  {contractMetadata?.contract_title}
+                </Typography>
+              ) : (
+                <Typography fontWeight="600">
+                  Unable to load contract title
+                </Typography>
+              )}
 
-            <Box>
-              <Typography fontWeight="medium" fontSize={14}>
-                {contractMetadata?.contract_title
-                  ? contractMetadata?.contract_title
-                  : "Unable to title"}
-              </Typography>
-              <Typography paragraph fontSize={12}>
-                {contractMetadata?.contract_description
+          <Box
+            component={Typography}
+            paragraph
+            color="rgb(90, 104,119)"
+            fontSize={13}
+            fontWeight="medium"
+            sx={{
+              height: 30,
+              display: "-webkit-box",
+              overflow: "hidden",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 2,
+              textOverflow: "ellipsis",
+            }}
+          >
+            {
+              loading ? <Skeleton variant='text' component='h6' sx={{ height: 45 }} /> :
+
+                contractMetadata?.contract_description
                   ? contractMetadata?.contract_description
                   : "Unable to load description"}
-              </Typography>
-              <Typography fontSize={12}>
-                {contractMetadata?.contract_definition_of_done
-                  ? contractMetadata?.contract_definition_of_done
-                  : "Unable to requirements"}
-              </Typography>
-              <Stack mt={0.5} direction="row" alignItems="center" spacing={1}>
-                {contractMetadata?.tags &&
-                  contractMetadata?.tags?.length > 0 ? (
+          </Box>
+
+          <Grid
+            pb={2}
+            container
+            direction="row"
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="flex-start"
+          >
+            {
+
+              loading ?
+                <Stack direction='row' alignItems='center' spacing={2}>
+                  {[0, 1, 2].map((num) => <Skeleton sx={{ width: 48, height: 37, borderRadius: 3 }} />)}
+                </Stack>
+                :
+
+                contractMetadata?.tags && contractMetadata?.tags?.length > 0 ? (
                   contractMetadata?.tags?.map((tag) => {
                     return (
-                      <Chip
-                        variant="filled"
-                        sx={{ fontSize: 12, width: 'auto', height: 20, backgroundColor: "#eee" }}
-                        label={tag}
-                        size="small"
-                      />
+                      <Grid item mr={1} key={tag}>
+                        <Chip
+                          variant="filled"
+                          sx={{ fontSize: 12, padding: 1, backgroundColor: "#eee" }}
+                          label={tag}
+                          size="small"
+                        />
+                      </Grid>
                     );
                   })
                 ) : (
-                  <Typography color="text.secondary" variant="caption">
-                    Unable to load tags
-                  </Typography>
+                  <Typography variant="caption">Unable to load tags</Typography>
                 )}
-              </Stack>
-            </Box>
-          </Box>
-
-        </TableBodyCell>
-        <TableBodyCell sx={{ width: 150 }}>
-          <Stack direction="row" spacing={0.5}>
-            <img
-              src="/assets/images/dai.svg"
-              style={{ width: 18, height: 18 }}
-            />
-            <Typography variant="body2" fontSize={12}>
-              {contractMetadata?.contract_budget}
-            </Typography>
-          </Stack>
-        </TableBodyCell>
-        <TableBodyCell sx={{ width: 150 }}>
-          <StatusChip status="Unclaimed" />
-        </TableBodyCell>
-        <TableBodyCell sx={{ width: 150 }}>
-          {moment().format("h:mm A")}
-        </TableBodyCell>
-
-        <Box component={Alert} sx={{ borderTopLeftRadius: '10px !important', fontWeight: 'medium', borderRadius: 0, width: 200, height: 45, position: 'absolute', bottom: 0, right: 0 }}>
-          Check requirements
-        </Box>
-      </TableRow>
-
-    </>
-  ) : (
-    <Grid xs={12} md={6} lg={4}>
-    <Card
-      onClick={
-        accountData.address
-          ? () => router.push(`/view/contract/${data?.id}`)
-          : () => { }
-      }
-      key={Math.random()}
-      square
-      // variant="outlined"
-      sx={{
-        boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-        WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-        MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-        //  boxShadow: "0 19px 38px #eee, 0 15px 12px #eee",
-        cursor: accountData.address ? "pointer" : "auto",
-        width: "100%",
-        height: '200px',
-        "&:hover": {
-          color: (theme) => theme.palette.primary.main,
-        },
-      }}
-    >
-      <CardContent
-        sx={{
-          display: "flex",
-          height: 210,
-          flexDirection: "column",
-          justifyContent: "space-evenly",
-        }}
-      >
-        {/* <Typography color="text.secondary" fontWeight="medium" fontSize={13}>
-          August 1, 2022 - 1:59 PM
-        </Typography> */}
-        {contractMetadata?.contract_title ? (
-          <Typography fontWeight="600">
-            {contractMetadata?.contract_title}
-          </Typography>
-        ) : (
-          <Typography fontWeight="600">
-            Unable to load contract title
-          </Typography>
-        )}
-
-        <Box
-          component={Typography}
-          paragraph
-          color="rgb(90, 104,119)"
-          fontSize={13}
-          fontWeight="medium"
-          sx={{
-            height: 30,
-            display: "-webkit-box",
-            overflow: "hidden",
-            WebkitBoxOrient: "vertical",
-            WebkitLineClamp: 2,
-            textOverflow: "ellipsis",
-          }}
-        >
-          {contractMetadata?.contract_description
-            ? contractMetadata?.contract_description
-            : "Unable to load description"}
-        </Box>
-
-        <Grid
-          pb={2}
-          container
-          direction="row"
-          flexDirection="row"
-          alignItems="center"
-          justifyContent="flex-start"
-        >
-          {contractMetadata?.tags && contractMetadata?.tags?.length > 0 ? (
-            contractMetadata?.tags?.map((tag) => {
-              return (
-                <Grid item mr={1} key={tag}>
-                  <Chip
-                    variant="filled"
-                    sx={{ fontSize: 12, padding: 1, backgroundColor: "#eee" }}
-                    label={tag}
-                    size="small"
-                  />
-                </Grid>
-              );
-            })
-          ) : (
-            <Typography variant="caption">Unable to load tags</Typography>
-          )}
-        </Grid>
-
-        <Grid
-          sx={{ width: "100%" }}
-          container
-          item
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Grid item sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography mr={0.5} component='span' fontSize={13} fontWeight='medium'>
-              Budget: {" "}
-            </Typography>
-
-            <Stack direction='row' alignItems='center'>
-              <Typography fontSize={13} fontWeight='medium'>
-                {contractMetadata?.contract_budget
-                  ? contractMetadata?.contract_budget
-                  : 0}{" "}
-              </Typography>
-              <img
-                src="/assets/images/dai.svg"
-                style={{ margin: '3px 3px', width: 15, height: 20 }}
-              />
-            </Stack>
           </Grid>
-          <Grid item>
-            <Stack direction='row' alignItems='center'>
-              <Typography fontSize={12}>
-                Predicted Duration:
-              </Typography>
-              &nbsp;
-            <Chip
-              variant="outlined"
-              size="small"
-              label={
-                contractMetadata?.duration
-                  ? contractMetadata?.duration
-                  : "Undefined"
-              }
-            />
-            </Stack>
-            
-          </Grid>
-        </Grid>
-      </CardContent>
 
-      {
-        showStatus && (
-          <>
-            <Divider />
-            <CardContent>
-              <Box display="flex" alignItems="center" justifyContent="center">
-                <Typography fontSize={13} color="text.secondary">
-                  Status:{" "}
-                  <Typography
-                    fontSize={13}
-                    fontWeight="medium"
-                    component="span"
-                    color="green"
-                  >
-                    Resolved
-                  </Typography>
+          <Grid
+            sx={{ width: "100%" }}
+            container
+            item
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Grid item sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography mr={0.5} component='span' fontSize={13} fontWeight='medium'>
+                Budget: {" "}
+              </Typography>
+
+              <Stack direction='row' alignItems='center'>
+                <Typography fontSize={13} fontWeight='medium'>
+                  {loading ? <Skeleton variant='text' sx={{ width: 15, height: 20 }} />
+                    :
+                    contractMetadata?.contract_budget
+                      ? contractMetadata?.contract_budget
+                      : 0}{" "}
                 </Typography>
-              </Box>
-            </CardContent>
-          </>
-        )
-      }
-    </Card>
+                <img
+                  src="/assets/images/dai.svg"
+                  style={{ margin: '3px 3px', width: 15, height: 20 }}
+                />
+              </Stack>
+            </Grid>
+            <Grid item>
+              <Stack direction='row' alignItems='center'>
+                <Typography fontSize={12}>
+                  Predicted Duration:
+                </Typography>
+                &nbsp;
+                {
+                  loading ? 
+                  <Skeleton sx={{ width: 48, height: 37, borderRadius: 3 }} />
+                  :
+                  <Chip
+                  variant="outlined"
+                  size="small"
+                  label={
+                    contractMetadata?.duration
+                      ? contractMetadata?.duration
+                      : "Undefined"
+                  }
+                />
+                }
+              
+              </Stack>
+
+            </Grid>
+          </Grid>
+        </CardContent>
+
+        {
+          showStatus && (
+            <>
+              <Divider />
+              <CardContent>
+                <Box display="flex" alignItems="center" justifyContent="center">
+                  <Typography fontSize={13} color="text.secondary">
+                    Status:{" "}
+                    <Typography
+                      fontSize={13}
+                      fontWeight="medium"
+                      component="span"
+                      color="green"
+                    >
+                      Resolved
+                    </Typography>
+                  </Typography>
+                </Box>
+              </CardContent>
+            </>
+          )
+        }
+      </Card>
     </Grid>
   );
 };

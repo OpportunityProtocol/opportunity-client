@@ -5,7 +5,11 @@ import {
     Container,
     Typography,
     Divider,
-    Avatar
+    Avatar,
+    Card,
+    CardContent,
+    alpha,
+    Chip
 } from '@mui/material'
 import { QueryResult, useQuery } from '@apollo/client'
 import { GET_MARKETS } from '../../../modules/market/MarketGQLQueries'
@@ -14,6 +18,7 @@ import { NextPage } from 'next'
 import { GET_VERIFIED_FREELANCERS } from '../../../modules/user/UserGQLQueries'
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import { NextRouter, useRouter } from 'next/router'
+import { MoreHoriz, MoreHorizOutlined } from '@mui/icons-material'
 
 const MarketHome: NextPage<any> = () => {
     const router: NextRouter = useRouter()
@@ -36,50 +41,21 @@ const MarketHome: NextPage<any> = () => {
 
     return (
         <Container maxWidth='xl' sx={{ bgcolor: 'white', height: '100%' }}>
-            <Box mt={2} mb={1}>
-                <Typography pb={2} fontWeight='bold' variant='h5'>
-                    Active Freelancers
-                </Typography>
-
-                <Stack direction='row' alignItems='center' spacing={5}>
+            <Box>
+                <Box mt={2} mb={2}>
+                    <Typography fontWeight='bold' fontSize={16} color='#212121'>
+                        Labor Markets
+                    </Typography>
+                </Box>
+                <Grid container direction='row' alignItems='center' spacing={3}>
                     {
-                        activeFreelancers.map((freelancer) => 
-                        <Stack onClick={() => router.push(`/view/profile/${freelancer.address}`)} sx={{ mr: 1, cursor: 'pointer' }} spacing={0.5} alignItems='center'>
-
-                        <Jazzicon
-                        key={freelancer.address}
-                        diameter={60}
-                        seed={jsNumberForAddress(String(freelancer.address))}
-                      />
-                      <Typography fontWeight='300' fontSize={10}>
-                        {freelancer.address.slice(0,8)} {/*freelancer.handle*/}
-                      </Typography>
-                      </Stack>
-                        
-                        )}
-                </Stack>
-            </Box>  
-
-
-            <Divider  sx={{ my: 3 }} />
-
-            <Box mt={2} mb={1}>
-                <Typography color='#aaa' fontSize={14}>
-                    {markets?.length} Active Markets
-                </Typography>
-                <Typography py={1} variant='h5' fontWeight='bold'>
-                    Markets
-                </Typography>
+                        markets.map((marketDetails) => {
+                            return <MarketDisplay marketDetails={marketDetails} />
+                        })
+                    }
+                </Grid>
             </Box>
-       
-            <Grid container direction='row' alignItems='center' spacing={3}>
-                {
-                    markets.map((marketDetails) => {
-                        return <MarketDisplay marketDetails={marketDetails} />
-                    })
-                }
 
-            </Grid>
         </Container>
     )
 }

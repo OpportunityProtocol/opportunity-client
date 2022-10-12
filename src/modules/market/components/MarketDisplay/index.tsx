@@ -1,7 +1,7 @@
 import { useState, FC, useEffect, memo } from "react";
 import { useStyles } from "./MarketDisplayStyles";
 
-import { Typography, CardContent, Grid, Divider } from "@mui/material";
+import { Typography, CardContent, Grid, Divider, alpha, Card, CardActions, CardActionArea, Button } from "@mui/material";
 import ClickableCard from "../../../../common/components/ClickableCard/ClickableCard";
 import { NextRouter, useRouter } from "next/router";
 
@@ -37,8 +37,6 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
     useStyles();
   const router: NextRouter = useRouter();
 
-  const [marketInfo, setMarketInfo] = useState<any>([]);
-
   const handleOnSelect = (): void => {
     // internal
 
@@ -46,40 +44,20 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
     onSelect();
   };
 
-  return text ? (
-    <Box>
-      <Typography
-        fontSize={13}
-        fontWeight="medium"
-        color={(theme) => theme.palette.primary.main}
-      >
-        {marketDetails?.name
-          ? marketDetails?.name
-          : "Unable to load market name"}
-      </Typography>
-    </Box>
-  ) : (
+  return (
     <Grid item xs={12} md={6} lg={4}>
-      <ClickableCard
+      <Card
         sx={{
-          boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-          WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-          MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+          boxShadow: 'rgba(0, 0, 0, 0.1) -4px 9px 25px -6px',
+          cursor: 'pointer',
           border: (theme) =>
             selected
               ? `2px solid ${theme.palette.primary.main}`
-              : "1px solid #eee",
+              : `1px solid #eee`,
         }}
-        variant="outlined"
         onClick={selectable ? () => handleOnSelect() : () => router.push(`/view/market/${marketDetails?.id}`)}
       >
-        <Box sx={{ width: "100%", height: 150 }}>
-          <img
-            style={{ width: "100%", height: "100%" }}
-            src="/assets/images/carousel_two.jpeg"
-          />
-        </Box>
-        <Divider />
+
         <CardContent className={classes.primaryContentContainer}>
           <Grid
             container
@@ -121,18 +99,8 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
             </Typography>
           )}
 
-          {isShowingStats && (
-            <Typography
-              color="#49A882"
-              pt={2}
-              variant="body2"
-              sx={{ height: 25 }}
-            >
-              {Math.floor(Math.random() * 3200)} contracts and services available
-            </Typography>
-          )}
         </CardContent>
-      </ClickableCard>
+      </Card>
     </Grid>
   );
 };

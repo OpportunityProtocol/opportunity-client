@@ -19,6 +19,7 @@ import {
   ListItemButton,
   ListItemIcon,
   Chip,
+  alpha,
 } from "@mui/material";
 
 import { useRouter } from "next/router";
@@ -83,6 +84,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
+import { getRefreshToken, login } from "../../../modules/lens/LensAPIAuthentication";
+import SearchBar from "../SearchBar/SearchBar";
 
 
 const NavigationBar: FC = (): JSX.Element => {
@@ -91,7 +94,7 @@ const NavigationBar: FC = (): JSX.Element => {
   const connectData = useConnect();
   const accountData = useAccount();
   const dispatch = useDispatch();
-  const { data: signer } = useSigner()
+  const signer = useSigner()
   const feeData = useFeeData({
     enabled: false,
     watch: false
@@ -193,7 +196,7 @@ const NavigationBar: FC = (): JSX.Element => {
     functionName: "mint",
     chainId: CHAIN_ID,
     args: [userAddress, String(100 * (10 ** 18))],
-    signerOrProvider: signer,
+    signerOrProvider: signer.data,
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
@@ -212,8 +215,15 @@ const NavigationBar: FC = (): JSX.Element => {
 
   useEffect(() => {
     if (accountData?.status == 'connected') {
+      feeData.refetch()
       ethBalanceData.refetch()
+
+      signer.refetch().then((signer) => {
+        login(signer.data).then(() => console.log('login success')).catch((error) => console.log(error))
+      })
     }
+
+    handlesClose();
   }, [accountData?.status])
 
   useEffect(() => {
@@ -245,16 +255,6 @@ const NavigationBar: FC = (): JSX.Element => {
       setGasPrice(feeData.data.formatted.gasPrice);
     }
   }, [feeData.isLoading]);
-
-  useEffect(() => {
-    feeData.refetch()
-  }, []);
-
-  useEffect(() => {
-    if (accountData.isConnected) {
-      handlesClose();
-    }
-  }, [accountData.isConnected]);
 
   const onFetchLensProfileId = () => {
     if (accountData.address && accountData.address != ZERO_ADDRESS) {
@@ -359,15 +359,15 @@ const NavigationBar: FC = (): JSX.Element => {
       <AppBar
         variant="outlined"
         sx={{
-          width: router.pathname.includes('/view/market') || router.pathname == '/' ? `calc(100% - ${320}px)` : '100%',
-          ml: `${320}px`,
+          width: { sm: `calc(100% - ${280}px)` },
+          ml: { sm: `${280}px` },
           bgcolor: "#fff",
           border: 'none',
-          borderBottom: "1px solid #ddd !important",
-
+          borderBottom: `1px solid ${alpha("#b8e0d0", 0.3)} !important`,
+          height: '65px !important'
         }}
       >
-        <Toolbar className={classes.toolbar}>
+        <Toolbar disableGutters>
           <Container
             maxWidth="xl"
             sx={{ display: "flex", flexDirection: "column", bgcolor: "#fff" }}
@@ -382,14 +382,7 @@ const NavigationBar: FC = (): JSX.Element => {
               justifyContent="space-between"
             >
               <Grid item sx={{ display: "flex", alignItems: "center" }}>
-                <Stack direction="row" alignItems="center" sx={{}}>
-                  <img
-                    className={classes.clickableBrand}
-                    src="/assets/logo.svg"
-                    style={{ width: 40, height: 40 }}
-                  />
-                </Stack>
-
+                <img src='/assets/logo.svg' style={{ width: 40 ,height: 50 }} />
               </Grid>
 
               <Grid
@@ -402,7 +395,8 @@ const NavigationBar: FC = (): JSX.Element => {
               >
                 <Stack direction="row" alignItems="center" spacing={1}>
                   {
-                    userData.data?.handle && (
+                    !userData.data?.verifiedUsers[0]?.handle  && (
+
                       <Chip
                         sx={{
                           fontWeight: "medium",
@@ -432,46 +426,25 @@ const NavigationBar: FC = (): JSX.Element => {
                           fontSize: "11px",
                           bgcolor: "rgb(245, 245, 245)",
                         }}
-                        icon={
-                          <HelpOutline
-                            fontSize="small"
-                            sx={{ color: "rgb(158, 158, 166)" }}
-                          />
-                        }
+
                         label="Add Funds"
                         size='small'
                         onClick={handleOnAddFunds}
                       />
                     )
                   }
-
-
-
                   <>
                     <Tooltip title="Create">
-                      <Chip
-                        size='small'
-                        clickable
-                        label="Create"
-                        sx={{
-                          fontWeight: "medium",
-                          border: "1px solid #ddd",
-                          fontSize: "11px",
-                          bgcolor: "rgb(245, 245, 245)",
-                        }}
+                      <Button
+                      disabled={!userData?.data?.verifiedUsers[0]?.handle}
+                        variant="text"
+                        color="secondary"
                         onClick={handleOnClickCreateIcon}
-                        aria-controls={
-                          createMenuIsOpen ? "create-menu" : undefined
-                        }
-                        aria-haspopup="true"
-                        aria-expanded={createMenuIsOpen ? "true" : undefined}
-                        icon={
-                          <AddCircleOutline
-                            fontSize="small"
-                            sx={{ color: "rgb(158, 158, 166)" }}
-                          />
-                        }
-                      />
+                      >
+                        <Typography color={userData?.data?.verifiedUsers[0]?.handle ? 'text.secondary' : 'text.disabled' } fontWeight='600' fontSize={12}>
+                          Create
+                        </Typography>
+                      </Button>
                     </Tooltip>
 
                     <Menu
@@ -550,28 +523,16 @@ const NavigationBar: FC = (): JSX.Element => {
                       </List>
                     </Menu>
                   </>
-
-
-
                   <>
-                    <Chip
-                      sx={{
-                        fontWeight: "medium",
-                        border: "1px solid #ddd",
-                        fontSize: "11px",
-                        bgcolor: "rgb(245, 245, 245)",
-                      }}
-                      icon={
-                        <HelpOutline
-                          fontSize="small"
-                          sx={{ color: "rgb(158, 158, 166)" }}
-                        />
-                      }
-                      label="Help"
-                      size='small'
+                    <Button
+                      variant="text"
+                      color="secondary"
                       onClick={handleOnClickHelpIcon}
-                    />
-
+                    >
+                      <Typography color='text.secondary' fontWeight='600' fontSize={12}>
+                        Help
+                      </Typography>
+                    </Button>
                     <Menu
                       anchorEl={helpMenuAnchorEl}
                       id="help-menu"
@@ -659,8 +620,6 @@ const NavigationBar: FC = (): JSX.Element => {
                       onClick={handleClickOpen}
                     />
                   )}
-
-
                 </Stack>
               </Grid>
             </Grid>
@@ -673,7 +632,7 @@ const NavigationBar: FC = (): JSX.Element => {
         >
           <DialogContent
             sx={{
-              border: "0.187rem solid #ddd",
+              border: "1px solid #eee",
               bordeRadius: "0.5rem",
               padding: "48px 56px",
             }}
@@ -691,17 +650,25 @@ const NavigationBar: FC = (): JSX.Element => {
                 cursor: "pointer",
               }}
             />
+            <Box my={2}>
             <DialogTitle
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
                 padding: "0px",
-                marginBottom: "2rem",
+                fontSize: 25,
+                fontWeight: '600'
               }}
             >
               Login
             </DialogTitle>
+            <Typography variant='caption'>
+              New to Lens Talent? {" " } Start by connecting a wallet.
+            </Typography>
+            </Box>
+
+
 
             <div>
               {connectData.connectors.slice(-2, 1).map((connector) => (
@@ -716,6 +683,7 @@ const NavigationBar: FC = (): JSX.Element => {
                     paddingLeft: "24px",
                     paddingRight: "163px",
                     paddingTop: "15px",
+                    border: '1px solid #ddd',
                     paddingBottom: "15px",
                     borderRadius: "0.1875rem",
                   }}
@@ -737,7 +705,7 @@ const NavigationBar: FC = (): JSX.Element => {
                       marginLeft: "1.3125rem",
                     }}
                   >
-                    {connector.name}
+                    Login with {connector.name}
 
                     {connectData.status === "loading" &&
                       connector.id === connectData.pendingConnector?.id &&
@@ -772,6 +740,7 @@ const NavigationBar: FC = (): JSX.Element => {
                   sx={{
                     paddingLeft: "24px",
                     paddingRight: "122px",
+                    border: '1px solid #ddd',
                     paddingTop: "12px",
                     paddingBottom: "12px",
                     borderRadius: "0.1875rem",
@@ -779,7 +748,7 @@ const NavigationBar: FC = (): JSX.Element => {
                 >
                   <img
                     src="/assets/images/coinbaseconnect.png"
-                    alt="coinnasewalletlogo"
+                    alt="coinbasewalletlogo"
                     style={{ width: 28, height: 28 }}
                   />
 
@@ -795,7 +764,7 @@ const NavigationBar: FC = (): JSX.Element => {
                       marginLeft: "1.3125rem",
                     }}
                   >
-                    {connector.name}
+                    Login with {connector.name}
                     {!connector.ready && " (unsupported)"}
                     {connectData.status === "loading" &&
                       connector.id === connectData.pendingConnector?.id &&
@@ -806,7 +775,15 @@ const NavigationBar: FC = (): JSX.Element => {
               ))}
               {connectData.error && <div>{connectData.error.message}</div>}
             </div>
+            <Box mt={2}>
+
+            <Typography variant='caption'>
+            Want to learn more about Lens Talent? <Typography component='span' variant='caption' color='primary' sx={{ cursor: 'pointer' }}> Read our guide </Typography>
+          </Typography>
+          </Box>
           </DialogContent>
+       
+
         </Dialog>
       </AppBar>
       <VerificationDialog

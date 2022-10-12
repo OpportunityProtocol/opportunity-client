@@ -117,7 +117,7 @@ const Settings: NextPage<any> = () => {
         });
 
       } else {
-        retVal = await getJSONFromIPFSPinata(ptr) //await fleek.getUser(ptr);
+        retVal = await fleek.getUser(ptr); //await getJSONFromIPFSPinata(ptr) 
 
         setMetadataState({
           ...retVal
@@ -263,12 +263,12 @@ const Settings: NextPage<any> = () => {
     } else {
 
       const data = generatePinataData(String(userAddress), metadataState)
-      retVal = await pinJSONToIPFSPinata(data)
+     // retVal = await pinJSONToIPFSPinata(data)
 
-      /*retVal = await fleek.uploadService(
+      retVal = await fleek.uploadService(
         String(userAddress),
-        JSON.stringify(metadataState)
-      );*/
+        JSON.stringify(data)
+      );
     }
 
     await networkManager_updateUser.writeAsync({

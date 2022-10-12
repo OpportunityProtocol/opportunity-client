@@ -283,9 +283,13 @@ const ExplorePage: NextPage = () => {
   const renderContracts = () => {
     switch (state.persona) {
       case Persona.HIRING:
-        return contractsHiring.map((item) => {
+        return contractsHiring?.length > 0 ? contractsHiring.map((item) => {
           return <JobDisplay data={item} />
         })
+        :
+        <Typography p={2} color='text.secondary'>
+        Sorry, no results found.
+      </Typography>
       case Persona.WORKING:
         return contractWorking?.length > 0 ?
           contractWorking.map((item) => {
@@ -300,9 +304,13 @@ const ExplorePage: NextPage = () => {
           persona: Persona.HIRING
         })
 
-        return contractsHiring.map((item) => {
+        return contractsHiring?.length > 0 ? contractsHiring.map((item) => {
           return <JobDisplay data={item} />
         })
+        :
+        <Typography p={2} color='text.secondary'>
+        Sorry, no results found.
+      </Typography>
       default:
     }
   }
@@ -310,17 +318,29 @@ const ExplorePage: NextPage = () => {
   const renderServices = () => {
     switch (state.persona) {
       case Persona.HIRING:
-        return servicesHired.map((item) => {
+        return servicesHired?.length > 0 ? servicesHired.map((item) => {
           return <ServiceCard table={false} id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
+        :
+        <Typography p={2} color='text.secondary'>
+        Sorry, no results found.
+      </Typography>
       case Persona.WORKING:
-        return servicesWorking.map((item) => {
+        return servicesWorking?.length > 0 ? servicesWorking.map((item) => {
           return <ServiceCard table={false} id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
+        :
+        <Typography p={2} color='text.secondary'>
+        Sorry, no results found.
+      </Typography>
       case Persona.CATALOG:
-        return createdServices.map((item) => {
+        return createdServices?.length > 0 ? createdServices.map((item) => {
           return <ServiceCard table={false} id={item?.id} data={item} />
         })
+        :
+        <Typography p={2} color='text.secondary'>
+        Sorry, no results found.
+      </Typography>
       default:
     }
   }
@@ -460,7 +480,7 @@ const ExplorePage: NextPage = () => {
                   </IconButton>
 
 
-                  <IconButton size='small'>
+                  <IconButton size='small' onClick={onRefresh}>
                     <Refresh fontSize='small' />
                   </IconButton>
                 </Stack>
@@ -473,49 +493,7 @@ const ExplorePage: NextPage = () => {
                 </Grid>
               </Box>
             </Grid>
-
-
           </Grid>
-          {/*  <Table sx={{ width: "100%" }}>
-            <MuiTableHead
-              sx={{
-                width: "100% !important",
-                ".MuiTableHead-root": {
-                  width: "100% !important",
-                  borderRadius: 20
-                },
-              }}
-            >
-              <TableRow
-                component={Paper}
-                elevation={0}
-                variant="outlined"
-                sx={{
-                  width: "100%",
-                  minWidth: "100% !important",
-                  display: "flex",
-                  "& .MuiDrawer-paper": {
-                    borderRadius: 20
-                  },
-                }}
-              >
-                <TableHeaderCell
-                  sx={{ width: "100% !important", }}
-                >
-                  Information
-                </TableHeaderCell>
-                <TableHeaderCell sx={{ width: 150, }}>
-                  Payout
-                </TableHeaderCell>
-                <TableHeaderCell sx={{ width: 150,  }}>
-                  Status
-                </TableHeaderCell>
-                <TableHeaderCell sx={{ width: 150, }}>
-                  Deadline
-                </TableHeaderCell>
-              </TableRow>
-            </MuiTableHead>
-              </Table>*/}
         </Container>
       </Box>
     </Container>

@@ -8,6 +8,7 @@ import {
   Button,
   IconButton,
   Stack,
+  CardContent,
 } from "@mui/material";
 
 import * as React from "react";
@@ -43,6 +44,10 @@ import {
   useAccount,
 } from "wagmi";
 import { NextPage } from "next";
+import { AddBoxTwoTone } from "@mui/icons-material";
+import SearchBar from "../common/components/SearchBar/SearchBar";
+import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
+import SearchBarV2 from "../common/components/SearchBarV2/SearchBarV2";
 
 enum MessageType {
   ContractProposal,
@@ -148,88 +153,70 @@ const Messenger: NextPage<any> = () => {
   }
 
   return (
-    <Container
-      maxWidth="xl"
+    <Box
       sx={{
-        height: "100vh",
-        padding: "100px",
+        height: "calc(100vh - 65px - 65px)",
         justifyContent: "center",
         alignItems: "center",
       }}
     >
-      <Paper
+      <Box
         sx={{
-          bgcolor: "background.paper",
           display: "flex",
           width: "100%",
           height: "100%",
+          flexGrow: 1,
         }}
       >
-        <Grid sx={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr  3fr', overflow: 'hidden', maxHeight: '100%', width: '100%' }} >
-          <Grid sx={{ borderRight: '1px solid #ddd', overflowY: 'auto', overflow: 'hidden' }}>
-            <Grid
-              container
-              direction='column'
-              alignItems="center"
-              alignContent="center"
-              justifyContent='space-between'
-              sx={{ bgcolor: "", marginLeft: "0px", padding: '15px', marginTop: '20px', borderBottom: '1px solid #ddd', height: '25%' }}
-            >
-
-              <Avatar
-                alt="Remy Sharp"
-                src="/static/images/avatar/1.jpg"
-                sx={{
-                  width: 85,
-                  height: 85,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+        <Box sx={{  height: '100%'}}>
+          <Box sx={{ pt: 1, height: '65px', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <CardContent>
+            <SearchBar />
+            </CardContent>
+            
+          </Box>
+          <Box sx={{ overflow: 'scroll', height: '100%' }}>
+            {users.map((user) => (
+              <User
+                key={user.uid}
+                user={user}
+                selectUser={selectUser}
+                user1={user1}
+                chat={chat}
               />
-              <Typography sx={{ fontSize: "20px", marginBottom: '20px' }}>Elijah Hampton</Typography>
-            </Grid>
-            <Grid sx={{ overflow: 'scroll', maxHeight: '473px', marginTop: '10px' }}>
+            ))}
+          </Box>
+        </Box>
 
-              {users.map((user) => (
-                <User
-                  key={user.uid}
-                  user={user}
-                  selectUser={selectUser}
-                  user1={user1}
-                  chat={chat}
-                />
-              ))}
-            </Grid>
-          </Grid>
-          <Grid sx={{ position: 'relative', width: '100%' }}>
-            {chat ? (
-              <>
-                <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ padding: '15px', borderBottom: '1px solid #ddd' }} >
-                  <Stack direction="row" alignItems='center'>
+        <Divider sx={{ height: '100%' }} orientation='vertical' />
 
-                    <Avatar
-                      alt=''
-                      src="/static/images/avatar/1.jpg"
-                      sx={{
-                        width: 40,
-                        height: 40,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginRight: "15px",
-                      }}
-                    />
-                    <Typography display='flex' sx={{ fontSize: "20px" }}>
-                      {chat.name}
-                    </Typography>
-                  </Stack>
-                  <Button sx={{ fontSize: "14px" }} ><SearchIcon /></Button>
-                </Box>
+        <Box sx={{ width: '100%', height: '100%' }}>
+          {chat ? (
+            <Box sx={{ height: '100%' }}>
+              <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ height: '65px', padding: '15px', borderBottom: '1px solid #ddd' }} >
+                <Stack direction="row" alignItems='center'>
+                  <Avatar
+                    alt=''
+                    src="/static/images/avatar/1.jpg"
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginRight: "15px",
+                    }}
+                  />
+                  <Typography display='flex' sx={{ fontSize: "20px" }}>
+                    {chat.name}
+                  </Typography>
+                </Stack>
+                <Button sx={{ fontSize: "14px" }} ><SearchIcon /></Button>
+              </Box>
 
-                <Grid sx={{ height: 'calc(100vh - 395px)', overflowY: 'auto', borderBottom: '1px solid #ddd', overflowX: 'hidden' }}>
-                  {msgs.length
-                    ? msgs.map((msg, idx) => renderMessage(idx, msg))
-                    : null}
-                </Grid>
+              <Box sx={{ position: 'relative', flexGrow: 1, height: '100%', borderBottom: '1px solid #ddd' }}>
+                {msgs.length
+                  ? msgs.map((msg, idx) => renderMessage(idx, msg))
+                  : null}
 
                 <MessageForm
                   handleSubmit={handleSubmit}
@@ -237,14 +224,14 @@ const Messenger: NextPage<any> = () => {
                   setText={setText}
                   setImg={setImg}
                 />
-              </>
-            ) : (
-              <Typography sx={{ fontSize: '20px', color: 'grey', textAlign: 'center' }}>Select a user to start conversation</Typography>
-            )}
-          </Grid>
-        </Grid>
-      </Paper>
-    </Container>
+              </Box>
+            </Box>
+          ) : (
+            <Typography color='text.secondary' sx={{ fontSize: '20px', textAlign: 'center' }}>Select a user to start conversation</Typography>
+          )}
+        </Box>
+      </Box>
+    </Box>
   );
 }
 

@@ -10,6 +10,7 @@ import {
   Stack,
   Typography,
   IconButton,
+  Chip,
 } from "@mui/material";
 
 import JobDisplay from "../../modules/market/components/JobDisplay";
@@ -312,14 +313,14 @@ const Contracts: NextPage<any> = () => {
           <Tabs
             value={tabValue}
             onChange={handleOnChangeTab}
-            textColor="primary"
-            indicatorColor="primary"
+            textColor="secondary"
+            indicatorColor="secondary"
           >
-            <Tab value={0} label="Published Services" />
-            <Tab value={1} label="Services Purchased" />
-            <Tab value={2} label="Services Working" />
-            <Tab value={3} label="Published Contracts" />
-            <Tab value={4} label="Contract Working" />
+            <Tab value={0} label="Published Services" sx={{ color: tabValue === 1 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={0} size='small' variant='filled' />} iconPosition='end' />
+            <Tab value={1} label="Services Purchased" sx={{ color: tabValue === 1 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={0} size='small' variant='filled' />} iconPosition='end' />
+            <Tab value={2} label="Services Working" sx={{ color: tabValue === 1 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={0} size='small' variant='filled' />} iconPosition='end' />
+            <Tab value={3} label="Published Contracts" sx={{ color: tabValue === 1 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={0} size='small' variant='filled' />} iconPosition='end' />
+            <Tab value={4} label="Contract Working" sx={{ color: tabValue === 1 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={0} size='small' variant='filled' />} iconPosition='end' />
           </Tabs>
           <Divider sx={{ borderBottom: "1px solid #ddd" }} />
         </Box>
