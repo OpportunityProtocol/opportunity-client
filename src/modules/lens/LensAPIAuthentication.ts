@@ -43,7 +43,7 @@ const authenticate = async (request: SignedAuthChallenge) => {
 };
 
 export const login = async (signer: any) => {
-  if (getAuthenticationToken()) 
+  if (getAuthenticationToken())  {
     return;
   }
 
