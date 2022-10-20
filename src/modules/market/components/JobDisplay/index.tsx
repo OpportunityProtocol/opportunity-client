@@ -11,15 +11,10 @@ import {
   Card,
   CardContent,
   Typography,
-  Alert,
   Skeleton,
   Grid,
   Stack,
   Divider,
-  CardActions,
-  Button,
-  TableRow,
-  Paper,
 } from "@mui/material";
 import { withStyles } from '@mui/styles'
 import { NextRouter, useRouter } from "next/router";
@@ -33,65 +28,9 @@ import { CHAIN_ID } from "../../../../constant/provider";
 import { LensHubInterface, NetworkManagerInterface } from "../../../../abis";
 import { Result } from "ethers/lib/utils";
 import { hexToDecimal } from "../../../../common/helper";
-import { getJSONFromIPFSPinata, getMetadata } from "../../../../common/ipfs-helper";
-import moment from "moment";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../../../user/userReduxSlice";
 import fleek from "../../../../fleek";
-
-/**
- * @author Elijah Hampton
- * @param IJobDisplayProps See interface
- * @returns React Functional Component
- * @dev This component temporarily fetches contract data from the blockchain instead of graphql to obtain the contract
- * metadata due to issues with graphql returning a different encoded format
- */
-
-const TableBodyCell = withStyles((theme) => ({
-  root: {
-    color: "black",
-    fontSize: "12px !important",
-    padding: "10px !important",
-  },
-}))(TableCell);
-
-const StatusChip = ({ status }: { status: string }) => {
-  const bgcolor = () => {
-    switch (status) {
-      case "Reclaimed":
-        return "rgba(255, 138, 0, .24)";
-      case "Dispute":
-        return "rgba(255, 0, 0, .19)";
-      case "Unclaimed":
-        return "rgba(36, 227, 32, 0.4)";
-      case "Claimed":
-      default:
-    }
-  };
-  const formStatus = () => {
-    switch (status) {
-      case "Reclaimed":
-        return "Pending Dispute";
-      default:
-        return status;
-    }
-  };
-
-  return (
-    <Chip
-      label={formStatus()}
-      sx={{
-        display: "flex",
-        borderRadius: 1,
-        fontSize: 10,
-        bgcolor: bgcolor(),
-        width: "80px",
-        height: "30px",
-      }}
-    />
-  );
-};
-
 interface IJobDisplayProps {
   data: any;
   table?: boolean;
@@ -101,7 +40,6 @@ interface IJobDisplayProps {
 const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatus = false }) => {
   const router: NextRouter = useRouter();
   const accountData = useAccount();
-
   const [contractOwnerData, setContractOwnerData] = useState<any>({
     lensProfileId: -1,
   });
@@ -157,12 +95,6 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
   });
 
   useEffect(() => {
-    if (data?.id) {
-      networkManager_getContractData.refetch();
-    }
-  }, [data?.id]);
-
-  useEffect(() => {
     if (contractOwnerData?.lensProfileId != -1) {
       lensHub_getProfile.refetch();
     }
@@ -172,22 +104,10 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
     networkManager_getLensProfileIdFromAddress.refetch();
   }, [data?.employer]);
 
-  useEffect(() => {
-    async function loadMetadata() {
-      const metadata = await fleek.getContract(String(metadataString).slice(13))
-      setContractMetadata(metadata);
-    }
-
-    if (metadataString) {
-      setLoading(true)
-      loadMetadata().finally(() => setLoading(false))
-    }
-  }, [metadataString]);
-
-
   return (
     <Grid xs={12} md={6} lg={4}>
       <Card
+      key={data?.id}
         onClick={() => router.push(`/view/contract/${data?.id}`)}
         key={Math.random()}
 
@@ -214,12 +134,9 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
           }}
         >
           {
-            loading ? <Skeleton variant='text' component='h3' /> :
-
-
-              contractMetadata?.contract_title ? (
+              data?.contract_title ? (
                 <Typography fontWeight="600">
-                  {contractMetadata?.contract_title}
+                  {data?.contract_title}
                 </Typography>
               ) : (
                 <Typography fontWeight="600">
@@ -243,10 +160,9 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
             }}
           >
             {
-              loading ? <Skeleton variant='text' component='h6' sx={{ height: 45 }} /> :
 
-                contractMetadata?.contract_description
-                  ? contractMetadata?.contract_description
+                data?.contract_description
+                  ? data?.contract_description
                   : "Unable to load description"}
           </Box>
 
@@ -260,14 +176,8 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
           >
             {
 
-              loading ?
-                <Stack direction='row' alignItems='center' spacing={2}>
-                  {[0, 1, 2].map((num) => <Skeleton sx={{ width: 48, height: 37, borderRadius: 3 }} />)}
-                </Stack>
-                :
-
-                contractMetadata?.tags && contractMetadata?.tags?.length > 0 ? (
-                  contractMetadata?.tags?.map((tag) => {
+               data?.tags && data?.tags?.length > 0 ? (
+                  data?.tags?.map((tag) => {
                     return (
                       <Grid item mr={1} key={tag}>
                         <Chip
@@ -299,10 +209,9 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
 
               <Stack direction='row' alignItems='center'>
                 <Typography fontSize={13} fontWeight='medium'>
-                  {loading ? <Skeleton variant='text' sx={{ width: 15, height: 20 }} />
-                    :
-                    contractMetadata?.contract_budget
-                      ? contractMetadata?.contract_budget
+                  {
+                    data?.contract_budget
+                      ? data?.contract_budget
                       : 0}{" "}
                 </Typography>
                 <img
@@ -318,15 +227,12 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
                 </Typography>
                 &nbsp;
                 {
-                  loading ? 
-                  <Skeleton sx={{ width: 48, height: 37, borderRadius: 3 }} />
-                  :
                   <Chip
                   variant="outlined"
                   size="small"
                   label={
-                    contractMetadata?.duration
-                      ? contractMetadata?.duration
+                    data?.duration
+                      ? data?.duration
                       : "Undefined"
                   }
                 />

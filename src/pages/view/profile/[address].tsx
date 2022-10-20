@@ -151,12 +151,10 @@ const ProfilePage: NextPage<any> = () => {
   const [following, setFollowing] = useState<Array<any>>([])
   const [followers, setFollowers] = useState<Array<any>>([])
 
-  const [profileState, setProfileState] = useState<any>({
-    general: {},
-    lensProfileId: 0,
-    lensProfile: {},
-    verifiedFreelancerData: {},
-  });
+  const [general, setGeneral] = useState<any>({})
+  const [lensProfileId, setLensProfileId] = useState<number>(0)
+  const [lensProfile, setLensProfile] = useState<any>({})
+  const [verifiedFreelancerData, setVerifiedFreelancerData] = useState<any>({})
 
   const { signTypedData } =
     useSignTypedData({
@@ -208,7 +206,7 @@ const ProfilePage: NextPage<any> = () => {
 
   })
 
-  const lensFollowerStateQuery: QueryResult = useQuery(lensGetFollowersStateByProfileId(String(profileState?.lensProfileId)), {
+  const lensFollowerStateQuery: QueryResult = useQuery(lensGetFollowersStateByProfileId(String(lensProfileId)), {
     client: lens_client,
     skip: true
   })
@@ -222,10 +220,8 @@ const ProfilePage: NextPage<any> = () => {
     chainId: CHAIN_ID,
     args: [accountData?.address],
     onSuccess: (data: Result) => {
-      setProfileState({
-        ...profileState,
-        lensProfileId: data?._hex,
-      });
+      console.log(data)
+      setLensProfileId(data?._hex)
     },
     onError: (error) => { },
   });
@@ -238,12 +234,12 @@ const ProfilePage: NextPage<any> = () => {
     enabled: false,
     watch: false,
     chainId: CHAIN_ID,
-    args: [Number(profileState.lensProfileId)],
+    args: [Number(lensProfileId)],
     onSuccess: (data: Result) => {
-      setProfileState({
-        ...profileState,
-        lensProfile: data,
-      });
+      setLensProfile({
+        ...lensProfile,
+        ...data
+      })
     },
   });
 
@@ -264,7 +260,7 @@ const ProfilePage: NextPage<any> = () => {
     contractInterface: LensHubInterface,
     functionName: "follow",
     mode: "recklesslyUnprepared",
-    args: [[Number(profileState?.lensProfileId)], [[]]],
+    args: [[Number(lensProfileId)], [[]]],
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
@@ -273,13 +269,10 @@ const ProfilePage: NextPage<any> = () => {
       lensFollowingStateQuery.refetch()
     },
   });
-  
+
   useEffect(() => {
     if (!verifiedUserQuery.loading && verifiedUserQuery.data) {
-      setProfileState({
-        ...profileState,
-        verifiedFreelancerData: verifiedUserQuery.data?.verifiedUsers[0],
-      });
+      setVerifiedFreelancerData(verifiedUserQuery.data?.verifiedUsers[0])
 
       //only fetch profile id and created services if the user is a verified freelancers
       if (verifiedUserQuery.data?.verifiedUsers[0]?.metadata) {
@@ -293,7 +286,7 @@ const ProfilePage: NextPage<any> = () => {
 
   useEffect(() => {
     async function fetchLensProfileState() {
-      if (Number(profileState.lensProfileId) > 0) {
+      if (Number(lensProfileId) > 0) {
         lensHub_getProfile.refetch();
         await lensFollowerStateQuery.refetch()
           .then((queryResult) => {
@@ -311,7 +304,7 @@ const ProfilePage: NextPage<any> = () => {
 
     fetchLensProfileState()
 
-  }, [address, profileState?.lensProfileId])
+  }, [address, lensProfileId])
 
   useEffect(() => {
     networkManager_getLensProfileIdFromAddress.refetch();
@@ -334,7 +327,7 @@ const ProfilePage: NextPage<any> = () => {
 
   const getValues = () => {
     return {
-      profileIds: [Number(profileState?.lensProfileId)],
+      profileIds: [Number(lensProfileId)],
       datas: [[]],
       nonce: userLensSigNonce,
       deadline: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
@@ -343,7 +336,7 @@ const ProfilePage: NextPage<any> = () => {
 
   const onConnect = async () => {
     follow({
-      recklesslySetUnpreparedArgs: [[Number(profileState?.lensProfileId)], [[]]],
+      recklesslySetUnpreparedArgs: [[Number(lensProfileId)], [[]]],
     });
   };
 
@@ -365,22 +358,17 @@ const ProfilePage: NextPage<any> = () => {
         );
         const parsedData = JSON.parse(parsedString);
 
-        setProfileState({
-          ...profileState,
-          general: {
-            ...profileState.general,
-            ...parsedData,
-          },
-        });
+        setGeneral({
+          ...general,
+          ...parsedData
+        })
+
       } else {
         retVal = await fleek.getUser(String(ptr).slice(10));
 
-        setProfileState({
-          ...profileState,
-          general: {
-            ...profileState.general,
-            ...retVal
-          }
+        setGeneral({
+          ...general,
+          ...retVal
         })
       }
 
@@ -392,15 +380,15 @@ const ProfilePage: NextPage<any> = () => {
       <Box mb={2}>
         <Stack pb={2} direction='row' alignItems='flex-start' justifyContent='space-between'>
           <Box>
-            {profileState?.lensProfile?.imageURI ? (
+            {lensProfile?.imageURI ? (
               <img
-                src={profileState?.lensProfile?.imageURI}
+                src={lensProfile?.imageURI}
                 style={{ width: 130, height: 130, borderRadius: 130 }}
               />
             ) : (
               <Jazzicon
-              svgStyles={{ borderRadius: 130 }}
-              paperStyles={{ borderRadius: 130 }}
+                svgStyles={{ borderRadius: 130 }}
+                paperStyles={{ borderRadius: 130 }}
                 diameter={130}
                 seed={jsNumberForAddress(String(address))}
               />
@@ -412,11 +400,10 @@ const ProfilePage: NextPage<any> = () => {
                 fontSize={23}
                 py={1}
               >
-                {profileState.verifiedFreelancerData?.handle}
+                {verifiedFreelancerData?.handle}
 
               </Typography>
               <Chip sx={{ py: 1, borderRadius: 1, color: '#747474', maxWidth: 100, fontSize: 12 }} size='small' variant='filled' label={address} />
-              {/*profileState?.general?.display_name*/}
             </Box>
           </Box>
           <Box sx={{ width: 350 }}>
@@ -430,10 +417,10 @@ const ProfilePage: NextPage<any> = () => {
                     Skills:
                   </Typography>
 
-                  {profileState?.general?.skills &&
-                    profileState?.general?.skills?.length ? (
+                  {general?.skills &&
+                    general?.skills?.length ? (
                     <Stack direction="row" alignItems="center" spacing={2}>
-                      {profileState?.general?.skills.map((cert) => {
+                      {general?.skills.map((cert) => {
                         return <Chip key={cert} sx={{ fontSize: 12, borderRadius: 1, border: '1px solid #ddd' }} label={cert} size="small" />;
                       })}
                     </Stack>
@@ -446,10 +433,10 @@ const ProfilePage: NextPage<any> = () => {
                     Languages:
                   </Typography>
 
-                  {profileState?.general?.languages &&
-                    profileState?.general?.languages?.length ? (
+                  {general?.languages &&
+                    general?.languages?.length ? (
                     <Stack direction="row" alignItems="center" spacing={2}>
-                     {profileState?.general?.languages.map((cert) => {
+                      {general?.languages.map((cert) => {
                         return <Chip key={cert} sx={{ fontSize: 12, borderRadius: 1, border: '1px solid #ddd' }} label={cert} size="small" />;
                       })}
                     </Stack>
@@ -461,12 +448,12 @@ const ProfilePage: NextPage<any> = () => {
             </Card>
             <Stack my={1} spacing={1} direction='row' alignItems='center' justifyContent='flex-end'>
               {String(
-                profileState.verifiedFreelancerData?.address
+                verifiedFreelancerData?.address
               ).toLowerCase() !== String(address).toLowerCase() ? (
                 <Button
                   color="primary"
                   sx={{ borderRadius: 5 }}
-                  disabled={profileState?.lensProfileId <= 0}
+                  disabled={lensProfileId <= 0}
                   variant="contained"
                   onClick={() => setConnectDialogIsOpen(true)}
                 >
@@ -495,9 +482,9 @@ const ProfilePage: NextPage<any> = () => {
           </Box>
         </Stack>
         <Box>
-          {profileState?.general?.description ? (
+          {general?.description ? (
             <Typography paragraph variant='body2' color="text.secondary">
-              {profileState?.general?.description}
+              {general?.description}
             </Typography>
           ) : (
             <Typography>No description</Typography>
@@ -571,8 +558,8 @@ const ProfilePage: NextPage<any> = () => {
                   {...a11yProps(0)}
                 />
                 <Tab label="Worked Contracts" sx={{ color: value === 2 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={contractsByWorkerQuery.data?.contracts.filter(
-        (contract) => contract.owner === 2
-      ).length} size='small' variant='filled' />} iconPosition='end' {...a11yProps(1)} />
+                  (contract) => contract.owner === 2
+                ).length} size='small' variant='filled' />} iconPosition='end' {...a11yProps(1)} />
                 <Tab label="Published Services" sx={{ color: value === 3 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={servicesCreated.data?.services?.length} size='small' variant='filled' />} iconPosition='end' {...a11yProps(2)} />
                 <Tab label="Published Contracts" sx={{ color: value === 4 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={contractsByEmployerQuery.data?.contracts?.length} size='small' variant='filled' />} iconPosition='end' {...a11yProps(3)} />
               </Tabs>
@@ -581,7 +568,7 @@ const ProfilePage: NextPage<any> = () => {
               <Typography>No publications</Typography>
             </TabPanel>
             <TabPanel value={value} index={1}>
-            <Grid
+              <Grid
                 container
                 direction="row"
                 alignItems="center"
@@ -589,48 +576,48 @@ const ProfilePage: NextPage<any> = () => {
               >
                 {contractsByWorkerQuery.data?.contracts.filter((contract) => contract.owner === 2) &&
                   contractsByWorkerQuery.data?.contracts.filter((contract) => contract.owner === 2)?.length > 0 ? (
-                    contractsByWorkerQuery.data?.contracts.filter((contract) => contract.owner === 2)?.map((contract) => {
+                  contractsByWorkerQuery.data?.contracts.filter((contract) => contract.owner === 2)?.map((contract) => {
                     return <JobDisplay data={contract} />;
                   })
                 ) : (
                   <Typography>
-                    {profileState?.general?.display_name}s hasn't created any
+                    {general?.display_name}s hasn't created any
                     contracts.
                   </Typography>
                 )}
               </Grid>
             </TabPanel>
             <TabPanel value={value} index={2}>
-            <Grid
+              <Grid
                 container
                 direction="row"
                 alignItems="center"
 
               >
-               
+
                 {servicesCreated.data?.services &&
                   servicesCreated.data?.services?.length > 0 ? (
-                    servicesCreated.data?.services?.map((service) => {
-                      return (
-                        <ServiceCard
+                  servicesCreated.data?.services?.map((service) => {
+                    return (
+                      <ServiceCard
                         outlined={true}
                         id={service?.serviceId}
                         data={service}
                       />
-                      )
-                    })
+                    )
+                  })
                 ) : (
                   <Typography>
-                    {profileState?.general?.display_name}s hasn't created any
+                    {general?.display_name}s hasn't created any
                     services.
                   </Typography>
                 )}
               </Grid>
 
- 
+
             </TabPanel>
             <TabPanel value={value} index={3}>
-            <Grid
+              <Grid
                 container
                 direction="row"
                 alignItems="center"
@@ -638,12 +625,12 @@ const ProfilePage: NextPage<any> = () => {
               >
                 {contractsByEmployerQuery.data?.contracts &&
                   contractsByEmployerQuery.data?.contracts?.length > 0 ? (
-                    contractsByEmployerQuery.data?.contracts.map((contract) => {
+                  contractsByEmployerQuery.data?.contracts.map((contract) => {
                     return <JobDisplay data={contract} />;
                   })
                 ) : (
                   <Typography>
-                    {profileState?.general?.display_name}s hasn't created any
+                    {general?.display_name}s hasn't created any
                     contracts.
                   </Typography>
                 )}

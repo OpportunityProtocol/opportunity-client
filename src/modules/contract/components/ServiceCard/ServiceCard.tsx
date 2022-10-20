@@ -49,7 +49,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectLens,
   selectUserAddress,
-  selectVerificationStatus,
 } from "../../../user/userReduxSlice";
 
 import { Check } from "@mui/icons-material";
@@ -65,11 +64,9 @@ import { ConfirmationDialog } from "../../../../common/components/ConfirmationDi
 import moment from "moment";
 import { withStyles } from '@mui/styles'
 interface IServiceCardProps {
-  id: string;
   purchaseData?: any;
-  data?: any;
+  service: any;
   purchase?: boolean;
-  table: boolean;
 }
 
 const Box = withStyles((theme) => ({
@@ -80,64 +77,26 @@ const Box = withStyles((theme) => ({
   },
 }))(TableCell);
 
-const StatusChip = ({ status }: { status: string }) => {
-  const bgcolor = () => {
-    switch (status) {
-      case "Reclaimed":
-        return "rgba(255, 138, 0, .24)";
-      case "Dispute":
-        return "rgba(255, 0, 0, .19)";
-      case "Unclaimed":
-        return "rgba(36, 227, 32, 0.4)";
-      case "Claimed":
-      default:
-    }
-  };
-  const formStatus = () => {
-    switch (status) {
-      case "Reclaimed":
-        return "Pending Dispute";
-      default:
-        return status;
-    }
-  };
 
-  return (
-    <Chip
-      label={formStatus()}
-      size='small'
-      sx={{
-        display: "flex",
-        borderRadius: 1,
-        fontSize: 10,
-        bgcolor: bgcolor(),
-        // width: "80px",
-        //  height: "30px",
-      }}
-    />
-  );
-};
+
+const abiencoder = ethers.utils.defaultAbiCoder;
 
 const ServiceCard = ({
-  id,
-  data,
+  service,
   purchaseData,
-  purchase = false,
-  table = false
+  purchase = false
 }: IServiceCardProps) => {
+
   const cardStyles = useStyles();
   const router: NextRouter = useRouter();
-  const provider = useProvider()
 
-  const [loadedData, setLoadedData] = useState<any>(data);
   const [loading, setLoading] = useState(false)
 
   const [serviceOwnerLensData, setServiceOwnerLensData] =
     useState<any>({});
-  const [servicePubId, setServicePubId] = useState<number>(0);
+
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
-  const [serviceMetadata, setServiceMetadata] = useState<any>({});
   const [displayImg, setDisplayImg] = useState<Buffer>();
   const [errors, setErrors] = useState<any>({
     metadataError: false,
@@ -150,7 +109,6 @@ const ServiceCard = ({
   const [resolveServiceDialogIsOpen, setResolveServiceDialogIsOpen] =
     useState<boolean>(false);
 
-  const dispatch = useDispatch();
   const userAddress = useSelector(selectUserAddress);
   const signTypedData = useSignTypedData({
     onSettled(data, error) { },
@@ -162,7 +120,7 @@ const ServiceCard = ({
     contractInterface: DaiInterface,
     mode: "recklesslyUnprepared",
     functionName: "approve",
-    args: [FEE_COLLECT_MODULE, typeof loadedData?.offers == 'object' ? 10000 : 10000],
+    args: [FEE_COLLECT_MODULE, typeof service?.offers == 'object' ? 10000 : 10000],
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
@@ -224,7 +182,7 @@ const ServiceCard = ({
     functionName: "getLensProfileIdFromAddress",
     enabled: true,
     chainId: CHAIN_ID,
-    args: [loadedData?.creator ? loadedData?.creator : ZERO_ADDRESS],
+    args: [service?.creator ? service?.creator : ZERO_ADDRESS],
     onSuccess: (data: Result) => {
       setServiceOwnerLensProfileId(Number(data._hex));
     },
@@ -233,14 +191,14 @@ const ServiceCard = ({
 
   const handleOnNavigateToServicePage = () => {
     router.push({
-      pathname: `/view/service/${loadedData?.id}`,
+      pathname: `/view/service/${service?.id}`,
       query: {
-        ...loadedData,
-        id: Number(loadedData.id),
+        ...service,
+        id: Number(service.id),
         offers: [
-          serviceMetadata?.beginner_offer,
-          serviceMetadata?.business_offer,
-          serviceMetadata?.enterprise_offer,
+          service?.beginner_offer,
+          service?.business_offer,
+          service?.enterprise_offer,
         ],
       },
     });
@@ -263,20 +221,8 @@ const ServiceCard = ({
 
   useEffect(() => {
     networkManager_getLensProfileIdFromAddress.refetch();
-  }, [loadedData?.creator]);
+  }, [service?.creator]);
 
-  useEffect(() => {
-    async function loadMetadata() {
-      const metadata = await getJSONFromIPFSPinata(data?.metadataPtr).finally(() => setLoading(false))
-      setServiceMetadata(metadata);
-    }
-
-    if (data?.metadataPtr) {
-      setLoading(true)
-      loadMetadata();
-    }
-
-  }, [data?.metadataPtr]);
 
   const getDomain = () => {
     return {
@@ -302,9 +248,6 @@ const ServiceCard = ({
     },
   })
 
-
-
-  const abiencoder = ethers.utils.defaultAbiCoder;
   const getValues = async () => {
     return {
       profileId: Number(serviceOwnerLensProfileId),
@@ -395,7 +338,7 @@ const ServiceCard = ({
           <Button
             sx={{ borderRadius: 1 }}
             fullWidth
-            variant="text"
+            variant="contained"
             onClick={handleOnNavigateToServicePage}
           >
             View service
@@ -407,7 +350,7 @@ const ServiceCard = ({
     // owner is viewing
 
     if (
-      String(loadedData?.creator).toLowerCase() ===
+      String(service?.creator).toLowerCase() ===
       String(userAddress).toLowerCase()
     ) {
       if (purchaseData) {
@@ -492,7 +435,6 @@ const ServiceCard = ({
   };
 
   return (
-    <Grid item xs={12} md={6} lg={4}>
       <Card variant="outlined" className={cx(cardStyles.root)} sx={{
         boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
         WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
@@ -503,26 +445,25 @@ const ServiceCard = ({
           sx={{ height: 250, width: "100%" }}
         >
           {
-            loading ? <Skeleton sx={{ width: '100%', height: '100%' }} variant='rectangular' /> :
 
-              errors.metadataError ? (
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  sx={{ width: "100%", height: "100%" }}
-                >
-                  <BrokenImageIcon
-                    sx={{ color: "#dbdbdb", width: 100, height: 100 }}
-                    fontSize="large"
-                  />
-                </Box>
-              ) : (
-                <CardMedia
-                  image={URL.createObjectURL(new Blob([displayImg]))}
-                  sx={{ height: "100%", width: "100%" }}
+            errors.metadataError ? (
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                sx={{ width: "100%", height: "100%" }}
+              >
+                <BrokenImageIcon
+                  sx={{ color: "#dbdbdb", width: 100, height: 100 }}
+                  fontSize="large"
                 />
-              )}
+              </Box>
+            ) : (
+              <CardMedia
+                image={URL.createObjectURL(new Blob([displayImg]))}
+                sx={{ height: "100%", width: "100%" }}
+              />
+            )}
         </CardActionArea>
 
         <CardContent sx={{ width: '100%' }}>
@@ -536,7 +477,7 @@ const ServiceCard = ({
               alignItems="center"
               justifyContent="flex-start"
             >
-              <Avatar />
+              <Avatar src={serviceOwnerLensData?.imageURI} />
               <Typography px={2}>
                 {serviceOwnerLensData?.handle}
               </Typography>
@@ -557,7 +498,7 @@ const ServiceCard = ({
                   WebkitBoxOrient: "vertical",
                 }}
               >
-                {loading ? <Skeleton variant='text' component='h3' sx={{ width: '100%' }} /> : serviceMetadata?.serviceTitle ? serviceMetadata?.serviceTitle : 'Unable to load title'}
+                {service?.serviceTitle ? service?.serviceTitle : 'Unable to load title'}
               </Typography>
 
               <Typography
@@ -573,7 +514,7 @@ const ServiceCard = ({
                   WebkitBoxOrient: "vertical",
                 }}
               >
-                {loading ? <Skeleton variant='text' component='h6' sx={{ height: 45, width: '100% !important' }} /> : serviceMetadata?.serviceDescription ? serviceMetadata?.serviceDescription : 'Unable to load description'}
+                {service?.serviceDescription ? service?.serviceDescription : 'Unable to load description'}
               </Typography>
             </Box>
 
@@ -612,7 +553,7 @@ const ServiceCard = ({
           primaryActionTitle="Confirm"
         />
       </Card>
-    </Grid>
+
   )
 };
 

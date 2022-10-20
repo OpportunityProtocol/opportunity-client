@@ -7,8 +7,8 @@ interface UserReducerState {
     address: string;
     erc20Balance: ERC20Balance
     connector: string;
-    connected: boolean;
-    verified: boolean;
+    connection: any;
+    account: any;
     lensProfile: ILensProfile;
     metadataUri
 }
@@ -19,19 +19,21 @@ interface ERC20Balance {
 
 interface ILensProfile {
     profileId: 0;
-    handle: string;
+    profile: any;
+    error: String;
 }
 
 const initialState: UserReducerState = {
     balance: 0,
     address: ZERO_ADDRESS,
     connector: null,
-    connected: false,
+    connection: null,
+    account: null,
     metadataUri: '',
-    verified: false,
     lensProfile: {
         profileId: 0,
-        handle: '',
+        profile: null,
+        error: null
     },
     erc20Balance: {}
 }   
@@ -45,7 +47,6 @@ const userSlice = createSlice({
     },
     userLensDataStored(state, action) {
         state.lensProfile = action.payload
-        state.verified = true
     },
     userWalletDataStored(state, action) {
         return { ...state,  ...action.payload }
@@ -56,9 +57,6 @@ const userSlice = createSlice({
     userERC20BalanceChanged(state, action) {
         state.erc20Balance = { ...state, ...action.payload }
     },
-    userConnectionToggled(state, action) {
-        state.connected = !state.connected
-    },
   }
 })
 
@@ -67,7 +65,7 @@ export const selectUserBalance = (state: RootState) => state.user.balance
 export const selectErc20Balance = (state: RootState, erc20Address: string) => state.user.erc20Balance[erc20Address]
 export const selectUserAddress = (state: RootState) => state.user.address
 export const selectUserConnector = (state: RootState) => state.user.connector
-export const selectUserConnectionStatus = (state: RootState) => state.user.connected
-export const selectVerificationStatus = (state: RootState) => state.user.verified
-export const { userWalletDataStored, userWalletDataCleared, userERC20BalanceChanged, userConnectionToggled, userLensDataStored,  } = userSlice.actions
+export const selectUserConnectionStatus = (state: RootState) => state.user.connection
+export const selectUserAccountData = (state: RootState) => state.user.account
+export const { userWalletDataStored, userWalletDataCleared, userERC20BalanceChanged, userLensDataStored,  } = userSlice.actions
 export default userSlice.reducer

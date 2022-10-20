@@ -50,7 +50,11 @@ const MarketHome: NextPage<any> = () => {
                 <Grid container direction='row' alignItems='center' spacing={3}>
                     {
                         markets.map((marketDetails) => {
-                            return <MarketDisplay marketDetails={marketDetails} />
+                            return (
+                                <Grid xs={12} md={6} lg={4} item>
+                                    <MarketDisplay marketDetails={marketDetails} />
+                                </Grid>
+                            )
                         })
                     }
                 </Grid>

@@ -11,7 +11,7 @@ import {
   CardContent,
 } from "@mui/material";
 
-import * as React from "react";
+import { useContext } from "react";
 import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -44,10 +44,13 @@ import {
   useAccount,
 } from "wagmi";
 import { NextPage } from "next";
-import { AddBoxTwoTone } from "@mui/icons-material";
-import SearchBar from "../common/components/SearchBar/SearchBar";
-import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
-import SearchBarV2 from "../common/components/SearchBarV2/SearchBarV2";
+import { AddBoxTwoTone, Refresh } from "@mui/icons-material";
+import { QueryResult, useQuery } from "@apollo/client";
+import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../modules/user/UserGQLQueries";
+import { ZERO_ADDRESS } from "../constant";
+import {getLensProfileById, LENS_GET_PROFILE_BY_PROFILE_ID } from "../modules/lens/LensGQLQueries";
+import { useSelector } from "react-redux";
+import { selectUserAccountData } from "../modules/user/userReduxSlice";
 
 enum MessageType {
   ContractProposal,
@@ -60,21 +63,55 @@ const Messenger: NextPage<any> = () => {
   const [text, setText] = useState<string>("");
   const [img, setImg] = useState<string>("");
   const [msgs, setMsgs] = useState<Array<any>>([]);
+  const account = useSelector(selectUserAccountData)
+  const user1 = String(account?.address).toLowerCase();
+  const [loadingUsers, setLoadingUsers] = useState<boolean>(false)
 
-  const { address, connector } = useAccount();
-  const user1 = String(address).toLowerCase();
+  const userDataQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
+    skip: true,
+    variables: {
+      userAddress: ZERO_ADDRESS
+    }
+  })
+
+  const lensGetUserProfileByProfileId: QueryResult = useQuery(LENS_GET_PROFILE_BY_PROFILE_ID, {
+    skip: true,
+    variables: {
+      id: 0
+    }
+  })
 
   useEffect(() => {
     const usersRef = collection(db, "users", user1, "selectedUser");
     // create query object
     const q = query(usersRef, where("uid", "not-in", [user1]));
     // execute query
-    const unsub = onSnapshot(q, (querySnapshot) => {
+    const unsub = onSnapshot(q, async (querySnapshot) => {
       let users = [];
-      querySnapshot.forEach((doc) => {
+      await querySnapshot.forEach((doc) => {
         users.push(doc.data());
       });
-      setUsers(users);
+
+      let completeUserData = []
+
+      await users.forEach(async (user) => {
+       await userDataQuery.refetch({
+          userAddress: user?.uid
+        })
+        .then(async (userData) => {
+          if (userData?.data?.verifiedUsers && userData?.data?.verifiedUsers[0]?.id) {
+            const profile = await getLensProfileById(`0x${Math.abs(Number(userData?.data?.verifiedUsers && userData?.data?.verifiedUsers[0]?.id)).toString(16)}`)
+
+            completeUserData.push({
+              ...user,
+              ...userData?.data?.verifiedUsers[0],
+              ...profile
+            })  
+          }
+        })
+      })
+
+      
     });
     return () => unsub();
   }, []);
@@ -169,16 +206,18 @@ const Messenger: NextPage<any> = () => {
         }}
       >
         <Box sx={{  height: '100%'}}>
-          <Box sx={{ pt: 1, height: '65px', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box>
             <CardContent>
-            <SearchBar />
+              <Typography>
+                Chats
+              </Typography>
             </CardContent>
-            
           </Box>
-          <Box sx={{ overflow: 'scroll', height: '100%' }}>
+          <Divider />
+          <Box sx={{ overflow: 'scroll', width: 250, height: '100%' }}>
             {users.map((user) => (
               <User
-                key={user.uid}
+                key={user.handle}
                 user={user}
                 selectUser={selectUser}
                 user1={user1}
@@ -190,10 +229,8 @@ const Messenger: NextPage<any> = () => {
 
         <Divider sx={{ height: '100%' }} orientation='vertical' />
 
-        <Box sx={{ width: '100%', height: '100%' }}>
-          {chat ? (
-            <Box sx={{ height: '100%' }}>
-              <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ height: '65px', padding: '15px', borderBottom: '1px solid #ddd' }} >
+        <Box sx={{  overflow: 'hidden', width: '100%', height: '100%' }}>
+        <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ height: '65px', padding: '15px', borderBottom: '1px solid #ddd' }} >
                 <Stack direction="row" alignItems='center'>
                   <Avatar
                     alt=''
@@ -210,15 +247,28 @@ const Messenger: NextPage<any> = () => {
                     {chat.name}
                   </Typography>
                 </Stack>
-                <Button sx={{ fontSize: "14px" }} ><SearchIcon /></Button>
+                <IconButton>
+                 <Refresh />
+                </IconButton>
               </Box>
 
-              <Box sx={{ position: 'relative', flexGrow: 1, height: '100%', borderBottom: '1px solid #ddd' }}>
+          {
+
+            !account.isConnected ? 
+           <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              Connect a wallet to see your messages
+          </Box>
+            :
+          
+          chat ? (
+            <Box sx={{  height: '100%', overflow: 'scroll' }}>
+             
+
+              <Box sx={{  position: 'relative', flexGrow: 1, height: '100%', }}>
                 {msgs.length
                   ? msgs.map((msg, idx) => renderMessage(idx, msg))
                   : null}
-
-                <MessageForm
+                   <MessageForm
                   handleSubmit={handleSubmit}
                   text={text}
                   setText={setText}
@@ -229,7 +279,10 @@ const Messenger: NextPage<any> = () => {
           ) : (
             <Typography color='text.secondary' sx={{ fontSize: '20px', textAlign: 'center' }}>Select a user to start conversation</Typography>
           )}
+             
         </Box>
+
+        
       </Box>
     </Box>
   );

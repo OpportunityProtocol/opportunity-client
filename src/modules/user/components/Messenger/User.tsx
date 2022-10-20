@@ -50,7 +50,7 @@ const User = ({ user1, user, selectUser, chat }) => {
               borderRadius: "50%",
               marginLeft: "5px",
             }}
-            src=""
+            src={user.picture.original.url}
             alt={user.name}
           />
 
@@ -69,12 +69,12 @@ const User = ({ user1, user, selectUser, chat }) => {
             <Typography
               sx={{
                 fontSize: "16px",
-                fontWeight: "bold",
+                fontWeight: "medium",
                 marginLeft: "10px",
                 color: "#49A882",
               }}
             >
-              {user.name}
+              {user.handle}
             </Typography>
             {data?.from !== user1 && data?.unread && (
               <Typography

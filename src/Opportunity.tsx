@@ -34,18 +34,20 @@ import {
 } from "wagmi";
 import { QueryResult, useQuery } from "@apollo/client";
 import {
-  selectUserAddress,
+  selectUserAddress, userLensDataStored,
 } from "./modules/user/userReduxSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { DAI_ADDRESS, MARKET_DESCRIPTION_MAPPING, NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "./constant";
 import Link from "next/link";
 import VerificationDialog from "./modules/user/components/VerificationDialog";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "./modules/user/UserGQLQueries";
+import { getLensProfileById } from "./modules/lens/LensGQLQueries";
 
 const APP_BACKGROUND: string = '#ffffff'
 
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
+  const dispatch = useDispatch()
   const accountData = useAccount()
   const userAddress = useSelector(selectUserAddress);
   const [state, setState] = useState({
@@ -227,6 +229,27 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
       </Box>
     </Box>
   );
+
+  useEffect(() => {
+
+    userData.refetch().then(async (updatedUserData) => {
+      const profile = await getLensProfileById(`0x${Math.abs(Number(updatedUserData.data?.verifiedUsers[0]?.id)).toString(16)}`)
+
+      dispatch(userLensDataStored({
+        profileId: updatedUserData.data?.verifiedUsers[0]?.id,
+        profile,
+        error: null
+      }))
+
+    }).catch(error => {
+      dispatch(userLensDataStored({
+        profileId: 0,
+        profile: null,
+        error: error.message
+      }))
+    })
+
+  }, [])
 
   return (
     <>

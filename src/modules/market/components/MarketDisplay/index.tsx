@@ -38,14 +38,13 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
   const router: NextRouter = useRouter();
 
   const handleOnSelect = (): void => {
-    // internal
+    //internal event
 
-    //external
+    //external event
     onSelect();
   };
 
   return (
-    <Grid item xs={12} md={6} lg={4}>
       <Card
         sx={{
           boxShadow: 'rgba(0, 0, 0, 0.1) -4px 9px 25px -6px',
@@ -57,7 +56,6 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
         }}
         onClick={selectable ? () => handleOnSelect() : () => router.push(`/view/market/${marketDetails?.id}`)}
       >
-
         <CardContent className={classes.primaryContentContainer}>
           <Grid
             container
@@ -84,9 +82,11 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
           </Grid>
           {showDescription && (
             <Typography
+            variant='body2'
               sx={{
+                height: 75,
                 py: 1,
-                fontSize: small ? 10 : 13,
+              //  fontSize: small ? 10 : 13,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 display: "-webkit-box",
@@ -101,7 +101,7 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
 
         </CardContent>
       </Card>
-    </Grid>
+ 
   );
 };
 

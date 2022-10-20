@@ -750,7 +750,7 @@ const ViewContract: NextPage<any> = () => {
             <JobDisplay data={contractData} />
           </Box>
 
-          <Card variant="outlined" className={classes.marginBottom}>
+          <Card elevation={0} className={classes.marginBottom}>
             <CardContent>
               <Typography
                 pb={2}
@@ -833,21 +833,6 @@ const ViewContract: NextPage<any> = () => {
 
         <Grid item xs={3.8}>
           {renderPrimaryButtonState()}
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={1}
-            className={classes.marginBottom}
-          >
-            <Button
-              variant="outlined"
-              size="large"
-              fullWidth
-              endIcon={<FavoriteBorderOutlined fontSize="small" />}
-            >
-              Save Contract
-            </Button>
-          </Stack>
 
           <Alert
             sx={{ border: "1px solid #eee" }}

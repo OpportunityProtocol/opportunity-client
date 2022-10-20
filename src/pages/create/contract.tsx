@@ -21,6 +21,10 @@ import {
   LinearProgress,
   DialogContent,
   DialogContentText,
+  Tabs,
+  Tab,
+  Theme,
+  CardActions,
 } from "@mui/material";
 
 import BoltIcon from "@mui/icons-material/Bolt";
@@ -48,17 +52,37 @@ import {
 } from "wagmi";
 import { NETWORK_MANAGER_ADDRESS, PINATA_JWT, TOKEN_FACTORY_ADDRESS } from "../../constant";
 import { NetworkManagerInterface, TokenFactoryInterface } from "../../abis";
-import { BigNumber } from "ethers";
-import { Result } from "ethers/lib/utils";
-import { hexToDecimal } from "../../common/helper";
-import { CHAIN_ID } from "../../constant/provider";
-import SearchBarV1 from "../../common/components/SearchBarV1/SearchBarV1";
 import { FaBoxTissue } from "react-icons/fa";
 import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
-import { ClassNameMap } from "@mui/styles";
+import { ClassNameMap, styled } from "@mui/styles";
 import { generatePinataData, pinJSONToIPFSPinata } from "../../common/ipfs-helper";
+import { a11yProps } from "../../common/components/TabPanel/helper";
+import TabPanel from "../../common/components/TabPanel/TabPanel";
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
+
+const SummaryKey = styled(Typography)(
+  ({ theme }: { theme?: Theme }) => ({
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.palette.text.secondary
+  })
+)
+
+const SummaryValue = styled(Typography)(
+  ({ theme }: { theme?: Theme }) => ({
+    fontSize: 14,
+  })
+)
+
+const SummarySectionTitle = styled(Typography)(
+  ({ theme }: { theme?: Theme }) => ({
+    fontWeight: '600',
+  })
+)
 
 /**
  * Elijah Hampton
@@ -76,7 +100,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
     contract_tags: "",
     tags: [],
     contract_budget: 0,
-    deadline: new Date("2014-08-18T21:11:54").toDateString(),
+    deadline: new Date(),
     contract_definition_of_done: "",
     duration: "quick",
     specific_languages: [],
@@ -316,13 +340,15 @@ console.log(error)
     router.push("/dashboard");
   };
 
+  console.log({ marketDetails })
+
+  const [tabValue, setTabValue] = useState<number>(0);
+
   return (
     <Container
       maxWidth="xl"
       sx={{ bgcolor: '#fff', height: 'auto', width: '100%' }}
     >
-      <Stack spacing={5}
-        sx={{ width: "100%", height: '100%' }}>
         <Box>
           <Typography fontWeight="600" fontSize={25}>
             Create a contract
@@ -336,32 +362,43 @@ console.log(error)
           </Typography>
         </Box>
 
-        <Grid
-          container
-          display="flex"
-          alignItems="flex-start"
-          justifyContent="space-between"
+        <Box sx={{ width: "100%" }}>
+        <Tabs
+          value={tabValue}
+          onChange={(e, val) => setTabValue(val)}
+          textColor="secondary"
+          indicatorColor="secondary"
         >
-          <Grid item xs={4} sx={{ maxWidth: 600, width: 600 }}>
-            <Typography fontWeight="700" fontSize={18} color="text.primary">
-              Select a market
-            </Typography>
-            <Typography color="text.secondary" fontWeight="500" fontSize={14}>
-              Select or search for the appropriate market to deploy your contract.
-            </Typography>
-            <Typography variant="caption">
-              Can't find a market?{" "}
-              <Typography component="span" color="primary" variant="button">
-                Learn about market proposals.
-              </Typography>
-            </Typography>
-          </Grid>
+          <Tab {...a11yProps(0)} label="Select a market" />
+          <Tab {...a11yProps(1)} label="Basic Information" />
 
-          <Grid item xs={6}>
-            <Card variant="outlined">
-              <CardContent sx={{ width: "100%", flexGrow: 1 }}>
+          <Tab {...a11yProps(1)} label="Summary" />
+        </Tabs>
+        <Divider sx={{ borderBottom: "1px solid #eee" }} />
+      </Box>
+
+      <TabPanel index={0} value={tabValue}>
+      <Box pb={2} width={600} maxWidth={600}>
+
+<Typography color="text.secondary" fontWeight="500" fontSize={14}>
+  Select or search for the appropriate market to deploy your
+  contract.
+</Typography>
+<Typography variant="caption">
+  Can't find a market?{" "}
+  <Typography component="span" color="primary" variant="button">
+    Learn about market proposals.
+  </Typography>
+</Typography>
+</Box>
+
+
+<Grid container alignItems='center' direction='row' spacing={3}>
+
+<Grid item xs={12} md={6} lg={4}>
+
                 {marketDetails && marketDetails?.length ? (
-                  marketDetails.slice(0, 6).map((details) => {
+                  marketDetails.map((details) => {
                     return (
 
                       <MarketDisplay
@@ -378,14 +415,12 @@ console.log(error)
                             contract_market_id: details?.id,
                           })
                         }
-                        showDescription={false}
-                        showStats={false}
                       />
 
                     );
                   })
                 ) : (
-                  <Grid item xs={12}>
+                  <Box>
                     <Typography color="error">
                       Error occurred while loading marketplaces.{" "}
                       <Typography component="span" variant="button">
@@ -393,23 +428,137 @@ console.log(error)
                         Try again
                       </Typography>
                     </Typography>
-                  </Grid>
+                  </Box>
                 )}
+                </Grid>
+       </Grid>
+    
+
+
+      </TabPanel>
+
+
+      <TabPanel index={1} value={tabValue}>
+          <Box component={Stack} spacing={3} sx={{ width: '75%' }}>
+          <Typography color="text.secondary" fontWeight="500" fontSize={14} pb={2}>
+            Fill out basic information that will help readers better understand
+            the contract.
+          </Typography>
+
+          <Grid item xs={6}>
+            <Card sx={{ width: "100%", flexGrow: 1 }} variant="outlined">
+              <CardContent>
+                <TextField
+                  margin="normal"
+                  sx={{ width: "100%" }}
+                  variant="outlined"
+                  size="small"
+                  id="contractTitle"
+                  placeholder="I am looking for an ES to EN translator."
+                  aria-label="Pick a title for your contract"
+                  name="contractTitle"
+                  type="text"
+                  onChange={handleOnChangeCreateContractForm}
+                  error={createContractFormErrorState.contractTitleError}
+                  helperText={
+                    createContractFormErrorState.contractTitleErrorMessage
+                  }
+                //inputProps={{ maxLength: 81 , minLength: 30 }}
+                />
+
+                <TextField
+                  rows={6}
+                  multiline
+                  margin="normal"
+                  sx={{ width: "100%" }}
+                  size="small"
+                  id="contractDescription"
+                  variant="outlined"
+                  placeholder='I need to translate an ebook to English from Spanish..."'
+                  aria-label="Write a description"
+                  name="contractDescription"
+                  type="text"
+                  onChange={handleOnChangeCreateContractForm}
+                  error={createContractFormErrorState.contractDescriptionError}
+                  helperText={
+                    createContractFormErrorState.contractDescriptionErrorMessage
+                  }
+                />
+
+                <Grid
+                  sx={{ py: 2 }}
+                  container
+                  direction="row"
+                  alignItems="flex-start"
+                  justifyContent="space-between"
+                  spacing={10}
+                >
+                  <Grid item>
+                    <Typography fontWeight="medium" color="text.primary">
+                      Budget
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      fontWeight="500"
+                      color="#757575"
+                      width={350}
+                    >
+                      Your budget will reflect to freelancers how much you are
+                      willing to spend
+                    </Typography>
+                  </Grid>
+
+                  <Grid item>
+                    <TextField
+                      size="small"
+                      value={createContractForm.contract_budget}
+                      placeholder="550.00"
+                      type='number'
+                      id="contractBudget"
+                      onChange={handleOnChangeCreateContractForm}
+                      sx={{ width: 100 }}
+                      InputProps={{
+                        startAdornment: <Typography>$</Typography>,
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Grid
+                  sx={{ py: 2 }}
+                  container
+                  direction="row"
+                  alignItems="flex-start"
+                  justifyContent="space-between"
+                  spacing={10}
+                >
+                  <Grid item>
+                    <Typography fontWeight="medium" color="text.primary">
+                      Deadline
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      fontWeight="500"
+                      color="#757575"
+                      width={350}
+                    >
+                      This will be the display for your contract
+                    </Typography>
+                  </Grid>
+
+                  <Grid item>
+                  <DatePicker selected={createContractForm.deadline} onChange={(date:Date) =>  setCreateContractForm({ ...createContractForm, deadline: date })} />
+                  </Grid>
+                </Grid>
               </CardContent>
             </Card>
           </Grid>
-        </Grid>
 
-        <Divider />
+          
 
-        <Grid
-          container
-          display="flex"
-          alignItems="flex-start"
-          justifyContent="space-between"
-        >
-          <Grid item xs={4}>
-            <Box py={1}>
+            <Card variant="outlined" sx={{ flexGrow: 1, width: "100%" }}>
+              <CardContent>
+              <Box py={1}>
               <Typography
                 fontWeight="700"
                 fontSize={18}
@@ -422,18 +571,14 @@ console.log(error)
                 Select an estimated duration of time for this contract.
               </Typography>
             </Box>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Card variant="outlined" sx={{ flexGrow: 1, width: "100%" }}>
-              <CardContent>
+            
                 <Grid
                   sx={{ width: "100%", flexGrow: 1 }}
                   container
-                  spacing={0}
+                  spacing={1}
                   direction="row"
                   alignItems="center"
-                  justifyContent="space-between"
+                  justifyContent="space-evenly"
                 >
                   <Grid item>
                     <ClickableCard
@@ -537,158 +682,12 @@ console.log(error)
                 </Grid>
               </CardContent>
             </Card>
-          </Grid>
-        </Grid>
+     
+        <Card variant='outlined'>
+        <CardContent>
+      <Box>
 
-        <Divider />
-
-        <Grid
-          container
-          justifyContent="space-between"
-          display="flex"
-          alignItems="flex-start"
-        >
-          <Grid item xs={4}>
-            <Typography fontWeight="700" color="text.primary" fontSize={18}>
-              Basic Information
-            </Typography>
-            <Typography color="text.secondary" fontWeight="500" fontSize={14}>
-              Fill out basic information that will help readers better understand
-              the contract.
-            </Typography>
-          </Grid>
-
-          <Grid item xs={6}>
-            <Card sx={{ width: "100%", flexGrow: 1 }} variant="outlined">
-              <CardContent>
-                <TextField
-                  margin="normal"
-                  sx={{ width: "100%" }}
-                  variant="outlined"
-                  size="small"
-                  label="Title"
-                  id="contractTitle"
-                  placeholder="Need software developer to..."
-                  aria-label="Pick a title for your contract"
-                  name="contractTitle"
-                  type="text"
-                  onChange={handleOnChangeCreateContractForm}
-                  error={createContractFormErrorState.contractTitleError}
-                  helperText={
-                    createContractFormErrorState.contractTitleErrorMessage
-                  }
-                //inputProps={{ maxLength: 81 , minLength: 30 }}
-                />
-
-                <TextField
-                  rows={6}
-                  multiline
-                  margin="normal"
-                  sx={{ width: "100%" }}
-                  size="small"
-                  id="contractDescription"
-                  variant="outlined"
-                  label="Description"
-                  placeholder='"In a maximum of 2-4 weeks I am looking to complete a website based on..."'
-                  aria-label="Write a description"
-                  name="contractDescription"
-                  type="text"
-                  onChange={handleOnChangeCreateContractForm}
-                  error={createContractFormErrorState.contractDescriptionError}
-                  helperText={
-                    createContractFormErrorState.contractDescriptionErrorMessage
-                  }
-                //inputProps={{ maxLength: 730 , minLength: 30 }}
-                />
-
-                <Grid
-                  sx={{ py: 2 }}
-                  container
-                  direction="row"
-                  alignItems="flex-start"
-                  justifyContent="space-between"
-                  spacing={10}
-                >
-                  <Grid item>
-                    <Typography fontWeight="medium" color="text.primary">
-                      Budget
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      fontWeight="500"
-                      color="#757575"
-                      width={350}
-                    >
-                      Your budget will reflect to freelancers how much you are
-                      willing to spend
-                    </Typography>
-                  </Grid>
-
-                  <Grid item>
-                    <TextField
-                      size="small"
-                      value={createContractForm.contract_budget}
-                      placeholder="550.00"
-                      type='number'
-                      id="contractBudget"
-                      onChange={handleOnChangeCreateContractForm}
-                      sx={{ width: 100 }}
-                      InputProps={{
-                        startAdornment: <Typography>$</Typography>,
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-
-                <Grid
-                  sx={{ py: 2 }}
-                  container
-                  direction="row"
-                  alignItems="flex-start"
-                  justifyContent="space-between"
-                  spacing={10}
-                >
-                  <Grid item>
-                    <Typography fontWeight="medium" color="text.primary">
-                      Deadline
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      fontWeight="500"
-                      color="#757575"
-                      width={350}
-                    >
-                      This will be the display for your contract
-                    </Typography>
-                  </Grid>
-
-                  <Grid item>
-                    <h6>Missing Date Picker</h6>
-                    {/* <DesktopDatePicker
-                    label="Date desktop"
-                    inputFormat="MM/dd/yyyy"
-                    value={createContractForm.deadline}
-                    onChange={handleOnChangeDeadline}
-                    renderInput={(params) => <TextField {...params} />}
-                  /> */}
-                  </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/*  */}
-        </Grid>
-
-        <Divider />
-
-        <Grid
-          container
-          justifyContent="space-between"
-          display="flex"
-          alignItems="flex-start"
-        >
-          <Grid item xs={4}>
+     
             <Typography fontWeight="700" fontSize={18} color="text.primary">
               Definition of Done
             </Typography>
@@ -699,11 +698,11 @@ console.log(error)
             <Typography variant="caption">
               The more specific the better
             </Typography>
-          </Grid>
+            </Box>
 
-          <Grid item xs={6}>
-            <Card variant="outlined" sx={{ width: "100%" }}>
-              <CardContent>
+      
+            <Box sx={{ width: "100%" }}>
+           
                 <TextField
                   label="Definition of done"
                   id="contractDefinitionOfDone"
@@ -723,12 +722,11 @@ console.log(error)
                   }
                 //inputProps={{ maxLength: 500 , minLength: 30 }}
                 />
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
-        <Divider />
+           
+            </Box>
+        
+        </CardContent>
+        </Card>
 
         <Card variant="outlined">
           <CardContent>
@@ -833,8 +831,119 @@ console.log(error)
         </CardContent>
               </Card> 
 
-        <Stack justifyContent="flex-end" direction="row">
-          <Button
+  
+
+
+          </Box>
+      </TabPanel>
+
+      {/*
+      
+        const [createContractForm, setCreateContractForm] = useState({
+    contract_title: "",
+    contract_description: "",
+    contract_tags: "",
+    tags: [],
+    contract_budget: 0,
+    deadline: new Date("2014-08-18T21:11:54").toDateString(),
+    contract_definition_of_done: "",
+    duration: "quick",
+    specific_languages: [],
+    contract_market_id: 0
+  });
+
+*/}
+
+
+      <TabPanel index={2} value={tabValue}>
+
+      <Box sx={{ width: '70%' }}>
+          <Card variant='outlined'>
+            <CardContent>
+              <Box>
+
+                <SummarySectionTitle>
+                  Service Sumary
+                </SummarySectionTitle>
+                <Stack sx={{ my: 2 }} spacing={2}>
+
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Title:
+                    </SummaryKey>
+                    <SummaryValue>
+                      {createContractForm.contract_title}
+                    </SummaryValue>
+                  </Stack>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Description:
+                    </SummaryKey>
+                    <SummaryValue>
+                      {createContractForm.contract_description}
+                    </SummaryValue>
+                  </Stack>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Budget:
+                    </SummaryKey>
+                    <SummaryValue>
+                      {createContractForm.contract_budget}
+                    </SummaryValue>
+                  </Stack>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Market:
+                    </SummaryKey>
+                    <SummaryValue>
+                      {createContractForm.contract_market_id}
+                    </SummaryValue>
+                  </Stack>
+
+
+                </Stack>
+              </Box>
+
+
+              <Box>
+                <SummarySectionTitle>
+                  Fees
+                </SummarySectionTitle>
+                <Stack spacing={2} sx={{ my: 2 }}>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Protocol Fee:
+                    </SummaryKey>
+                    <SummaryValue>
+                      0
+                    </SummaryValue>
+                  </Stack>
+
+                  <Stack direction='row' spacing={1}>
+                    <SummaryKey>
+                      Estimated Profit:
+                    </SummaryKey>
+                    <SummaryValue>
+                      0
+                    </SummaryValue>
+                  </Stack>
+
+
+                </Stack>
+              </Box>
+              <Divider />
+              <Typography variant='caption'>
+                Here is a cool caption
+              </Typography>
+
+            </CardContent>
+            <CardActions>
+            <Button
             sx={{ mx: 1, width: 120, p: 1 }}
             variant="contained"
             // disabled={createContractForm.contract_definition_of_done.trim().length >= 500 || createContractForm.contract_title.trim().length >= 81 || createContractForm.contract_description.trim().length >= 730}
@@ -847,7 +956,19 @@ console.log(error)
           >
             Create
           </Button>
-        </Stack>
+            </CardActions>
+          </Card>
+
+
+
+
+
+        </Box>
+
+  
+      </TabPanel>
+      
+
 
         <ConfirmationDialog
           open={createContractDialogState.open}
@@ -860,7 +981,7 @@ console.log(error)
           primaryActionTitle="Create"
           loading={createContractDialogState?.loading}
         />
-      </Stack>
+  
     </Container>
   );
 };

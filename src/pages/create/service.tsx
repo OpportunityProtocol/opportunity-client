@@ -408,7 +408,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const [tabValue, setTabValue] = useState<number>(0);
 
   return (
-    <Container component={Stack} spacing={2} maxWidth="xl">
+    <Container maxWidth="xl">
       <Box>
         <Typography fontWeight="600" fontSize={25}>
           Create a service
@@ -451,33 +451,31 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           </Typography>
         </Box>
 
-        <Grid item xs={6}>
-          <Card variant='outlined' sx={{ width: "100%", border: 'none' }}>
-            <CardContent>
-              <Grid
-                container
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                {marketDetails.map((details) => {
-                  return (
 
-                    <MarketDisplay
-                      small
-                      marketDetails={details}
-                      isShowingStats={false}
-                      selected={details?.id === selectedMarketId}
-                      selectable
-                      onSelect={() => setSelectedMarketId(details?.id)}
-                    />
 
-                  );
-                })}
+        <Grid
+          container
+          direction="row"
+          alignItems="center"
+          spacing={3}
+        >
+          {marketDetails.map((details) => {
+            return (
+              <Grid item xs={12} md={6} lg={3}>
+                <MarketDisplay
+                  small
+                  marketDetails={details}
+                  isShowingStats={false}
+                  selected={details?.id === selectedMarketId}
+                  selectable
+                  onSelect={() => setSelectedMarketId(details?.id)}
+                />
               </Grid>
-            </CardContent>
-          </Card>
+            );
+          })}
         </Grid>
+
+
       </TabPanel>
 
       <TabPanel index={1} value={tabValue}>
@@ -547,10 +545,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             </CardContent>
           </Card>
 
-
-
           <Card elevation={0} sx={{ mb: 3, width: "100%" }}>
-
             <Stack spacing={2}>
               <StyledTextField
                 margin="normal"

@@ -44,24 +44,7 @@ import { useSelector } from "react-redux";
 import { selectUserAddress } from "../modules/user/userReduxSlice";
 import { KeyboardArrowDown, Refresh, TableRows, ViewModule } from "@mui/icons-material";
 import SearchBar from "../common/components/SearchBar/SearchBar";
-
-const MuiTableHead = withStyles((theme) => ({
-  root: {
-    width: "100% !important",
-    minWidth: "100% !important",
-    backgroundColor: "#fff",
-  },
-}))(TableHead);
-
-const TableHeaderCell = withStyles((theme) => ({
-  root: {
-    color: "rgb(190, 190, 190)",
-    fontSize: "14px !important",
-    textTransform: 'capitalize',
-    padding: "10px !important",
-    fontWeight: "bold",
-  },
-}))(TableCell);
+import fleek from "../fleek";
 
 enum Persona {
   CATALOG,
@@ -197,10 +180,15 @@ const ExplorePage: NextPage = () => {
                 activeServicesByCreatorQuery.data.purchasedServices[i]
                   .serviceId,
             })
-            .then((serviceData) => {
+            .then(async (serviceData) => {
+              const serviceMetadata = await fleek.getService(String(serviceData.data.service?.metadataPtr).slice(13))
+
               activeServices[i] = {
                 ...activeServices[i],
-                serviceData: serviceData.data.service,
+                serviceData: {
+                  ...serviceData.data.service,
+                  ...serviceMetadata
+                }
               };
             });
         }
@@ -214,9 +202,28 @@ const ExplorePage: NextPage = () => {
   }, [activeServicesByCreatorQuery.loading,]);
 
   useEffect(() => {
-    if (!workingContractsQuery.loading && workingContractsQuery.data) {
-      setContractsWorking([...workingContractsQuery.data.contracts]);
+    async function loadWorkingContracts() {
+      if (!workingContractsQuery.loading && workingContractsQuery.data) {
+        const contracts = workingContractsQuery.data.contracts
+
+        let contractMetadata = {}
+        let displayedContractsData = []
+        await contracts.forEach(async (contract) => {
+          contractMetadata = await fleek.getContract(String(contract?.metadata).slice(13))
+          displayedContractsData.push({
+            ...contract,
+            ...contractMetadata
+          })
+
+          setContractsWorking(displayedContractsData)
+        })
+
+
+      }
     }
+
+    loadWorkingContracts()
+
   }, [workingContractsQuery.loading])
 
   //hiring
@@ -245,10 +252,12 @@ const ExplorePage: NextPage = () => {
                 purchasedServicesByClientQuery.data.purchasedServices[i]
                   .serviceId,
             })
-            .then((serviceData) => {
+            .then(async (serviceData) => {
+              const serviceMetadata = await fleek.getService(String(serviceData.data.service?.metadataPtr).slice(13))
+
               purchasedServices[i] = {
                 ...purchasedServices[i],
-                serviceData: serviceData.data.service,
+                serviceData: { ...serviceData.data.service, ...serviceMetadata }
               };
             });
         }
@@ -265,7 +274,24 @@ const ExplorePage: NextPage = () => {
       !contractsCreatedByEmployerQuery.loading &&
       contractsCreatedByEmployerQuery.data
     ) {
-      setContractsHiring([...contractsCreatedByEmployerQuery.data.contracts]);
+      async function loadContractsHiring() {
+        const contracts = contractsCreatedByEmployerQuery.data.contracts
+
+        let contractMetadata = {}
+        let displayedContractsData = []
+        await contracts.forEach(async (contract) => {
+          contractMetadata = await fleek.getContract(String(contract?.metadata).slice(13))
+          displayedContractsData.push({
+            ...contract,
+            ...contractMetadata
+          })
+
+          setContractsHiring(displayedContractsData)
+        })
+      }
+
+      loadContractsHiring()
+
     }
   }, [contractsCreatedByEmployerQuery.loading])
 
@@ -274,20 +300,43 @@ const ExplorePage: NextPage = () => {
       !servicesByCreatorQuery.loading &&
       servicesByCreatorQuery.data
     ) {
-      setCreatedServices([...servicesByCreatorQuery.data.services]);
+      async function loadCreatedServices() {
+        const services = servicesByCreatorQuery.data.services
+
+        let serviceMetadata = {}
+        let displayedServicesData = []
+        let creatorLensProfile = {}
+
+        await services.forEach(async (service) => {
+          //fetch metadata
+          serviceMetadata = await fleek.getService(String(service?.metadataPtr).slice(13))
+
+          displayedServicesData.push({
+            ...service,
+            ...serviceMetadata,
+          })
+
+          setCreatedServices(displayedServicesData)
+        })
+      }
+
+      loadCreatedServices()
+
     }
   }, [servicesByCreatorQuery.loading])
 
   const renderContracts = () => {
+
     switch (state.persona) {
       case Persona.HIRING:
         return contractsHiring?.length > 0 ? contractsHiring.map((item) => {
+          console.log(item)
           return <JobDisplay data={item} />
         })
-        :
-        <Typography p={2} color='text.secondary'>
-        Sorry, no results found.
-      </Typography>
+          :
+          <Typography p={2} color='text.secondary'>
+            Sorry, no results found.
+          </Typography>
       case Persona.WORKING:
         return contractWorking?.length > 0 ?
           contractWorking.map((item) => {
@@ -305,10 +354,10 @@ const ExplorePage: NextPage = () => {
         return contractsHiring?.length > 0 ? contractsHiring.map((item) => {
           return <JobDisplay data={item} />
         })
-        :
-        <Typography p={2} color='text.secondary'>
-        Sorry, no results found.
-      </Typography>
+          :
+          <Typography p={2} color='text.secondary'>
+            Sorry, no results found.
+          </Typography>
       default:
     }
   }
@@ -317,28 +366,28 @@ const ExplorePage: NextPage = () => {
     switch (state.persona) {
       case Persona.HIRING:
         return servicesHired?.length > 0 ? servicesHired.map((item) => {
-          return <ServiceCard table={false} id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+          return <ServiceCard id={item?.id} service={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
-        :
-        <Typography p={2} color='text.secondary'>
-        Sorry, no results found.
-      </Typography>
+          :
+          <Typography p={2} color='text.secondary'>
+            Sorry, no results found.
+          </Typography>
       case Persona.WORKING:
         return servicesWorking?.length > 0 ? servicesWorking.map((item) => {
-          return <ServiceCard table={false} id={item?.id} data={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+          return <ServiceCard id={item?.id} service={item?.serviceData} purchase purchaseData={item?.purchaseData} />
         })
-        :
-        <Typography p={2} color='text.secondary'>
-        Sorry, no results found.
-      </Typography>
+          :
+          <Typography p={2} color='text.secondary'>
+            Sorry, no results found.
+          </Typography>
       case Persona.CATALOG:
         return createdServices?.length > 0 ? createdServices.map((item) => {
-          return <ServiceCard table={false} id={item?.id} data={item} />
+          return <ServiceCard id={item?.id} service={item} />
         })
-        :
-        <Typography p={2} color='text.secondary'>
-        Sorry, no results found.
-      </Typography>
+          :
+          <Typography p={2} color='text.secondary'>
+            Sorry, no results found.
+          </Typography>
       default:
     }
   }

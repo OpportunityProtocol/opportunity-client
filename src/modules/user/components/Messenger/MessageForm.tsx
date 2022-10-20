@@ -8,7 +8,7 @@ const MessageForm = ({ handleSubmit, text, setText, setImg }) => {
   return (
 
     <FormControl component='form' onSubmit={handleSubmit} sx={{
-      position: 'absolute',
+      position: 'fixed',
       bottom: 0,
       width: '100%',
       display: 'flex',

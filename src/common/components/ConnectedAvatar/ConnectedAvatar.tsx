@@ -165,11 +165,8 @@ const ConnectedAvatar: FC = () => {
                 justifyContent="space-between"
               >
                 <Box sx={{ flex: 1, flexGrow: 1 }}>
-                  <Typography fontSize={12} fontWeight="medium">
-                    {userLensData && userLensData?.handle ? userLensData?.handle : `Connect a wallet`}
-                  </Typography>
-                  <Typography fontSize={15} fontWeight="bold">
-                    Leslie Alexander
+                  <Typography fontSize={16} fontWeight="600">
+                    {userLensData && userLensData.profile?.handle ? userLensData.profile?.handle : `Register a lens handle`}
                   </Typography>
                 </Box>
               </Stack>

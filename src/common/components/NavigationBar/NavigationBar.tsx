@@ -86,10 +86,10 @@ import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
 import { getRefreshToken, login } from "../../../modules/lens/LensAPIAuthentication";
 import SearchBar from "../SearchBar/SearchBar";
+import { getLensProfileById } from "../../../modules/lens/LensGQLQueries";
 
 
 const NavigationBar: FC = (): JSX.Element => {
-  const classes = useStyles();
   const router = useRouter();
   const connectData = useConnect();
   const accountData = useAccount();
@@ -118,7 +118,6 @@ const NavigationBar: FC = (): JSX.Element => {
   );
 
   const userAddress = useSelector(selectUserAddress);
-  const connected = useSelector(selectUserConnectionStatus);
   const userLensProfile = useSelector(selectLens)
 
   const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
@@ -130,52 +129,6 @@ const NavigationBar: FC = (): JSX.Element => {
   const open = Boolean(anchorEl);
   const helpMenuIsOpen = Boolean(helpMenuAnchorEl);
   const createMenuIsOpen = Boolean(createMenuAnchorEl);
-
-  //getProfile
-  const lensHub_getProfile = useContractRead({
-    addressOrName: LENS_HUB_PROXY,
-    contractInterface: LensHubInterface,
-    functionName: "getProfile",
-    enabled: false,
-    watch: false,
-    chainId: CHAIN_ID,
-    args: [lensProfileId],
-    onSuccess: (data) => {
-      const {
-        followModule,
-        followNFT,
-        followNFTURI,
-        handle,
-        imageURI,
-        pubCount,
-      } = data;
-      dispatch(
-        userLensDataStored({
-          followModule,
-          followNFT,
-          followNFTURI,
-          handle,
-          imageURI,
-          pubCount: hexToDecimal(Number(pubCount._hex)),
-          profileId: Number(lensProfileId),
-        })
-      );
-    },
-  });
-
-  const networkManager_getLensProfileIdFromAddress = useContractRead({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    contractInterface: NetworkManagerInterface,
-    functionName: "getLensProfileIdFromAddress",
-    enabled: false,
-    watch: false,
-    chainId: CHAIN_ID,
-    args: [accountData?.address],
-    onSuccess: (data: Result) => {
-      setLensProfileId(hexToDecimal(data._hex));
-    },
-    onError: (error) => { },
-  });
 
   const dai_balanceOf = useContractRead({
     addressOrName: DAI_ADDRESS,
@@ -201,16 +154,7 @@ const NavigationBar: FC = (): JSX.Element => {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
       from: userAddress
-    },
-    onMutate({ args, overrides }) {
-
-    },
-    onError(error, variables, context) {
-
-    },
-    onSettled(data, error, variables, context) {
-
-    },
+    }
   });
 
   useEffect(() => {
@@ -219,7 +163,25 @@ const NavigationBar: FC = (): JSX.Element => {
       ethBalanceData.refetch()
 
       signer.refetch().then((signer) => {
-        login(signer.data).then(() => console.log('login success')).catch((error) => console.log(error))
+        login(signer.data)
+          .then(() => {
+            console.log('login success')
+            handleOnIsConnected();
+
+          })
+          .catch((error) => {
+            console.log(error)
+
+            dispatch(
+              userWalletDataStored({
+                balance: 0,
+                erc20Balance: {},
+                connector: null,
+                address: ZERO_ADDRESS,
+                connected: false,
+              })
+            );
+          })
       })
     }
 
@@ -227,69 +189,42 @@ const NavigationBar: FC = (): JSX.Element => {
   }, [accountData?.status])
 
   useEffect(() => {
-    if (lensProfileId !== 0) {
-      lensHub_getProfile.refetch({
-        throwOnError: true,
-      });
-    }
-  }, [lensProfileId]);
-
-  useEffect(() => {
-    if (accountData.status == 'connected') {
-      handleOnIsConnected();
-    } else {
-      dispatch(
-        userWalletDataStored({
-          balance: 0,
-          erc20Balance: {},
-          connector: null,
-          address: ZERO_ADDRESS,
-          connected: false,
-        })
-      );
-    }
-  }, [accountData.status]);
-
-  useEffect(() => {
     if (!feeData.isLoading && feeData.data) {
       setGasPrice(feeData.data.formatted.gasPrice);
     }
   }, [feeData.isLoading]);
 
-  const onFetchLensProfileId = () => {
-    if (accountData.address && accountData.address != ZERO_ADDRESS) {
-      networkManager_getLensProfileIdFromAddress
-        .refetch({
-          throwOnError: true,
-        })
-        .then((updatedResults) => {
-          if (updatedResults.isSuccess) {
-            setLensProfileId(updatedResults.data._hex);
-          } else {
-            setLensProfileId(0);
-          }
-        })
-        .catch((error) => { });
-    }
-  };
-
   async function handleOnIsConnected() {
-    let address: string = "Please connect a wallet",
-      connector: any = "",
-      ethBalance: string | number = 0,
-      daiBalance: Result | number = 0;
+    let ethBalance: string | number = 0,
+      daiBalance: Result | number = 0
 
     if (accountData.isConnected) {
-      address = accountData.address;
-      connector = accountData.connector;
-      onFetchLensProfileId();
+      userData.refetch().then(async (updatedUserData) => {
+
+        const profile = await getLensProfileById(`0x${Math.abs(Number(updatedUserData.data?.verifiedUsers[0]?.id)).toString(16)}`)
+
+        dispatch(userLensDataStored({
+          profileId: updatedUserData.data?.verifiedUsers[0]?.id,
+          profile,
+          error: null
+        }))
+
+      }).catch(error => {
+        dispatch(userLensDataStored({
+          profileId: 0,
+          profile: null,
+          error: error.message
+        }))
+      })
+
     }
 
     if (ethBalanceData.isSuccess) {
       ethBalance = ethBalanceData.data.formatted;
     }
 
-    const result = await dai_balanceOf.refetch();
+
+    const result = await dai_balanceOf.refetch()
     if (result.isSuccess) {
       daiBalance = Number(dai_balanceOf.data?._hex)
     } else {
@@ -302,9 +237,18 @@ const NavigationBar: FC = (): JSX.Element => {
         erc20Balance: {
           [DAI_ADDRESS]: daiBalance,
         },
+        address: accountData.address,
         connector: { name: String(accountData.connector.name), network: await accountData.connector.getChainId() },
-        address,
-        connected: accountData.status,
+        connection: {
+          isSuccess: connectData.isSuccess,
+          isLoading: connectData.isLoading,
+          isError: connectData.isError,
+          isIdle: connectData.isIdle,
+          ...connectData.data
+        },
+        account: {
+          ...accountData
+        }
       })
     );
   }
@@ -382,7 +326,7 @@ const NavigationBar: FC = (): JSX.Element => {
               justifyContent="space-between"
             >
               <Grid item sx={{ display: "flex", alignItems: "center" }}>
-                <img src='/assets/logo.svg' style={{ width: 40 ,height: 50 }} />
+                <img src='/assets/logo.svg' style={{ width: 40, height: 50 }} />
               </Grid>
 
               <Grid
@@ -395,7 +339,7 @@ const NavigationBar: FC = (): JSX.Element => {
               >
                 <Stack direction="row" alignItems="center" spacing={1}>
                   {
-                    !userData.data?.verifiedUsers[0]?.handle  && (
+                     userLensProfile?.profileId == 0 || String(userAddress).toLowerCase() === ZERO_ADDRESS.toLowerCase() ? (
 
                       <Chip
                         sx={{
@@ -415,6 +359,8 @@ const NavigationBar: FC = (): JSX.Element => {
                         onClick={() => setVerificationDialogOpen(true)}
                       />
                     )
+                    :
+                    null
                   }
 
                   {
@@ -436,12 +382,12 @@ const NavigationBar: FC = (): JSX.Element => {
                   <>
                     <Tooltip title="Create">
                       <Button
-                      disabled={!userData?.data?.verifiedUsers[0]?.handle}
+                        disabled={userLensProfile?.profileId && userLensProfile?.profileId === 0}
                         variant="text"
                         color="secondary"
                         onClick={handleOnClickCreateIcon}
                       >
-                        <Typography color={userData?.data?.verifiedUsers[0]?.handle ? 'text.secondary' : 'text.disabled' } fontWeight='600' fontSize={12}>
+                        <Typography  fontWeight='600' fontSize={12}>
                           Create
                         </Typography>
                       </Button>
@@ -484,7 +430,7 @@ const NavigationBar: FC = (): JSX.Element => {
                     >
                       <List>
                         <ListItemButton
-                          disabled={userLensProfile?.profileId == 0}
+                          disabled={userLensProfile?.handle}
                           onClick={() => router.push("/create/contract")}
                         >
                           <ListItemText
@@ -504,7 +450,7 @@ const NavigationBar: FC = (): JSX.Element => {
 
                         <ListItemButton
                           onClick={() => router.push("/create/service")}
-                          disabled={userLensProfile?.profileId == 0}
+                          disabled={userLensProfile?.handle}
                         >
                           <ListItemText
                             primary="Service"
@@ -651,21 +597,21 @@ const NavigationBar: FC = (): JSX.Element => {
               }}
             />
             <Box my={2}>
-            <DialogTitle
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "0px",
-                fontSize: 25,
-                fontWeight: '600'
-              }}
-            >
-              Login
-            </DialogTitle>
-            <Typography variant='caption'>
-              New to Lens Talent? {" " } Start by connecting a wallet.
-            </Typography>
+              <DialogTitle
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "0px",
+                  fontSize: 25,
+                  fontWeight: '600'
+                }}
+              >
+                Login
+              </DialogTitle>
+              <Typography variant='caption'>
+                New to Lens Talent? {" "} Start by connecting a wallet.
+              </Typography>
             </Box>
 
 
@@ -777,12 +723,12 @@ const NavigationBar: FC = (): JSX.Element => {
             </div>
             <Box mt={2}>
 
-            <Typography variant='caption'>
-            Want to learn more about Lens Talent? <Typography component='span' variant='caption' color='primary' sx={{ cursor: 'pointer' }}> Read our guide </Typography>
-          </Typography>
-          </Box>
+              <Typography variant='caption'>
+                Want to learn more about Lens Talent? <Typography component='span' variant='caption' color='primary' sx={{ cursor: 'pointer' }}> Read our guide </Typography>
+              </Typography>
+            </Box>
           </DialogContent>
-       
+
 
         </Dialog>
       </AppBar>

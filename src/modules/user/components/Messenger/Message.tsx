@@ -1,6 +1,6 @@
 import React, { FC, useRef, useEffect, useState } from "react";
 import Moment from "react-moment";
-import { Card, Grid, styled, Typography, Box, Button, DialogContentText } from "@mui/material";
+import { Card, Grid, styled, Typography, Box, Button, Stack, DialogContentText, AvatarGroup, Avatar } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useContractWrite } from "wagmi";
 import { DAI_ADDRESS, NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "../../../../constant";
@@ -31,7 +31,7 @@ const useStyles = makeStyles({
 
   },
   MessageFriend: {
-    background: '#333',
+    background: '#ddd',
   }
 });
 
@@ -87,7 +87,7 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
     args: [NETWORK_MANAGER_ADDRESS, msg?.data?.proposalPayout],
     overrides: {
       gasLimit: BigNumber.from("2000000"),
-      gasPrice: 90000000000,  
+      gasPrice: 90000000000,
     },
     onSuccess(data, variables, context) {
       setConfirmationDialogState({
@@ -105,7 +105,7 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
         success: false,
         error: true
       })
-        alert('Error dai transfer!')
+      alert('Error dai transfer!')
     },
   })
 
@@ -119,7 +119,7 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
     args: [msg?.data?.contractId, msg?.data?.proposedWorker, msg?.data?.proposalPayout],
     overrides: {
       gasLimit: BigNumber.from("2000000"),
-      gasPrice: 90000000000,  
+      gasPrice: 90000000000,
     },
     onSuccess(data, variables, context) {
       setConfirmationDialogState({
@@ -138,7 +138,7 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
         success: false,
         error: true
       })
-        alert('Accept proposal error')
+      alert('Accept proposal error')
     },
   })
 
@@ -182,21 +182,47 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
       className={checkMsg ? classes.containerOwn : classes.containerFriend}
       ref={scrollRef}
     >
-      <Typography sx={{ fontSize: "16px", padding: '15px', display: 'inline-block', maxWidth: '300px', textAlign: 'left', borderRadius: '5px;', marginTop: '10px', marginBottom: '10px' }}
-        className={checkMsg ? classes.MessageOwn : classes.MessageFriend}>
-        {msg.proposalPayout ? <p><h4>Proposal Payout:</h4> {msg.proposalPayout}</p> : null}
-        {msg.proposalMessage ? <p><h4>Proposal Message:</h4> {msg.proposalMessage}</p> : null}
-        {msg.media ? <img src={msg.media} alt={msg.text} /> : null}
-        {msg.text ? msg.text : null}
-        {(String(userAddress).toLowerCase() === String(msg?.from).toLowerCase() || String(userAddress).toLowerCase() === String(ZERO_ADDRESS).toLowerCase()) ? null :  <Grid sx={{ display: 'flex', justifyContent: "center", marginTop: '50px' }}><Button size="large" onClick={() => setConfirmationDialogState({ ...confirmationDialogState, open: true })}>Accept</Button></Grid> }
-       
-        <br />
-        <Typography sx={{ fontSize: 'smaller', display: 'inline-block', marginTop: '15px', opacity: '0.8' }}>
-          <Moment fromNow>{msg.createdAt.toDate()}</Moment>
+      <Box className={checkMsg ? classes.MessageOwn : classes.MessageFriend} sx={{ padding: '15px', display: 'inline-block', maxWidth: '300px', textAlign: 'left', borderRadius: '5px;', marginTop: '10px', marginBottom: '10px' }}>
+        <Typography variant='subtitle2' py={1}>
+          {userAddress != msg?.from ? 'New Contract Proposal from helloworld.lens' : null}
         </Typography>
-      </Typography>
 
-      <ConfirmationDialog open={confirmationDialogState.open} onOpen={() => {}} onClose={() => { setConfirmationDialogState({ ...confirmationDialogState, open: false })}} primaryAction={approveDaiTransfer} primaryActionTitle='Accept Proposal' hasSigningStep={false} content={confirmationDialogContent} success={confirmationDialogContent.success} loading={confirmationDialogContent.loading} />
+
+        <Box>
+
+          <Typography fontWeight='400' fontSize={15}>
+            {msg.proposalMessage ? msg.proposalMessage : null}
+          </Typography>
+          <Typography fontWeight='medium' fontSize={14}>
+            Proposed Payout: {msg.proposalPayout ? msg.proposalPayout : null}
+          </Typography>
+
+ 
+        </Box>
+
+        {
+          (
+            String(userAddress).toLowerCase() === String(msg?.from).toLowerCase()
+            || String(userAddress).toLowerCase() === String(ZERO_ADDRESS).toLowerCase())
+            ? null
+            :
+            <Stack sx={{ my: 1 }} spacing={3} direction='row' alignItems='center' justifyContent='flex-start'>
+              <Button variant='contained' size="large" onClick={() => setConfirmationDialogState({ ...confirmationDialogState, open: true })}>
+                Accept
+              </Button>
+              <Button>
+                Decline
+              </Button>
+            </Stack>
+        }
+
+<Typography sx={{ fontSize: 'smaller', display: 'inline-block', marginTop: '15px', opacity: '0.8' }}>
+            <Moment fromNow>{msg.createdAt.toDate()}</Moment>
+          </Typography>
+      </Box>
+
+
+      <ConfirmationDialog open={confirmationDialogState.open} onOpen={() => { }} onClose={() => { setConfirmationDialogState({ ...confirmationDialogState, open: false }) }} primaryAction={approveDaiTransfer} primaryActionTitle='Accept Proposal' hasSigningStep={false} content={confirmationDialogContent} success={confirmationDialogContent.success} loading={confirmationDialogContent.loading} />
     </Grid>
   )
 }

@@ -92,11 +92,9 @@ function MyApp({ Component, pageProps }: AppProps) {
             <ThemeProvider theme={theme}>
               <CssBaseline />
               <ApolloProvider client={apolloClient}>
-        
                   <Opportunity>
                     <Component {...pageProps} />
                   </Opportunity>
-          
               </ApolloProvider>
             </ThemeProvider>
           </ReduxProvider>

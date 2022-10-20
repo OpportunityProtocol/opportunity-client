@@ -20,6 +20,7 @@ import SearchBar from '../../../common/components/SearchBar/SearchBar';
 import { Refresh } from '@mui/icons-material';
 import { NextPage } from 'next';
 import { GET_MARKET_DETAILS_BY_ID } from '../../../modules/market/MarketGQLQueries';
+import fleek from '../../../fleek';
 
 const Market: NextPage = () => {
   const router: NextRouter = useRouter()
@@ -30,7 +31,6 @@ const Market: NextPage = () => {
   const { id } = router.query;
 
   const marketDetailsQuery: QueryResult = useQuery(GET_MARKET_DETAILS_BY_ID, {
-    skip: true,
     variables: {
       id: Number(id)
     }
@@ -56,19 +56,57 @@ const Market: NextPage = () => {
 
   useEffect(() => {
     if (!marketDetailsQuery.loading && marketDetailsQuery.data) {
-     // setMarketDetails(marketDetailsQuery.data?.markets[0])
+      setMarketDetails(marketDetailsQuery.data?.markets[0])
     }
   }, [marketDetailsQuery.loading])
 
   useEffect(() => {
-    if (!contractsQuery.loading && contractsQuery.data) {
-      setDisplayedContracts([...contractsQuery.data?.contracts])
+    async function loadContracts() {
+      if (!contractsQuery.loading && contractsQuery.data) {
+        const contracts = contractsQuery.data?.contracts
+
+        let contractMetadata = {}
+        let displayedContractsData = []
+        await contracts.forEach(async (contract) => {
+          contractMetadata = await fleek.getContract(String(contract?.metadata).slice(13))
+          displayedContractsData.push({
+            ...contract,
+            ...contractMetadata
+          })
+
+          setDisplayedContracts(displayedContractsData)
+        })
+      }
     }
+
+    loadContracts()
+
   }, [contractsQuery.loading])
 
   useEffect(() => {
     if (!servicesQuery.loading && servicesQuery.data) {
-      setDisplayedServices([...servicesQuery.data?.services])
+
+      async function loadServices() {
+        const services = servicesQuery.data?.services
+
+        let serviceMetadata = {}
+        let displayedServicesData = []
+        let creatorLensProfile = {}
+
+        await services.forEach(async (service) => {
+          //fetch metadata
+          serviceMetadata = await fleek.getService(String(service?.metadataPtr).slice(13))
+
+          displayedServicesData.push({
+            ...service,
+            ...serviceMetadata,
+          })
+
+          setDisplayedServices(displayedServicesData)
+        })
+      }
+
+      loadServices()
     }
   }, [servicesQuery.loading])
 
@@ -79,6 +117,7 @@ const Market: NextPage = () => {
   const onRefresh = () => {
     servicesQuery.refetch()
     contractsQuery.refetch()
+    marketDetailsQuery.refetch()
   }
 
   return (
@@ -90,36 +129,36 @@ const Market: NextPage = () => {
             fontSize={24}
             color="rgba(33, 33, 33, .85)"
           >
-            Writing and Translation
+            {marketDetails?.name}
           </Typography>
         </Stack>
 
         <Box sx={{ width: "100%", mt: 1, mb: 3 }}>
           <Box display='flex' alignItems='center' justifyContent='space-between'>
-          <Tabs
-            value={tabValue}
-            onChange={handleOnChangeTab}
-            textColor="secondary"
-            indicatorColor="secondary"
-          >
-            <Tab value={0} label="Contracts" />
-            <Tab value={1} label="Services" />
-          </Tabs>
-          <Stack direction='row' alignItems='center' spacing={1}>
-            <IconButton size='small' onClick={onRefresh}>
-              <Refresh fontSize='small' />
-            </IconButton>
-            {/*
+            <Tabs
+              value={tabValue}
+              onChange={handleOnChangeTab}
+              textColor="secondary"
+              indicatorColor="secondary"
+            >
+              <Tab value={0} label="Contracts" />
+              <Tab value={1} label="Services" />
+            </Tabs>
+            <Stack direction='row' alignItems='center' spacing={1}>
+              <IconButton size='small' onClick={onRefresh}>
+                <Refresh fontSize='small' />
+              </IconButton>
+              {/*
               tabValue === 0 ? (<SearchBar placeholder='Search...' onChange={e => setDisplayedContracts(contractsQuery.data?.contracts?.filter(contract => contract?.))} />) : (<SearchBar placeholder='Search...' onChange={e => alert('hji')} />)
   */}
-          </Stack>
+            </Stack>
           </Box>
         </Box>
         <TabPanel index={0} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
               {displayedContracts.filter((item) => item.ownership == 0).map((contract: any, idx: number) => {
-                return ( <JobDisplay id={Number(contract.id)} data={contract} /> )
+                return (<JobDisplay id={Number(contract.id)} data={contract} />)
               })}
             </Grid>
           </Box>
@@ -132,7 +171,7 @@ const Market: NextPage = () => {
                   purchase={false}
                   table={false}
                   id={service.id}
-                  data={service}
+                  service={service}
                 />
               ))}
             </Grid>
