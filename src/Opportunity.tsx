@@ -77,24 +77,24 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
 
 
 
-  const drawerWidth = 280;
+  const drawerWidth = 250;
   const drawer = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Toolbar disableGutters sx={{ height: "64px" }}>
         {
-          accountData.isConnected  && (
+          accountData.isConnected && (
             <CardActionArea sx={{ p: 2, mb: 2, height: '100%', width: '100%' }}>
-            <Stack mb={2} spacing={1} direction='row' alignItems='center'>
-              <Avatar src='/assets/images/woman_work.jpg' />
-  
-              <Box>
-                <Typography py={0.4} fontSize={14} color='black' fontWeight='600'>
-                  { userData?.data?.verifiedUsers[0]?.handle ? userData?.data?.verifiedUsers[0]?.handle : 'Register to get a handle' }
-                </Typography>
-                <Chip sx={{ py: 1, height: 15, borderRadius: 1, color: '#757575', maxWidth: 100, fontSize: 10 }} size='small' variant='filled' label={userAddress} />
-              </Box>
-            </Stack>
-          </CardActionArea>
+              <Stack mb={2} spacing={1} direction='row' alignItems='center'>
+                <Avatar src='/assets/images/woman_work.jpg' />
+
+                <Box>
+                  <Typography py={0.4} fontSize={14} color='black' fontWeight='600'>
+                    {userData?.data?.verifiedUsers[0]?.handle ? userData?.data?.verifiedUsers[0]?.handle : 'Register to get a handle'}
+                  </Typography>
+                  <Chip sx={{ py: 1, height: 15, borderRadius: 1, color: '#757575', maxWidth: 100, fontSize: 10 }} size='small' variant='filled' label={userAddress} />
+                </Box>
+              </Stack>
+            </CardActionArea>
           )
         }
 
@@ -117,7 +117,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
                         {
                           fontWeight: 'medium',
                           color: (router.pathname === '/') ? 'primary' : '#757575',
-                          fontSize: 13
+                          fontSize: 14
 
                         }
                       }
@@ -137,7 +137,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
                         {
                           fontWeight: 'medium',
                           color: router.pathname.includes('/market') ? 'primary' : '#757575',
-                          fontSize: 13
+                          fontSize: 14
 
                         }
                       }
@@ -157,7 +157,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
                           {
                             fontWeight: 'medium',
                             color: router.pathname.includes('/dashboard') ? 'primary' : '#757575',
-                            fontSize: 13
+                            fontSize: 14
 
                           }
                         }
@@ -178,7 +178,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
                           {
                             fontWeight: 'medium',
                             color: router.pathname === '/messenger' ? 'primary' : '#757575',
-                            fontSize: 13
+                            fontSize: 14
 
                           }
                         }
@@ -199,7 +199,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
                           {
                             fontWeight: 'medium',
                             color: router.pathname === `/profile` ? 'primary' : '#757575',
-                            fontSize: 13
+                            fontSize: 14
 
                           }
                         }
@@ -210,21 +210,6 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
               </List>
             </Stack>
           </Box>
-
-          <Divider sx={{ mb: 2 }} />
-              
-          <Box>
-            <Typography pb={1} fontWeight='500'>
-              Most Active Markets 🌍
-            </Typography>
-       
-                            <ListItemButton sx={{  margin: 0 }} secondaryAction={<ArrowOutward sx={{ fontSize: 14 }} />}>
-                                <ListItemText primaryTypographyProps={{ fontWeight: '600' }} secondaryTypographyProps={{ fontSize: 12, color: '#757575', fontWeight: '500'}} primary='Writing and Translation' secondary='1324 contracts and services' />
-                            </ListItemButton>
-                       
-          </Box>
-
-
         </CardContent>
       </Box>
     </Box>
@@ -263,7 +248,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
       >
         <NavigationBar />
         <Drawer
-        elevation={3}
+          elevation={3}
           variant="permanent"
           sx={{
             height: "100%",
@@ -271,8 +256,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
             flexShrink: 0,
             "& .MuiDrawer-paper": {
               boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
-              bgcolor: '#fff', //'rgb(246, 248, 250)',
-              borderRight:  '1px solid #eee', //`1px solid ${alpha("#b8e0d0", 0.3)}`,
+              bgcolor: '#fff',
+              borderRight: '1px solid #eee',
               width: drawerWidth,
               boxSizing: "border-box",
               height: "100%",
@@ -284,7 +269,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
         </Drawer>
         <Box
           component="main"
-          sx={{ flexGrow: 1, mt: router.pathname.includes('/messenger') ? 0 : 2 }}
+          sx={{ flexGrow: 1, mt: router.pathname.includes('/messenger') || router.pathname.includes('/') ? 0 : 2 }}
         >
           <Toolbar />
           {children}

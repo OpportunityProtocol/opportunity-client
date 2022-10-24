@@ -22,7 +22,7 @@ const styles = (theme) => ({
     height: theme.spacing(5),
     display: "flex",
     justifyContent: "space-between",
-    width: 320,
+    width: 520,
   },
   iconButton: {
     color: theme.palette.action.active,
@@ -39,7 +39,7 @@ const styles = (theme) => ({
     },
   },
   searchIconButton: {
-    marginRight: theme.spacing(-12),
+    marginRight: theme.spacing(-40),
   },
   icon: {
     transition: theme.transitions.create(["opacity"], {
@@ -154,7 +154,7 @@ const SearchBar = React.forwardRef(
     }));
 
     return (
-      <Paper elevation={0} sx={{ backgroundColor: alpha("#b8e0d0", 0.2), border: 'none', borderRadius: 5 }} className={classNames(classes.root, className)} style={style}>
+      <Paper elevation={0} sx={{  border: '1px solid #ddd', borderRadius: 1 }} className={classNames(classes.root, className)} style={style}>
         <div className={classes.searchContainer}>
           <Input
             {...inputProps}

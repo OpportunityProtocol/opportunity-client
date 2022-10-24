@@ -376,7 +376,7 @@ const ProfilePage: NextPage<any> = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ height: 'calc(100vh - 65px)', }}>
+    <Container maxWidth="lg" sx={{ mt: 2, height: 'calc(100vh - 65px)', }}>
       <Box mb={2}>
         <Stack pb={2} direction='row' alignItems='flex-start' justifyContent='space-between'>
           <Box>
@@ -467,7 +467,7 @@ const ProfilePage: NextPage<any> = () => {
               <Button
                 variant="outlined"
                 color="secondary"
-                sx={{ border: '1px solid #ddd', borderRadius: 5 }}
+                sx={{ border: '1px solid #ddd', borderRadius: 1 }}
                 onClick={() =>
                   router.push(
                     `/view/profile/${address}/settings?metadata=${verifiedUserQuery?.data?.verifiedUsers[0]?.metadata}`

@@ -146,7 +146,7 @@ const UserCard: FC = ({ freelancer }) => {
 
   return (
     <Grid item xs={4}>
-      <Card onClick={onViewProfile} variant='outlined' sx={{ boxShadow: 'rgba(0, 0, 0, 0.1) -4px 9px 25px -6px', cursor: 'pointer', border: `1px solid #eee` }}>
+      <Card onClick={onViewProfile} variant='outlined' sx={{ boxShadow: 'rgba(0, 0, 0, 0.1) -4px 9px 25px -6px', cursor: 'pointer', border: `1px solid #ddd` }}>
         <CardContent>
           <Box py={1.5} display='flex' alignItems='flex-start' justifyContent='space-between'>
             <Stack spacing={2} direction='row' alignItems='center'>

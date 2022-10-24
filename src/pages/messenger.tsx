@@ -48,9 +48,9 @@ import { AddBoxTwoTone, Refresh } from "@mui/icons-material";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../modules/user/UserGQLQueries";
 import { ZERO_ADDRESS } from "../constant";
-import {getLensProfileById, LENS_GET_PROFILE_BY_PROFILE_ID } from "../modules/lens/LensGQLQueries";
+import { getLensProfileById, LENS_GET_PROFILE_BY_PROFILE_ID } from "../modules/lens/LensGQLQueries";
 import { useSelector } from "react-redux";
-import { selectUserAccountData } from "../modules/user/userReduxSlice";
+import { selectLens, selectUserAccountData, userLensDataStored } from "../modules/user/userReduxSlice";
 
 enum MessageType {
   ContractProposal,
@@ -66,7 +66,8 @@ const Messenger: NextPage<any> = () => {
   const account = useSelector(selectUserAccountData)
   const user1 = String(account?.address).toLowerCase();
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false)
-
+  const userLensData = useSelector(selectLens)
+  console.log({ userLensData })
   const userDataQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     skip: true,
     variables: {
@@ -95,23 +96,23 @@ const Messenger: NextPage<any> = () => {
       let completeUserData = []
 
       await users.forEach(async (user) => {
-       await userDataQuery.refetch({
+        await userDataQuery.refetch({
           userAddress: user?.uid
         })
-        .then(async (userData) => {
-          if (userData?.data?.verifiedUsers && userData?.data?.verifiedUsers[0]?.id) {
-            const profile = await getLensProfileById(`0x${Math.abs(Number(userData?.data?.verifiedUsers && userData?.data?.verifiedUsers[0]?.id)).toString(16)}`)
+          .then(async (userData) => {
+            if (userData?.data?.verifiedUsers && userData?.data?.verifiedUsers[0]?.id) {
+              const profile = await getLensProfileById(`0x${Math.abs(Number(userData?.data?.verifiedUsers && userData?.data?.verifiedUsers[0]?.id)).toString(16)}`)
 
-            completeUserData.push({
-              ...user,
-              ...userData?.data?.verifiedUsers[0],
-              ...profile
-            })  
-          }
-        })
+              completeUserData.push({
+                ...user,
+                ...userData?.data?.verifiedUsers[0],
+                ...profile
+              })
+            }
+          })
       })
 
-      
+
     });
     return () => unsub();
   }, []);
@@ -205,11 +206,11 @@ const Messenger: NextPage<any> = () => {
           flexGrow: 1,
         }}
       >
-        <Box sx={{  height: '100%'}}>
+        <Box sx={{ height: '100%' }}>
           <Box>
             <CardContent>
               <Typography>
-                Chats
+                Messages
               </Typography>
             </CardContent>
           </Box>
@@ -229,60 +230,57 @@ const Messenger: NextPage<any> = () => {
 
         <Divider sx={{ height: '100%' }} orientation='vertical' />
 
-        <Box sx={{  overflow: 'hidden', width: '100%', height: '100%' }}>
-        <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ height: '65px', padding: '15px', borderBottom: '1px solid #ddd' }} >
-                <Stack direction="row" alignItems='center'>
-                  <Avatar
-                    alt=''
-                    src="/static/images/avatar/1.jpg"
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginRight: "15px",
-                    }}
-                  />
-                  <Typography display='flex' sx={{ fontSize: "20px" }}>
-                    {chat.name}
-                  </Typography>
-                </Stack>
-                <IconButton>
-                 <Refresh />
-                </IconButton>
-              </Box>
+        <Box sx={{ overflow: 'hidden', width: '100%', height: '100%' }}>
+          <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ height: '65px', padding: '15px', borderBottom: '1px solid #ddd' }} >
+            <Stack direction="row" alignItems='center'>
+              <Avatar
+                alt=''
+                src={userLensData?.profile?.picture?.original?.url}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginRight: "15px",
+                }}
+              />
+              <Typography display='flex' sx={{ fontSize: "20px" }}>
+                {chat.name}
+              </Typography>
+            </Stack>
+            <IconButton>
+              <Refresh />
+            </IconButton>
+          </Box>
 
           {
 
-            !account.isConnected ? 
-           <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              Connect a wallet to see your messages
-          </Box>
-            :
-          
-          chat ? (
-            <Box sx={{  height: '100%', overflow: 'scroll' }}>
-             
-
-              <Box sx={{  position: 'relative', flexGrow: 1, height: '100%', }}>
-                {msgs.length
-                  ? msgs.map((msg, idx) => renderMessage(idx, msg))
-                  : null}
-                   <MessageForm
-                  handleSubmit={handleSubmit}
-                  text={text}
-                  setText={setText}
-                  setImg={setImg}
-                />
+            !account.isConnected ?
+              <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                Connect a wallet to see your messages
               </Box>
-            </Box>
-          ) : (
-            <Typography color='text.secondary' sx={{ fontSize: '20px', textAlign: 'center' }}>Select a user to start conversation</Typography>
-          )}
-             
-        </Box>
+              :
 
-        
+              chat ? (
+                <Box sx={{ height: '100%', overflow: 'scroll' }}>
+
+
+                  <Box sx={{ position: 'relative', flexGrow: 1, height: '100%', }}>
+                    {msgs.length
+                      ? msgs.map((msg, idx) => renderMessage(idx, msg))
+                      : null}
+                    <MessageForm
+                      handleSubmit={handleSubmit}
+                      text={text}
+                      setText={setText}
+                      setImg={setImg}
+                    />
+                  </Box>
+                </Box>
+              ) : (
+                <Typography color='text.secondary' sx={{ fontSize: '20px', textAlign: 'center' }}>Select a user to start conversation</Typography>
+              )}
+        </Box>
       </Box>
     </Box>
   );

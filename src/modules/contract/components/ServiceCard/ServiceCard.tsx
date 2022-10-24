@@ -439,6 +439,7 @@ const ServiceCard = ({
         boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
         WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
         MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
+        border: '1px solid #ddd !important'
       }}>
         <CardActionArea
           onClick={handleOnNavigateToServicePage}

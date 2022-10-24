@@ -10,6 +10,7 @@ import {
     CardContent,
     List,
     ListItem,
+    Button,
     alpha,
     Chip,
     ListItemText,
@@ -32,6 +33,7 @@ import { selectLens } from '../modules/user/userReduxSlice';
 import UserCard from '../modules/user/components/UserCard/UserCard';
 import { GET_SERVICES } from '../modules/contract/ContractGQLQueries';
 import ServiceCard from '../modules/contract/components/ServiceCard/ServiceCard';
+import SearchBar from '../common/components/SearchBar/SearchBar';
 
 const tags = ['spanish', 'english', 'essay', 'french', 'arabic', 'poetry', 'russian', 'portuguese', 'mandarin', 'hindu']
 
@@ -75,45 +77,44 @@ const Explore: NextPage<any> = () => {
     }, [])
 
     return (
+        <Box>
+                        <Box sx={{ mb: 2, p: 3, backgroundColor: (theme) => alpha(theme.palette.primary.light, 0.3), width: '100%' }}>
+<Stack direction='row' alignItems='center' justifyContent='space-between'>
+<SearchBar />
+
+<Box direction='row' component={Stack} spacing={2}>
+    <Button variant='contained' sx={{ borderRadius: 1 }}>
+        Search
+    </Button>
+    <Button variant='outlined' sx={{ borderRadius: 1 }}>
+        See all markets
+    </Button>
+</Box>
+</Stack>
+
+</Box>
+
+
         <Container maxWidth='xl' sx={{ bgcolor: 'white', height: '100%' }}>
-
-            {!userLensData.profile?.handle && (
-                <Alert sx={{ mb: 2, border: '1px solid #ddd' }}>
-                    Welcome to Lens Talent. The social network for <b>work</b>. Create or work contracts and servics by DAOs or users anytime from any place.
-                </Alert>
-            )}
-
             <Box mb={3}>
-                <Typography pb={2} fontWeight='bold' fontSize={16} color='#212121'>
+                <Typography pb={2} fontWeight='600' fontSize={16} color='#212121'>
                     Explore
                 </Typography>
                 <Stack spacing={2} direction='row' alignItems='center'>
                     {
                         tags.map((tag: string) => {
-                            return <Chip clickable label={String(tag).charAt(0).toUpperCase() + String(tag).slice(1)} size='small' sx={{ p: 1, fontSize: 12, color: 'black', fontWeight: 'medium', width: 'fit-content', bgcolor: "#eee", height: 25, border: '1px solid #ddd' }} />
+                            return <Chip clickable label={String(tag).charAt(0).toUpperCase() + String(tag).slice(1)} size='small' sx={{ p: 1.5, py: 1.8, fontSize: 13, color: 'black', fontWeight: '400', width: 'fit-content', bgcolor: "#eee", height: 25, border: 'none', borderRadius: 0 }} />
                         })
                     }
                 </Stack>
             </Box>
 
             <Box mb={1}>
-                <Typography pb={2} fontWeight='bold' fontSize={16} color='#212121'>
-                    Top Freelancers
-                </Typography>
-                <Grid container direction='row' alignItems='center' spacing={2}>
-                    {
-                        activeFreelancers.map((freelancer) =>
-                            <UserCard freelancer={freelancer} />
-                        )}
-                </Grid>
-            </Box>
-
-            <Box mt={5}>
-                <Box mt={2} mb={2}>
-                    <Typography fontWeight='bold' fontSize={16} color='#212121'>
+               
+                <Typography pb={2} fontWeight='600' fontSize={16} color='#212121'>
                         Labor Markets
                     </Typography>
-                </Box>
+            
                 <Grid container direction='row' alignItems='center' spacing={3}>
                     {
                         markets.map((marketDetails) => {
@@ -127,12 +128,22 @@ const Explore: NextPage<any> = () => {
                 </Grid>
             </Box>
 
+            <Box my={5}>
+            <Typography pb={2} fontWeight='600' fontSize={16} color='#212121'>
+                    Top Freelancers
+                </Typography>
+                <Grid container direction='row' alignItems='center' spacing={2}>
+                    {
+                        activeFreelancers.map((freelancer) =>
+                            <UserCard freelancer={freelancer} />
+                        )}
+                </Grid>
+            </Box>
+
             <Box mt={5}>
-                <Box mt={2} mb={2}>
-                    <Typography fontWeight='bold' fontSize={16} color='#212121'>
+                <Typography pb={2} fontWeight='600' fontSize={16} color='#212121'>
                         Highest Valued Services
                     </Typography>
-                </Box>
                 <Grid container direction='row' alignItems='center' spacing={3}>
                     <Grid xs={12} md={6} lg={4} item>
                         {
@@ -145,6 +156,7 @@ const Explore: NextPage<any> = () => {
                 </Grid>
             </Box>
         </Container>
+        </Box>
     )
 }
 

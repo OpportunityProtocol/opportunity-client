@@ -25,7 +25,6 @@ import {
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-import useStyles from "./NavigationBarStyle";
 import ConnectedAvatar from "../ConnectedAvatar/ConnectedAvatar";
 import SearchBarV1 from "../SearchBarV1/SearchBarV1";
 import { CHAIN_ID } from "../../../constant/provider";
@@ -301,11 +300,12 @@ const NavigationBar: FC = (): JSX.Element => {
   return (
     <React.Fragment>
       <AppBar
-        variant="outlined"
+        //variant="outlined"
         sx={{
-          width: { sm: `calc(100% - ${280}px)` },
-          ml: { sm: `${280}px` },
-          bgcolor: "#fff",
+          boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
+          width: { sm: `calc(100% - ${250}px)` },
+          ml: { sm: `${250}px` },
+          bgcolor: '#fff', //'rgb(246, 248, 250)',
           border: 'none',
           borderBottom: `1px solid ${alpha("#b8e0d0", 0.3)} !important`,
           height: '65px !important'
@@ -314,7 +314,7 @@ const NavigationBar: FC = (): JSX.Element => {
         <Toolbar disableGutters>
           <Container
             maxWidth="xl"
-            sx={{ display: "flex", flexDirection: "column", bgcolor: "#fff" }}
+            sx={{ display: "flex", flexDirection: "column" }}
           >
             <Grid
               width="100%"
@@ -326,7 +326,13 @@ const NavigationBar: FC = (): JSX.Element => {
               justifyContent="space-between"
             >
               <Grid item sx={{ display: "flex", alignItems: "center" }}>
+                <Stack direction='row' alignItems='center'>
                 <img src='/assets/logo.svg' style={{ width: 40, height: 50 }} />
+                <Typography mb={1.1} ml={1}>
+                  Allowing anyone to find work, from anywhere where, at anytime.
+                </Typography>
+                </Stack>
+                
               </Grid>
 
               <Grid
@@ -342,20 +348,19 @@ const NavigationBar: FC = (): JSX.Element => {
                      userLensProfile?.profileId == 0 || String(userAddress).toLowerCase() === ZERO_ADDRESS.toLowerCase() ? (
 
                       <Chip
-                        sx={{
-                          fontWeight: "medium",
-                          border: "1px solid #ddd",
-                          fontSize: "11px",
-                          bgcolor: "rgb(245, 245, 245)",
-                        }}
-                        icon={
-                          <HelpOutline
-                            fontSize="small"
-                            sx={{ color: "rgb(158, 158, 166)" }}
-                          />
-                        }
+                      color="primary"
+                      size="medium"
+                      component={Button}
+                      disableRipple
+                      disableFocusRipple
+                      disableTouchRipple
+                      sx={{
+                        fontWeight: "600",
+                        border: "1px solid #ddd",
+                        fontSize: "11px",
+                        bgcolor: "rgb(245, 245, 245)",
+                      }}
                         label="Register"
-                        size='small'
                         onClick={() => setVerificationDialogOpen(true)}
                       />
                     )
@@ -475,7 +480,7 @@ const NavigationBar: FC = (): JSX.Element => {
                       color="secondary"
                       onClick={handleOnClickHelpIcon}
                     >
-                      <Typography color='text.secondary' fontWeight='600' fontSize={12}>
+                      <Typography fontWeight='600' fontSize={12}>
                         Help
                       </Typography>
                     </Button>
