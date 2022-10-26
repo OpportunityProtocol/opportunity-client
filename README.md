@@ -158,7 +158,7 @@ Elijah Hampton - [@elihampton_](https://twitter.com/elihampton_) - hamptonelijah
 
 Nathan Farley - natefarley@live.com
 
-Project Link: [https://opportunity-client.vercel.app/](https://opportunity-client.vercel.app/)
+Project Link: Contact us for a free demo!
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
