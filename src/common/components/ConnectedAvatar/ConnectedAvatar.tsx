@@ -124,6 +124,8 @@ const ConnectedAvatar: FC = () => {
 
   const open = Boolean(anchorEl);
 
+  console.log({ userLensData })
+
   return (
     <StyledBadge
       connected={connected}

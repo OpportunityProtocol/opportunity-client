@@ -37,13 +37,12 @@ import {
   selectUserAddress, userLensDataStored,
 } from "./modules/user/userReduxSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { DAI_ADDRESS, MARKET_DESCRIPTION_MAPPING, NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "./constant";
 import Link from "next/link";
 import VerificationDialog from "./modules/user/components/VerificationDialog";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "./modules/user/UserGQLQueries";
 import { getLensProfileById } from "./modules/lens/LensGQLQueries";
+import { APP_BACKGROUND, DRAWER_WIDTH } from "./constant/component";
 
-const APP_BACKGROUND: string = '#ffffff'
 
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
@@ -57,7 +56,6 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     useState<boolean>(false);
 
   const marketsQuery: QueryResult = useQuery(GET_MARKETS);
-
   const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     variables: {
       userAddress,
@@ -65,7 +63,6 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   });
 
   useEffect(() => {
-
     if (!marketsQuery.loading && marketsQuery.data) {
       setState({
         ...state,
@@ -74,10 +71,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
     }
   }, [marketsQuery.loading]);
 
+  const hasPaddingTop = router.pathname.includes('/messenger') || router.pathname.includes('/')
 
-
-
-  const drawerWidth = 250;
   const drawer = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Toolbar disableGutters sx={{ height: "64px" }}>
@@ -216,10 +211,8 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   );
 
   useEffect(() => {
-
     userData.refetch().then(async (updatedUserData) => {
       const profile = await getLensProfileById(`0x${Math.abs(Number(updatedUserData.data?.verifiedUsers[0]?.id)).toString(16)}`)
-
       dispatch(userLensDataStored({
         profileId: updatedUserData.data?.verifiedUsers[0]?.id,
         profile,
@@ -233,7 +226,6 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
         error: error.message
       }))
     })
-
   }, [])
 
   return (
@@ -252,13 +244,13 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
           variant="permanent"
           sx={{
             height: "100%",
-            width: drawerWidth,
+            width: DRAWER_WIDTH,
             flexShrink: 0,
             "& .MuiDrawer-paper": {
               boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
               bgcolor: '#fff',
               borderRight: '1px solid #eee',
-              width: drawerWidth,
+              width: DRAWER_WIDTH,
               boxSizing: "border-box",
               height: "100%",
             },
@@ -269,12 +261,11 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
         </Drawer>
         <Box
           component="main"
-          sx={{ flexGrow: 1, mt: router.pathname.includes('/messenger') || router.pathname.includes('/') ? 0 : 2 }}
+          sx={{ flexGrow: 1, mt: hasPaddingTop ? 0 : 2 }}
         >
           <Toolbar />
           {children}
         </Box>
-
         <VerificationDialog handleClose={(event, reason) => {
           if (reason && reason == "backdropClick") {
             return;

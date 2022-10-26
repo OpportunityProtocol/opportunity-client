@@ -24,7 +24,7 @@ import {
   CardActions,
 } from "@mui/material";
 import { NextPage } from "next";
-import { Fragment, ChangeEvent, createRef, useEffect, useState } from "react";
+import { Fragment, ChangeEvent, createRef, useEffect, useState, KeyboardEventHandler, ChangeEventHandler } from "react";
 import Stack from "@mui/material/Stack";
 import { Button, Container, TextField, Typography } from "@mui/material";
 import MarketDisplay from "../../modules/market/components/MarketDisplay";
@@ -108,6 +108,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const [serviceMetadataKey, setServiceMetadataKey] = useState<string>("");
   const [marketDetails, setMarketDetails] = useState<any>([]);
   const [selectedMarketId, setSelectedMarketId] = useState<number>(-1);
+  const [tabValue, setTabValue] = useState<number>(0);
   const [createServiceForm, setCreateServiceForm] = useState<any>({
     serviceTitle: "",
     serviceDescription: "",
@@ -255,14 +256,12 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
         deepCopyCreateServiceForm.serviceThumbnail = ""
         deepCopyCreateServiceForm.thumbnail = ""
-        ///
 
         retVal = await fleek.uploadService(String(accountData.address) + ":" + createServiceForm.serviceTitle, JSON.stringify(deepCopyCreateServiceForm)) //await pinJSONToIPFSPinata(data)
       }
 
       setServiceMetadataKey(retVal);
     } catch (error) {
-      console.log(error)
 
       setCreateServiceDialogState({
         ...createServiceDialogState,
@@ -327,7 +326,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     });
   };
 
-  const onTagInputKeyPress = (e) => {
+  const onTagInputKeyPress = (e: KeyboardEventHandler<HTMLDivElement>) => {
     if (e.code === "Space") {
       if (createServiceForm.tags.length >= 5) {
         alert("No more tags");
@@ -349,7 +348,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     }
   };
 
-  const handleOnDeleteTag = (idx) => {
+  const handleOnDeleteTag = (idx: number) => {
     const updatedTags = createServiceForm.tags;
     updatedTags.splice(idx, 1);
 
@@ -359,7 +358,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     });
   };
 
-  const handleOnChangeFile = (e) => {
+  const handleOnChangeFile = (e: ChangeEventHandler<HTMLInputElement>) => {
     let reader = new FileReader();
 
     reader.onloadend = () => {
@@ -373,15 +372,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     };
     reader.readAsArrayBuffer(e.target.files[0]);
   };
-
-
-  const handleOnChangeOffers = (e, idx: number) => {
-    const updatedArr = [...offers];
-    updatedArr[idx] = e.target.value;
-    setOffers(updatedArr);
-  };
-
-  const handleOnChangeCheckbox = (e, idx: number) => { };
 
   const publishDialogContent = [
     <DialogContent>
@@ -405,8 +395,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     </DialogContent>,
   ];
 
-  const [tabValue, setTabValue] = useState<number>(0);
-
   return (
     <Container maxWidth="xl">
       <Box>
@@ -420,7 +408,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           </Typography>
         </Typography>
       </Box>
-
       <Box sx={{ width: "100%" }}>
         <Tabs
           value={tabValue}
@@ -430,15 +417,12 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         >
           <Tab {...a11yProps(0)} label="Select a market" />
           <Tab {...a11yProps(1)} label="Basic Information" />
-
           <Tab {...a11yProps(1)} label="Summary" />
         </Tabs>
         <Divider sx={{ borderBottom: "1px solid #eee" }} />
       </Box>
-
       <TabPanel index={0} value={tabValue}>
         <Box width={600} maxWidth={600}>
-
           <Typography color="text.secondary" fontWeight="500" fontSize={14}>
             Select or search for the appropriate market to deploy your
             contract.
@@ -450,9 +434,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             </Typography>
           </Typography>
         </Box>
-
-
-
         <Grid
           container
           direction="row"
@@ -474,25 +455,18 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             );
           })}
         </Grid>
-
-
       </TabPanel>
-
       <TabPanel index={1} value={tabValue}>
         <Box sx={{ width: '75%' }}>
-
           <Typography color="text.secondary" fontWeight="500" fontSize={14} pb={2}>
             Fill out basic information that will help readers better understand
             the contract.
           </Typography>
-
           <Card variant="outlined" sx={{ border: 'none', backgroundColor: '#eee', width: "100%" }}>
             <CardContent>
               <Box
                 sx={{
                   width: "100%",
-                  //border: "dashed 1px #B3B3B3",
-
                   height: 400,
                 }}
               >
@@ -571,9 +545,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                 onChange={handleOnChangeCreateServiceForm}
               />
             </Stack>
-
           </Card>
-
           <Stack spacing={3}>
             <Card variant="outlined">
               <CardContent>
@@ -592,7 +564,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                 >
                   Tags are separated by spaces
                 </Typography>
-
                 <Paper
                   component="form"
                   variant="outlined"
@@ -678,19 +649,15 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           </Stack>
         </Box>
       </TabPanel>
-
       <TabPanel index={2} value={tabValue}>
         <Box sx={{ width: '70%' }}>
           <Card variant='outlined'>
             <CardContent>
               <Box>
-
                 <SummarySectionTitle>
                   Service Sumary
                 </SummarySectionTitle>
                 <Stack sx={{ my: 2 }} spacing={2}>
-
-
                   <Stack direction='row' spacing={1}>
                     <SummaryKey>
                       Title:
@@ -699,7 +666,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                       {createServiceForm.serviceTitle}
                     </SummaryValue>
                   </Stack>
-
                   <Stack direction='row' spacing={1}>
                     <SummaryKey>
                       Description:
@@ -708,7 +674,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                       {createServiceForm.serviceDescription}
                     </SummaryValue>
                   </Stack>
-
                   <Stack direction='row' spacing={1}>
                     <SummaryKey>
                       Price:
@@ -717,7 +682,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                       {createServiceForm.beginner_offer}
                     </SummaryValue>
                   </Stack>
-
                   <Stack direction='row' spacing={1}>
                     <SummaryKey>
                       Market:
@@ -726,7 +690,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                       {selectedMarketId}
                     </SummaryValue>
                   </Stack>
-
                   <Stack direction='row' spacing={1}>
                     <SummaryKey>
                       CollectModule:
@@ -735,18 +698,13 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                       {FREE_COLLECT_MODULE}
                     </SummaryValue>
                   </Stack>
-
-
                 </Stack>
               </Box>
-
-
               <Box>
                 <SummarySectionTitle>
                   Fees
                 </SummarySectionTitle>
                 <Stack spacing={2} sx={{ my: 2 }}>
-
                   <Stack direction='row' spacing={1}>
                     <SummaryKey>
                       Protocol Fee:
@@ -755,7 +713,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                       0
                     </SummaryValue>
                   </Stack>
-
                   <Stack direction='row' spacing={1}>
                     <SummaryKey>
                       Estimated Profit:
@@ -764,28 +721,22 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                       0
                     </SummaryValue>
                   </Stack>
-
-
                 </Stack>
               </Box>
               <Divider />
               <Typography variant='caption'>
                 Here is a cool caption
               </Typography>
-
             </CardContent>
             <CardActions>
               <Stack sx={{ width: '100%' }} direction="row" alignItems="center" justifyContent="flex-end">
                 <Button
                   sx={{ mx: 1, width: 120, p: 1 }}
                   variant="contained"
-                  /*disabled={
-                    createServiceForm.beginner_offer === 0 ||
-                    createServiceForm.business_offer === 0 ||
-                    createServiceForm.enterprise_offer === 0 ||
+                  disabled={
                     createServiceForm.service_title >= 81 ||
                     createServiceForm.service_description >= 730
-                  }*/
+                  }
                   onClick={() => {
                     setCreateServiceDialogState({
                       ...createServiceDialogState,
@@ -798,11 +749,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
               </Stack>
             </CardActions>
           </Card>
-
-
-
-
-
         </Box>
       </TabPanel>
 

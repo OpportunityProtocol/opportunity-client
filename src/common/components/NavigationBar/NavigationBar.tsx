@@ -40,8 +40,6 @@ import {
 import {
   DAI_ADDRESS,
   ZERO_ADDRESS,
-  NETWORK_MANAGER_ADDRESS,
-  LENS_HUB_PROXY,
 } from "../../../constant";
 import {
   DaiInterface,
@@ -49,12 +47,9 @@ import {
   NetworkManagerInterface,
 } from "../../../abis";
 
-import { hexToDecimal } from "../../helper";
 import { FormatTypes, Result } from "ethers/lib/utils";
-import VerificationDialog from "../../../modules/user/components/VerificationDialog";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  selectUserConnectionStatus,
   userWalletDataStored,
   userLensDataStored,
   selectUserAddress,
@@ -108,8 +103,7 @@ const NavigationBar: FC = (): JSX.Element => {
   const [gasPrice, setGasPrice] = useState<string>("0");
   const [verificationDialogOpen, setVerificationDialogOpen] =
     useState<boolean>(false);
-  const [lensProfileId, setLensProfileId] = useState<Result | any>(0);
-  const [modelopen, setmodelOpen] = React.useState(false);
+  const [modelopen, setmodelOpen] = useState<boolean>(false);
   const [createMenuAnchorEl, setCreateMenuAnchorEl] =
     React.useState<null | HTMLElement>(null);
   const [helpMenuAnchorEl, setHelpMenuAnchorEl] = useState<null | HTMLElement>(
@@ -125,7 +119,6 @@ const NavigationBar: FC = (): JSX.Element => {
     }
   });
 
-  const open = Boolean(anchorEl);
   const helpMenuIsOpen = Boolean(helpMenuAnchorEl);
   const createMenuIsOpen = Boolean(createMenuAnchorEl);
 
@@ -164,13 +157,10 @@ const NavigationBar: FC = (): JSX.Element => {
       signer.refetch().then((signer) => {
         login(signer.data)
           .then(() => {
-            console.log('login success')
             handleOnIsConnected();
 
           })
           .catch((error) => {
-            console.log(error)
-
             dispatch(
               userWalletDataStored({
                 balance: 0,
@@ -215,13 +205,11 @@ const NavigationBar: FC = (): JSX.Element => {
           error: error.message
         }))
       })
-
     }
 
     if (ethBalanceData.isSuccess) {
       ethBalance = ethBalanceData.data.formatted;
     }
-
 
     const result = await dai_balanceOf.refetch()
     if (result.isSuccess) {
@@ -254,36 +242,15 @@ const NavigationBar: FC = (): JSX.Element => {
 
   const handleOnClickHelpIcon = (
     event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    setHelpMenuAnchorEl(event.currentTarget);
-  };
+  ) => setHelpMenuAnchorEl(event.currentTarget);
 
-  const handleOnCloseHelpMenu = () => {
-    setHelpMenuAnchorEl(null);
-  };
-
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleOnClickCreateIcon = (event: React.MouseEvent<HTMLElement>) => {
-    setCreateMenuAnchorEl(event.currentTarget);
-  };
-  const handleOnCloseCreateMenu = () => {
-    setCreateMenuAnchorEl(null);
-  };
-
-  const handleClickOpen = () => {
-    setmodelOpen(true);
-  };
-
-  const handlesClose = () => {
-    setmodelOpen(false);
-  };
+  const handleOnCloseHelpMenu = () => setHelpMenuAnchorEl(null);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+  const handleOnClickCreateIcon = (event: React.MouseEvent<HTMLElement>) => setCreateMenuAnchorEl(event.currentTarget);
+  const handleOnCloseCreateMenu = () => setCreateMenuAnchorEl(null);
+  const handleClickOpen = () => setmodelOpen(true);
+  const handlesClose = () => setmodelOpen(false);
 
   const handleOnAddFunds = async () => {
     await daiWrite.write()
@@ -300,12 +267,11 @@ const NavigationBar: FC = (): JSX.Element => {
   return (
     <React.Fragment>
       <AppBar
-        //variant="outlined"
         sx={{
           boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
           width: { sm: `calc(100% - ${250}px)` },
           ml: { sm: `${250}px` },
-          bgcolor: '#fff', //'rgb(246, 248, 250)',
+          bgcolor: '#fff',
           border: 'none',
           borderBottom: `1px solid ${alpha("#b8e0d0", 0.3)} !important`,
           height: '65px !important'
@@ -327,12 +293,11 @@ const NavigationBar: FC = (): JSX.Element => {
             >
               <Grid item sx={{ display: "flex", alignItems: "center" }}>
                 <Stack direction='row' alignItems='center'>
-                <img src='/assets/logo.svg' style={{ width: 40, height: 50 }} />
-                <Typography mb={1.1} ml={1}>
-                  Allowing anyone to find work, from anywhere where, at anytime.
-                </Typography>
+                  <img src='/assets/logo.svg' style={{ width: 40, height: 50 }} />
+                  <Typography mb={1.1} ml={1} fontWeight='500'>
+                    Allowing anyone to find work, from anywhere where, at anytime.
+                  </Typography>
                 </Stack>
-                
               </Grid>
 
               <Grid
@@ -345,27 +310,27 @@ const NavigationBar: FC = (): JSX.Element => {
               >
                 <Stack direction="row" alignItems="center" spacing={1}>
                   {
-                     userLensProfile?.profileId == 0 || String(userAddress).toLowerCase() === ZERO_ADDRESS.toLowerCase() ? (
+                    userLensProfile?.profileId == 0 || String(userAddress).toLowerCase() === ZERO_ADDRESS.toLowerCase() ? (
 
                       <Chip
-                      color="primary"
-                      size="medium"
-                      component={Button}
-                      disableRipple
-                      disableFocusRipple
-                      disableTouchRipple
-                      sx={{
-                        fontWeight: "600",
-                        border: "1px solid #ddd",
-                        fontSize: "11px",
-                        bgcolor: "rgb(245, 245, 245)",
-                      }}
+                        color="primary"
+                        size="medium"
+                        component={Button}
+                        disableRipple
+                        disableFocusRipple
+                        disableTouchRipple
+                        sx={{
+                          fontWeight: "600",
+                          border: "1px solid #ddd",
+                          fontSize: "11px",
+                          bgcolor: "rgb(245, 245, 245)",
+                        }}
                         label="Register"
                         onClick={() => setVerificationDialogOpen(true)}
                       />
                     )
-                    :
-                    null
+                      :
+                      null
                   }
 
                   {
@@ -392,7 +357,7 @@ const NavigationBar: FC = (): JSX.Element => {
                         color="secondary"
                         onClick={handleOnClickCreateIcon}
                       >
-                        <Typography  fontWeight='600' fontSize={12}>
+                        <Typography fontWeight='600' fontSize={12}>
                           Create
                         </Typography>
                       </Button>
@@ -733,8 +698,6 @@ const NavigationBar: FC = (): JSX.Element => {
               </Typography>
             </Box>
           </DialogContent>
-
-
         </Dialog>
       </AppBar>
       <VerificationDialog

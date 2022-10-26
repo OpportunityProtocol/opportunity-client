@@ -77,15 +77,13 @@ const Explore: NextPage<any> = () => {
     }, [])
 
     return (
-        <Box>
+        <Box sx={{ width: '100%' }}>
                         <Box sx={{ mb: 2, p: 3, backgroundColor: (theme) => alpha(theme.palette.primary.light, 0.3), width: '100%' }}>
-<Stack direction='row' alignItems='center' justifyContent='space-between'>
-<SearchBar />
+<Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ width: '100%' }}>
+<Box />
 
 <Box direction='row' component={Stack} spacing={2}>
-    <Button variant='contained' sx={{ borderRadius: 1 }}>
-        Search
-    </Button>
+
     <Button variant='outlined' sx={{ borderRadius: 1 }}>
         See all markets
     </Button>

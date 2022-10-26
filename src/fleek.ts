@@ -21,7 +21,6 @@ const getIndividualUserFileData = async (key: string): Promise<any> => {
     getOptions: ["data", "bucket", "key", "hash", "publicUrl"],
   });
 
-
   const fileData = await fleekStorage.getFileFromHash({ hash })
 
   return fileData
