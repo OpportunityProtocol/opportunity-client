@@ -217,13 +217,10 @@ const ExplorePage: NextPage = () => {
 
           setContractsWorking(displayedContractsData)
         })
-
-
       }
     }
 
     loadWorkingContracts()
-
   }, [workingContractsQuery.loading])
 
   //hiring
@@ -321,7 +318,6 @@ const ExplorePage: NextPage = () => {
       }
 
       loadCreatedServices()
-
     }
   }, [servicesByCreatorQuery.loading])
 

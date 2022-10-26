@@ -56,11 +56,6 @@ import fleek from "../../../../fleek";
 import Tag from "../../../../common/components/Tag";
 import { getLensProfileById } from "../../../lens/LensGQLQueries";
 
-interface IVerificationDialogProps {
-  open: boolean;
-  handleClose: (event?: any, reason?: any) => void;
-}
-
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -72,7 +67,13 @@ const MenuProps = {
   },
 };
 
+//temporary
 const selectedLanguages = ["English", "Spanish"];
+
+interface IVerificationDialogProps {
+  open: boolean;
+  handleClose: (event?: any, reason?: any) => void;
+}
 
 const VerificationDialog: FC<IVerificationDialogProps> = ({
   open,

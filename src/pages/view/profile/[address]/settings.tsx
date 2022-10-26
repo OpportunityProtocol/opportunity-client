@@ -23,6 +23,7 @@ import {
   Select,
   FormControlLabel,
   Checkbox,
+  SelectChangeEvent,
 } from "@mui/material";
 import { NextPage } from "next";
 import BootstrapInput from "../../../../common/components/BootstrapInput/BootstrapInput";
@@ -39,7 +40,21 @@ import { selectUserAddress } from "../../../../modules/user/userReduxSlice";
 import { create } from "ipfs-http-client";
 import { generatePinataData, getJSONFromIPFSPinata, pinJSONToIPFSPinata } from "../../../../common/ipfs-helper";
 
-const Tags = ({ data }) => {
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+interface ITagProps {
+  data: string;
+}
+
+const Tags: FC<ITagProps> = ({ data }) => {
   return (
     <Box
       sx={{
@@ -70,15 +85,17 @@ const useStyles = makeStyles((theme) => {
 });
 
 const Settings: NextPage<any> = () => {
+  const tagRef = useRef();
   const router: NextRouter = useRouter();
   const classes = useStyles();
   const { address, metadata } = router.query;
+
+  const [personName, setPersonName] = useState<string[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<Array<string>>([
     "English",
     "Spanish",
   ]);
-
-  const [tags, SetTags] = useState([]);
+  const [tags, setTags] = useState<Array<any>>([]);
 
   const [metadataState, setMetadataState] = useState<object>({
     display_name: "",
@@ -89,9 +106,7 @@ const Settings: NextPage<any> = () => {
     show_freelancer_stats: 0,
   });
 
-  useEffect(() => {
-    downloadMetadata(metadata as string);
-  }, [metadata]);
+  const userAddress = useSelector(selectUserAddress);
 
   const downloadMetadata = async (ptr: string) => {
     let retVal: any = {};
@@ -116,7 +131,7 @@ const Settings: NextPage<any> = () => {
         });
 
       } else {
-        retVal = await fleek.getUser(ptr); //await getJSONFromIPFSPinata(ptr) 
+        retVal = await fleek.getUser(ptr); 
 
         setMetadataState({
           ...retVal
@@ -128,7 +143,7 @@ const Settings: NextPage<any> = () => {
     }
   };
 
-  const handleOnChangeTextField = (e) => {
+  const handleOnChangeTextField = (e: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>) => {
     switch (e.target.id) {
       case "settings-form-display-name":
         setMetadataState({
@@ -146,8 +161,6 @@ const Settings: NextPage<any> = () => {
     }
   };
 
-  const [personName, setPersonName] = React.useState<string[]>([]);
-
   const handleChange = (event: SelectChangeEvent<typeof personName>) => {
     const {
       target: { value },
@@ -159,61 +172,7 @@ const Settings: NextPage<any> = () => {
     });
   };
 
-  function getStyles(
-    name: string,
-    personName: readonly string[],
-    theme: Theme
-  ) {
-    return {
-      fontWeight:
-        personName.indexOf(name) === -1
-          ? theme.typography.fontWeightRegular
-          : theme.typography.fontWeightMedium,
-    };
-  }
-
-  const names = [
-    "Oliver Hansen",
-    "Van Henry",
-    "April Tucker",
-    "Ralph Hubbard",
-    "Omar Alexander",
-    "Carlos Abbott",
-    "Miriam Wagner",
-    "Bradley Wilkerson",
-    "Virginia Andrews",
-    "Kelly Snyder",
-  ];
-  const ITEM_HEIGHT = 48;
-  const ITEM_PADDING_TOP = 8;
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-        width: 250,
-      },
-    },
-  };
-
-  //
-  const tagRef = useRef();
-  const certificationsRef = useRef();
-
-  //HandleSubmit
-  const handleOnSubmitCertification = (e) => {
-    e.preventDefault();
-    setMetadataState({
-      ...metadataState,
-      certifications: [
-        ...metadataState?.certifications,
-        certificationsRef?.current?.value,
-      ],
-    });
-
-    certificationsRef.current.value = "";
-  };
-
-  const handleOnSubmitSkill = (e) => {
+  const handleOnSubmitSkill = (e: React.FormEventHandler<HTMLFormElement>) => {
     e.preventDefault();
     setMetadataState({
       ...metadataState,
@@ -248,12 +207,10 @@ const Settings: NextPage<any> = () => {
     networkManager_updateUserPrepare.config
   );
 
-  const userAddress = useSelector(selectUserAddress);
 
   const handleUpdate = async () => {
     let retVal;
     if (!PINATA_JWT) {
-      //https://ipfs.infura.io:5001/api/v0
       const ipfs = create({
         url: "/ip4/0.0.0.0/tcp/5001",
       });
@@ -262,7 +219,6 @@ const Settings: NextPage<any> = () => {
     } else {
 
       const data = generatePinataData(String(userAddress), metadataState)
-     // retVal = await pinJSONToIPFSPinata(data)
 
       retVal = await fleek.uploadService(
         String(userAddress),
@@ -274,6 +230,10 @@ const Settings: NextPage<any> = () => {
       recklesslySetUnpreparedArgs: [retVal],
     });
   };
+
+  useEffect(() => {
+    downloadMetadata(metadata as string);
+  }, [metadata]);
 
   return (
     <Container sx={{ height: "calc(100vh - 70px)" }} maxWidth="lg">
@@ -318,37 +278,6 @@ const Settings: NextPage<any> = () => {
                       size="small"
                       id="settings-form-about-you"
                     />
-                  </FormControl>
-
-                  <FormControl
-                    component="form"
-                    onSubmit={handleOnSubmitCertification}
-                    variant="standard"
-                  >
-                    <InputLabel shrink htmlFor="settings-certifications">
-                      Certifications
-                    </InputLabel>
-                    <TextField
-                      inputRef={certificationsRef}
-                      fullWidth
-                      placeholder={tags.length < 5 ? "Enter tags" : ""}
-                      sx={{ margin: "1rem 0" }}
-                      margin="none"
-                      InputProps={{
-                        startAdornment: (
-                          <Box sx={{ margin: "0 0.2rem 0 0", display: "flex" }}>
-                            {metadataState.certifications.map((data, index) => {
-                              return <Tags data={data} key={index} />;
-                            })}
-                          </Box>
-                        ),
-                      }}
-                      size="small"
-                      id="settings-certifications"
-                    />
-                    <FormHelperText>
-                      Enter certifications separated by commas
-                    </FormHelperText>
                   </FormControl>
 
                   <FormControl

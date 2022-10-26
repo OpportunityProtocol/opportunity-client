@@ -26,7 +26,7 @@ import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { ethers, getDefaultProvider } from "ethers";
 import { Provider as ReduxProvider } from "react-redux";
 import { store } from "../store";
-import {  ApolloProvider } from "@apollo/react-hooks";
+import { ApolloProvider } from "@apollo/react-hooks";
 import apolloClient from '../apollo'
 
 const { chains, provider, webSocketProvider } = configureChains(
@@ -81,23 +81,21 @@ const client = createClient({
   },
 });
 
-
-
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <React.Fragment>
       <Header />
       <WagmiConfig client={client}>
-          <ReduxProvider store={store}>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              <ApolloProvider client={apolloClient}>
-                  <Opportunity>
-                    <Component {...pageProps} />
-                  </Opportunity>
-              </ApolloProvider>
-            </ThemeProvider>
-          </ReduxProvider>
+        <ReduxProvider store={store}>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <ApolloProvider client={apolloClient}>
+              <Opportunity>
+                <Component {...pageProps} />
+              </Opportunity>
+            </ApolloProvider>
+          </ThemeProvider>
+        </ReduxProvider>
       </WagmiConfig>
     </React.Fragment>
   );

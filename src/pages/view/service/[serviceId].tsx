@@ -37,11 +37,9 @@ import { NextRouter, withRouter } from "next/router";
 import {
   useContractRead,
   useContractWrite,
-  usePrepareContractWrite,
 } from "wagmi";
 import {
   DAI_ADDRESS,
-  FEE_COLLECT_MODULE,
   LENS_HUB_PROXY,
   NETWORK_MANAGER_ADDRESS,
   ZERO_ADDRESS,
@@ -104,6 +102,8 @@ const confirmationDialogContent = [
   </DialogContentText>,
 ];
 
+const abiencoder = ethers.utils.defaultAbiCoder;
+
 interface IViewContractPage {
   router: NextRouter;
 }
@@ -112,18 +112,17 @@ interface IViewContractPage {
 const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const [successfulPaymentAlertVisible, setSuccessfulPaymentAlertVisible] =
     useState<boolean>(false);
-  const [purchaseIndex, setPurchaseIndex] = useState(0);
+  const [purchaseIndex, setPurchaseIndex] = useState<number>(0);
   const [serviceData, setServiceData] = useState<any>({});
-  const [serviceMetadata, setServiceMetadata] = useState({});
-  const [displayImg, setDisplayImg] = useState();
-  const [collectSig, setCollectSig] = useState({});
+  const [serviceMetadata, setServiceMetadata] = useState<any>({});
+  const [displayImg, setDisplayImg] = useState<string>();
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
   const [serviceOwnerLensProfile, setServiceOwnerLensProfile] =
     useState<any>({});
   const [purchaseDialogIsOpen, setPurchaseDialogIsOpen] =
     useState<boolean>(false);
-    const [additionalServices, setAdditionalServices]= useState([])
+  const [additionalServices, setAdditionalServices] = useState<Array<any>>([])
 
   const [tokenTransactionDialogOpen, setTokenTransactionDialogOpen] =
     useState<boolean>(false);
@@ -133,7 +132,9 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const [reviewError, setReviewError] = useState<boolean>(false);
   const [reviewDialogVisible, setReviewDialogVisible] =
     useState<boolean>(false);
+  const [buyingEnabled, setBuyingEnabled] = useState<boolean>(false);
 
+  const userLensData = useSelector(selectLens)
   const userAddress = useSelector(selectUserAddress);
 
   const serviceQueryById: QueryResult = useQuery(GET_SERVICE_BY_ID, {
@@ -148,8 +149,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       creator: serviceData?.creator
     }
   })
-
-
 
   const renderPackageInformation = (idx: number) => {
     try {
@@ -171,7 +170,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       return "0 DAI";
     }
   };
-
 
   //get user lens profile id
   const networkManager_getLensProfileIdFromAddress = useContractRead({
@@ -264,12 +262,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
     },
-    onSuccess(data, variables, context) {
-
-    },
-    onError(error, variables, context) {
-
-    },
     onSettled(data, error, variables, context) {
       if (!error) {
         purchaseService({
@@ -296,8 +288,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     },
     onSuccess(data) {
       setSuccessfulPaymentAlertVisible(true);
-    },
-    onError(error) { },
+    }
   });
 
   const onPurchase = async () => approveDai()
@@ -317,8 +308,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     },
   });
 
-  const userLensData = useSelector(selectLens)
-  const abiencoder = ethers.utils.defaultAbiCoder;
+
 
   const onSubmitReview = () => {
     setLoadingReviewTx(true);
@@ -330,7 +320,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         pubIdPointed: Number(serviceData?.id),
         referenceModuleData: [],
         collectModule: ZERO_ADDRESS,
-        collectModuleInitData: [], //abiencoder.encode([], []),
+        collectModuleInitData: [],
         referenceModule: ZERO_ADDRESS,
         referenceModuleInitData: []
       }]
@@ -342,8 +332,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         setLoadingReviewTx(false);
       });
   };
-
-  const [buyingEnabled, setBuyingEnabled] = useState<boolean>(false);
 
   return (
     <Container maxWidth="lg">
@@ -580,16 +568,16 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
               Other services provided by {serviceOwnerLensProfile?.handle}
             </Typography>
             <Stack spacing={2} direction='row' alignItems='center'>
-                  {
-                    additionalServices && additionalServices.length > 0 ? 
-                    additionalServices.map((service) => {
-                      return <ServiceCard id={service?.id} data={service} />
-                    })
-                    :
-                    <Typography color="text.secondary" paragraph>
+              {
+                additionalServices && additionalServices.length > 0 ?
+                  additionalServices.map((service) => {
+                    return <ServiceCard id={service?.id} data={service} />
+                  })
+                  :
+                  <Typography color="text.secondary" paragraph>
                     {serviceOwnerLensProfile?.handle} has not posted other services.
                   </Typography>
-                  }
+              }
             </Stack>
 
           </Box>

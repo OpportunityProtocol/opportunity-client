@@ -6,77 +6,55 @@ import {
   Typography,
   Container,
   Button,
-  Divider,
   Grid,
   Card,
   Stack,
-  Paper,
-  Avatar,
-  Alert,
   CardContent,
   Tabs,
   Tab,
   DialogContentText,
-  Chip,
-  alpha,
-  CardActions,
+  Chip
 } from "@mui/material";
-
-//import { LineChart, Line, ResponsiveContainer } from "recharts";
-
-import { timelineButtons } from "../../../modules/market/MarketConstants";
 import ServiceCard from "../../../modules/contract/components/ServiceCard/ServiceCard";
 import { NextRouter, useRouter } from "next/router";
 import { NextPage } from "next";
 import {
   useAccount,
-  useContract,
-  useContractEvent,
   useContractRead,
   useContractWrite,
-  usePrepareContractWrite,
-  useSigner,
   useSignTypedData,
 } from "wagmi";
 
 import {
   LENS_HUB_PROXY,
-  LENS_INTERACTION_LOGIC_ADDRESS,
   NETWORK_MANAGER_ADDRESS,
   PINATA_JWT,
-  ZERO_ADDRESS,
 } from "../../../constant";
 import {
-  FollowNFT,
   LensHubInterface,
   NetworkManagerInterface,
 } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
-import { hexToDecimal } from "../../../common/helper";
 import { Result } from "ethers/lib/utils";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../../modules/user/UserGQLQueries";
-import InvestmentTable from "../../../modules/market/components/InvestmentTable";
 import { ethers, Event } from "ethers";
 import {
   GET_CONTRACTS_BY_EMPLOYER,
   GET_CONTRACTS_BY_WORKER,
-  GET_PURCHASED_SERVICES_BY_CLIENT,
-  GET_SERVICES_BY_CREATOR,
+  GET_PURCHASED_SERVICES_BY_CLIENT
 } from "../../../modules/contract/ContractGQLQueries";
 import JobDisplay from "../../../modules/market/components/JobDisplay";
-import { EditOutlined, Info, InfoOutlined, InfoRounded, Settings } from "@mui/icons-material";
 import { create } from "ipfs-http-client";
 import fleek from "../../../fleek";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import { ConfirmationDialog } from "../../../common/components/ConfirmationDialog";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../../../modules/user/userReduxSlice";
-import { getJSONFromIPFSPinata } from "../../../common/ipfs-helper";
 import { getLensFollowingStateByAddressQuery, lensGetFollowersStateByProfileId, LENS_GET_COMPLETE_FOLLOW_STATE_BY_ADDRESS_AND_PROFILE_ID, LENS_GET_FOLLOWERS_STATE_BY_PROFILE_ID, LENS_GET_FOLLOWING_STATE_BY_ADDRESS } from "../../../modules/lens/LensGQLQueries";
 import { lens_client } from "../../../apollo";
-import TabPanel from "../../../common/components/TabPanel/TabPanel";
 import { a11yProps } from "../../../common/components/TabPanel/helper";
+import { EIP712UnlimitedExpiry } from "../../../constant/util";
 
 const getDomain = () => {
   return {
@@ -86,7 +64,6 @@ const getDomain = () => {
     verifyingContract: LENS_HUB_PROXY,
   };
 };
-
 
 const getTypes = () => {
   return {
@@ -99,13 +76,12 @@ const getTypes = () => {
   };
 };
 
-const connectDialogContent = [
+const connectDialogContent: Array<JSX.Element> = [
   <DialogContentText id="alert-dialog-description">
     <Typography fontSize={20} fontWeight="bold" py={1}>
       {" "}
       You are about to follow another user which will require two actions:
     </Typography>
-
     <ul>
       <li>
         {" "}
@@ -143,7 +119,6 @@ const ProfilePage: NextPage<any> = () => {
 
   const classes = useStyles();
   const accountData = useAccount();
-  const signer: ethers.Signer = useSigner();
   const userAddress = useSelector(selectUserAddress);
 
   const [value, setValue] = React.useState<number>(0);
@@ -330,7 +305,7 @@ const ProfilePage: NextPage<any> = () => {
       profileIds: [Number(lensProfileId)],
       datas: [[]],
       nonce: userLensSigNonce,
-      deadline: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+      deadline: EIP712UnlimitedExpiry
     };
   };
 

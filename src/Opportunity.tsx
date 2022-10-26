@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, useEffect, useState } from "react";
 
 import {
   alpha,
   Box,
   Drawer,
   Typography,
-  AppBar,
   Divider,
   Toolbar,
   Chip,
@@ -16,18 +15,12 @@ import {
   CardContent,
   ListItem,
   ListItemText,
-  Button,
   CardActionArea,
-  ListItemButton,
 } from "@mui/material";
-
-
 import { NextRouter, useRouter } from "next/router";
-
 import { IOpportunityProps } from "./OpportunityInterfaces";
 import NavigationBar from "./common/components/NavigationBar/NavigationBar";
-import { ArrowOutward, ArrowRight, Dashboard, Message, Person, Public, TravelExplore, TrendingUp } from "@mui/icons-material";
-import { FaEthereum } from "react-icons/fa";
+import { Dashboard, Message, Person, Public, TravelExplore, TrendingUp } from "@mui/icons-material";
 import { GET_MARKETS } from "./modules/market/MarketGQLQueries";
 import {
   useAccount,
@@ -42,14 +35,14 @@ import VerificationDialog from "./modules/user/components/VerificationDialog";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "./modules/user/UserGQLQueries";
 import { getLensProfileById } from "./modules/lens/LensGQLQueries";
 import { APP_BACKGROUND, DRAWER_WIDTH } from "./constant/component";
-
+import { AnyAction } from "redux";
 
 const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
   const router: NextRouter = useRouter();
-  const dispatch = useDispatch()
+  const dispatch: Dispatch<AnyAction> = useDispatch()
   const accountData = useAccount()
   const userAddress = useSelector(selectUserAddress);
-  const [state, setState] = useState({
+  const [state, setState] = useState<any>({
     displayedMarkets: [],
   });
   const [verificationDialogOpen, setVerificationDialogOpen] =

@@ -1,4 +1,4 @@
-import React, { useState, FC, useEffect, useContext, ChangeEvent } from "react";
+import React, { useState, FC, useEffect, useContext, ChangeEvent, Dispatch } from "react";
 import {
   Box,
   Container,
@@ -22,7 +22,7 @@ import {
   alpha,
 } from "@mui/material";
 
-import { useRouter } from "next/router";
+import { NextRouter, useRouter } from "next/router";
 import Link from "next/link";
 
 import ConnectedAvatar from "../ConnectedAvatar/ConnectedAvatar";
@@ -81,13 +81,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import { getRefreshToken, login } from "../../../modules/lens/LensAPIAuthentication";
 import SearchBar from "../SearchBar/SearchBar";
 import { getLensProfileById } from "../../../modules/lens/LensGQLQueries";
+import { AnyAction } from "redux";
 
 
 const NavigationBar: FC = (): JSX.Element => {
-  const router = useRouter();
+  const router: NextRouter = useRouter();
   const connectData = useConnect();
   const accountData = useAccount();
-  const dispatch = useDispatch();
+  const dispatch: Dispatch<AnyAction> = useDispatch();
   const signer = useSigner()
   const feeData = useFeeData({
     enabled: false,
@@ -105,7 +106,7 @@ const NavigationBar: FC = (): JSX.Element => {
     useState<boolean>(false);
   const [modelopen, setmodelOpen] = useState<boolean>(false);
   const [createMenuAnchorEl, setCreateMenuAnchorEl] =
-    React.useState<null | HTMLElement>(null);
+    useState<null | HTMLElement>(null);
   const [helpMenuAnchorEl, setHelpMenuAnchorEl] = useState<null | HTMLElement>(
     null
   );

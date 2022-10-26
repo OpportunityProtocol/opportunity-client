@@ -20,7 +20,9 @@ import { NextPage } from "next";
  */
 const Work: NextPage<any> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
-
+  const [contractsChecked, setContractsChecked] = useState<boolean>(true);
+  const [servicesChecked, setServicesChecked] = useState<boolean>(true);
+  
   const searchContext = useContext(SearchContext);
 
   const onChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -35,9 +37,6 @@ const Work: NextPage<any> = () => {
       searchContext.actionable.search(searchQuery);
     }
   };
-
-  const [contractsChecked, setContractsChecked] = useState<boolean>(true);
-  const [servicesChecked, setServicesChecked] = useState<boolean>(true);
 
   const handleOnChangeContractsChecked = (
     event: React.ChangeEvent<HTMLInputElement>
