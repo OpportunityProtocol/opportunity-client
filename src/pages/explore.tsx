@@ -80,10 +80,9 @@ const Explore: NextPage<any> = () => {
     return (
         <Box sx={{ width: '100%' }}>
             <Box sx={{ mb: 2, p: 3, backgroundColor: (theme) => alpha(theme.palette.primary.light, 0.3), width: '100%' }}>
-                <Stack direction='row' alignItems='center' justifyContent='space-between' sx={{ width: '100%' }}>
-                    <Box />
+                <Stack direction='row' alignItems='center' justifyContent='center' justifyContent='center' sx={{ width: '100%' }}>
                     <Box direction='row' component={Stack} spacing={2}>
-                        <Button variant='outlined' sx={{ borderRadius: 1 }}>
+                        <Button variant='outlined' sx={{ width: 300, borderRadius: 1 }}>
                             See all markets
                         </Button>
                     </Box>

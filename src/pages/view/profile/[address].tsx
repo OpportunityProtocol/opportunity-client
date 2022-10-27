@@ -42,7 +42,8 @@ import { ethers, Event } from "ethers";
 import {
   GET_CONTRACTS_BY_EMPLOYER,
   GET_CONTRACTS_BY_WORKER,
-  GET_PURCHASED_SERVICES_BY_CLIENT
+  GET_PURCHASED_SERVICES_BY_CLIENT,
+  GET_SERVICES_BY_CREATOR
 } from "../../../modules/contract/ContractGQLQueries";
 import JobDisplay from "../../../modules/market/components/JobDisplay";
 import { create } from "ipfs-http-client";
@@ -55,6 +56,7 @@ import { getLensFollowingStateByAddressQuery, lensGetFollowersStateByProfileId, 
 import { lens_client } from "../../../apollo";
 import { a11yProps } from "../../../common/components/TabPanel/helper";
 import { EIP712UnlimitedExpiry } from "../../../constant/util";
+import TabPanel from "../../../common/components/TabPanel/TabPanel";
 
 const getDomain = () => {
   return {
@@ -556,7 +558,7 @@ const ProfilePage: NextPage<any> = () => {
                   })
                 ) : (
                   <Typography>
-                    {general?.display_name}s hasn't created any
+                    {verifiedFreelancerData?.handle}s hasn't created any
                     contracts.
                   </Typography>
                 )}
@@ -583,7 +585,7 @@ const ProfilePage: NextPage<any> = () => {
                   })
                 ) : (
                   <Typography>
-                    {general?.display_name}s hasn't created any
+                    {verifiedFreelancerData?.handle}s hasn't created any
                     services.
                   </Typography>
                 )}
@@ -605,7 +607,7 @@ const ProfilePage: NextPage<any> = () => {
                   })
                 ) : (
                   <Typography>
-                    {general?.display_name}s hasn't created any
+                    {verifiedFreelancerData?.handle}s hasn't created any
                     contracts.
                   </Typography>
                 )}

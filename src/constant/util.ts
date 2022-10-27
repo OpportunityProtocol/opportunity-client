@@ -1,1 +1,1 @@
-export const EIP712UnlimitedExpiry = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+export const EIP712UnlimitedExpiry = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'

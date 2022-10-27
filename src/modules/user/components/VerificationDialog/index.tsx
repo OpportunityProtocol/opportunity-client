@@ -265,7 +265,6 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     });
 
     tagRef.current.value = "";
-    // tagRef?.current?.value = "";
   };
 
   const handleOnChangeDisplayFreelancer = (e) => {

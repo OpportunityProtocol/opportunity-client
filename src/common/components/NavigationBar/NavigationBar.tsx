@@ -82,6 +82,7 @@ import { getRefreshToken, login } from "../../../modules/lens/LensAPIAuthenticat
 import SearchBar from "../SearchBar/SearchBar";
 import { getLensProfileById } from "../../../modules/lens/LensGQLQueries";
 import { AnyAction } from "redux";
+import VerificationDialog from "../../../modules/user/components/VerificationDialog";
 
 
 const NavigationBar: FC = (): JSX.Element => {
@@ -701,6 +702,7 @@ const NavigationBar: FC = (): JSX.Element => {
           </DialogContent>
         </Dialog>
       </AppBar>
+
       <VerificationDialog
         open={verificationDialogOpen}
         handleClose={() => {
