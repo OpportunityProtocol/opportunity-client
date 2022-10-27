@@ -14,36 +14,7 @@
     <img src="public/assets/logo.svg" alt="Logo" width="150" height="150">
   </a>
 <h3 align="center">Lens Talent</h3>
-  <p align="center">
-    <br />
-    <a href="https://opportunity-website.vercel.app/"><strong>Explore the docs »</strong></a>
-    <br />
-    <a href="https://opportunity-website.vercel.app/">View Demo</a>
-    ·
-    <a href="https://github.com/OpportunityProtocol/opportunity-client/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/OpportunityProtocol/opportunity-client/issues">Request Feature</a>
-  </p>
 </div>
-
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-<div align="center">
-  
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-  
-  </div>
 
 
 <!-- TABLE OF CONTENTS -->
@@ -87,7 +58,6 @@
 * [Material-UI](https://mui.com/)
 * [The Graph](https://thegraph.com/en/)
 * [IPFS](https://ipfs.io/)
-* [Pinata](https://www.pinata.cloud/)
 * [Waku](https://wakuconnect.dev/)
 * [Firebase](https://firebase.google.com/)
 * [Solidity](https://docs.soliditylang.org/en/v0.8.14/)
@@ -158,7 +128,7 @@ Elijah Hampton - [@elihampton_](https://twitter.com/elihampton_) - hamptonelijah
 
 Nathan Farley - natefarley@live.com
 
-Project Link: [https://opportunity-client.vercel.app/](https://opportunity-client.vercel.app/)
+Project Link: Contact us for a free demo!
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
