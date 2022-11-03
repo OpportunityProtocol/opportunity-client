@@ -32,11 +32,13 @@ const SearchBarV1: FunctionComponent<any> = ({ width, ...inputProps }) => {
       elevation={0}
       sx={{
         display: "flex",
+   
         width: width ? width : "auto",
         border: "1px solid #CFD0D7",
         minWidth: "300px",
+        marginBottom: 0.5,
         backgroundColor: "#FCFCFD",
-        borderRadius: 0
+        borderRadius: 1.5
       }}
     >
       <SearchBarV1StyledInputBase

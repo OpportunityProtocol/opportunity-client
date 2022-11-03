@@ -8,6 +8,7 @@ import {
   Stack,
   AppBar,
   List,
+  CardContent,
   ListItem,
   ListItemText,
   Toolbar,
@@ -227,7 +228,7 @@ const NavigationBar: FC = (): JSX.Element => {
           [DAI_ADDRESS]: daiBalance,
         },
         address: accountData.address,
-        connector: { name: String(accountData.connector.name), network: await accountData.connector.getChainId() },
+        connector: String(accountData.connector.name),
         connection: {
           isSuccess: connectData.isSuccess,
           isLoading: connectData.isLoading,
@@ -269,10 +270,9 @@ const NavigationBar: FC = (): JSX.Element => {
   return (
     <React.Fragment>
       <AppBar
+      elevation={0}
         sx={{
-          boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px',
-          width: { sm: `calc(100% - ${250}px)` },
-          ml: { sm: `${250}px` },
+          width: { sm: `calc(100%)` },
           bgcolor: '#fff',
           border: 'none',
           borderBottom: `1px solid ${alpha("#b8e0d0", 0.3)} !important`,
@@ -294,12 +294,107 @@ const NavigationBar: FC = (): JSX.Element => {
               justifyContent="space-between"
             >
               <Grid item sx={{ display: "flex", alignItems: "center" }}>
-                <Stack direction='row' alignItems='center'>
+                <Stack direction='row' alignItems='center' spacing={1}>
                   <img src='/assets/logo.svg' style={{ width: 40, height: 50 }} />
-                  <Typography mb={1.1} ml={1} fontWeight='500'>
-                    Allowing anyone to find work, from anywhere where, at anytime.
-                  </Typography>
+                  
+            
+<Stack direction='row' alignItems='center' spacing={2}>
+ 
+    <ListItem sx={{ my: 1, '&:hover': { cursor: 'pointer' } }} disablePadding disableGutters >
+      <Link href="/">
+        <ListItemText
+          primary='Explore'
+          primaryTypographyProps={
+            {
+              fontWeight: 'medium',
+              color: (router.pathname === '/') ? 'primary' : 'black',
+              fontSize: 14,
+
+            }
+          }
+        />
+      </Link>
+    </ListItem>
+
+
+    <ListItem sx={{ my: 1, '&:hover': { cursor: 'pointer' } }} disablePadding disableGutters >
+      <Link href="/view/market">
+        <ListItemText
+          primary='Markets'
+          primaryTypographyProps={
+            {
+              fontWeight: 'medium',
+              color: router.pathname.includes('/market') ? 'primary' : 'black',
+              fontSize: 14
+
+            }
+          }
+        />
+      </Link>
+    </ListItem>
+
+    {accountData.isConnected && (
+      <ListItem sx={{ my: 1, '&:hover': { cursor: 'pointer' } }} disablePadding disableGutters >
+
+        <Link href="/dashboard">
+          <ListItemText
+            primary='Dashboard'
+            primaryTypographyProps={
+              {
+                fontWeight: 'medium',
+                color: router.pathname.includes('/dashboard') ? 'primary' : 'black',
+                fontSize: 14
+
+              }
+            }
+          />
+        </Link>
+      </ListItem>
+    )}
+
+    {accountData.isConnected && (
+      <ListItem sx={{ my: 1, '&:hover': { cursor: 'pointer' } }} disablePadding disableGutters>
+        <Link href="/messenger">
+          <ListItemText
+            primary='Messenger'
+            primaryTypographyProps={
+              {
+                fontWeight: 'medium',
+                color: router.pathname === '/messenger' ? 'primary' : 'black',
+                fontSize: 14
+
+              }
+            }
+          />
+        </Link>
+      </ListItem>
+    )}
+
+    {accountData.isConnected && (
+      <ListItem sx={{ my: 1, '&:hover': { cursor: 'pointer' } }} disablePadding disableGutters >
+        <Link href={`/view/profile/${userAddress}`}>
+          <ListItemText
+            primary='Profile'
+            primaryTypographyProps={
+              {
+                fontWeight: 'medium',
+                color: router.pathname === `/profile` ? 'primary' : 'black',
+                fontSize: 14
+
+              }
+            }
+          />
+        </Link>
+      </ListItem>
+    )}
+
+</Stack>
+
                 </Stack>
+              </Grid>
+
+              <Grid item>
+                <SearchBar />
               </Grid>
 
               <Grid
@@ -310,26 +405,23 @@ const NavigationBar: FC = (): JSX.Element => {
                   justifyContent: "flex-end",
                 }}
               >
-                <Stack direction="row" alignItems="center" spacing={1}>
+                <Stack direction="row" alignItems="center" spacing={3}>
                   {
                     userLensProfile?.profileId == 0 || String(userAddress).toLowerCase() === ZERO_ADDRESS.toLowerCase() ? (
 
-                      <Chip
-                        color="primary"
-                        size="medium"
-                        component={Button}
-                        disableRipple
-                        disableFocusRipple
-                        disableTouchRipple
+                      <Typography
+                      variant='button'
                         sx={{
-                          fontWeight: "600",
-                          border: "1px solid #ddd",
-                          fontSize: "11px",
-                          bgcolor: "rgb(245, 245, 245)",
+                          fontWeight: "700",
+                   
+                          fontSize: "12px",
+                         
                         }}
-                        label="Register"
+
                         onClick={() => setVerificationDialogOpen(true)}
-                      />
+                      >
+                        Register
+                      </Typography>
                     )
                       :
                       null
@@ -337,120 +429,131 @@ const NavigationBar: FC = (): JSX.Element => {
 
                   {
                     accountData?.status === 'connected' && (
-                      <Chip
+                      <Typography
+                      variant='button'
                         sx={{
-                          fontWeight: "medium",
-                          border: "1px solid #ddd",
-                          fontSize: "11px",
-                          bgcolor: "rgb(245, 245, 245)",
+                          fontWeight: "700",
+                   
+                          fontSize: "12px",
+                         
                         }}
-
-                        label="Add Funds"
-                        size='small'
                         onClick={handleOnAddFunds}
-                      />
+                      >
+                        Add Funds
+                      </Typography>
                     )
                   }
-                  <>
-                    <Tooltip title="Create">
-                      <Button
-                        disabled={userLensProfile?.profileId && userLensProfile?.profileId === 0}
-                        variant="text"
-                        color="secondary"
-                        onClick={handleOnClickCreateIcon}
+
+                  {
+                    accountData.status === 'connected' && (
+                      <>
+                      <Tooltip title="Create">
+                      <Typography
+                        variant='button'
+                          sx={{
+                            fontWeight: "700",
+                     
+                            fontSize: "12px",
+                           
+                          }}
+                          onClick={handleOnClickCreateIcon}
+                        >
+                            Create
+                          </Typography>
+                  
+                      </Tooltip>
+  
+                      <Menu
+                        anchorEl={createMenuAnchorEl}
+                        id="create-menu"
+                        open={createMenuIsOpen}
+                        onClose={handleOnCloseCreateMenu}
+                        onClick={handleOnCloseCreateMenu}
+                        PaperProps={{
+                          elevation: 0,
+                          sx: {
+                            overflow: "visible",
+                            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                            mt: 1.5,
+                            "& .MuiAvatar-root": {
+                              width: 32,
+                              height: 32,
+                              ml: -0.5,
+                              mr: 1,
+                            },
+                            "&:before": {
+                              content: '""',
+                              display: "block",
+                              position: "absolute",
+                              top: 0,
+                              right: 14,
+                              width: 10,
+                              height: 10,
+                              bgcolor: "background.paper",
+                              transform: "translateY(-50%) rotate(45deg)",
+                              zIndex: 0,
+                            },
+                          },
+                        }}
+                        transformOrigin={{ horizontal: "right", vertical: "top" }}
+                        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                       >
-                        <Typography fontWeight='600' fontSize={12}>
-                          Create
-                        </Typography>
-                      </Button>
-                    </Tooltip>
-
-                    <Menu
-                      anchorEl={createMenuAnchorEl}
-                      id="create-menu"
-                      open={createMenuIsOpen}
-                      onClose={handleOnCloseCreateMenu}
-                      onClick={handleOnCloseCreateMenu}
-                      PaperProps={{
-                        elevation: 0,
-                        sx: {
-                          overflow: "visible",
-                          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                          mt: 1.5,
-                          "& .MuiAvatar-root": {
-                            width: 32,
-                            height: 32,
-                            ml: -0.5,
-                            mr: 1,
-                          },
-                          "&:before": {
-                            content: '""',
-                            display: "block",
-                            position: "absolute",
-                            top: 0,
-                            right: 14,
-                            width: 10,
-                            height: 10,
-                            bgcolor: "background.paper",
-                            transform: "translateY(-50%) rotate(45deg)",
-                            zIndex: 0,
-                          },
-                        },
-                      }}
-                      transformOrigin={{ horizontal: "right", vertical: "top" }}
-                      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-                    >
-                      <List>
-                        <ListItemButton
-                          disabled={userLensProfile?.handle}
-                          onClick={() => router.push("/create/contract")}
-                        >
-                          <ListItemText
-                            primary="Contract"
-                            secondary="Create a contract if you're looking for a one time deal"
-                            primaryTypographyProps={{
-                              fontWeight: "bold",
-                              fontSize: 14,
-                            }}
-                            secondaryTypographyProps={{
-                              fontSize: 12,
-                              fontWeight: "medium",
-                              color: "#444",
-                            }}
-                          />
-                        </ListItemButton>
-
-                        <ListItemButton
-                          onClick={() => router.push("/create/service")}
-                          disabled={userLensProfile?.handle}
-                        >
-                          <ListItemText
-                            primary="Service"
-                            secondary="Publish a service and allow your peers to invest in its success"
-                            primaryTypographyProps={{
-                              fontWeight: "bold",
-                              fontSize: 14,
-                            }}
-                            secondaryTypographyProps={{
-                              fontSize: 12,
-                              fontWeight: "medium",
-                              color: "#444",
-                            }}
-                          />
-                        </ListItemButton>
-                      </List>
-                    </Menu>
-                  </>
+                        <List>
+                          <ListItemButton
+                            disabled={userLensProfile?.handle}
+                            onClick={() => router.push("/create/contract")}
+                          >
+                            <ListItemText
+                              primary="Contract"
+                              secondary="Create a contract if you're looking for a one time deal"
+                              primaryTypographyProps={{
+                                fontWeight: "bold",
+                                fontSize: 14,
+                              }}
+                              secondaryTypographyProps={{
+                                fontSize: 12,
+                                fontWeight: "medium",
+                                color: "#444",
+                              }}
+                            />
+                          </ListItemButton>
+  
+                          <ListItemButton
+                            onClick={() => router.push("/create/service")}
+                            disabled={userLensProfile?.handle}
+                          >
+                            <ListItemText
+                              primary="Service"
+                              secondary="Publish a service and allow your peers to invest in its success"
+                              primaryTypographyProps={{
+                                fontWeight: "bold",
+                                fontSize: 14,
+                              }}
+                              secondaryTypographyProps={{
+                                fontSize: 12,
+                                fontWeight: "medium",
+                                color: "#444",
+                              }}
+                            />
+                          </ListItemButton>
+                        </List>
+                      </Menu>
+                    </>
+                    )
+                  }
+               
                   <>
-                    <Button
-                      variant="text"
-                      color="secondary"
-                      onClick={handleOnClickHelpIcon}
-                    >
-                      <Typography fontWeight='600' fontSize={12}>
+                  <Typography
+                      variant='button'
+                        sx={{
+                          fontWeight: "700",
+                   
+                          fontSize: "12px",
+                         
+                        }}
+                      onClick={handleOnClickHelpIcon}>
                         Help
                       </Typography>
-                    </Button>
                     <Menu
                       anchorEl={helpMenuAnchorEl}
                       id="help-menu"

@@ -435,11 +435,9 @@ const ServiceCard = ({
   };
 
   return (
-      <Card variant="outlined" className={cx(cardStyles.root)} sx={{
-        boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-        WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-        MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-        border: '1px solid #ddd !important'
+      <Card variant="elevation" className={cx(cardStyles.root)} sx={{
+        border: '1px solid #eee !important',
+        boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
       }}>
         <CardActionArea
           onClick={handleOnNavigateToServicePage}

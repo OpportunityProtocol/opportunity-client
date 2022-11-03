@@ -157,7 +157,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
   const onCloseCreateServiceDialog = () => {
     if (createServiceDialogState.success == true) {
-      router.push("/view");
+      router.push("/dashboard");
     }
 
     setCreateServiceDialogState({
@@ -254,8 +254,8 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       } else {
         const deepCopyCreateServiceForm = JSON.parse(JSON.stringify(createServiceForm))
 
-        deepCopyCreateServiceForm.serviceThumbnail = ""
-        deepCopyCreateServiceForm.thumbnail = ""
+       // deepCopyCreateServiceForm.serviceThumbnail = ""
+        //deepCopyCreateServiceForm.thumbnail = ""
 
         retVal = await fleek.uploadService(String(accountData.address) + ":" + createServiceForm.serviceTitle, JSON.stringify(deepCopyCreateServiceForm)) //await pinJSONToIPFSPinata(data)
       }

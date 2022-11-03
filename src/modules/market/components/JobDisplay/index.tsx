@@ -109,14 +109,10 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
       <Card
       key={data?.id}
         onClick={() => router.push(`/view/contract/${data?.id}`)}
-        key={Math.random()}
 
         square
-        // variant="outlined"
+         variant="outlined"
         sx={{
-          boxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-          WebkitBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
-          MozBoxShadow: '10px 10px 5px 0px rgba(238,238,238,0.75)',
           cursor: "pointer",
           width: "100%",
           height: '200px',

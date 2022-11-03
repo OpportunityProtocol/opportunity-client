@@ -1,5 +1,5 @@
 import { QueryResult, useQuery } from "@apollo/client";
-import { MoreHorizOutlined } from "@mui/icons-material";
+import { Check, CommentOutlined, MoreHorizOutlined, PostAddOutlined } from "@mui/icons-material";
 import {
   Box,
   Typography,
@@ -7,6 +7,7 @@ import {
   Avatar,
   Card,
   CardContent,
+  CardActions,
   Stack,
   Divider,
   Grid,
@@ -57,7 +58,7 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 const UserCard: FC = ({ freelancer }) => {
   const router: NextRouter = useRouter()
   const [loading, setLoading] = useState<boolean>(false)
-  const [metadata, setMetadata] = useState<any>({}) 
+  const [metadata, setMetadata] = useState<any>({})
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -145,68 +146,35 @@ const UserCard: FC = ({ freelancer }) => {
   }
 
   return (
-    <Grid item xs={4}>
-      <Card onClick={onViewProfile} variant='outlined' sx={{ boxShadow: 'rgba(0, 0, 0, 0.1) -4px 9px 25px -6px', cursor: 'pointer', border: `1px solid #ddd` }}>
-        <CardContent>
-          <Box py={1.5} display='flex' alignItems='flex-start' justifyContent='space-between'>
-            <Stack spacing={2} direction='row' alignItems='center'>
-              <Avatar src={freelancer?.imageURI} sx={{ width: 60, height: 60, border: `1px solid ${alpha("#b8e0d0", 0.5)}` }} />
+    <Card onClick={onViewProfile} variant='elevation' sx={{ boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;', cursor: 'pointer', width: '100%' }}>
+      <CardContent>
+        <Stack mb={2} direction='row' alignItems='center' sx={{ width: '100%' }}>
+          <Stack spacing={1} direction='row' alignItems='center' sx={{ width: '100%' }}>
+            <Avatar />
+            <Box>
+              <Typography fontWeight='500' fontSize={14} variant='subtitle1'>
+                Elijah Hampton
+              </Typography>
+              <Typography color='primary' variant='subtitle2'>
+                @{freelancer?.handle}
+              </Typography>
+            </Box>
+          </Stack>
 
-              <Box >
-                <Typography sx={{ height: 22, maxWidth: 180, textOverflow: 'ellipsis', overflow: 'hidden' }} fontWeight='bold' fontSize={12}>
-                  {freelancer?.handle}
-                </Typography>
-                <Chip sx={{ py: 1, borderRadius: 1, color: '#757575', maxWidth: 100, fontSize: 12 }} size='small' variant='filled' label={freelancer?.address} />
-              </Box>
-            </Stack>
-
-            <>
-              <IconButton id="demo-positioned-button"
-                aria-controls={open ? 'demo-positioned-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? 'true' : undefined}
-                onClick={onOpenUserMenu}>
-                <MoreHorizOutlined sx={{ color: '#757575' }} />
-              </IconButton>
-
-              <Menu
-                id="demo-positioned-menu"
-                aria-labelledby="demo-positioned-button"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={onCloseUserMenu}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left',
-                }}
-              >
-                <StyledMenuItem onClick={onViewProfile}>View Profile</StyledMenuItem>
-                <StyledMenuItem onClick={onSendMessage}>Send a message</StyledMenuItem>
-                <StyledMenuItem onClick={onFollow}>Follow</StyledMenuItem>
-              </Menu>
-            </>
-
-          </Box>
-          <Box>
-            {
-              loading ? 
-<Skeleton variant='text' component='h4' sx={{ height: 30, width: '100%'}} />
-:
-<Typography color='text.secondary' variant='body2' paragraph sx={{ height: 40 }} fontSize={12}>
-{metadata?.description ? metadata?.description : 'Unable to load user about me'}
-</Typography>
-            }
-   
-          </Box>
-          
-
-        </CardContent>
-      </Card>
-    </Grid>
+          <Chip  icon={<Check fontSize='small' color='primary' /> } size='small' sx={{ color: (theme) => theme.palette.primary.main, fontWeight: '600', fontSize: 10, bgcolor: '#eee' }} label='Member (9 years)' />
+        </Stack>
+        <Box>
+          {
+            loading ?
+              <Skeleton variant='text' component='h4' sx={{ height: 30, width: '100%' }} />
+              :
+              <Typography color='text.secondary' variant='body2' paragraph sx={{ height: 40 }}>
+                {metadata?.description ? metadata?.description : 'Unable to load user about me'}
+              </Typography>
+          }
+        </Box>
+      </CardContent>
+    </Card >
   );
 };
 

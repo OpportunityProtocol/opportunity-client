@@ -67,7 +67,7 @@ const Messenger: NextPage<any> = () => {
   const user1 = String(account?.address).toLowerCase();
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false)
   const userLensData = useSelector(selectLens)
-  console.log({ userLensData })
+  
   const userDataQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     skip: true,
     variables: {

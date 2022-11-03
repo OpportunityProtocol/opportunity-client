@@ -124,8 +124,6 @@ const ConnectedAvatar: FC = () => {
 
   const open = Boolean(anchorEl);
 
-  console.log({ userLensData })
-
   return (
     <StyledBadge
       connected={connected}
@@ -184,7 +182,7 @@ const ConnectedAvatar: FC = () => {
               </ListItemIcon>
               <ListItemText
                 primary="MATIC Balance"
-                secondary={accountData.status == 'connected' ? userBalance : 0}
+                secondary={accountData.status == 'connected' ? Number(userBalance).toPrecision(3) : 0}
                 primaryTypographyProps={{
                   fontSize: 10,
                   fontWeight: "medium",
@@ -217,7 +215,7 @@ const ConnectedAvatar: FC = () => {
             <ListItem divider>
               <ListItemText
                 primary="Web3/Wallet Provider"
-                secondary={accountData.status == 'connected' ? userConnector?.name : '-'}
+                secondary={accountData.status == 'connected' ? userConnector : '-'}
                 primaryTypographyProps={{
                   fontSize: 10,
                   fontWeight: "medium",
@@ -232,7 +230,7 @@ const ConnectedAvatar: FC = () => {
             <ListItem divider>
               <ListItemText
                 primary="Network"
-                secondary={accountData.status == 'connected' ? userConnector?.network : '-'}
+                secondary={accountData.status == 'connected' ? 'Polygon' : '-'}
                 primaryTypographyProps={{
                   fontSize: 10,
                   fontWeight: "medium",

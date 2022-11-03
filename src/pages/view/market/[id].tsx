@@ -91,19 +91,17 @@ const Market: NextPage = () => {
 
         let serviceMetadata = {}
         let displayedServicesData = []
-        let creatorLensProfile = {}
 
-        await services.forEach(async (service) => {
-          //fetch metadata
+        for (const service of services) {
           serviceMetadata = await fleek.getService(String(service?.metadataPtr).slice(13))
 
-          displayedServicesData.push({
-            ...service,
-            ...serviceMetadata,
-          })
-
-          setDisplayedServices(displayedServicesData)
+        displayedServicesData.push({
+          ...service,
+          ...serviceMetadata,
         })
+      }
+
+      setDisplayedServices(displayedServicesData)
       }
 
       loadServices()

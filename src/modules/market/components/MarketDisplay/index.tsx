@@ -46,13 +46,14 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
 
   return (
       <Card
+      variant='elevation'
         sx={{
-          boxShadow: 'rgba(0, 0, 0, 0.1) -4px 9px 25px -6px',
+          boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;',
           cursor: 'pointer',
           border: (theme) =>
             selected
               ? `2px solid ${theme.palette.primary.main}`
-              : `1px solid #ddd`,
+              : `1px solid #eee`,
         }}
         onClick={selectable ? () => handleOnSelect() : () => router.push(`/view/market/${marketDetails?.id}`)}
       >
