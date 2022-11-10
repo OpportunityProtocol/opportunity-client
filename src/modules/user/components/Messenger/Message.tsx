@@ -31,7 +31,7 @@ const useStyles = makeStyles({
 
   },
   MessageFriend: {
-    background: '#ddd',
+    background: '#eee',
   }
 });
 
@@ -182,22 +182,24 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
       className={checkMsg ? classes.containerOwn : classes.containerFriend}
       ref={scrollRef}
     >
+      
       <Box className={checkMsg ? classes.MessageOwn : classes.MessageFriend} sx={{ padding: '15px', display: 'inline-block', maxWidth: '300px', textAlign: 'left', borderRadius: '5px;', marginTop: '10px', marginBottom: '10px' }}>
-        <Typography variant='subtitle2' py={1}>
-          {userAddress != msg?.from ? 'New Contract Proposal from helloworld.lens' : null}
+      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end'}}>
+      <Typography  sx={{ fontSize: 'smaller', display: 'inline-block', marginTop: '15px', opacity: '0.8' }}>
+          <Moment fromNow>{msg.createdAt.toDate()}</Moment>
         </Typography>
+      </Box>
 
-
+        <Typography variant='subtitle2' py={1}>
+          {userAddress != msg?.from ? '🎉 New Contract Proposal from helloworld.lens' : null}
+        </Typography>
         <Box>
-
-          <Typography fontWeight='400' fontSize={15}>
+          <Typography paragraph variant='body2' fontSize={15}>
             {msg.proposalMessage ? msg.proposalMessage : null}
           </Typography>
           <Typography fontWeight='medium' fontSize={14}>
             Proposed Payout: {msg.proposalPayout ? msg.proposalPayout : null}
           </Typography>
-
- 
         </Box>
 
         {
@@ -215,10 +217,6 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
               </Button>
             </Stack>
         }
-
-<Typography sx={{ fontSize: 'smaller', display: 'inline-block', marginTop: '15px', opacity: '0.8' }}>
-            <Moment fromNow>{msg.createdAt.toDate()}</Moment>
-          </Typography>
       </Box>
 
 

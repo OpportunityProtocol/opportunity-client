@@ -118,7 +118,7 @@ const NavigationBar: FC = (): JSX.Element => {
 
   const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     variables: {
-      userAddress,
+      userAddress: accountData.address,
     }
   });
 
@@ -157,13 +157,13 @@ const NavigationBar: FC = (): JSX.Element => {
       feeData.refetch()
       ethBalanceData.refetch()
 
-      signer.refetch().then((signer) => {
+      signer.refetch()
+      .then((signer) => {
         login(signer.data)
-          .then(() => {
-            handleOnIsConnected();
-
-          })
+          .then(() => { })
+          .finally(() => handleOnIsConnected())
           .catch((error) => {
+            alert(error)
             dispatch(
               userWalletDataStored({
                 balance: 0,
@@ -178,7 +178,7 @@ const NavigationBar: FC = (): JSX.Element => {
     }
 
     handlesClose();
-  }, [accountData?.status])
+  }, [accountData?.status, accountData.isReconnecting, accountData.isConnected, accountData.isConnecting])
 
   useEffect(() => {
     if (!feeData.isLoading && feeData.data) {
@@ -186,15 +186,17 @@ const NavigationBar: FC = (): JSX.Element => {
     }
   }, [feeData.isLoading]);
 
+
   async function handleOnIsConnected() {
     let ethBalance: string | number = 0,
       daiBalance: Result | number = 0
 
     if (accountData.isConnected) {
       userData.refetch().then(async (updatedUserData) => {
-
+        console.log({ updatedUserData  })
         const profile = await getLensProfileById(`0x${Math.abs(Number(updatedUserData.data?.verifiedUsers[0]?.id)).toString(16)}`)
-
+console.log('CONNECTED')
+console.log({ profile })
         dispatch(userLensDataStored({
           profileId: updatedUserData.data?.verifiedUsers[0]?.id,
           profile,
@@ -202,6 +204,7 @@ const NavigationBar: FC = (): JSX.Element => {
         }))
 
       }).catch(error => {
+        alert(error)
         dispatch(userLensDataStored({
           profileId: 0,
           profile: null,
@@ -242,6 +245,9 @@ const NavigationBar: FC = (): JSX.Element => {
       })
     );
   }
+
+  console.log({ userLensDataStored })
+  console.log({ userLensProfile })
 
   const handleOnClickHelpIcon = (
     event: React.MouseEvent<HTMLButtonElement>
@@ -407,21 +413,9 @@ const NavigationBar: FC = (): JSX.Element => {
               >
                 <Stack direction="row" alignItems="center" spacing={3}>
                   {
-                    userLensProfile?.profileId == 0 || String(userAddress).toLowerCase() === ZERO_ADDRESS.toLowerCase() ? (
+                    (accountData?.status === 'connected' && userLensProfile?.profileId === 0) ? (
 
-                      <Typography
-                      variant='button'
-                        sx={{
-                          fontWeight: "700",
-                   
-                          fontSize: "12px",
-                         
-                        }}
-
-                        onClick={() => setVerificationDialogOpen(true)}
-                      >
-                        Register
-                      </Typography>
+                      <Chip clickable   onClick={() => setVerificationDialogOpen(true)} size='small' sx={{ color: (theme) => theme.palette.primary.main, fontWeight: '700', fontSize: 10, bgcolor: '#eee' }} label='Register' />
                     )
                       :
                       null
@@ -445,10 +439,11 @@ const NavigationBar: FC = (): JSX.Element => {
                   }
 
                   {
-                    accountData.status === 'connected' && (
+                    accountData.status === 'connected' && userLensProfile.profile?.handle && (
                       <>
                       <Tooltip title="Create">
                       <Typography
+                      
                         variant='button'
                           sx={{
                             fontWeight: "700",

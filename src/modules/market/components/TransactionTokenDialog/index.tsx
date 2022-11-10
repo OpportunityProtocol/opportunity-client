@@ -33,6 +33,7 @@ import TabPanel from "../../../../common/components/TabPanel/TabPanel";
 import {
   useContractRead,
   useContractWrite,
+  useDeprecatedContractWrite,
   useFeeData,
   usePrepareContractWrite,
   useProvider,
@@ -83,7 +84,7 @@ interface ITransactionDialogInfoProps {
 
 const TransactionTokenDialog: FC<
   ITransactionDialogProps & ITransactionDialogInfoProps
-> = ({ open = true, handleClose, serviceId = -1 }) => {
+> = ({ open = true, handleClose, serviceId = -1, tokenInfo }) => {
   const [tokenPriceRefreshCounter, setTokenPriceRefreshCounter] =
     useState("0.00");
   const [tabValue, setTabValue] = useState<number>(0);
@@ -103,14 +104,6 @@ const TransactionTokenDialog: FC<
   const feeData = useFeeData();
   const provider = useProvider({ chainId: CHAIN_ID})
 
-  const [tokenInfo, setTokenInfo] = useState<any>({
-    exists: false,
-    id: -1,
-    name: "",
-    serviceToken: ZERO_ADDRESS,
-    address: ZERO_ADDRESS
-  });
-
   const [serviceData, setServiceData] = useState<any>({});
 
   const serviceDataQuery = useQuery(GET_SERVICE_BY_ID, {
@@ -122,13 +115,6 @@ const TransactionTokenDialog: FC<
   const marketDetailsQuery: QueryResult = useQuery(GET_MARKET_DETAILS_BY_ID, {
     variables: {
       id: Number(serviceData?.marketId),
-    },
-  });
-
-  const tokenInfoQuery: QueryResult = useQuery(GET_TOKEN_INFO_BY_SERVICE_ID, {
-    variables: {
-      serviceId: Number(serviceId),
-      id: Number(serviceId),
     },
   });
 
@@ -191,19 +177,23 @@ const TransactionTokenDialog: FC<
     },
   })
 
-  const tokenExchange_sellTokensPrepare = usePrepareContractWrite(
-    {
-      addressOrName: TOKEN_EXCHANGE_ADDRESS,
+  console.log({ tokenAddress })
+
+  const { write: onSellTokens } = useContractWrite({
+    mode: "recklesslyUnprepared",
+    addressOrName: TOKEN_EXCHANGE_ADDRESS,
       contractInterface: TokenExchangeInterface,
       functionName: "sellTokens",
       args: [tokenAddress, numTokens, 0, userAddress],
       overrides: {
-        gasLimit: BigNumber.from("900000"),
+        gasLimit: ethers.BigNumber.from("2000000"),
+        gasPrice: 90000000000,
       },
-    }
-  )
-
-  const tokenExchange_sellTokens = useContractWrite(tokenExchange_sellTokensPrepare.config);
+      onError(error, variables, context) {
+        alert(error)
+        console.log({ variables })
+      },
+  });
 
   const tokenExchange_getCostForBuyingTokens = useContractRead(
     {
@@ -304,7 +294,6 @@ const TransactionTokenDialog: FC<
   useEffect(() => {
     if (serviceId >= 0) {
       serviceDataQuery.refetch();
-      tokenInfoQuery.refetch();
     }
   }, [serviceId]);
 
@@ -315,11 +304,10 @@ const TransactionTokenDialog: FC<
   }, [serviceData?.marketId, serviceId]);
 
   useEffect(() => {
-    if (!tokenInfoQuery.loading && tokenInfoQuery.data) {
-      setTokenInfo(tokenInfoQuery.data.serviceTokens[0]);
+    if (tokenInfo?.address) {
       refetchServiceTokenBalance()
     }
-  }, [tokenInfoQuery.loading]);
+  }, [tokenInfo?.address]);
 
 
   useEffect(() => {
@@ -573,7 +561,7 @@ const TransactionTokenDialog: FC<
             </Box>
 
             <Button
-              disabled={!buyingEnabled}
+              disabled={!buyingEnabled || !tokenInfo?.address}
               variant="contained"
               onClick={onBuy}
             >
@@ -713,9 +701,7 @@ const TransactionTokenDialog: FC<
             <Button
               color="primary"
               variant="contained"
-              onClick={async () => {
-                await tokenExchange_sellTokens.write();
-              }}
+              onClick={onSellTokens}
             >
               Sell {numTokens} tokens
             </Button>

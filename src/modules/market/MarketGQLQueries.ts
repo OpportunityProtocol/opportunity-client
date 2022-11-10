@@ -31,7 +31,7 @@ const GET_MARKET_DETAILS_BY_NAME = gql`
 `;
 
 const GET_MARKET_DETAILS_BY_ID = gql`
-  query GetMarketDetailsByID($id: ID!) {
+  query GetMarketDetailsByID($id: String!) {
     market(where: { id: $id }) {
       id
       name

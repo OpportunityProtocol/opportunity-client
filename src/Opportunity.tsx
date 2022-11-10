@@ -99,7 +99,7 @@ const Opportunity: React.FC<IOpportunityProps> = ({ children }) => {
         <NavigationBar />
         <Box
           component="main"
-          sx={{ flexGrow: 1, mt: hasPaddingTop ? 0 : 2 }}
+          sx={{ flexGrow: 1, pt: 2 }}
         >
           <Toolbar />
           {children}

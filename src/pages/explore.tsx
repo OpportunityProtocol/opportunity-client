@@ -199,7 +199,7 @@ const Explore: NextPage<any> = () => {
                                 </Stack>
 
 
-                                <Grid container direction='row' justifyContent='flex-start' alignItems='center' wrap='nowrap' spacing={0}>
+                                <Grid container direction='row' justifyContent='flex-start' alignItems='center' wrap='nowrap' spacing={-18}>
 
                                     {
                                         highestValuedServices.map((serviceData: any) => {
@@ -226,7 +226,20 @@ const Explore: NextPage<any> = () => {
                             </Stack>
 
                             <Stack>
-                                <Paper elevation={0} sx={{ border: '1px solid #ddd' }}>
+                                <Paper elevation={0} sx={{  border: '1px solid #ddd !important',
+        boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px' }}>
+                                    <Post />
+                                    <Divider />
+                                    <Post />
+                                    <Divider />
+                                    <Post />
+                                    <Divider />
+                                    <Post />
+                                    <Divider />
+                                    <Post />
+                                    <Divider />
+                                    <Post />
+                                    <Divider />
                                     <Post />
                                     <Divider />
                                     <Post />

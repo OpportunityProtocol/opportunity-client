@@ -136,9 +136,9 @@ const CreateContractPage: NextPage = (): JSX.Element => {
       <DialogContentText>
         {createContractDialogState?.loading
           ? "Waiting for confirmation..."
-          : "After pressing create your wallet provider will prompt you to accept the transaction."}
+          : createContractDialogState?.error ? createContractDialogState.errorMessage :  "After pressing create your wallet provider will prompt you to accept the transaction."}
       </DialogContentText>
-    </DialogContent>,
+    </DialogContent>
   ]
 
   useEffect(() => {
@@ -151,7 +151,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
       .catch(error => { })
   }, []);
 
-  const networkManager_createContract = useContractWrite({
+  const { write: onCreateContract } = useContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "createContract",
@@ -282,9 +282,9 @@ const CreateContractPage: NextPage = (): JSX.Element => {
         retVal = await fleek.uploadContract(String(accountData.address) + ":" + createContractForm.contract_title, JSON.stringify(tempFormData)) //await pinJSONToIPFSPinata(data)
       }
 
-      await networkManager_createContract?.write({
+      await onCreateContract({
         recklesslySetUnpreparedArgs: [createContractForm.contract_market_id, String(retVal)],
-      });
+      })
 
       setContractMetadataURI(retVal);
     } catch (error) {
@@ -315,7 +315,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
   return (
     <Container
       maxWidth="xl"
-      sx={{ bgcolor: '#fff', height: 'auto', width: '100%' }}
+      sx={{ height: 'auto', width: '100%' }}
     >
       <Box>
         <Typography fontWeight="600" fontSize={25}>
@@ -362,9 +362,7 @@ const CreateContractPage: NextPage = (): JSX.Element => {
 
 
         <Grid container alignItems='center' direction='row' spacing={3}>
-
           <Grid item xs={12} md={6} lg={4}>
-
             {marketDetails && marketDetails?.length ? (
               marketDetails.map((details) => {
                 return (
@@ -676,6 +674,18 @@ const CreateContractPage: NextPage = (): JSX.Element => {
                   }
                   inputProps={{ maxLength: 500, minLength: 30 }}
                 />
+
+                <Stack>
+                  <Typography variant='subtitle2'>
+                    Examples
+                  </Typography>
+                  <Typography variant='caption'>
+                    This is an example of a definition of done
+                  </Typography>
+                  <Typography variant='caption'>
+                    This is another example of a definition of done
+                  </Typography>
+                </Stack>
               </Box>
             </CardContent>
           </Card>

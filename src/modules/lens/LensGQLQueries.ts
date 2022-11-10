@@ -1,10 +1,15 @@
 import { gql } from "@apollo/client";
+import { ethers } from "ethers";
 import { StringValueNode } from "graphql";
+import { LensHubInterface } from "../../abis";
 import { lens_client } from "../../apollo";
-import { ProfileDocument, SingleProfileQueryRequest } from "./LensTypes";
+import { LENS_HUB_PROXY } from "../../constant";
+import fleek from "../../fleek";
+import { HasTxHashBeenIndexedDocument, HasTxHashBeenIndexedRequest, ProfileDocument, PublicationMainFocus, SingleProfileQueryRequest } from "./LensTypes";
+import { v4 as uuidv4 } from 'uuid';
 
-const getLensFollowingStateByAddressQuery = (address: string) => {
-    return gql`
+export const getLensFollowingStateByAddressQuery = (address: string) => {
+  return gql`
     query Following {
         following(request: { 
                       address: "${address}",
@@ -130,7 +135,7 @@ const getLensFollowingStateByAddressQuery = (address: string) => {
 }
 
 export const lensGetFollowersStateByProfileId = (id: string) => {
-    return gql`
+  return gql`
     query Followers {
         followers(request: { 
                       profileId: "${id}",
@@ -231,7 +236,7 @@ export const lensGetFollowersStateByProfileId = (id: string) => {
     `
 }
 
-const LENS_GET_COMPLETE_FOLLOW_STATE_BY_ADDRESS_AND_PROFILE_ID = gql`
+export const LENS_GET_COMPLETE_FOLLOW_STATE_BY_ADDRESS_AND_PROFILE_ID = gql`
 query Following($address: String!) {
     following(request: { 
                   address: $address,
@@ -453,7 +458,7 @@ query Following($address: String!) {
   }
 `
 
-const LENS_GET_PROFILE_BY_PROFILE_ID = gql`
+export const LENS_GET_PROFILE_BY_PROFILE_ID = gql`
 query Profile {
   profile(request: { profileId: $id }) {
     id
@@ -539,7 +544,7 @@ query Profile {
 `
 
 
-const getProfileRequest = async (request: SingleProfileQueryRequest) => {
+export const getProfileRequest = async (request: SingleProfileQueryRequest) => {
   const result = await lens_client.query({
     query: ProfileDocument,
     variables: {
@@ -550,7 +555,7 @@ const getProfileRequest = async (request: SingleProfileQueryRequest) => {
   return result.data.profile;
 };
 
-const getLensProfileById = async (profileId: String, request?: SingleProfileQueryRequest) => {
+export const getLensProfileById = async (profileId: String, request?: SingleProfileQueryRequest) => {
   if (!profileId) {
     throw new Error('Must provide a profile id');
   }
@@ -564,6 +569,128 @@ const getLensProfileById = async (profileId: String, request?: SingleProfileQuer
   return profile;
 };
 
+export const createPostTypedData = async (request: CreatePublicPostRequest) => {
+  const result = await apolloClient.mutate({
+    mutation: CreatePostTypedDataDocument,
+    variables: {
+      request,
+    },
+  });
+
+  return result.data!.createPostTypedData;
+};
+
+/*export const signCreatePostTypedData = async (request: CreatePublicPostRequest) => {
+  const result = await createPostTypedData(request);
+  console.log('create post: createPostTypedData', result);
+
+  const typedData = result.typedData;
+  console.log('create post: typedData', typedData);
+
+  const signature = await signedTypeData(typedData.domain, typedData.types, typedData.value);
+  console.log('create post: signature', signature);
+
+  return { result, signature };
+};*/
 
 
-export { getLensProfileById, LENS_GET_PROFILE_BY_PROFILE_ID, LENS_GET_COMPLETE_FOLLOW_STATE_BY_ADDRESS_AND_PROFILE_ID, getLensFollowingStateByAddressQuery }
+export const createPost = async (identifier: string, address: string, profileId: number, signature: any, signer: any) => {
+
+  const ipfsPath = fleek.uploadPostMetadata(identifier, {
+    version: '2.0.0',
+    mainContentFocus: PublicationMainFocus.TextOnly,
+    metadata_id: uuidv4(),
+    description: 'Description',
+    locale: 'en-US',
+    content: 'Content',
+    external_url: null,
+    image: null,
+    imageMimeType: null,
+    name: 'Name',
+    attributes: [],
+    tags: ['using_api_examples'],
+    appId: 'api_examples_github',
+  })
+
+  // hard coded to make the code example clear
+  const createPostRequest = {
+    profileId,
+    contentURI: ipfsPath, //'ipfs://' + ipfsResult.path,
+    collectModule: {
+      freeCollectModule: { followerOnly: true },
+    },
+    referenceModule: {
+      followerOnlyReferenceModule: false,
+    },
+  };
+
+  const signedResult = await createPostTypedData(createPostRequest);
+
+  const typedData = signedResult.result.typedData;
+
+  const { v, r, s } = ethers.utils.splitSignature(signedResult.signature);
+
+  const lensHub = new ethers.Contract(LENS_HUB_PROXY, LensHubInterface, signer);
+
+  const tx = await lensHub.postWithSig({
+    profileId: typedData.value.profileId,
+    contentURI: typedData.value.contentURI,
+    collectModule: typedData.value.collectModule,
+    collectModuleInitData: typedData.value.collectModuleInitData,
+    referenceModule: typedData.value.referenceModule,
+    referenceModuleInitData: typedData.value.referenceModuleInitData,
+    sig: {
+      v,
+      r,
+      s,
+      deadline: typedData.value.deadline,
+    },
+  });
+};
+
+
+const hasTxBeenIndexed = async (request: HasTxHashBeenIndexedRequest) => {
+  const result = await lens_client.query({
+    query: HasTxHashBeenIndexedDocument,
+    variables: {
+      request,
+    },
+    fetchPolicy: 'network-only',
+  });
+
+  return result.data.hasTxHashBeenIndexed;
+};
+
+export const pollUntilIndexed = async (input: { txHash: string } | { txId: string }) => {
+  while (true) {
+    const response = await hasTxBeenIndexed(input);
+    console.log('pool until indexed: result', response);
+
+    if (response.__typename === 'TransactionIndexedResult') {
+      console.log('pool until indexed: indexed', response.indexed);
+      console.log('pool until metadataStatus: metadataStatus', response.metadataStatus);
+
+      console.log(response.metadataStatus);
+      if (response.metadataStatus) {
+        if (response.metadataStatus.status === 'SUCCESS') {
+          return response;
+        }
+
+        if (response.metadataStatus.status === 'METADATA_VALIDATION_FAILED') {
+          throw new Error(response.metadataStatus.status);
+        }
+      } else {
+        if (response.indexed) {
+          return response;
+        }
+      }
+
+      console.log('pool until indexed: sleep for 1500 milliseconds then try again');
+      // sleep for a second before trying again
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+    } else {
+      // it got reverted and failed!
+      throw new Error(response.reason);
+    }
+  }
+};

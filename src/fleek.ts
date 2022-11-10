@@ -11,6 +11,7 @@ interface IFleekApi {
   uploadUser: (keyIdentifier: string, data: any) => Promise<string>;
   uploadContract: (keyIdentifier: string, data: any) => Promise<string>;
   uploadService: (keyIdentifier: string, data: any) => Promise<string>;
+  uploadPostMetadata: (keyIdentifier: string, data: any) => Promise<object>;
 }
 
 const getIndividualUserFileData = async (key: string): Promise<any> => {
@@ -94,6 +95,20 @@ const uploadServiceData = async (
   return key;
 };
 
+const uploadPost = async (
+  keyIdentifier: string,
+  data: any
+): Promise<object> => {
+  const { key, hash, publicUrl } = await fleekStorage.upload({
+    apiKey: process.env.NEXT_PUBLIC_FLEEK_STORAGE_API_KEY,
+    apiSecret: process.env.NEXT_PUBLIC_FLEEK_STORAGE_API_SECRET,
+    key: String("post-metadata" + keyIdentifier),
+    data,
+  });
+
+  return { key, hash, publicUrl }
+};
+
 const fleek: IFleekApi = {
   getUser: getIndividualUserFileData,
   getContract: getIndividualContractFileData,
@@ -101,6 +116,7 @@ const fleek: IFleekApi = {
   uploadUser: uploadUserData,
   uploadService: uploadServiceData,
   uploadContract: uploadContractData,
+  uploadPostMetadata: uploadPost
 };
 
 export { type IFleekApi };

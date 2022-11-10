@@ -14,7 +14,8 @@ import {
   ListItemText,
   Button,
   FormControl,
-  TextField
+  TextField,
+  LinearProgress
 } from "@mui/material";
 import { useStyles } from "../../../modules/contract/ContractStyles";
 import { FavoriteBorderOutlined } from "@mui/icons-material";
@@ -98,18 +99,16 @@ enum MessageType {
  * @dev TODO: Add modal for inputting accepted solution pointer
  */
 const ViewContract: NextPage<any> = () => {
-
-
   const classes = useStyles();
-  const { address, connector } = useAccount();
+  const { address } = useAccount();
   const router = useRouter();
 
   const { contractId } = router.query;
 
   const [contractData, setContractData] = useState<any>({});
   const [contractMetadata, setContractMetadata] = useState<any>({});
-  const [metadataString, setMetadataString] = useState("");
   const [acceptedSolutionPtr, setAcceptedSolutionPtr] = useState<string>("dsfsdfsdfsdf");
+  const [refreshing, setRefreshing] = useState<boolean>(false)
   const [reviews, setReviews] = useState<any>([]);
   const [sendMessageopen, setSendmessageOpen] = React.useState(false);
   const [data, setData] = useState({
@@ -119,110 +118,37 @@ const ViewContract: NextPage<any> = () => {
   });
   const { proposalPayout, proposalMessage, error } = data;
 
-  //convert to gql
-  const networkManager_getContractData = useContractRead({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    contractInterface: NetworkManagerInterface,
-    functionName: "getContractData",
-    enabled: false,
-    watch: false,
-    chainId: CHAIN_ID,
-    args: [contractId],
-    onSuccess: (data: Result) => {
-      setMetadataString(data.taskMetadataPtr);
-    },
-    onError: (error) => {
-      setMetadataString("");
-    },
-  });
-
   const dai_approvePrepare = usePrepareContractWrite({
     addressOrName: DAI_ADDRESS,
     contractInterface: DaiInterface,
     functionName: "approve",
     enabled: true,
-    args: [NETWORK_MANAGER_ADDRESS, 100000],
+    args: [NETWORK_MANAGER_ADDRESS, 100000]
   });
 
-  const dai_approve = useContractWrite(dai_approvePrepare.config);
-
-  useEffect(() => {
-    if (contractId) {
-      networkManager_getContractData.refetch();
-    }
-  }, [contractId]);
-
-  useEffect(() => {
-    let retVal: any = {};
-
-    async function getMetadata() {
-      try {
-        if (!PINATA_JWT) {
-          const ipfs = create({
-            url: "/ip4/127.0.0.1/tcp/8080",
-          });
-
-          retVal = await ipfs.get(`/ipfs/${metadataString}`).next();
-
-          const jsonString = Buffer.from(retVal.value).toString("utf8");
-          const parsedString = jsonString.slice(
-            jsonString.indexOf("{"),
-            jsonString.lastIndexOf("}") + 1
-          );
-          const parsedData = JSON.parse(parsedString);
-
-          setContractMetadata(parsedData);
-        } else {
-          retVal = await fleek.getContract(String(metadataString.slice(13))) //getJSONFromIPFSPinata(metadataString) //await fleek.getService(metadataString);
-
-          setContractMetadata(retVal)
-        }
-
-      } catch (error) {
-        setContractMetadata({})
-      }
-    }
-
-    if (metadataString) {
-      getMetadata();
-    }
-  }, [metadataString]);
-
   const contractByIdQuery: QueryResult = useQuery(GET_CONTRACT_BY_ID, {
+    pollInterval: 30000,
     variables: {
       contractId,
     },
   });
 
+  const dai_approve = useContractWrite(dai_approvePrepare.config);
+
   useEffect(() => {
-    async function syncContractData() {
-      if (!contractByIdQuery.loading && contractByIdQuery.data) {
-        setContractData(contractByIdQuery.data.contract);
-      }
-    }
-
-    syncContractData();
-  }, [contractByIdQuery.loading]);
+    loadContractData()
+  }, [contractId]);
 
   useContractEvent({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     eventName: "ContractOwnershipUpdate",
     listener: async (event: Event) => {
-      contractByIdQuery.refetch();
+      loadContractData()
     },
   });
 
-  useContractEvent({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    contractInterface: NetworkManagerInterface,
-    eventName: "ContractOwnershipUpdate",
-    listener: async (event: Event) => {
-      contractByIdQuery.refetch();
-    },
-  });
-
-  const networkManager_releaseContractPrepare = usePrepareContractWrite({
+  const { config: releaseContractConfig } = usePrepareContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "releaseContract",
@@ -231,30 +157,48 @@ const ViewContract: NextPage<any> = () => {
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
-    },
-    onSettled(data, error) {
-      if (error) {
-      } else {
-        contractByIdQuery.refetch();
-      }
-    },
+    }
   });
 
-  const networkManager_releaseContract = useContractWrite(
-    networkManager_releaseContractPrepare.config
-  );
+  const { write: onReleaseContract } = useContractWrite(releaseContractConfig);
 
-  const { write: resolveContract } = useContractWrite({
+  const { write: onResolveContract, isLoading: isLoadingResolveContractTransaction } = useContractWrite({
+    mode: "recklesslyUnprepared",
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "resolveContract",
-    chainId: CHAIN_ID,
     args: [contractId, acceptedSolutionPtr],
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
-    },
+    }
   });
+
+  useEffect(() => {
+    if (isLoadingResolveContractTransaction === false && contractByIdQuery.loading === false) {
+      setRefreshing(false)
+    } else {
+      setRefreshing(true)
+    }
+  }, [isLoadingResolveContractTransaction, contractByIdQuery.loading])
+
+  const handleResolveContract = () => onResolveContract()
+
+  const handleOnReleaseContract = () => onReleaseContract()
+
+  async function loadContractData() {
+    if (contractId) {
+      contractByIdQuery.refetch().then(async (res) => {
+        const updatedContractData = res.data.contract;
+        const contractMetadata = await fleek.getContract(String(updatedContractData?.metadata).slice(13))
+
+        setContractData({
+          ...updatedContractData,
+          ...contractMetadata
+        })
+      })
+    }
+  }
 
 
   const handleOpen = () => setSendmessageOpen(true);
@@ -280,6 +224,7 @@ const ViewContract: NextPage<any> = () => {
       const selectedRef1 = doc(db, "users", user1, "selectedUser", user2);
       const selectedRef2 = doc(db, "users", user2, "selectedUser", user1);
 
+      try {
       await setDoc(selectedRef1, {
         uid: user2,
         name: user2,
@@ -299,13 +244,17 @@ const ViewContract: NextPage<any> = () => {
         proposalPayout,
         proposalMessage,
         type: MessageType.ContractProposal,
-      });
+      })
 
       setData({
         proposalPayout,
         proposalMessage,
         error: null,
       });
+
+    } catch(error) {
+      alert(error)
+    }
 
       handleClose();
     } catch (err) {
@@ -344,7 +293,7 @@ const ViewContract: NextPage<any> = () => {
               color="primary"
               disableElevation
               disableRipple
-              onClick={resolveContract}
+              onClick={handleResolveContract}
             >
               Accept Work
             </Button>
@@ -413,7 +362,7 @@ const ViewContract: NextPage<any> = () => {
               color="error"
               disableElevation
               disableRipple
-              onClick={() => networkManager_releaseContract.write()}
+              onClick={handleOnReleaseContract}
             >
               Release Contract
             </Button>
@@ -432,9 +381,6 @@ const ViewContract: NextPage<any> = () => {
               component={Stack}
             >
               Resolved
-              <Typography variant="caption" color="primary">
-                You earned: {contractData.amount}
-              </Typography>
             </Button>
           );
         case 3: //reclaimed
@@ -738,6 +684,7 @@ const ViewContract: NextPage<any> = () => {
 
   return (
     <Container maxWidth="lg">
+      { refreshing && <LinearProgress variant='indeterminate' /> }
       <Grid
         container
         direction="row"
@@ -750,7 +697,11 @@ const ViewContract: NextPage<any> = () => {
             <JobDisplay data={contractData} />
           </Box>
 
-          <Card elevation={0} className={classes.marginBottom}>
+          <Card elevation={0} className={classes.marginBottom} sx={{ 
+                    border: '1px solid #ddd !important',
+                    boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
+                    
+          }}>
             <CardContent>
               <Typography
                 pb={2}

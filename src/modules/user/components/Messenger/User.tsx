@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "../../../../../firebase";
 import { Avatar, Grid, Typography } from "@mui/material";
+import { Box } from "@mui/system";
 
 const User = ({ user1, user, selectUser, chat }) => {
   const user2 = user?.uid;
@@ -50,13 +51,12 @@ const User = ({ user1, user, selectUser, chat }) => {
               borderRadius: "50%",
               marginLeft: "5px",
             }}
-            src={user.picture.original.url}
-            alt={user.name}
+            src={user?.picture?.original?.url}
+            alt={user?.name}
           />
 
           <Grid
             sx={{
-              bgcolor: "",
               display: "flex",
               alignItems: "start",
               display: "flex",
@@ -66,16 +66,21 @@ const User = ({ user1, user, selectUser, chat }) => {
               overflow: "hidden",
             }}
           >
+            <Box ml={1}>
+            <Typography>
+              Elijah Hampton
+            </Typography>
             <Typography
+            fontSize={12}
               sx={{
-                fontSize: "16px",
                 fontWeight: "medium",
-                marginLeft: "10px",
-                color: "#49A882",
+              
+               // color: "#49A882",
               }}
             >
               {user.handle}
             </Typography>
+            </Box>
             {data?.from !== user1 && data?.unread && (
               <Typography
                 variant="h6"

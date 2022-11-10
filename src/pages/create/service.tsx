@@ -177,6 +177,11 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const accountData = useAccount();
 
   const networkManager_createServicePrepare = usePrepareContractWrite({
+
+  });
+
+  const { write: onCreateService, writeAsync: onCreateServiceAsync, error: createServiceError, isError: isCreateServiceError, status: createServiceStatus } = useContractWrite({
+    mode: "recklesslyUnprepared",
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     functionName: "createService",
@@ -193,11 +198,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     ],
     overrides: {
       gasLimit: BigNumber.from("11643163"),
-    }
-  });
-
-  const networkManager_createService = useContractWrite({
-    ...networkManager_createServicePrepare.config,
+    },
     onError(error, variables, context) {
 
 
@@ -275,7 +276,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     }
 
     if (String(retVal)) {
-      const confirm = await networkManager_createService.writeAsync({
+      onCreateService({
         recklesslySetUnpreparedArgs: [
           1,
           retVal,
@@ -361,6 +362,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const handleOnChangeFile = (e: ChangeEventHandler<HTMLInputElement>) => {
     let reader = new FileReader();
 
+
     reader.onloadend = () => {
       const buffer: Buffer = Buffer.from(reader.result)
 
@@ -370,6 +372,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         serviceThumbnail: buffer.toString(),
       });
     };
+
     reader.readAsArrayBuffer(e.target.files[0]);
   };
 
@@ -422,7 +425,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         <Divider sx={{ borderBottom: "1px solid #eee" }} />
       </Box>
       <TabPanel index={0} value={tabValue}>
-        <Box width={600} maxWidth={600}>
+        <Box width={600} maxWidth={600} pb={2}>
           <Typography color="text.secondary" fontWeight="500" fontSize={14}>
             Select or search for the appropriate market to deploy your
             contract.
@@ -520,7 +523,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           </Card>
 
           <Card elevation={0} sx={{ mb: 3, width: "100%" }}>
-            <Stack spacing={2}>
+            <Stack spacing={2} sx={{ bgcolor: '#fafafa' }}>
               <StyledTextField
                 margin="normal"
                 sx={{ width: "100%" }}

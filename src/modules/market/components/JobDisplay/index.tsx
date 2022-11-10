@@ -49,21 +49,8 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
 
   const userAddress = useSelector(selectUserAddress)
 
-  const networkManager_getContractData = useContractRead({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    contractInterface: NetworkManagerInterface,
-    functionName: "getContractData",
-    enabled: false,
-    watch: false,
-    chainId: CHAIN_ID,
-    args: [data?.id],
-    onSuccess: (data: Result) => {
-      setMetadataString(data.taskMetadataPtr);
-    },
-    onError: (error) => {
-      setMetadataString("");
-    },
-  });
+  console.log({ data })
+
 
   const networkManager_getLensProfileIdFromAddress = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -104,8 +91,18 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
     networkManager_getLensProfileIdFromAddress.refetch();
   }, [data?.employer]);
 
+  const border = () => {
+    switch(data?.ownership) {
+      case 1: 
+      return '1px solid blue'
+      case 2: //resolved
+        return '1px solid green'
+      default:
+        return '1px solid #ddd'
+    }
+  }
+
   return (
-    <Grid xs={12} md={6} lg={4}>
       <Card
       key={data?.id}
         onClick={() => router.push(`/view/contract/${data?.id}`)}
@@ -113,6 +110,8 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
         square
          variant="outlined"
         sx={{
+          border: border(),
+          boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
           cursor: "pointer",
           width: "100%",
           height: '200px',
@@ -129,6 +128,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
             justifyContent: "space-evenly",
           }}
         >
+       
           {
               data?.contract_title ? (
                 <Typography fontWeight="600">
@@ -147,7 +147,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
             fontSize={13}
             fontWeight="medium"
             sx={{
-              height: 30,
+              height: 60,
               display: "-webkit-box",
               overflow: "hidden",
               WebkitBoxOrient: "vertical",
@@ -199,21 +199,21 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
             justifyContent="space-between"
           >
             <Grid item sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography mr={0.5} component='span' fontSize={13} fontWeight='medium'>
+              <Typography mr={0.5} variant='body2' component='span' fontSize={13} >
                 Budget: {" "}
               </Typography>
 
               <Stack direction='row' alignItems='center'>
-                <Typography fontSize={13} fontWeight='medium'>
+              <img
+                  src="/assets/images/dai.svg"
+                  style={{ margin: '3px 3px', width: 15, height: 20 }}
+                />
+                <Typography variant='body2' fontSize={13}>
                   {
                     data?.contract_budget
                       ? data?.contract_budget
                       : 0}{" "}
                 </Typography>
-                <img
-                  src="/assets/images/dai.svg"
-                  style={{ margin: '3px 3px', width: 15, height: 20 }}
-                />
               </Stack>
             </Grid>
             <Grid item>
@@ -223,15 +223,14 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
                 </Typography>
                 &nbsp;
                 {
-                  <Chip
-                  variant="outlined"
-                  size="small"
-                  label={
-                    data?.duration
+                  <Typography fontSize={12} fontWeight='600'>
+                    {
+                      data?.duration
                       ? data?.duration
                       : "Undefined"
-                  }
-                />
+                    }
+                  </Typography>
+                
                 }
               
               </Stack>
@@ -263,7 +262,6 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
           )
         }
       </Card>
-    </Grid>
   );
 };
 

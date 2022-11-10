@@ -68,6 +68,10 @@ const Messenger: NextPage<any> = () => {
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false)
   const userLensData = useSelector(selectLens)
   
+  console.log({ msgs })
+
+  
+  console.log({ users })
   const userDataQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     skip: true,
     variables: {
@@ -99,7 +103,7 @@ const Messenger: NextPage<any> = () => {
         await userDataQuery.refetch({
           userAddress: user?.uid
         })
-          .then(async (userData) => {
+        .then(async (userData) => {
             if (userData?.data?.verifiedUsers && userData?.data?.verifiedUsers[0]?.id) {
               const profile = await getLensProfileById(`0x${Math.abs(Number(userData?.data?.verifiedUsers && userData?.data?.verifiedUsers[0]?.id)).toString(16)}`)
 
@@ -108,6 +112,10 @@ const Messenger: NextPage<any> = () => {
                 ...userData?.data?.verifiedUsers[0],
                 ...profile
               })
+
+              setUsers(completeUserData)
+
+              console.log({ completeUserData })
             }
           })
       })
@@ -207,12 +215,15 @@ const Messenger: NextPage<any> = () => {
         }}
       >
         <Box sx={{ height: '100%' }}>
-          <Box>
-            <CardContent>
-              <Typography>
+          <Box px={1} sx={{ height: '65px' }}>
+      
+              <Typography variant='subtitle2'>
                 Messages
               </Typography>
-            </CardContent>
+              <Typography paragraph variant='body2'>
+                4 conversations
+              </Typography>
+     
           </Box>
           <Divider />
           <Box sx={{ overflow: 'scroll', width: 250, height: '100%' }}>
@@ -231,7 +242,7 @@ const Messenger: NextPage<any> = () => {
         <Divider sx={{ height: '100%' }} orientation='vertical' />
 
         <Box sx={{ overflow: 'hidden', width: '100%', height: '100%' }}>
-          <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ height: '65px', padding: '15px', borderBottom: '1px solid #ddd' }} >
+          <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ height: '65px', px: 1, borderBottom: '1px solid #ddd' }} >
             <Stack direction="row" alignItems='center'>
               <Avatar
                 alt=''

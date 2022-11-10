@@ -148,9 +148,9 @@ const UserCard: FC = ({ freelancer }) => {
   return (
     <Card onClick={onViewProfile} variant='elevation' sx={{ boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;', cursor: 'pointer', width: '100%' }}>
       <CardContent>
-        <Stack mb={2} direction='row' alignItems='center' sx={{ width: '100%' }}>
+        <Stack mb={2} direction='row' alignItems='flex-start' sx={{ width: '100%' }}>
           <Stack spacing={1} direction='row' alignItems='center' sx={{ width: '100%' }}>
-            <Avatar />
+            <Avatar src={freelancer?.imageURI} />
             <Box>
               <Typography fontWeight='500' fontSize={14} variant='subtitle1'>
                 Elijah Hampton
@@ -161,7 +161,7 @@ const UserCard: FC = ({ freelancer }) => {
             </Box>
           </Stack>
 
-          <Chip  icon={<Check fontSize='small' color='primary' /> } size='small' sx={{ color: (theme) => theme.palette.primary.main, fontWeight: '600', fontSize: 10, bgcolor: '#eee' }} label='Member (9 years)' />
+          <Chip size='small' sx={{ color: (theme) => theme.palette.primary.main, fontWeight: '700', fontSize: 10, bgcolor: '#eee' }} label='Member (9 years)' />
         </Stack>
         <Box>
           {

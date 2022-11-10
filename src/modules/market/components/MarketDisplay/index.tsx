@@ -53,7 +53,7 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
           border: (theme) =>
             selected
               ? `2px solid ${theme.palette.primary.main}`
-              : `1px solid #eee`,
+              : `1px solid #ddd`,
         }}
         onClick={selectable ? () => handleOnSelect() : () => router.push(`/view/market/${marketDetails?.id}`)}
       >

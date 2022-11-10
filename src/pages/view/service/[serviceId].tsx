@@ -66,6 +66,10 @@ import { QueryResult, useQuery } from "@apollo/client";
 import { GET_SERVICES_BY_CREATOR, GET_SERVICE_BY_ID } from "../../../modules/contract/ContractGQLQueries";
 import { getJSONFromIPFSPinata, getMetadata } from "../../../common/ipfs-helper";
 import ServiceCard from "../../../modules/contract/components/ServiceCard/ServiceCard";
+import fleek from "../../../fleek";
+import { getLensProfileById } from "../../../modules/lens/LensGQLQueries";
+import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../../modules/user/UserGQLQueries";
+import { GET_TOKEN_INFO_BY_SERVICE_ID } from "../../../modules/market/MarketGQLQueries";
 
 const confirmationDialogContent = [
   <DialogContentText id="alert-dialog-description">
@@ -114,7 +118,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     useState<boolean>(false);
   const [purchaseIndex, setPurchaseIndex] = useState<number>(0);
   const [serviceData, setServiceData] = useState<any>({});
-  const [serviceMetadata, setServiceMetadata] = useState<any>({});
   const [displayImg, setDisplayImg] = useState<string>();
   const [serviceOwnerLensProfileId, setServiceOwnerLensProfileId] =
     useState<number>(0);
@@ -137,6 +140,43 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const userLensData = useSelector(selectLens)
   const userAddress = useSelector(selectUserAddress);
 
+  const [tokenInfo, setTokenInfo] = useState<any>({})
+
+  const tokenInfoQuery: QueryResult = useQuery(GET_TOKEN_INFO_BY_SERVICE_ID, {
+    skip: true,
+    variables: {
+      serviceId: Number(serviceData?.id),
+      id: Number(serviceData?.id),
+    },
+  });
+
+  const tokenAddress = tokenInfo?.address
+
+  useEffect(() => {
+    if (serviceData?.id) {
+      tokenInfoQuery.refetch().then((res) => {
+
+        if (res.data?.serviceTokens && res.data?.serviceTokens?.length > 0) {
+          const tokenInfo = res.data?.serviceTokens[0]
+  
+          setTokenInfo(tokenInfo)
+        }
+        console.log('@@@@')
+        console.log(serviceData)
+        console.log(res.data)
+      })
+    }
+
+  }, [serviceData?.id])
+
+
+  const serviceCreatorQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
+    skip: true,
+    variables: {
+      userAddress: serviceData?.creator
+    }
+  })
+
   const serviceQueryById: QueryResult = useQuery(GET_SERVICE_BY_ID, {
     variables: {
       serviceId: router.query.serviceId,
@@ -149,21 +189,28 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       creator: serviceData?.creator
     }
   })
+  
 
   const renderPackageInformation = (idx: number) => {
     try {
       return (
         <Box display="flex" alignItems="center">
+          <Typography>
+            Price:
+            </Typography> 
           {" "}
-          (
+      
+
+          <Typography px={1} fontWeight="400" fontSize={20}>
+            {Number(serviceData.offers[idx]).toFixed(2)}
+          </Typography>{" "}
           <img
-            style={{ width: 25, height: 25, padding: "5px 0px" }}
+            style={{ width: 30, height: 30, padding: "5px 0px" }}
             src="/assets/images/dai.svg"
           />{" "}
-          <Typography pr={0.5}>DAI</Typography>){" "}
-          <Typography px={1} fontWeight="medium" fontSize={25}>
-            {Number(serviceData.offers[idx])}
-          </Typography>{" "}
+       
+
+
         </Box>
       );
     } catch (error) {
@@ -171,86 +218,54 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     }
   };
 
-  //get user lens profile id
-  const networkManager_getLensProfileIdFromAddress = useContractRead({
-    addressOrName: NETWORK_MANAGER_ADDRESS,
-    contractInterface: NetworkManagerInterface,
-    functionName: "getLensProfileIdFromAddress",
-    enabled: false,
-    watch: false,
-    chainId: CHAIN_ID,
-    args: serviceData?.creator,
-    onSuccess: (data: Result) => {
-      setServiceOwnerLensProfileId(hexToDecimal(data._hex));
-    },
-    onError: (error) => { },
-  });
+  //load profile when profile id changes
+  useEffect(() => {
+    async function loadProfile() {
+      if (serviceOwnerLensProfileId > 0) {
+        const profile = await getLensProfileById(`0x${Math.abs(Number(serviceOwnerLensProfileId)).toString(16)}`)
+        console.log({ profile })
+        setServiceOwnerLensProfile(profile)
+      }
+    }
 
-  //get user lens profile
-  const lensHub_getProfile = useContractRead({
-    addressOrName: LENS_HUB_PROXY,
-    contractInterface: LensHubInterface,
-    functionName: "getProfile",
-    enabled: false,
-    watch: false,
-    chainId: CHAIN_ID,
-    args: [serviceOwnerLensProfileId],
-    onSuccess: (data: Result) => {
-      setServiceOwnerLensProfile(data);
-    },
-    onError: (error) => { },
-  });
+    loadProfile()
+  
+  }, [serviceOwnerLensProfileId])
 
   useEffect(() => {
-    serviceQueryById.refetch();
-    networkManager_getLensProfileIdFromAddress.refetch();
+    serviceQueryById.refetch().then((data) => setServiceData(data))
   }, [router.query.serviceId]);
 
   useEffect(() => {
-    if (serviceData?.creator && String(serviceData?.creator).toLowerCase() != ZERO_ADDRESS) {
-      servicesByCreatorQuery.refetch()
+    if (serviceData?.creator) {
+      serviceCreatorQuery.refetch().then((data) => {
+   
+        const freelancerData = data.data?.verifiedUsers[0]
+
+        setServiceOwnerLensProfileId(freelancerData?.id)
+      })
     }
   }, [serviceData?.creator])
 
   useEffect(() => {
-    if (!serviceQueryById.loading && serviceQueryById.data) {
-      setServiceData(serviceQueryById.data.service);
+    async function loadService() {
+      const serviceData = serviceQueryById.data.service
+      const serviceMetadata = await fleek.getService(String(serviceData?.metadataPtr).slice(13))
+      const updatedServiceData = { ...serviceData, ...serviceMetadata }
+
+      setServiceData(updatedServiceData);
     }
-  }, []);
+
+    if (!serviceQueryById.loading && serviceQueryById.data) {
+      loadService()
+    }
+  }, [serviceQueryById.loading]);
 
   useEffect(() => {
     if (!servicesByCreatorQuery.loading && servicesByCreatorQuery.data) {
       setAdditionalServices(servicesByCreatorQuery.data.services);
     }
   }, []);
-
-  //fetch lens profile among  lens profile id change
-  useEffect(() => {
-    lensHub_getProfile.refetch({
-      throwOnError: true,
-    });
-  }, [serviceOwnerLensProfileId]);
-
-  useEffect(() => {
-    async function loadMetadata() {
-      if (serviceData?.metadataPtr) {
-        const parsedData = await getJSONFromIPFSPinata(serviceData?.metadataPtr)
-        //@ts-ignore
-        if (
-          parsedData?.serviceThumbnail &&
-          parsedData?.serviceThumbnail?.data
-        ) {
-          const buffer: Buffer = parsedData?.serviceThumbnail?.data;
-          const updatedImg: any = Buffer.from(buffer);
-
-          setDisplayImg(updatedImg);
-          setServiceMetadata(parsedData);
-        }
-      }
-    }
-
-    loadMetadata()
-  }, [serviceData?.metadataPtr]);
 
   const { write: approveDai } = useContractWrite({
     addressOrName: DAI_ADDRESS,
@@ -286,7 +301,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
     },
-    onSuccess(data) {
+    onSettled(data, error, variables, context) {
       setSuccessfulPaymentAlertVisible(true);
     }
   });
@@ -307,8 +322,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       setLoadingReviewTx(false);
     },
   });
-
-
 
   const onSubmitReview = () => {
     setLoadingReviewTx(true);
@@ -335,133 +348,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
 
   return (
     <Container maxWidth="lg">
-      <Grid
-        justifyContent="space-between"
-        container
-        direction="row"
-        alignItems="flex-start"
-      >
-        {/* Start of first grid */}
-        <Grid item xs={12}>
-          <Stack
-            direction="row"
-            alignItems="flex-start"
-            justifyContent="space-between"
-          >
-            <Card
-              elevation={0}
-              sx={{
-                width: "100%",
-                py: 2,
-              }}
-            >
-              <CardContent
-                sx={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Stack sx={{ width: '100%' }} direction='row' justifyContent='space-between' alignItems='flex-start'>
-                  <Stack spacing={3}>
-                    <Stack>
-                      <Avatar sx={{ width: 90, height: 90 }} src={serviceOwnerLensProfile?.imageURI} />
-                      <Typography
-                        fontWeight="600"
-                        color="black"
-                        fontSize={23}
-                        py={1}>
-                        {serviceOwnerLensProfile?.handle}
-                      </Typography>
-                      <Chip sx={{ py: 1, height: 15, borderRadius: 1, color: '#757575', maxWidth: 100, fontSize: 10 }} size='small' variant='filled' label={serviceData?.creator} />
-                    </Stack>
-
-                    <Stack spacing={0.3}>
-                      <Typography fontWeight="700" fontSize={20} maxWidth={300}>
-                        {serviceMetadata?.serviceTitle
-                          ? serviceMetadata?.serviceTitle
-                          : "Unable to load title"}
-                      </Typography>
-                      <Typography paragraph variant='body2' color="text.secondary">
-                        {serviceMetadata?.serviceDescription
-                          ? serviceMetadata?.serviceDescription
-                          : "Unable to load description"}
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                  <Card sx={{ pr: 2, bgcolor: 'rgb(246, 248, 250)' }} variant='outlined'>
-                    <CardContent>
-                      <Box>
-                        <Stack
-
-                          direction="row"
-                          alignItems="center"
-                          spacing={5}
-                          sx={{ width: "100%" }}
-                        >
-                          <Box textAlign="start">
-                            <Typography
-                              pb={1}
-                              color='text.primary'
-                              // fontWeight="600"
-                              fontSize={14}
-                              variant='subtitle2'
-                            >
-                              Service Value
-                            </Typography>
-
-                            <Stack spacing={1} direction="row" alignItems="center">
-                              <img
-                                src="/assets/images/dai.svg"
-                                style={{ width: 20, height: 25 }}
-                              />
-
-                              <Typography
-
-                                fontSize={13}
-                                color="primary"
-                              >
-                                $12,434 {" "}
-                                <Typography fontSize={13} color='text.primary' component='span'>
-                                  value locked
-                                </Typography>
-                              </Typography>
-                            </Stack>
-                          </Box>
-
-                        </Stack>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Stack>
-
-          <Box my={1.5}>
-            <Box py={2} component={Alert} severity="success">
-              <Box>
-                <AlertTitle>Earn as babys8 earns. </AlertTitle>
-                Buy a stake in this service and earn as babys8 earns. Stake is
-                long term confidence of this service based on quality.{" "}
-                <Typography variant="button">How it works</Typography>
-              </Box>
-              <Stack py={2} spacing={3} direction="row" alignItems="center">
-                <Button
-                  disabled={false}
-                  variant="contained"
-                  onClick={() => setTokenTransactionDialogOpen(true)}
-                >
-                  Invest
-                </Button>
-                <Button variant="outlined" sx={{}}>
-                  Learn more about investing
-                </Button>
-              </Stack>
-            </Box>
-          </Box>
-
-          <Box my={5}>
+                <Box mb={2}>
             {successfulPaymentAlertVisible && (
               <Alert severity="success">
                 <AlertTitle>Successful Purchase</AlertTitle>
@@ -478,30 +365,118 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
               </Alert>
             )}
           </Box>
-
-          <Box>
-            <Typography
-              fontWeight="600"
-              py={2}
-              fontSize={20}
+      <Grid
+        justifyContent="space-between"
+        container
+        direction="row"
+        alignItems="flex-start"
+      >
+        {/* Start of first grid */}
+        <Grid item xs={12}>
+          <Stack
+          spacing={2}
+            direction="row"
+            alignItems="flex-start"
+            justifyContent="space-between"
+          >
+            <Stack>
+            <Card
+            variant='outlined'
+              elevation={0}
+              sx={{
+                border: '1px solid #ddd !important',
+                boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
+                width: '100%',
+                py: 2,
+              }}
             >
-              Offer Details
-            </Typography>
+              <CardContent
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Stack sx={{ width: '100%' }} direction='row' justifyContent='space-between' alignItems='flex-start'>
+                  <Stack spacing={3}>
+                    <Stack>
+                      <Avatar sx={{ width: 90, height: 90 }} src={serviceOwnerLensProfile?.picture?.original?.url} />
+                      <Typography
+                        fontWeight="600"
+                        color="black"
+                        fontSize={23}
+                        py={1}>
+                        {serviceOwnerLensProfile?.handle}
+                      </Typography>
+                      <Chip sx={{ py: 1, height: 15, borderRadius: 1, color: '#757575', maxWidth: 100, fontSize: 10 }} size='small' variant='filled' label={serviceData?.creator} />
+                    </Stack>
+
+
+                  </Stack>
+             {/*     <Card sx={{ pr: 2, bgcolor: 'rgb(246, 248, 250)' }} variant='outlined'>
+                    <CardContent>
+                      <Box />
+                    </CardContent>
+                        </Card>*/}
+                </Stack>
+              </CardContent>
+            </Card>
+            <Box my={1.5}>
+            <Box py={2} component={Alert} severity="success">
+              <Box>
+                <AlertTitle>Earn as {serviceOwnerLensProfile?.handle} earns. </AlertTitle>
+                Buy a stake in this service and earn as babys8 earns. Stake is
+                long term confidence of this service based on quality.{" "}
+
+              </Box>
+              <Stack py={2} spacing={3} direction="row" alignItems="center">
+                <Button
+                  disabled={!tokenInfo?.address}
+                  variant="contained"
+                  onClick={() => setTokenTransactionDialogOpen(true)}
+                >
+                  Invest
+                </Button>
+                <Button variant="outlined" sx={{}}>
+                  Learn more about investing
+                </Button>
+              </Stack>
+            </Box>
           </Box>
-          <Card
+            </Stack>
+
+
+            <Card
+            variant='outlined'
             sx={{
-              boxShadow:
-                "0px 3px 5px -1px #eee, 0px 5px 8px 0px #eee, 0px 1px 14px 0px #eee",
+             width: '100%',
+             border: '1px solid #ddd !important',
+             boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
             }}
           >
             <CardContent>
               <Stack
                 spacing={4}
                 sx={{ height: "100%" }}
-                alignItems="center"
+              
               >
-                {renderPackageInformation(0)}
-                <Box component={Stack} spacing={1} sx={{ height: 150 }}>
+                          
+
+                <Stack spacing={0.3}>
+                      <Typography fontWeight="700" fontSize={23}>
+                        {serviceData?.serviceTitle
+                          ? serviceData?.serviceTitle
+                          : "Unable to load title"}
+                      </Typography>
+                      <Typography paragraph variant='body2' color="text.secondary">
+                        {serviceData?.serviceDescription
+                          ? serviceData?.serviceDescription
+                          : "Unable to load description"}
+                      </Typography>
+                      {renderPackageInformation(0)}
+                    </Stack>
+
+                <Box component={Stack} alignItems='flex-start' spacing={1} sx={{ height: 150 }}>
                   <Typography
                     textAlign="center"
                     color="rgb(33, 33, 33)"
@@ -559,6 +534,8 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
               </Stack>
             </CardContent>
           </Card>
+          </Stack>
+     
           <Box my={5}>
             <Typography
               fontWeight="600"
@@ -571,7 +548,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
               {
                 additionalServices && additionalServices.length > 0 ?
                   additionalServices.map((service) => {
-                    return <ServiceCard id={service?.id} data={service} />
+                    return <ServiceCard data={service} />
                   })
                   :
                   <Typography color="text.secondary" paragraph>
@@ -611,6 +588,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
       </Grid>
 
       <TransactionTokenDialog
+      tokenInfo={tokenInfo}
         open={tokenTransactionDialogOpen}
         handleClose={() => setTokenTransactionDialogOpen(false)}
         serviceId={serviceData.id}

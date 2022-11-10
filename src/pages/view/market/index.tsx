@@ -40,10 +40,10 @@ const MarketHome: NextPage<any> = () => {
     }, [usersQuery.loading])
 
     return (
-        <Container maxWidth='xl' sx={{ bgcolor: 'white', height: '100%' }}>
+        <Container maxWidth='xl' sx={{ height: '100%' }}>
             <Box>
                 <Box mt={2} mb={2}>
-                    <Typography fontWeight='bold' fontSize={16} color='#212121'>
+                    <Typography fontWeight='bold' fontSize={18} color='#212121'>
                         Labor Markets
                     </Typography>
                 </Box>

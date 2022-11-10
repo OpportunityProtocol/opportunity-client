@@ -63,6 +63,7 @@ import { getJSONFromIPFSPinata, getMetadata } from "../../../../common/ipfs-help
 import { ConfirmationDialog } from "../../../../common/components/ConfirmationDialog";
 import moment from "moment";
 import { withStyles } from '@mui/styles'
+import { getLensProfileById } from "../../../lens/LensGQLQueries";
 interface IServiceCardProps {
   purchaseData?: any;
   service: any;
@@ -132,8 +133,14 @@ const ServiceCard = ({
 
     },
     onSettled(data, error, variables, context) {
+
       if (!error) {
+        alert('hi')
+        console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
         onResolveService()
+      } else {
+        console.log("BBBBBSOJISJFOISJEOJREOJROESJROIEJROIESJROSEJROEJROSEJSER")
+        alert(error)
       }
     },
   })
@@ -204,20 +211,18 @@ const ServiceCard = ({
     });
   };
 
-  //fetch lens profile among  lens profile id change
   useEffect(() => {
-    lensHub_getProfile.refetch({
-      throwOnError: true,
-    });
-  }, [serviceOwnerLensProfileId]);
-
-  useEffect(() => {
-    if (serviceOwnerLensProfileId !== 0) {
-      lensHub_getProfile.refetch({
-        throwOnError: false,
-      });
+    async function loadProfile() {
+      if (serviceOwnerLensProfileId > 0) {
+        const profile = await getLensProfileById(`0x${Math.abs(Number(serviceOwnerLensProfileId)).toString(16)}`)
+        console.log({ profile })
+        setServiceOwnerLensData(profile);
+      }
     }
-  }, [serviceOwnerLensProfileId]);
+
+    loadProfile()
+  
+  }, [serviceOwnerLensProfileId])
 
   useEffect(() => {
     networkManager_getLensProfileIdFromAddress.refetch();
@@ -248,10 +253,12 @@ const ServiceCard = ({
     },
   })
 
+  console.log({ service })
+
   const getValues = async () => {
     return {
       profileId: Number(serviceOwnerLensProfileId),
-      pubId: Number(data?.pubId),
+      pubId: Number(service?.id),
       data: abiencoder.encode(["uint256", "uint256"], [DAI_ADDRESS, 100]),
       nonce: Number(userLensSigNonce),
       deadline: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
@@ -285,7 +292,7 @@ const ServiceCard = ({
 
       resolveService({
         recklesslySetUnpreparedArgs: [
-          Number(data?.id),
+          Number(service?.id),
           Number(purchaseData?.purchaseId),
           { v: splitSignature.v, r: splitSignature.r, s: splitSignature.s, deadline: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' },
         ],
@@ -299,7 +306,6 @@ const ServiceCard = ({
         {" "}
         You are about to purchase a service which will require three actions:
       </Typography>
-
       <ul>
         <li>
           {" "}
@@ -436,7 +442,7 @@ const ServiceCard = ({
 
   return (
       <Card variant="elevation" className={cx(cardStyles.root)} sx={{
-        border: '1px solid #eee !important',
+        border: '1px solid #ddd !important',
         boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
       }}>
         <CardActionArea
@@ -476,7 +482,7 @@ const ServiceCard = ({
               alignItems="center"
               justifyContent="flex-start"
             >
-              <Avatar src={serviceOwnerLensData?.imageURI} />
+              <Avatar src={serviceOwnerLensData?.picture?.original?.url} />
               <Typography px={2}>
                 {serviceOwnerLensData?.handle}
               </Typography>

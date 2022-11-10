@@ -58,7 +58,6 @@ enum ContractsViewingPersona {
 }
 
 const ExplorePage: NextPage = () => {
-  const classes = useStyles();
   const [state, setState] = useState({
     persona: Persona.WORKING,
     workingJobs: [],
@@ -283,6 +282,8 @@ const ExplorePage: NextPage = () => {
             ...contractMetadata
           })
 
+          console.log({ displayedContractsData })
+
           setContractsHiring(displayedContractsData)
         })
       }
@@ -327,7 +328,11 @@ const ExplorePage: NextPage = () => {
       case Persona.HIRING:
         return contractsHiring?.length > 0 ? contractsHiring.map((item) => {
           console.log(item)
-          return <JobDisplay data={item} />
+          return (
+            <Grid item xs={4}>
+              <JobDisplay data={item} />
+            </Grid>
+          )
         })
           :
           <Typography p={2} color='text.secondary'>
@@ -336,7 +341,12 @@ const ExplorePage: NextPage = () => {
       case Persona.WORKING:
         return contractWorking?.length > 0 ?
           contractWorking.map((item) => {
-            return <JobDisplay data={item} />
+            return (
+              <Grid item xs={4}>
+                <JobDisplay data={item} />
+              </Grid>
+
+            )
           }) :
           <Typography p={2} color='text.secondary'>
             Sorry, no results found.
@@ -348,7 +358,11 @@ const ExplorePage: NextPage = () => {
         })
 
         return contractsHiring?.length > 0 ? contractsHiring.map((item) => {
-          return <JobDisplay data={item} />
+          return (
+            <Grid item xs={4}>
+              <JobDisplay data={item} />
+            </Grid>
+          )
         })
           :
           <Typography p={2} color='text.secondary'>
@@ -362,7 +376,13 @@ const ExplorePage: NextPage = () => {
     switch (state.persona) {
       case Persona.HIRING:
         return servicesHired?.length > 0 ? servicesHired.map((item) => {
-          return <ServiceCard id={item?.id} service={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+          return (
+            <Grid item xs={4}>
+
+
+              <ServiceCard id={item?.id} service={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+            </Grid>
+          )
         })
           :
           <Typography p={2} color='text.secondary'>
@@ -370,7 +390,13 @@ const ExplorePage: NextPage = () => {
           </Typography>
       case Persona.WORKING:
         return servicesWorking?.length > 0 ? servicesWorking.map((item) => {
-          return <ServiceCard id={item?.id} service={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+          return (
+            <Grid item xs={4}>
+
+
+              <ServiceCard id={item?.id} service={item?.serviceData} purchase purchaseData={item?.purchaseData} />
+            </Grid>
+          )
         })
           :
           <Typography p={2} color='text.secondary'>
@@ -378,7 +404,13 @@ const ExplorePage: NextPage = () => {
           </Typography>
       case Persona.CATALOG:
         return createdServices?.length > 0 ? createdServices.map((item) => {
-          return <ServiceCard id={item?.id} service={item} />
+          return (
+            <Grid item xs={4}>
+
+
+              <ServiceCard id={item?.id} service={item} />
+            </Grid>
+          )
         })
           :
           <Typography p={2} color='text.secondary'>
@@ -399,7 +431,7 @@ const ExplorePage: NextPage = () => {
       <Box
         sx={{
           width: "100%",
-          height: 120,
+          height: 220,
           px: 2.5
         }}
       >
@@ -414,10 +446,9 @@ const ExplorePage: NextPage = () => {
           height: '100%',
           //  mt: 3,
           width: "100%",
-          backgroundColor: 'rgba(255, 255, 255, 0.2)'
         }}
       >
-        <Box sx={{ bgcolor: 'white', py: 2 }}>
+        <Box sx={{ py: 2 }}>
           <Container maxWidth='lg' sx={{ width: "100%", my: 2, px: 5 }}>
 
             <Stack
@@ -434,7 +465,7 @@ const ExplorePage: NextPage = () => {
                   Work Dashboard
                 </Typography>
                 <Typography variant='body2' color='text.secondary' fontWeight='medium'>
-                  The homeplace for asynchronous work between users and DAOs
+                  The home for asynchronous work between users and DAOs
                 </Typography>
               </Box>
 
@@ -504,39 +535,30 @@ const ExplorePage: NextPage = () => {
           </Container>
         </Box>
         <Divider />
-        <Container maxWidth='lg' sx={{ height: '100%', width: "100%", my: 2, px: 5 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Box py={1} display='flex' alignItems='center' justifyContent='space-between'>
-                <Typography fontWeight='bold'>
-                  Your incoming gigs
-                </Typography>
+        <Container maxWidth='lg' sx={{ height: '100%', width: "100%" }}>
 
-                <Stack spacing={1} direction='row' alignItems='center'>
-                  <SearchBar placeholder='Search...' />
-                  <IconButton size='small'>
-                    <TableRows fontSize='small' />
-                  </IconButton>
+          <Box my={2} mb={5} display='flex' alignItems='center' justifyContent='space-between'>
+            <Typography fontWeight='bold'>
+              Your incoming gigs
+            </Typography>
 
-                  <IconButton size='small'>
-                    <ViewModule fontSize='small' />
-                  </IconButton>
+            <Stack spacing={1} direction='row' alignItems='center'>
+              <SearchBar placeholder='Search...' />
+
+              <IconButton size='small' onClick={onRefresh}>
+                <Refresh fontSize='small' />
+              </IconButton>
+            </Stack>
+          </Box>
 
 
-                  <IconButton size='small' onClick={onRefresh}>
-                    <Refresh fontSize='small' />
-                  </IconButton>
-                </Stack>
-              </Box>
-              <Box sx={{}}>
-                <Grid container direction='row' spacing={2}>
-                  {
-                    contractViewPersona === ContractsViewingPersona.CONTRACTS ? renderContracts() : renderServices()
-                  }
-                </Grid>
-              </Box>
-            </Grid>
+          <Grid container wrap='nowrap' direction='row' spacing={2}>
+            {
+              contractViewPersona === ContractsViewingPersona.CONTRACTS ? renderContracts() : renderServices()
+            }
           </Grid>
+
+
         </Container>
       </Box>
     </Container>

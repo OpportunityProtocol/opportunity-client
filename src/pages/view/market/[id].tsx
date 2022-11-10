@@ -24,6 +24,7 @@ import fleek from '../../../fleek';
 
 const Market: NextPage = () => {
   const router: NextRouter = useRouter()
+  const [pageLoading, setPageLoading] = useState<boolean>(false)
   const [tabValue, setTabValue] = useState<number>(0);
   const [marketDetails, setMarketDetails] = useState<any>({})
   const [displayedServices, setDisplayedServices] = useState<Array<any>>([])
@@ -32,91 +33,99 @@ const Market: NextPage = () => {
 
   const marketDetailsQuery: QueryResult = useQuery(GET_MARKET_DETAILS_BY_ID, {
     variables: {
-      id: Number(id)
-    }
+      id: 1
+    },
+    onError(error) {
+      alert(error)
+    },
   })
 
   const contractsQuery: QueryResult = useQuery(GET_CONTRACTS_BY_MARKET_ID, {
     variables: {
-      id
-    }
+      id: 1,
+      marketId: String(id)
+    },
+    errorPolicy: 'all',
+    onError(error) {
+      alert(error)
+    },
   })
 
   const servicesQuery: QueryResult = useQuery(GET_SERVICES_BY_MARKET_ID, {
+
     variables: {
-      id
-    }
+      id: 1
+    },
+    errorPolicy: 'all',
+    onError(error) {
+      alert(error)
+    },
   })
 
   useEffect(() => {
-    marketDetailsQuery.refetch()
-    contractsQuery.refetch()
-    servicesQuery.refetch()
+    loadMarketData()
   }, [id])
 
-  useEffect(() => {
-    if (!marketDetailsQuery.loading && marketDetailsQuery.data) {
-      setMarketDetails(marketDetailsQuery.data?.markets[0])
+  const loadMarketData = async () => { 
+    if (id) {
+      console.log({ id })
+      setPageLoading(true)
+      await marketDetailsQuery.refetch().then((res) => setMarketDetails(marketDetailsQuery.data?.markets[0]))
+      await contractsQuery.refetch().then((res) => loadContracts() ).catch(error => console.log(error))
+      await servicesQuery.refetch().then((res) => loadServices()).catch(error => console.log(error))
+      setPageLoading(false)
     }
-  }, [marketDetailsQuery.loading])
+  }
 
-  useEffect(() => {
-    async function loadContracts() {
-      if (!contractsQuery.loading && contractsQuery.data) {
-        const contracts = contractsQuery.data?.contracts
+  async function loadContracts() {
+    if (contractsQuery.data) {
+      const contracts = contractsQuery.data?.contracts
 
-        let contractMetadata = {}
-        let displayedContractsData = []
-        await contracts.forEach(async (contract) => {
-          contractMetadata = await fleek.getContract(String(contract?.metadata).slice(13))
-          displayedContractsData.push({
-            ...contract,
-            ...contractMetadata
-          })
+      if (typeof(contracts) == 'undefined') {
+        setDisplayedContracts([])
+        return
+      }
 
-          setDisplayedContracts(displayedContractsData)
+      let contractMetadata = {}
+      let displayedContractsData = []
+      await contracts.forEach(async (contract: any) => {
+        contractMetadata = await fleek.getContract(String(contract?.metadata).slice(13))
+        displayedContractsData.push({
+          ...contract,
+          ...contractMetadata
         })
-      }
+
+        setDisplayedContracts(displayedContractsData)
+      })
+    }
+  }
+
+  async function loadServices() {
+    const services = servicesQuery.data?.services
+
+    if (typeof(services) == 'undefined') {
+      setDisplayedServices([])
+      return
     }
 
-    loadContracts()
+    let serviceMetadata = {}
+    let displayedServicesData = []
 
-  }, [contractsQuery.loading])
+    for (const service of services) {
+      serviceMetadata = await fleek.getService(String(service?.metadataPtr).slice(13))
 
-  useEffect(() => {
-    if (!servicesQuery.loading && servicesQuery.data) {
+    displayedServicesData.push({
+      ...service,
+      ...serviceMetadata,
+    })
+  }
 
-      async function loadServices() {
-        const services = servicesQuery.data?.services
-
-        let serviceMetadata = {}
-        let displayedServicesData = []
-
-        for (const service of services) {
-          serviceMetadata = await fleek.getService(String(service?.metadataPtr).slice(13))
-
-        displayedServicesData.push({
-          ...service,
-          ...serviceMetadata,
-        })
-      }
-
-      setDisplayedServices(displayedServicesData)
-      }
-
-      loadServices()
-    }
-  }, [servicesQuery.loading])
+  setDisplayedServices(displayedServicesData)
+  }
 
   const handleOnChangeTab = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
-
-  const onRefresh = () => {
-    servicesQuery.refetch()
-    contractsQuery.refetch()
-    marketDetailsQuery.refetch()
-  }
 
   return (
     <Container maxWidth='xl'>
@@ -143,12 +152,9 @@ const Market: NextPage = () => {
               <Tab value={1} label="Services" />
             </Tabs>
             <Stack direction='row' alignItems='center' spacing={1}>
-              <IconButton size='small' onClick={onRefresh}>
+              <IconButton size='small' onClick={loadMarketData}>
                 <Refresh fontSize='small' />
               </IconButton>
-              {/*
-              tabValue === 0 ? (<SearchBar placeholder='Search...' onChange={e => setDisplayedContracts(contractsQuery.data?.contracts?.filter(contract => contract?.))} />) : (<SearchBar placeholder='Search...' onChange={e => alert('hji')} />)
-  */}
             </Stack>
           </Box>
         </Box>
@@ -156,7 +162,11 @@ const Market: NextPage = () => {
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
               {displayedContracts.filter((item) => item.ownership == 0).map((contract: any, idx: number) => {
-                return (<JobDisplay id={Number(contract.id)} data={contract} />)
+                return (
+                  <Grid item xs={4}>
+                <JobDisplay id={Number(contract.id)} data={contract} />
+                </Grid>
+                )
               })}
             </Grid>
           </Box>
@@ -165,12 +175,14 @@ const Market: NextPage = () => {
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
               {displayedServices.map((service: any, idx: number) => (
+                <Grid item xs={4}>
                 <ServiceCard
                   purchase={false}
                   table={false}
                   id={service.id}
                   service={service}
                 />
+                </Grid>
               ))}
             </Grid>
           </Box>
