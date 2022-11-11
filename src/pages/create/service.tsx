@@ -24,79 +24,88 @@ import {
   CardActions,
 } from "@mui/material";
 import { NextPage } from "next";
-import { Fragment, ChangeEvent, createRef, useEffect, useState, KeyboardEventHandler, ChangeEventHandler } from "react";
+import {
+  Fragment,
+  ChangeEvent,
+  createRef,
+  useEffect,
+  useState,
+  KeyboardEventHandler,
+  ChangeEventHandler,
+} from "react";
 import Stack from "@mui/material/Stack";
 import { Button, Container, TextField, Typography } from "@mui/material";
 import MarketDisplay from "../../modules/market/components/MarketDisplay";
 import ImageIcon from "@mui/icons-material/Image";
 import fleek from "../../fleek";
+import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
 import {
-  useAccount,
-  useContractWrite,
-  usePrepareContractWrite,
-} from "wagmi";
-import {
-  NETWORK_MANAGER_ADDRESS, PINATA_API_KEY, PINATA_JWT,
+  NETWORK_MANAGER_ADDRESS,
+  PINATA_API_KEY,
+  PINATA_JWT,
 } from "../../constant";
 import { NetworkManagerInterface, TokenFactoryInterface } from "../../abis";
 import { BigNumber } from "ethers";
 import { create } from "ipfs-http-client";
 import { NextRouter, useRouter } from "next/router";
 import BootstrapInput from "../../common/components/BootstrapInput/BootstrapInput";
-import { FEE_COLLECT_MODULE, FOLLOWER_ONLY_REFERENCE_MODULE, FREE_COLLECT_MODULE } from "../../constant/contracts";
+import {
+  FEE_COLLECT_MODULE,
+  FOLLOWER_ONLY_REFERENCE_MODULE,
+  FREE_COLLECT_MODULE,
+} from "../../constant/contracts";
 import { ConfirmationDialog } from "../../common/components/ConfirmationDialog";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_MARKETS } from "../../modules/market/MarketGQLQueries";
-import { generatePinataData, pinJSONToIPFSPinata } from "../../common/ipfs-helper";
+import {
+  generatePinataData,
+  pinJSONToIPFSPinata,
+} from "../../common/ipfs-helper";
 import { a11yProps } from "../../common/components/TabPanel/helper";
 import TabPanel from "../../common/components/TabPanel/TabPanel";
 import { styled } from "@mui/styles";
 const Buffer = require("buffer").Buffer;
 
 const StyledTextField = styled(TextField)({
-  '& label.Mui-focused': {
-    color: '#212121',
+  "& label.Mui-focused": {
+    color: "#212121",
   },
-  '& .MuiInput-underline:after': {
-    borderBottomColor: 'none',
-    border: 'none'
+  "& .MuiInput-underline:after": {
+    borderBottomColor: "none",
+    border: "none",
   },
-  '& .MuiOutlinedInput-root': {
-    '& fieldset': {
-      borderColor: 'none',
-      border: '1px solid #ddd',
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: "none",
+      border: "1px solid #ddd",
       // backgroundColor: 'rgb(239, 247, 238)'
     },
-    '&:hover fieldset': {
+    "&:hover fieldset": {
       //  borderColor: 'none',
-      border: '1px solid #ddd',
+      border: "1px solid #ddd",
     },
-    '&.Mui-focused fieldset': {
+    "&.Mui-focused fieldset": {
       // borderColor: 'none',
-      border: '1px solid #ddd',
+      border: "1px solid #ddd",
     },
   },
 });
 
-const SummaryKey = styled(Typography)(
-  ({ theme }: { theme?: Theme }) => ({
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.palette.text.secondary
-  })
-)
+const SummaryKey = styled(Typography)(({ theme }: { theme?: Theme }) => ({
+  fontSize: 14,
+  fontWeight: "600",
+  color: theme.palette.text.secondary,
+}));
 
-const SummaryValue = styled(Typography)(
-  ({ theme }: { theme?: Theme }) => ({
-    fontSize: 14,
-  })
-)
+const SummaryValue = styled(Typography)(({ theme }: { theme?: Theme }) => ({
+  fontSize: 14,
+}));
 
 const SummarySectionTitle = styled(Typography)(
   ({ theme }: { theme?: Theme }) => ({
-    fontWeight: '600',
+    fontWeight: "600",
   })
-)
+);
 
 /**
  * Elijah Hampton
@@ -118,7 +127,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     thumbnail: "",
     beginner_offer: 0,
     business_offer: 0,
-    enterprise_offer: 0
+    enterprise_offer: 0,
   });
 
   const [createServiceDialogState, setCreateServiceDialogState] = useState({
@@ -147,13 +156,12 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const [checkboxes, setCheckboxes] = useState<Array<boolean>>([]);
   const [publishDialogIsOpen, setPublishDialogIsOpen] =
     useState<boolean>(false);
-  const onOpenPublishDialog = () => { };
+  const onOpenPublishDialog = () => {};
   const [publishDialogIsLoading, setPublishDialogIsLoading] =
     useState<boolean>(false);
   const [publishServiceSuccessful, setPublishServiceSuccessful] =
     useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-
 
   const onCloseCreateServiceDialog = () => {
     if (createServiceDialogState.success == true) {
@@ -176,11 +184,15 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
   const accountData = useAccount();
 
-  const networkManager_createServicePrepare = usePrepareContractWrite({
+  const networkManager_createServicePrepare = usePrepareContractWrite({});
 
-  });
-
-  const { write: onCreateService, writeAsync: onCreateServiceAsync, error: createServiceError, isError: isCreateServiceError, status: createServiceStatus } = useContractWrite({
+  const {
+    write: onCreateService,
+    writeAsync: onCreateServiceAsync,
+    error: createServiceError,
+    isError: isCreateServiceError,
+    status: createServiceStatus,
+  } = useContractWrite({
     mode: "recklesslyUnprepared",
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
@@ -200,8 +212,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       gasLimit: BigNumber.from("11643163"),
     },
     onError(error, variables, context) {
-
-
       setCreateServiceDialogState({
         ...createServiceDialogState,
         loading: false,
@@ -221,11 +231,8 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
       setServiceMetadataKey("");
     },
-    onSettled(data, error, variables, context) {
-
-    }
+    onSettled(data, error, variables, context) {},
   });
-
 
   useEffect(() => {
     if (!marketsQuery.loading && marketsQuery.data) {
@@ -253,17 +260,21 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
         retVal = await (await ipfs.add(JSON.stringify(createServiceForm))).path;
       } else {
-        const deepCopyCreateServiceForm = JSON.parse(JSON.stringify(createServiceForm))
+        const deepCopyCreateServiceForm = JSON.parse(
+          JSON.stringify(createServiceForm)
+        );
 
-       // deepCopyCreateServiceForm.serviceThumbnail = ""
+        // deepCopyCreateServiceForm.serviceThumbnail = ""
         //deepCopyCreateServiceForm.thumbnail = ""
 
-        retVal = await fleek.uploadService(String(accountData.address) + ":" + createServiceForm.serviceTitle, JSON.stringify(deepCopyCreateServiceForm)) //await pinJSONToIPFSPinata(data)
+        retVal = await fleek.uploadService(
+          String(accountData.address) + ":" + createServiceForm.serviceTitle,
+          JSON.stringify(deepCopyCreateServiceForm)
+        ); //await pinJSONToIPFSPinata(data)
       }
 
       setServiceMetadataKey(retVal);
     } catch (error) {
-
       setCreateServiceDialogState({
         ...createServiceDialogState,
         loading: false,
@@ -309,7 +320,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     if (value > 0) {
       setCreateServiceForm({
         ...createServiceForm,
-        [e.target.name]: e.target.value
+        [e.target.name]: e.target.value,
       });
     }
   };
@@ -362,9 +373,8 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const handleOnChangeFile = (e: ChangeEventHandler<HTMLInputElement>) => {
     let reader = new FileReader();
 
-
     reader.onloadend = () => {
-      const buffer: Buffer = Buffer.from(reader.result)
+      const buffer: Buffer = Buffer.from(reader.result);
 
       setSelectedImage(e.target.files[0]);
       setCreateServiceForm({
@@ -427,8 +437,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
       <TabPanel index={0} value={tabValue}>
         <Box width={600} maxWidth={600} pb={2}>
           <Typography color="text.secondary" fontWeight="500" fontSize={14}>
-            Select or search for the appropriate market to deploy your
-            contract.
+            Select or search for the appropriate market to deploy your contract.
           </Typography>
           <Typography variant="caption">
             Can't find a market?{" "}
@@ -437,12 +446,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             </Typography>
           </Typography>
         </Box>
-        <Grid
-          container
-          direction="row"
-          alignItems="center"
-          spacing={3}
-        >
+        <Grid container direction="row" alignItems="center" spacing={3}>
           {marketDetails.map((details) => {
             return (
               <Grid item xs={12} md={6} lg={3}>
@@ -460,12 +464,20 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         </Grid>
       </TabPanel>
       <TabPanel index={1} value={tabValue}>
-        <Box sx={{ width: '75%' }}>
-          <Typography color="text.secondary" fontWeight="500" fontSize={14} pb={2}>
+        <Box sx={{ width: "75%" }}>
+          <Typography
+            color="text.secondary"
+            fontWeight="500"
+            fontSize={14}
+            pb={2}
+          >
             Fill out basic information that will help readers better understand
             the contract.
           </Typography>
-          <Card variant="outlined" sx={{ border: 'none', backgroundColor: '#eee', width: "100%" }}>
+          <Card
+            variant="outlined"
+            sx={{ border: "none", backgroundColor: "#eee", width: "100%" }}
+          >
             <CardContent>
               <Box
                 sx={{
@@ -523,7 +535,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           </Card>
 
           <Card elevation={0} sx={{ mb: 3, width: "100%" }}>
-            <Stack spacing={2} sx={{ bgcolor: '#fafafa' }}>
+            <Stack spacing={2} sx={{ bgcolor: "#fafafa" }}>
               <StyledTextField
                 margin="normal"
                 sx={{ width: "100%" }}
@@ -555,9 +567,13 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
                 <Typography fontWeight="700" fontSize={18} color="text.primary">
                   Add tags
                 </Typography>
-                <Typography color="text.secondary" fontWeight="500" fontSize={14}>
-                  Increase the relevancy of your contract with tags. Try (budget:low,
-                  quick-job)
+                <Typography
+                  color="text.secondary"
+                  fontWeight="500"
+                  fontSize={14}
+                >
+                  Increase the relevancy of your contract with tags. Try
+                  (budget:low, quick-job)
                 </Typography>
                 <Typography
                   variant="caption"
@@ -611,9 +627,14 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
             </Card>
 
             <Box>
-              <Typography pb={2} color="text.secondary" fontWeight="500" fontSize={14}>
-                Fill out basic information that will help readers better understand
-                the contract.
+              <Typography
+                pb={2}
+                color="text.secondary"
+                fontWeight="500"
+                fontSize={14}
+              >
+                Fill out basic information that will help readers better
+                understand the contract.
               </Typography>
               <FormControl>
                 <InputLabel>Beginner Price</InputLabel>
@@ -653,86 +674,63 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
         </Box>
       </TabPanel>
       <TabPanel index={2} value={tabValue}>
-        <Box sx={{ width: '70%' }}>
-          <Card variant='outlined'>
+        <Box sx={{ width: "70%" }}>
+          <Card variant="outlined">
             <CardContent>
               <Box>
-                <SummarySectionTitle>
-                  Service Sumary
-                </SummarySectionTitle>
+                <SummarySectionTitle>Service Sumary</SummarySectionTitle>
                 <Stack sx={{ my: 2 }} spacing={2}>
-                  <Stack direction='row' spacing={1}>
-                    <SummaryKey>
-                      Title:
-                    </SummaryKey>
+                  <Stack direction="row" spacing={1}>
+                    <SummaryKey>Title:</SummaryKey>
                     <SummaryValue>
                       {createServiceForm.serviceTitle}
                     </SummaryValue>
                   </Stack>
-                  <Stack direction='row' spacing={1}>
-                    <SummaryKey>
-                      Description:
-                    </SummaryKey>
+                  <Stack direction="row" spacing={1}>
+                    <SummaryKey>Description:</SummaryKey>
                     <SummaryValue>
                       {createServiceForm.serviceDescription}
                     </SummaryValue>
                   </Stack>
-                  <Stack direction='row' spacing={1}>
-                    <SummaryKey>
-                      Price:
-                    </SummaryKey>
+                  <Stack direction="row" spacing={1}>
+                    <SummaryKey>Price:</SummaryKey>
                     <SummaryValue>
                       {createServiceForm.beginner_offer}
                     </SummaryValue>
                   </Stack>
-                  <Stack direction='row' spacing={1}>
-                    <SummaryKey>
-                      Market:
-                    </SummaryKey>
-                    <SummaryValue>
-                      {selectedMarketId}
-                    </SummaryValue>
+                  <Stack direction="row" spacing={1}>
+                    <SummaryKey>Market:</SummaryKey>
+                    <SummaryValue>{selectedMarketId}</SummaryValue>
                   </Stack>
-                  <Stack direction='row' spacing={1}>
-                    <SummaryKey>
-                      CollectModule:
-                    </SummaryKey>
-                    <SummaryValue>
-                      {FREE_COLLECT_MODULE}
-                    </SummaryValue>
+                  <Stack direction="row" spacing={1}>
+                    <SummaryKey>CollectModule:</SummaryKey>
+                    <SummaryValue>{FREE_COLLECT_MODULE}</SummaryValue>
                   </Stack>
                 </Stack>
               </Box>
               <Box>
-                <SummarySectionTitle>
-                  Fees
-                </SummarySectionTitle>
+                <SummarySectionTitle>Fees</SummarySectionTitle>
                 <Stack spacing={2} sx={{ my: 2 }}>
-                  <Stack direction='row' spacing={1}>
-                    <SummaryKey>
-                      Protocol Fee:
-                    </SummaryKey>
-                    <SummaryValue>
-                      0
-                    </SummaryValue>
+                  <Stack direction="row" spacing={1}>
+                    <SummaryKey>Protocol Fee:</SummaryKey>
+                    <SummaryValue>0</SummaryValue>
                   </Stack>
-                  <Stack direction='row' spacing={1}>
-                    <SummaryKey>
-                      Estimated Profit:
-                    </SummaryKey>
-                    <SummaryValue>
-                      0
-                    </SummaryValue>
+                  <Stack direction="row" spacing={1}>
+                    <SummaryKey>Estimated Profit:</SummaryKey>
+                    <SummaryValue>0</SummaryValue>
                   </Stack>
                 </Stack>
               </Box>
               <Divider />
-              <Typography variant='caption'>
-                Here is a cool caption
-              </Typography>
+              <Typography variant="caption">Here is a cool caption</Typography>
             </CardContent>
             <CardActions>
-              <Stack sx={{ width: '100%' }} direction="row" alignItems="center" justifyContent="flex-end">
+              <Stack
+                sx={{ width: "100%" }}
+                direction="row"
+                alignItems="center"
+                justifyContent="flex-end"
+              >
                 <Button
                   sx={{ mx: 1, width: 120, p: 1 }}
                   variant="contained"
@@ -757,7 +755,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
       <ConfirmationDialog
         open={createServiceDialogState.open}
-        onOpen={() => { }}
+        onOpen={() => {}}
         onClose={onCloseCreateServiceDialog}
         primaryAction={handleOnPublish}
         primaryActionTitle="Publish"

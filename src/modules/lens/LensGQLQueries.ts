@@ -1,12 +1,14 @@
 import { gql } from "@apollo/client";
-import { ethers } from "ethers";
+import { ethers, TypedDataDomain } from "ethers";
 import { StringValueNode } from "graphql";
 import { LensHubInterface } from "../../abis";
 import { lens_client } from "../../apollo";
 import { LENS_HUB_PROXY } from "../../constant";
 import fleek from "../../fleek";
-import { HasTxHashBeenIndexedDocument, HasTxHashBeenIndexedRequest, ProfileDocument, PublicationMainFocus, SingleProfileQueryRequest } from "./LensTypes";
+import { CreatePostTypedDataDocument, CreatePublicPostRequest, HasTxHashBeenIndexedDocument, HasTxHashBeenIndexedRequest, ProfileDocument, PublicationMainFocus, SingleProfileQueryRequest } from "./LensTypes";
 import { v4 as uuidv4 } from 'uuid';
+import omitDeep from 'omit-deep';
+import { login } from "./LensAPIAuthentication";
 
 export const getLensFollowingStateByAddressQuery = (address: string) => {
   return gql`
@@ -570,7 +572,7 @@ export const getLensProfileById = async (profileId: String, request?: SingleProf
 };
 
 export const createPostTypedData = async (request: CreatePublicPostRequest) => {
-  const result = await apolloClient.mutate({
+  const result = await lens_client.mutate({
     mutation: CreatePostTypedDataDocument,
     variables: {
       request,
@@ -580,23 +582,41 @@ export const createPostTypedData = async (request: CreatePublicPostRequest) => {
   return result.data!.createPostTypedData;
 };
 
-/*export const signCreatePostTypedData = async (request: CreatePublicPostRequest) => {
+export const omit = (object: any, name: string) => {
+  return omitDeep(object, name);
+};
+
+export const signedTypeData = (
+  signer,
+  domain: TypedDataDomain,
+  types: Record<string, any>,
+  value: Record<string, any>
+) => {
+  
+  // remove the __typedname from the signature!
+  return signer._signTypedData(
+    omit(domain, '__typename'),
+    omit(types, '__typename'),
+    omit(value, '__typename')
+  );
+};
+
+export const signCreatePostTypedData = async (signer: any, request: CreatePublicPostRequest) => {
   const result = await createPostTypedData(request);
   console.log('create post: createPostTypedData', result);
 
   const typedData = result.typedData;
   console.log('create post: typedData', typedData);
 
-  const signature = await signedTypeData(typedData.domain, typedData.types, typedData.value);
+  const signature = await signedTypeData(signer, typedData.domain, typedData.types, typedData.value);
   console.log('create post: signature', signature);
 
   return { result, signature };
-};*/
+};
 
 
-export const createPost = async (identifier: string, address: string, profileId: number, signature: any, signer: any) => {
-
-  const ipfsPath = fleek.uploadPostMetadata(identifier, {
+export const createPost = async (identifier: string, profileId: number, signer: any) => {
+  const { publicUrl } : any = await fleek.uploadPostMetadata(identifier, JSON.stringify({
     version: '2.0.0',
     mainContentFocus: PublicationMainFocus.TextOnly,
     metadata_id: uuidv4(),
@@ -610,12 +630,13 @@ export const createPost = async (identifier: string, address: string, profileId:
     attributes: [],
     tags: ['using_api_examples'],
     appId: 'api_examples_github',
-  })
+  }))
+
 
   // hard coded to make the code example clear
   const createPostRequest = {
-    profileId,
-    contentURI: ipfsPath, //'ipfs://' + ipfsResult.path,
+    profileId: `0x${Math.abs(Number(profileId)).toString(16)}`,
+    contentURI: publicUrl, //'ipfs://' + ipfsResult.path,
     collectModule: {
       freeCollectModule: { followerOnly: true },
     },
@@ -624,9 +645,9 @@ export const createPost = async (identifier: string, address: string, profileId:
     },
   };
 
-  const signedResult = await createPostTypedData(createPostRequest);
+  const signedResult = await signCreatePostTypedData(signer, createPostRequest);
 
-  const typedData = signedResult.result.typedData;
+  const typedData = signedResult?.result.typedData;
 
   const { v, r, s } = ethers.utils.splitSignature(signedResult.signature);
 

@@ -5,6 +5,7 @@ import React, {
   useRef,
   ChangeEvent,
   MutableRefObject,
+  KeyboardEventHandler,
 } from "react";
 import {
   Dialog,
@@ -30,11 +31,10 @@ import {
   Checkbox,
   Divider,
   LinearProgress,
+  InputBase,
+  Paper,
 } from "@mui/material";
-import {
-  useContractRead,
-  useContractWrite,
-} from "wagmi";
+import { useContractRead, useContractWrite } from "wagmi";
 import {
   FREE_FOLLOW_MODULE,
   LENS_HUB_PROXY,
@@ -90,12 +90,15 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
   const dispatch: Dispatch<AnyAction> = useDispatch();
   const [page, setPage] = useState<number>(0);
   const [updatedPtr, setUpdatedPtr] = useState<string>("");
-  const [registrationButtonEnabled, setRegistrationButtonEnabled] = useState<boolean>(false)
+  const [registrationButtonEnabled, setRegistrationButtonEnabled] =
+    useState<boolean>(false);
+  const [currentSkill, setCurrentSKill] = useState<string>("");
   const [metadataState, setMetadataState] = useState<object>({
+    display_name: "",
     description: "",
     skills: [],
     languages: [],
-    show_freelancer_stats: 0
+    show_freelancer_stats: 0,
   });
 
   const networkManager_getLensProfileIdFromAddress = useContractRead({
@@ -109,10 +112,16 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     onSuccess: (data: Result) => {
       setLensProfileId(hexToDecimal(data._hex));
     },
-    onError: (error) => { },
+    onError: (error) => {},
   });
 
-  const { write, isError, error, data: registerData, isSuccess } = useContractWrite({
+  const {
+    write,
+    isError,
+    error,
+    data: registerData,
+    isSuccess,
+  } = useContractWrite({
     mode: "recklesslyUnprepared",
     addressOrName: NETWORK_MANAGER_ADDRESS,
     enabled: false,
@@ -120,13 +129,14 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     functionName: "register",
     args: [
       {
-        to: NETWORK_MANAGER_ADDRESS,
+        to: userAddress,
         handle: chosenLensHandle,
         imageURI:
           "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
         followModule: ZERO_ADDRESS,
         followModuleInitData: [],
-        followNFTURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+        followNFTURI:
+          "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
       },
       updatedPtr,
     ],
@@ -135,40 +145,45 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
       gasPrice: 90000000000,
     },
     onSuccess: (data) => {
-
-      data.wait()
+      data
+        .wait()
         .then((data) => {
           if (data?.status > 0) {
             networkManager_getLensProfileIdFromAddress
               .refetch()
               .then(async (value) => {
-                const profile = await getLensProfileById(`0x${Math.abs(Number(data._hex)).toString(16)}`)
+                const profile = await getLensProfileById(
+                  `0x${Math.abs(Number(data._hex)).toString(16)}`
+                );
 
-                dispatch(userLensDataStored({
-                  profileId: data?._hex,
-                  profile,
-                  error: null
-                }))
+                dispatch(
+                  userLensDataStored({
+                    profileId: data?._hex,
+                    profile,
+                    error: null,
+                  })
+                );
               })
               .catch((error: Error) => {
-                dispatch(userLensDataStored({
-                  profileId: 0,
-                  profile: null,
-                  error: error.message
-                }))
-              })
+                dispatch(
+                  userLensDataStored({
+                    profileId: 0,
+                    profile: null,
+                    error: error.message,
+                  })
+                );
+              });
 
             handleClose();
           } else {
-            setChosenHandleErrorText('Sorry. Something went wrong');
+            setChosenHandleErrorText("Sorry. Something went wrong");
           }
 
           setRegistrationLoading(false);
-
         })
         .catch((error) => {
           setChosenHandleErrorText(error.message);
-        })
+        });
     },
     onError(error: Error) {
       if (String(error).includes("Taken")) {
@@ -193,8 +208,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
 
         retVal = await (await ipfs.add(JSON.stringify(metadataState))).path;
       } else {
-
-        const deepCopyMetadataState = JSON.parse(JSON.stringify(metadataState))
+        const deepCopyMetadataState = JSON.parse(JSON.stringify(metadataState));
 
         retVal = await fleek.uploadUser(
           "metadata_" + String(userAddress),
@@ -202,38 +216,42 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
         );
       }
 
-      if (!retVal) throw new Error('Error saving metadata.')
+      if (!retVal) throw new Error("Error saving metadata.");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-    setUpdatedPtr(retVal)
+    setUpdatedPtr(retVal);
 
     write({
       recklesslySetUnpreparedOverrides: {
-
         gasLimit: ethers.BigNumber.from("9000000"),
         gasPrice: 90000000000,
-
       },
       recklesslySetUnpreparedArgs: [
         {
-          to: NETWORK_MANAGER_ADDRESS,
+          to: userAddress,
           handle: chosenLensHandle,
           imageURI:
             "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
           followModule: ZERO_ADDRESS,
           followModuleInitData: [],
-          followNFTURI: "https://ipfs.io/ipfs/Qme7ss3ARVgxv6rXqVPiikMJ8u2NLgmgszg13pYrDKEoiu",
+          followNFTURI: "",
         },
         retVal,
-      ]
-    })
-  }
+      ],
+    });
+  };
 
   const handleOnChangeTextField = (e: ChangeEvent<HTMLInputElement>) => {
     switch (e.target.id) {
       case "register-lens-handle-text-field":
         setChosenLensHandle(e.target.value);
+        break;
+      case "register-display-name-text-field":
+        setMetadataState({
+          ...metadataState,
+          display_name: e.target.value,
+        });
         break;
       case "settings-form-about-you":
         setMetadataState({
@@ -258,6 +276,7 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
   const tagRef: MutableRefObject<any> = useRef();
 
   const handleOnSubmitSkill = (e) => {
+    console.log("DSSFSD");
     e.preventDefault();
     setMetadataState({
       ...metadataState,
@@ -270,7 +289,17 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
   const handleOnChangeDisplayFreelancer = (e) => {
     setMetadataState({
       ...metadataState,
-      display_freelancer_stats: e.target.checked == true ? 1 : 0
+      display_freelancer_stats: e.target.checked == true ? 1 : 0,
+    });
+  };
+
+  const handleOnDeleteTag = (idx: number) => {
+    const updatedTags = metadataState?.skills;
+    updatedTags.splice(idx, 1);
+
+    setMetadataState({
+      ...metadataState,
+      skills: updatedTags,
     });
   };
 
@@ -278,29 +307,22 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
     <Dialog
       fullWidth
       maxWidth="sm"
-      sx={{ height: '100vh' }}
+      sx={{ height: "100vh" }}
       open={open}
       onClose={(event, reason) => handleClose(event, reason)}
     >
       {registrationLoading ? <LinearProgress variant="indeterminate" /> : null}
-      <DialogContent
-        sx={{ height: 'fit-content', overflow: 'visible', display: "flex", flexDirection: "column", alignItems: "center" }}
-      >
-        <Avatar
-          src="/assets/images/writing.jpeg"
-          style={{ margin: "10px 0px", width: 100, height: 100 }}
-        />
-        <DialogTitle
-          sx={{ paddingTop: "0px !important", marginTop: "0px !important" }}
-        >
-          <Typography>Become a verified freelancer on Lens Talent</Typography>
-        </DialogTitle>
 
-        <DialogContentText textAlign="center" fontWeight="bold" maxWidth={400}>
-          Prioritize work based on customer needs and build a tighter feedback
-          loop with your customers
+      <Box p={2}>
+        <Typography textAlign="flex-start" fontSize={24} fontWeight="bold">
+          Access all the world work from one platform
+        </Typography>
+
+        <DialogContentText paragraph fontWeight="400" color="text.secondary">
+          Takes less than 5 minutes to fill out the information below for
+          immediate access.
         </DialogContentText>
-      </DialogContent>
+      </Box>
 
       <Divider />
       <>
@@ -312,23 +334,29 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
             flexDirection: "column",
           }}
         >
-
           <Box sx={{ width: "100%" }}>
-            <Stack spacing={4}>
+            <Stack spacing={4} sx={{ width: "100%" }}>
+              <FormControl>
+                <TextField
+                  disabled={registrationLoading}
+                  value={metadataState.display_name}
+                  placeholder="Select a display name"
+                  id="register-display-name-text-field"
+                  onChange={handleOnChangeTextField}
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                />
+                <FormHelperText>
+                  {"Share your name with the world"}
+                </FormHelperText>
+              </FormControl>
 
-              <FormControl
-                sx={{
-                  marginBottom: 3,
-                  marginTop: 3,
-
-                  display: "flex",
-                  alignItems: "center",
-                  alignSelf: "center",
-                }}
-              >
+              <FormControl>
                 <TextField
                   disabled={registrationLoading}
                   value={chosenLensHandle}
+                  placeholder="Select a Lens handle"
                   id="register-lens-handle-text-field"
                   onChange={handleOnChangeTextField}
                   size="small"
@@ -343,10 +371,10 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
               </FormControl>
 
               <FormControl variant="standard">
-                <InputLabel shrink htmlFor="settings-form-about-you">
-                  About You
-                </InputLabel>
-                <BootstrapInput
+                <TextField
+                  multiline
+                  rows={5}
+                  placeholder="About you"
                   disabled={registrationLoading}
                   onChange={handleOnChangeTextField}
                   size="small"
@@ -354,38 +382,46 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
                 />
               </FormControl>
 
-              <FormControl
-                component="form"
-                onSubmit={handleOnSubmitSkill}
-                variant="standard"
-              >
-                <InputLabel shrink htmlFor="settings-skills">
-                  Skills
-                </InputLabel>
+              <FormControl variant="outlined">
                 <TextField
                   disabled={registrationLoading}
                   size="small"
+                  label="Skills"
                   id="settings-skills"
                   inputRef={tagRef}
                   fullWidth
-                  variant="standard"
-                  sx={{ margin: "1rem 0" }}
+                  variant="outlined"
+                  onKeyPress={(e) =>
+                    e.code == "Space" ? handleOnSubmitSkill(e) : null
+                  }
                   margin="none"
                   placeholder={
                     metadataState.skills.length < 5 ? "Enter tags" : ""
                   }
                   InputProps={{
                     startAdornment: (
-                      <Box sx={{ margin: "0 0.2rem 0 0", display: "flex" }}>
-                        {metadataState.skills.map((data, index) => {
-                          return <Tag data={data} key={index} />;
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={1}
+                        sx={{ margin: "0 0.2rem 0 0", display: "flex" }}
+                      >
+                        {metadataState.skills.map((data, idx) => {
+                          return (
+                            <Chip
+                              key={data}
+                              label={data}
+                              size="small"
+                              onDelete={() => handleOnDeleteTag(idx)}
+                            />
+                          );
                         })}
-                      </Box>
+                      </Stack>
                     ),
                   }}
                 />
                 <FormHelperText>
-                  Enter skills separated by commas
+                  Enter skills separated by a space
                 </FormHelperText>
               </FormControl>
 
@@ -439,12 +475,15 @@ const VerificationDialog: FC<IVerificationDialogProps> = ({
           </Box>
         </DialogContent>
         <DialogActions>
-
           <Button disabled={registrationLoading} onClick={() => setPage(0)}>
-            Back
+            Cancel
           </Button>
 
-          <Button disabled={registrationLoading} onClick={handleOnVerify} >
+          <Button
+            variant="contained"
+            disabled={registrationLoading}
+            onClick={handleOnVerify}
+          >
             Verify on LensTalent
           </Button>
         </DialogActions>

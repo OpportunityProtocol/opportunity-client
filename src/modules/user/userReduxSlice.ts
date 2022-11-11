@@ -17,7 +17,14 @@ interface ERC20Balance {
     [address:string]: number
 }
 
+interface ILensProfileUser {
+    handle: string;
+            imageURI: string;
+            metadataPtr: string;
+}
+
 interface ILensProfile {
+    user: ILensProfileUser;
     profileId: 0;
     profile: any;
     error: String;
@@ -31,6 +38,11 @@ const initialState: UserReducerState = {
     account: null,
     metadataUri: '',
     lensProfile: {
+        user: {
+            handle: "",
+            imageURI: "",
+            metadataPtr: "",
+        },
         profileId: 0,
         profile: null,
         error: null
@@ -67,5 +79,6 @@ export const selectUserAddress = (state: RootState) => state.user.address
 export const selectUserConnector = (state: RootState) => state.user.connector
 export const selectUserConnectionStatus = (state: RootState) => state.user.connection
 export const selectUserAccountData = (state: RootState) => state.user.account
+export const selectUser = (state: RootState) => state.user;
 export const { userWalletDataStored, userWalletDataCleared, userERC20BalanceChanged, userLensDataStored,  } = userSlice.actions
 export default userSlice.reducer

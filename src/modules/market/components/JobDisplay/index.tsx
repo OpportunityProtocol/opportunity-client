@@ -34,7 +34,7 @@ import fleek from "../../../../fleek";
 interface IJobDisplayProps {
   data: any;
   table?: boolean;
-  showStatus: boolean;
+  showStatus?: boolean;
 }
 
 const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatus = false }) => {

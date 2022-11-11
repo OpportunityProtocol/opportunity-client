@@ -8,4 +8,10 @@ const MARKET_ID_MAPPING = {
     2: "Software Development"
 }
 
-export { MARKET_DESCRIPTION_MAPPING, MARKET_ID_MAPPING } 
+const MARKET_ASSETS_MAPPING = {
+    "Writing and Translation": {
+        "image": "writing_and_translation.jpeg"
+    }
+}
+
+export { MARKET_DESCRIPTION_MAPPING, MARKET_ID_MAPPING, MARKET_ASSETS_MAPPING } 

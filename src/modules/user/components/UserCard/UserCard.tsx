@@ -1,5 +1,5 @@
 import { QueryResult, useQuery } from "@apollo/client";
-import { Check, CommentOutlined, MoreHorizOutlined, PostAddOutlined } from "@mui/icons-material";
+import { Check, CommentOutlined, MoreHorizOutlined, MoreVert, PostAddOutlined } from "@mui/icons-material";
 import {
   Box,
   Typography,
@@ -161,7 +161,9 @@ const UserCard: FC = ({ freelancer }) => {
             </Box>
           </Stack>
 
-          <Chip size='small' sx={{ color: (theme) => theme.palette.primary.main, fontWeight: '700', fontSize: 10, bgcolor: '#eee' }} label='Member (9 years)' />
+          <IconButton size="small" sx={{ bgcolor: '#F5F5F5', border: '1px solid #eee' }}>
+            <MoreVert fontSize='small' />
+          </IconButton>
         </Stack>
         <Box>
           {

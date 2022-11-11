@@ -8,7 +8,8 @@ import {
   Tabs,
   Typography,
   IconButton,
-  Stack
+  Stack,
+  Chip
 } from '@mui/material'
 import { NextRouter, useRouter } from 'next/router';
 import JobDisplay from '../../../modules/market/components/JobDisplay';
@@ -21,56 +22,85 @@ import { Refresh } from '@mui/icons-material';
 import { NextPage } from 'next';
 import { GET_MARKET_DETAILS_BY_ID } from '../../../modules/market/MarketGQLQueries';
 import fleek from '../../../fleek';
+import SearchBarV1 from '../../../common/components/SearchBarV1/SearchBarV1';
+import { MARKET_DESCRIPTION_MAPPING } from '../../../constant';
 
 const Market: NextPage = () => {
   const router: NextRouter = useRouter()
   const [pageLoading, setPageLoading] = useState<boolean>(false)
+  const [searchQuery, setSearchQuery] = useState<string>("")
   const [tabValue, setTabValue] = useState<number>(0);
   const [marketDetails, setMarketDetails] = useState<any>({})
+  const [cachedContracts, setCachedContracts] = useState<Array<any>>([])
+  const [cachedServices, setCachedServices] = useState<Array<any>>([])
   const [displayedServices, setDisplayedServices] = useState<Array<any>>([])
   const [displayedContracts, setDisplayedContracts] = useState<Array<any>>([])
-  const { id } = router.query;
+  const { id, routedSearchQuery } = router.query;
+
 
   const marketDetailsQuery: QueryResult = useQuery(GET_MARKET_DETAILS_BY_ID, {
     variables: {
-      id: 1
+      marketId: 1
     },
     onError(error) {
       alert(error)
     },
   })
 
+
+
   const contractsQuery: QueryResult = useQuery(GET_CONTRACTS_BY_MARKET_ID, {
     variables: {
       id: 1,
-      marketId: String(id)
-    },
-    errorPolicy: 'all',
-    onError(error) {
-      alert(error)
-    },
+      marketId: 1
+    }
   })
 
   const servicesQuery: QueryResult = useQuery(GET_SERVICES_BY_MARKET_ID, {
 
     variables: {
       id: 1
-    },
-    errorPolicy: 'all',
-    onError(error) {
-      alert(error)
-    },
+    }
   })
 
   useEffect(() => {
+    if (routedSearchQuery) {
+      handleOnSearch({ target: { value: routedSearchQuery }})
+    }
+  }, [routedSearchQuery])
+
+  const handleOnSearch = (e: any) => {
+    setSearchQuery(e.target.value)
+
+    if (routedSearchQuery) {
+
+    }
+
+    if (e.target.value === "") {
+      setDisplayedContracts(cachedContracts)
+      setDisplayedServices(cachedServices)
+    }
+    
+    const filteredContracts = cachedContracts.filter((contract) => String(contract.contract_title).includes(e.target.value))
+    const filteredServices = cachedServices.filter((service) => String(service.serviceTitle).includes(e.target.value))
+
+    setDisplayedContracts(filteredContracts)
+    setDisplayedServices(filteredServices)
+  }
+
+  useEffect(() => {
+    console.log({ marketDetailsQuery })
     loadMarketData()
   }, [id])
 
   const loadMarketData = async () => { 
     if (id) {
-      console.log({ id })
+ 
       setPageLoading(true)
-      await marketDetailsQuery.refetch().then((res) => setMarketDetails(marketDetailsQuery.data?.markets[0]))
+
+      await marketDetailsQuery.refetch().then((res) => { 
+        setMarketDetails(res.data?.markets[0]) 
+      }).catch(err => console.log(err))
       await contractsQuery.refetch().then((res) => loadContracts() ).catch(error => console.log(error))
       await servicesQuery.refetch().then((res) => loadServices()).catch(error => console.log(error))
       setPageLoading(false)
@@ -96,6 +126,7 @@ const Market: NextPage = () => {
         })
 
         setDisplayedContracts(displayedContractsData)
+        setCachedContracts(displayedContractsData)
       })
     }
   }
@@ -121,6 +152,7 @@ const Market: NextPage = () => {
   }
 
   setDisplayedServices(displayedServicesData)
+  setCachedServices(displayedServicesData)
   }
 
   const handleOnChangeTab = (event: React.SyntheticEvent, newValue: number) => {
@@ -130,15 +162,26 @@ const Market: NextPage = () => {
   return (
     <Container maxWidth='xl'>
       <Box sx={{ width: "100%" }}>
-        <Stack mb={5} direction='row' sx={{ width: '100%' }} display='flex' alignItems='center' justifyContent='space-between'>
-          <Typography
+
+<Box>
+<Typography
             fontWeight="bold"
             fontSize={24}
             color="rgba(33, 33, 33, .85)"
           >
             {marketDetails?.name}
           </Typography>
-        </Stack>
+          <Typography paragraph>
+            {MARKET_DESCRIPTION_MAPPING[marketDetails?.name]}
+          </Typography>
+          <Stack spacing={3} direction='row' alignItems='center'>
+            <Chip size='small' label='Volume: $2923.23' />
+            <Chip size='small' label='Liquidty: $2923.23' />
+          </Stack>
+       
+</Box>
+        
+  
 
         <Box sx={{ width: "100%", mt: 1, mb: 3 }}>
           <Box display='flex' alignItems='center' justifyContent='space-between'>
@@ -152,6 +195,7 @@ const Market: NextPage = () => {
               <Tab value={1} label="Services" />
             </Tabs>
             <Stack direction='row' alignItems='center' spacing={1}>
+              <SearchBarV1 onChange={handleOnSearch} value={searchQuery} placeholder={tabValue === 0 ? 'Search contracts' : 'Search services'} />
               <IconButton size='small' onClick={loadMarketData}>
                 <Refresh fontSize='small' />
               </IconButton>
@@ -161,11 +205,11 @@ const Market: NextPage = () => {
         <TabPanel index={0} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
-              {displayedContracts.filter((item) => item.ownership == 0).map((contract: any, idx: number) => {
+              {displayedContracts.filter((item) => item.ownership == 0).length === 0 ? <Box><Typography>No results with the search query "{searchQuery}"</Typography></Box> : displayedContracts.filter((item) => item.ownership == 0).map((contract: any, idx: number) => {
                 return (
                   <Grid item xs={4}>
-                <JobDisplay id={Number(contract.id)} data={contract} />
-                </Grid>
+                    <JobDisplay id={Number(contract.id)} data={contract} />
+                  </Grid>
                 )
               })}
             </Grid>
@@ -174,7 +218,7 @@ const Market: NextPage = () => {
         <TabPanel index={1} value={tabValue}>
           <Box>
             <Grid container direction="row" alignItems="center" spacing={2}>
-              {displayedServices.map((service: any, idx: number) => (
+              {displayedServices.filter((service) => service.serviceTitle.toLowerCase().includes(searchQuery) || service.serviceTags.includes(searchQuery))?.length === 0 ? <Box><Typography>No results with the search query "{searchQuery}"</Typography></Box> : displayedServices.filter((service) => service.serviceTitle.toLowerCase().includes(searchQuery) || service.serviceTags.includes(searchQuery)).map((service: any, idx: number) => (
                 <Grid item xs={4}>
                 <ServiceCard
                   purchase={false}

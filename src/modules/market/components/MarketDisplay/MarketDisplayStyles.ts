@@ -6,7 +6,8 @@ const useStyles = makeStyles((theme) => {
       fontWeight: 'bold',
     },
     primaryContentContainer: {
-
+      display: 'flex',
+      alignItems: 'flex-start'
     }
   }
 })

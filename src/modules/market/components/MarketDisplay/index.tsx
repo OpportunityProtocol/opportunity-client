@@ -1,10 +1,20 @@
 import { useState, FC, useEffect, memo } from "react";
 import { useStyles } from "./MarketDisplayStyles";
 
-import { Typography, CardContent, Grid, Divider, alpha, Card, CardActions, CardActionArea, Button } from "@mui/material";
+import {
+  Typography,
+  CardContent,
+  Grid,
+  Divider,
+  alpha,
+  Card,
+  CardActions,
+  CardActionArea,
+  Button,
+} from "@mui/material";
 import ClickableCard from "../../../../common/components/ClickableCard/ClickableCard";
 import { NextRouter, useRouter } from "next/router";
-
+import Image from "next/image";
 import {
   MARKET_DESCRIPTION_MAPPING,
   TOKEN_FACTORY_ADDRESS,
@@ -33,8 +43,7 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
   onSelect,
   marketDetails,
 }) => {
-  const classes =
-    useStyles();
+  const classes = useStyles();
   const router: NextRouter = useRouter();
 
   const handleOnSelect = (): void => {
@@ -45,19 +54,34 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
   };
 
   return (
-      <Card
-      variant='elevation'
-        sx={{
-          boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;',
-          cursor: 'pointer',
-          border: (theme) =>
-            selected
-              ? `2px solid ${theme.palette.primary.main}`
-              : `1px solid #ddd`,
-        }}
-        onClick={selectable ? () => handleOnSelect() : () => router.push(`/view/market/${marketDetails?.id}`)}
-      >
-        <CardContent className={classes.primaryContentContainer}>
+    <Card
+      variant="elevation"
+      sx={{
+        boxShadow:
+          "rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;",
+        cursor: "pointer",
+        border: (theme) =>
+          selected
+            ? `2px solid ${theme.palette.primary.main}`
+            : `1px solid #ddd`,
+      }}
+      onClick={
+        selectable
+          ? () => handleOnSelect()
+          : () => router.push(`/view/market/${marketDetails?.id}`)
+      }
+    >
+      <CardContent className={classes.primaryContentContainer}>
+        <Box style={{ width: 100, height: 60, borderRadius: 2 }}>
+          <img
+            src="/assets/images/writing_and_translation.jpeg"
+            style={{ borderRadius: 2 }}
+            width="100%"
+            height="100%"
+          />
+        </Box>
+
+        <Box px={2}>
           <Grid
             container
             direction="row"
@@ -83,11 +107,11 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
           </Grid>
           {showDescription && (
             <Typography
-            variant='body2'
+              variant="body2"
               sx={{
                 height: 75,
                 py: 1,
-              //  fontSize: small ? 10 : 13,
+                //  fontSize: small ? 10 : 13,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 display: "-webkit-box",
@@ -99,10 +123,9 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
               {MARKET_DESCRIPTION_MAPPING[marketDetails?.name]}
             </Typography>
           )}
-
-        </CardContent>
-      </Card>
- 
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
 

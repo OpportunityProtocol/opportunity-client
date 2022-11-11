@@ -20,7 +20,7 @@ import {
   Grid,
 } from "@mui/material";
 
-import { withStyles } from '@mui/styles'
+import { withStyles } from "@mui/styles";
 import ServiceCard from "../modules/contract/components/ServiceCard/ServiceCard";
 
 import { NextPage } from "next";
@@ -42,35 +42,42 @@ import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
 import JobDisplay from "../modules/market/components/JobDisplay";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../modules/user/userReduxSlice";
-import { KeyboardArrowDown, Refresh, TableRows, ViewModule } from "@mui/icons-material";
-import SearchBar from "../common/components/SearchBar/SearchBar";
+import {
+  KeyboardArrowDown,
+  Refresh,
+  TableRows,
+  ViewModule,
+} from "@mui/icons-material";
 import fleek from "../fleek";
 
 enum Persona {
   CATALOG,
   WORKING,
-  HIRING
+  HIRING,
 }
 
 enum ContractsViewingPersona {
   CONTRACTS,
-  SERVICES
+  SERVICES,
 }
 
 const ExplorePage: NextPage = () => {
   const [state, setState] = useState({
     persona: Persona.WORKING,
     workingJobs: [],
-    hiringJobs: []
+    hiringJobs: [],
   });
 
-  const [contractWorking, setContractsWorking] = useState<Array<any>>([])
-  const [servicesWorking, setServicesWorking] = useState<Array<any>>([])
-  const [contractsHiring, setContractsHiring] = useState<Array<any>>([])
-  const [servicesHired, setServicesHired] = useState<Array<any>>([])
-  const [createdServices, setCreatedServices] = useState<Array<any>>([])
-  const [contractViewPersona, setContractViewPersona] = useState<any>(ContractsViewingPersona.CONTRACTS)
-  const userAddress = useSelector(selectUserAddress)
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [contractWorking, setContractsWorking] = useState<Array<any>>([]);
+  const [servicesWorking, setServicesWorking] = useState<Array<any>>([]);
+  const [contractsHiring, setContractsHiring] = useState<Array<any>>([]);
+  const [servicesHired, setServicesHired] = useState<Array<any>>([]);
+  const [createdServices, setCreatedServices] = useState<Array<any>>([]);
+  const [contractViewPersona, setContractViewPersona] = useState<any>(
+    ContractsViewingPersona.CONTRACTS
+  );
+  const userAddress = useSelector(selectUserAddress);
 
   const servicesByCreatorQuery: QueryResult = useQuery(
     GET_SERVICES_BY_CREATOR,
@@ -133,26 +140,25 @@ const ExplorePage: NextPage = () => {
     switch (state.persona) {
       case Persona.WORKING:
         if (contractViewPersona == ContractsViewingPersona.CONTRACTS) {
-          workingContractsQuery.refetch()
+          workingContractsQuery.refetch();
         } else {
-          activeServicesByCreatorQuery.refetch()
+          activeServicesByCreatorQuery.refetch();
         }
         break;
       case Persona.HIRING:
         if (contractViewPersona == ContractsViewingPersona.CONTRACTS) {
-          contractsCreatedByEmployerQuery.refetch()
+          contractsCreatedByEmployerQuery.refetch();
         } else {
-          purchasedServicesByClientQuery.refetch()
+          purchasedServicesByClientQuery.refetch();
         }
         break;
       default:
     }
-  }
-
+  };
 
   useEffect(() => {
-    onChangePersona()
-  }, [state.persona])
+    onChangePersona();
+  }, [state.persona]);
 
   //working
   useEffect(() => {
@@ -180,47 +186,54 @@ const ExplorePage: NextPage = () => {
                   .serviceId,
             })
             .then(async (serviceData) => {
-              const serviceMetadata = await fleek.getService(String(serviceData.data.service?.metadataPtr).slice(13))
+              const serviceMetadata = await fleek.getService(
+                String(serviceData.data.service?.metadataPtr).slice(13)
+              );
 
               activeServices[i] = {
                 ...activeServices[i],
                 serviceData: {
                   ...serviceData.data.service,
-                  ...serviceMetadata
-                }
+                  ...serviceMetadata,
+                },
               };
             });
         }
 
-        setServicesWorking([...activeServices])
-
+        setServicesWorking([...activeServices]);
       }
     }
 
     syncActiveServices();
-  }, [activeServicesByCreatorQuery.loading,]);
+  }, [activeServicesByCreatorQuery.loading]);
+
+  useEffect(() => {
+    console.log(searchQuery);
+  }, [searchQuery]);
 
   useEffect(() => {
     async function loadWorkingContracts() {
       if (!workingContractsQuery.loading && workingContractsQuery.data) {
-        const contracts = workingContractsQuery.data.contracts
+        const contracts = workingContractsQuery.data.contracts;
 
-        let contractMetadata = {}
-        let displayedContractsData = []
+        let contractMetadata = {};
+        let displayedContractsData = [];
         await contracts.forEach(async (contract) => {
-          contractMetadata = await fleek.getContract(String(contract?.metadata).slice(13))
+          contractMetadata = await fleek.getContract(
+            String(contract?.metadata).slice(13)
+          );
           displayedContractsData.push({
             ...contract,
-            ...contractMetadata
-          })
+            ...contractMetadata,
+          });
 
-          setContractsWorking(displayedContractsData)
-        })
+          setContractsWorking(displayedContractsData);
+        });
       }
     }
 
-    loadWorkingContracts()
-  }, [workingContractsQuery.loading])
+    loadWorkingContracts();
+  }, [workingContractsQuery.loading]);
 
   //hiring
   useEffect(() => {
@@ -249,11 +262,16 @@ const ExplorePage: NextPage = () => {
                   .serviceId,
             })
             .then(async (serviceData) => {
-              const serviceMetadata = await fleek.getService(String(serviceData.data.service?.metadataPtr).slice(13))
+              const serviceMetadata = await fleek.getService(
+                String(serviceData.data.service?.metadataPtr).slice(13)
+              );
 
               purchasedServices[i] = {
                 ...purchasedServices[i],
-                serviceData: { ...serviceData.data.service, ...serviceMetadata }
+                serviceData: {
+                  ...serviceData.data.service,
+                  ...serviceMetadata,
+                },
               };
             });
         }
@@ -271,154 +289,261 @@ const ExplorePage: NextPage = () => {
       contractsCreatedByEmployerQuery.data
     ) {
       async function loadContractsHiring() {
-        const contracts = contractsCreatedByEmployerQuery.data.contracts
+        const contracts = contractsCreatedByEmployerQuery.data.contracts;
 
-        let contractMetadata = {}
-        let displayedContractsData = []
+        let contractMetadata = {};
+        let displayedContractsData = [];
         await contracts.forEach(async (contract) => {
-          contractMetadata = await fleek.getContract(String(contract?.metadata).slice(13))
+          contractMetadata = await fleek.getContract(
+            String(contract?.metadata).slice(13)
+          );
           displayedContractsData.push({
             ...contract,
-            ...contractMetadata
-          })
+            ...contractMetadata,
+          });
 
-          console.log({ displayedContractsData })
+          console.log({ displayedContractsData });
 
-          setContractsHiring(displayedContractsData)
-        })
+          setContractsHiring(displayedContractsData);
+        });
       }
 
-      loadContractsHiring()
-
+      loadContractsHiring();
     }
-  }, [contractsCreatedByEmployerQuery.loading])
+  }, [contractsCreatedByEmployerQuery.loading]);
 
   useEffect(() => {
-    if (
-      !servicesByCreatorQuery.loading &&
-      servicesByCreatorQuery.data
-    ) {
+    if (!servicesByCreatorQuery.loading && servicesByCreatorQuery.data) {
       async function loadCreatedServices() {
-        const services = servicesByCreatorQuery.data.services
+        const services = servicesByCreatorQuery.data.services;
 
-        let serviceMetadata = {}
-        let displayedServicesData = []
-        let creatorLensProfile = {}
+        let serviceMetadata = {};
+        let displayedServicesData = [];
+        let creatorLensProfile = {};
 
         await services.forEach(async (service) => {
           //fetch metadata
-          serviceMetadata = await fleek.getService(String(service?.metadataPtr).slice(13))
+          serviceMetadata = await fleek.getService(
+            String(service?.metadataPtr).slice(13)
+          );
 
           displayedServicesData.push({
             ...service,
             ...serviceMetadata,
-          })
+          });
 
-          setCreatedServices(displayedServicesData)
-        })
+          setCreatedServices(displayedServicesData);
+        });
       }
 
-      loadCreatedServices()
+      loadCreatedServices();
     }
-  }, [servicesByCreatorQuery.loading])
+  }, [servicesByCreatorQuery.loading]);
 
   const renderContracts = () => {
-
     switch (state.persona) {
       case Persona.HIRING:
-        return contractsHiring?.length > 0 ? contractsHiring.map((item) => {
-          console.log(item)
-          return (
-            <Grid item xs={4}>
-              <JobDisplay data={item} />
-            </Grid>
+        return contractsHiring?.length > 0 ? (
+          searchQuery !== "" ? (
+            contractsHiring
+              .filter((contract) =>
+                String(contract.contract_title).includes(searchQuery)
+              )
+              .map((item) => {
+                return (
+                  <Grid item xs={4}>
+                    <JobDisplay data={item} />
+                  </Grid>
+                );
+              })
+          ) : (
+            contractsHiring.map((item) => {
+              return (
+                <Grid item xs={4}>
+                  <JobDisplay data={item} />
+                </Grid>
+              );
+            })
           )
-        })
-          :
-          <Typography p={2} color='text.secondary'>
+        ) : (
+          <Typography p={2} color="text.secondary">
             Sorry, no results found.
           </Typography>
+        );
       case Persona.WORKING:
-        return contractWorking?.length > 0 ?
-          contractWorking.map((item) => {
-            return (
-              <Grid item xs={4}>
-                <JobDisplay data={item} />
-              </Grid>
-
-            )
-          }) :
-          <Typography p={2} color='text.secondary'>
+        return contractWorking?.length > 0 ? (
+          searchQuery !== "" ? (
+            contractWorking
+              .filter((contract) =>
+                String(contract.contract_title).includes(searchQuery)
+              )
+              .map((item) => {
+                return (
+                  <Grid item xs={4}>
+                    <JobDisplay data={item} />
+                  </Grid>
+                );
+              })
+          ) : (
+            contractWorking.map((item) => {
+              return (
+                <Grid item xs={4}>
+                  <JobDisplay data={item} />
+                </Grid>
+              );
+            })
+          )
+        ) : (
+          <Typography p={2} color="text.secondary">
             Sorry, no results found.
           </Typography>
+        );
       case Persona.CATALOG: //services only but for now render hiring and change contract option to hiring
         setState({
           ...state,
-          persona: Persona.HIRING
-        })
+          persona: Persona.HIRING,
+        });
 
-        return contractsHiring?.length > 0 ? contractsHiring.map((item) => {
-          return (
-            <Grid item xs={4}>
-              <JobDisplay data={item} />
-            </Grid>
+        return contractsHiring?.length > 0 ? (
+          searchQuery !== "" ? (
+            contractsHiring
+              .filter((contract) =>
+                String(contract.contract_title).includes(searchQuery)
+              )
+              .map((item) => {
+                return (
+                  <Grid item xs={4}>
+                    <JobDisplay data={item} />
+                  </Grid>
+                );
+              })
+          ) : (
+            contractsHiring.map((item) => {
+              return (
+                <Grid item xs={4}>
+                  <JobDisplay data={item} />
+                </Grid>
+              );
+            })
           )
-        })
-          :
-          <Typography p={2} color='text.secondary'>
+        ) : (
+          <Typography p={2} color="text.secondary">
             Sorry, no results found.
           </Typography>
+        );
       default:
     }
-  }
+  };
 
   const renderServices = () => {
     switch (state.persona) {
       case Persona.HIRING:
-        return servicesHired?.length > 0 ? servicesHired.map((item) => {
-          return (
-            <Grid item xs={4}>
-
-
-              <ServiceCard id={item?.id} service={item?.serviceData} purchase purchaseData={item?.purchaseData} />
-            </Grid>
+        return servicesHired?.length > 0 ? (
+          searchQuery !== "" ? (
+            servicesHired
+              .filter((service) =>
+                String(service.serviceTitle).includes(searchQuery)
+              )
+              .map((item) => {
+                return (
+                  <Grid item xs={4}>
+                    <ServiceCard
+                      service={item?.serviceData}
+                      purchase
+                      purchaseData={item?.purchaseData}
+                    />
+                  </Grid>
+                );
+              })
+          ) : (
+            servicesHired.map((item) => {
+              return (
+                <Grid item xs={4}>
+                  <ServiceCard
+                    service={item?.serviceData}
+                    purchase
+                    purchaseData={item?.purchaseData}
+                  />
+                </Grid>
+              );
+            })
           )
-        })
-          :
-          <Typography p={2} color='text.secondary'>
+        ) : (
+          <Typography p={2} color="text.secondary">
             Sorry, no results found.
           </Typography>
+        );
       case Persona.WORKING:
-        return servicesWorking?.length > 0 ? servicesWorking.map((item) => {
-          return (
-            <Grid item xs={4}>
-
-
-              <ServiceCard id={item?.id} service={item?.serviceData} purchase purchaseData={item?.purchaseData} />
-            </Grid>
+        return servicesWorking?.length > 0 ? (
+          searchQuery !== "" ? (
+            servicesWorking
+              .filter((service) =>
+                String(service.serviceTitle).includes(searchQuery)
+              )
+              .map((item) => {
+                return (
+                  <Grid item xs={4}>
+                    <ServiceCard
+                      service={item?.serviceData}
+                      purchase
+                      purchaseData={item?.purchaseData}
+                    />
+                  </Grid>
+                );
+              })
+          ) : (
+            servicesWorking.map((item) => {
+              return (
+                <Grid item xs={4}>
+                  <ServiceCard
+                    service={item?.serviceData}
+                    purchase
+                    purchaseData={item?.purchaseData}
+                  />
+                </Grid>
+              );
+            })
           )
-        })
-          :
-          <Typography p={2} color='text.secondary'>
+        ) : (
+          <Typography p={2} color="text.secondary">
             Sorry, no results found.
           </Typography>
+        );
       case Persona.CATALOG:
-        return createdServices?.length > 0 ? createdServices.map((item) => {
-          return (
-            <Grid item xs={4}>
-
-
-              <ServiceCard id={item?.id} service={item} />
-            </Grid>
+        return createdServices?.length > 0 ? (
+          searchQuery !== "" ? (
+            createdServices
+              .filter((service) =>
+                String(service.serviceTitle).includes(searchQuery)
+              )
+              .map((item) => {
+                return (
+                  <Grid item xs={4}>
+                    <ServiceCard
+                      service={item?.serviceData}
+                      purchase
+                      purchaseData={item?.purchaseData}
+                    />
+                  </Grid>
+                );
+              })
+          ) : (
+            createdServices.map((item) => {
+              return (
+                <Grid item xs={4}>
+                  <ServiceCard service={item} />
+                </Grid>
+              );
+            })
           )
-        })
-          :
-          <Typography p={2} color='text.secondary'>
+        ) : (
+          <Typography p={2} color="text.secondary">
             Sorry, no results found.
           </Typography>
+        );
       default:
     }
-  }
+  };
 
   return (
     <Container
@@ -432,25 +557,29 @@ const ExplorePage: NextPage = () => {
         sx={{
           width: "100%",
           height: 220,
-          px: 2.5
+          px: 2.5,
         }}
       >
         <img
           src="/assets/images/project_management.jpg"
-          style={{ textAlign: 'center', width: "100%", height: "100%", objectFit: "cover" }}
+          style={{
+            textAlign: "center",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
         />
       </Box>
 
       <Box
         sx={{
-          height: '100%',
+          height: "100%",
           //  mt: 3,
           width: "100%",
         }}
       >
         <Box sx={{ py: 2 }}>
-          <Container maxWidth='lg' sx={{ width: "100%", my: 2, px: 5 }}>
-
+          <Container maxWidth="lg" sx={{ width: "100%", my: 2, px: 5 }}>
             <Stack
               my={2}
               direction="row"
@@ -458,32 +587,38 @@ const ExplorePage: NextPage = () => {
               justifyContent="space-between"
             >
               <Box>
-                <Typography
-                  fontWeight="600"
-                  fontSize={24}
-                >
+                <Typography fontWeight="600" fontSize={24}>
                   Work Dashboard
                 </Typography>
-                <Typography variant='body2' color='text.secondary' fontWeight='medium'>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  fontWeight="medium"
+                >
                   The home for asynchronous work between users and DAOs
                 </Typography>
               </Box>
-
-
-
             </Stack>
 
-            <Box display='flex' alignItems='center' justifyContent='space-between'>
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
               <Stack spacing={1} direction="row" alignItems="center">
                 <Chip
-                  variant='outlined'
-                  onClick={() => setContractViewPersona(ContractsViewingPersona.CONTRACTS)}
+                  variant="outlined"
+                  onClick={() =>
+                    setContractViewPersona(ContractsViewingPersona.CONTRACTS)
+                  }
                   sx={{
                     fontSize: 12,
                     fontWeight: "medium",
-                    border: '1px solid #ddd',
+                    border: "1px solid #ddd",
                     color:
-                      contractViewPersona === ContractsViewingPersona.CONTRACTS ? "white" : "black",
+                      contractViewPersona === ContractsViewingPersona.CONTRACTS
+                        ? "white"
+                        : "black",
                     bgcolor: (theme) =>
                       contractViewPersona === ContractsViewingPersona.CONTRACTS
                         ? theme.palette.primary.dark
@@ -493,14 +628,18 @@ const ExplorePage: NextPage = () => {
                   label="Contracts"
                 />
                 <Chip
-                  variant='outlined'
-                  onClick={() => setContractViewPersona(ContractsViewingPersona.SERVICES)}
+                  variant="outlined"
+                  onClick={() =>
+                    setContractViewPersona(ContractsViewingPersona.SERVICES)
+                  }
                   sx={{
                     fontSize: 12,
                     fontWeight: "medium",
-                    border: '1px solid #ddd',
+                    border: "1px solid #ddd",
                     color:
-                      contractViewPersona === ContractsViewingPersona.SERVICES ? "white" : "black",
+                      contractViewPersona === ContractsViewingPersona.SERVICES
+                        ? "white"
+                        : "black",
                     bgcolor: (theme) =>
                       contractViewPersona === ContractsViewingPersona.SERVICES
                         ? theme.palette.primary.dark
@@ -512,53 +651,83 @@ const ExplorePage: NextPage = () => {
               </Stack>
 
               <Stack spacing={1} direction="row" alignItems="center">
-                <Button sx={{ height: 25, borderRadius: 1 }} onClick={() => setState({ ...state, persona: Persona.WORKING })} size='small' variant={state.persona === Persona.WORKING ? 'contained' : 'outlined'}>
+                <Button
+                  sx={{ height: 25, borderRadius: 1 }}
+                  onClick={() =>
+                    setState({ ...state, persona: Persona.WORKING })
+                  }
+                  size="small"
+                  variant={
+                    state.persona === Persona.WORKING ? "contained" : "outlined"
+                  }
+                >
                   Working
                 </Button>
-                <Button sx={{ height: 25, borderRadius: 1 }} onClick={() => setState({ ...state, persona: Persona.HIRING })} size='small' variant={state.persona === Persona.HIRING ? 'contained' : 'outlined'}>
-                  Hiring For
+                <Button
+                  sx={{ height: 25, borderRadius: 1 }}
+                  onClick={() =>
+                    setState({ ...state, persona: Persona.HIRING })
+                  }
+                  size="small"
+                  variant={
+                    state.persona === Persona.HIRING ? "contained" : "outlined"
+                  }
+                >
+                  Hiring
                 </Button>
-                {
-                  contractViewPersona == ContractsViewingPersona.SERVICES && (
-                    <Button
-                      sx={{ height: 25, borderRadius: 1 }}
-                      onClick={() => setState({ ...state, persona: Persona.CATALOG })}
-                      size='small'
-                      variant={state.persona === Persona.CATALOG ? 'contained' : 'outlined'}>
-                      My Service Catalog
-                    </Button>
-                  )
-                }
-
+                {contractViewPersona == ContractsViewingPersona.SERVICES && (
+                  <Button
+                    sx={{ height: 25, borderRadius: 1 }}
+                    onClick={() =>
+                      setState({ ...state, persona: Persona.CATALOG })
+                    }
+                    size="small"
+                    variant={
+                      state.persona === Persona.CATALOG
+                        ? "contained"
+                        : "outlined"
+                    }
+                  >
+                    My Catalog
+                  </Button>
+                )}
               </Stack>
             </Box>
           </Container>
         </Box>
         <Divider />
-        <Container maxWidth='lg' sx={{ height: '100%', width: "100%" }}>
+        <Container maxWidth="lg" sx={{ height: "100%", width: "100%" }}>
+          <Box
+            my={2}
+            mb={5}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography fontWeight="bold">Your incoming gigs</Typography>
 
-          <Box my={2} mb={5} display='flex' alignItems='center' justifyContent='space-between'>
-            <Typography fontWeight='bold'>
-              Your incoming gigs
-            </Typography>
+            <Stack spacing={2} direction="row" alignItems="flex-start">
+              <SearchBarV1
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
 
-            <Stack spacing={1} direction='row' alignItems='center'>
-              <SearchBar placeholder='Search...' />
-
-              <IconButton size='small' onClick={onRefresh}>
-                <Refresh fontSize='small' />
+              <IconButton
+                sx={{ bgcolor: "#fff", border: "1px solid #ddd" }}
+                size="medium"
+                onClick={onRefresh}
+              >
+                <Refresh fontSize="small" />
               </IconButton>
             </Stack>
           </Box>
 
-
-          <Grid container wrap='nowrap' direction='row' spacing={2}>
-            {
-              contractViewPersona === ContractsViewingPersona.CONTRACTS ? renderContracts() : renderServices()
-            }
+          <Grid container wrap="nowrap" direction="row" spacing={2}>
+            {contractViewPersona === ContractsViewingPersona.CONTRACTS
+              ? renderContracts()
+              : renderServices()}
           </Grid>
-
-
         </Container>
       </Box>
     </Container>

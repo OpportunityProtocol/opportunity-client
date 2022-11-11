@@ -29,9 +29,9 @@ import {
   useContractWrite,
   usePrepareContractWrite,
   useProvider,
-  useQuery,
   useSignTypedData,
 } from "wagmi";
+import { useQuery } from '@apollo/client'
 import {
   DAI_ADDRESS,
   FEE_COLLECT_MODULE,
@@ -64,6 +64,8 @@ import { ConfirmationDialog } from "../../../../common/components/ConfirmationDi
 import moment from "moment";
 import { withStyles } from '@mui/styles'
 import { getLensProfileById } from "../../../lens/LensGQLQueries";
+import { GET_MARKET_DETAILS_BY_ID } from "../../../market/MarketGQLQueries";
+import { QueryResult } from "@apollo/client";
 interface IServiceCardProps {
   purchaseData?: any;
   service: any;
@@ -489,6 +491,9 @@ const ServiceCard = ({
             </Stack>
 
             <Box sx={{ width: '100%' }}>
+              <Typography variant='caption' color='rgb(128, 128, 128)'>
+                {service.marketDetails.name}
+              </Typography>
               <Typography
                 fontWeight="medium"
                 fontSize={14}
