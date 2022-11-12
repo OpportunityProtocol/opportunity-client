@@ -430,7 +430,7 @@ const Explore: NextPage<any> = () => {
                 alignItems="center"
               >
                 <Typography fontWeight="600" fontSize={16} color="#212121">
-                  Advertisements and Post
+                  Advertisements and Publications
                 </Typography>
               </Stack>
 
