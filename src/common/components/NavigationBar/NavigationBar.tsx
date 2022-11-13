@@ -28,6 +28,8 @@ import {
   ListItemIcon,
   Chip,
   alpha,
+  CircularProgress,
+  LinearProgress,
 } from "@mui/material";
 
 import { NextRouter, useRouter } from "next/router";
@@ -41,11 +43,17 @@ import {
   useBalance,
   useConnect,
   useContractRead,
+  useContractWrite,
   useDeprecatedContractWrite,
   useFeeData,
   useSigner,
 } from "wagmi";
-import { DAI_ADDRESS, ZERO_ADDRESS } from "../../../constant";
+import {
+  DAI_ADDRESS,
+  LENS_HUB_PROXY,
+  NETWORK_MANAGER_ADDRESS,
+  ZERO_ADDRESS,
+} from "../../../constant";
 import {
   DaiInterface,
   LensHubInterface,
@@ -75,7 +83,7 @@ import {
   WebAsset,
 } from "@mui/icons-material";
 import SearchContext from "../../../context/SearchContext";
-import { QueryResult, useQuery } from "@apollo/client";
+import { ApolloQueryResult, gql, QueryResult, useQuery } from "@apollo/client";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../../modules/user/UserGQLQueries";
 
 import Dialog from "@mui/material/Dialog";
@@ -88,9 +96,114 @@ import {
   login,
 } from "../../../modules/lens/LensAPIAuthentication";
 import SearchBar from "../SearchBar/SearchBar";
-import { getLensProfileById } from "../../../modules/lens/LensGQLQueries";
+import {
+  getLensProfileById,
+  LENS_GET_DISPATCHER_BY_PROFILE_ID,
+} from "../../../modules/lens/LensGQLQueries";
 import { AnyAction } from "redux";
 import VerificationDialog from "../../../modules/user/components/VerificationDialog";
+import { lens_client } from "../../../apollo";
+
+const CheckRequiredDispatcherDialog = ({ isConnected, profileId }) => {
+  const [open, setOpen] = useState<boolean>(false);
+  const [stateDispatcher, setStateDispatcher] = useState<string | null>("");
+
+  const checkDispatcherQuery: QueryResult = useQuery(
+    gql`
+  query Profile {
+    profile(request: { profileId: "${`0x${Math.abs(Number(profileId)).toString(
+      16
+    )}`}"  }) {
+      dispatcher { 
+        address
+        canUseRelay
+      }
+    }
+  }`,
+    {
+      client: lens_client,
+      skip: true,
+      variables: {
+        profileId: profileId,
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (isConnected && profileId !== 0) {
+      checkDispatcherQuery.refetch().then((result: ApolloQueryResult<any>) => {
+        const { stateDispatcher } = result.data.profile;
+
+        if (result.data) {
+          setStateDispatcher(stateDispatcher);
+        }
+
+        if (stateDispatcher) {
+          setOpen(false);
+        } else {
+          setOpen(true);
+        }
+      });
+    }
+  }, [isConnected, profileId]);
+
+  const {
+    write: setDispatcher,
+    isLoading: isLoadingSetDispatcher,
+    isSuccess: isSuccessSetDispatcher,
+  } = useContractWrite({
+    mode: "recklesslyUnprepared",
+    addressOrName: LENS_HUB_PROXY,
+    functionName: "setDispatcher",
+    args: [profileId, NETWORK_MANAGER_ADDRESS],
+    contractInterface: NetworkManagerInterface,
+    overrides: {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: 90000000000,
+    },
+    onSettled(data, error, variables, context) {
+      data.wait().then((value: ethers.providers.TransactionReceipt) => {
+        value.status > 0 ? setOpen(false) : () => {};
+      });
+    },
+    onError(error, variables, context) {},
+  });
+
+  return (
+    <Dialog open={open}>
+      {isLoadingSetDispatcher ? (
+        <LinearProgress variant="indeterminate" />
+      ) : null}
+      <DialogTitle>Lens Protocol Dispatcher Notice</DialogTitle>
+      <DialogContent>
+        <Typography paragraph variant="body2">
+          Lens Talent requires that you set Lens Talent as a dispatcher for your
+          profile to carry out some actions internally.
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        <Typography
+          component="a"
+          href="https://docs.lens.xyz/docs/dispatcher"
+          target="_blank"
+          variant="button"
+          sx={{ color: "#0000EE" }}
+        >
+          What is a dispatcher?
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          disabled={isLoadingSetDispatcher || isSuccessSetDispatcher}
+          sx={{ alignSelf: "flex-start" }}
+          variant="contained"
+          onClick={() => setDispatcher()}
+        >
+          Set Lens Protocol as Dispatcher
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
 
 const NavigationBar: FC = (): JSX.Element => {
   const router: NextRouter = useRouter();
@@ -170,7 +283,6 @@ const NavigationBar: FC = (): JSX.Element => {
           .then(() => {})
           .finally(() => handleOnIsConnected())
           .catch((error) => {
-            alert(error);
             dispatch(
               userWalletDataStored({
                 balance: 0,
@@ -224,7 +336,6 @@ const NavigationBar: FC = (): JSX.Element => {
           );
         })
         .catch((error) => {
-          alert(error);
           dispatch(
             userLensDataStored({
               profileId: 0,
@@ -441,9 +552,7 @@ const NavigationBar: FC = (): JSX.Element => {
                   </Stack>
                 </Stack>
               </Grid>
-
               <Grid item />
-
               <Grid
                 item
                 sx={{
@@ -468,7 +577,6 @@ const NavigationBar: FC = (): JSX.Element => {
                       variant="button"
                       sx={{
                         fontWeight: "700",
-
                         fontSize: "12px",
                       }}
                       onClick={handleOnAddFunds}
@@ -578,7 +686,6 @@ const NavigationBar: FC = (): JSX.Element => {
                         </Menu>
                       </>
                     )}
-
                   <>
                     <Typography
                       variant="button"
@@ -850,6 +957,11 @@ const NavigationBar: FC = (): JSX.Element => {
           userData.refetch();
           setVerificationDialogOpen(false);
         }}
+      />
+
+      <CheckRequiredDispatcherDialog
+        isConnected={accountData.isConnected}
+        profileId={userLensProfile.profileId}
       />
     </React.Fragment>
   );

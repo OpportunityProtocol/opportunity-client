@@ -13,7 +13,7 @@ import {
   Tabs,
   Tab,
   DialogContentText,
-  Chip
+  Chip,
 } from "@mui/material";
 import ServiceCard from "../../../modules/contract/components/ServiceCard/ServiceCard";
 import { NextRouter, useRouter } from "next/router";
@@ -30,20 +30,17 @@ import {
   NETWORK_MANAGER_ADDRESS,
   PINATA_JWT,
 } from "../../../constant";
-import {
-  LensHubInterface,
-  NetworkManagerInterface,
-} from "../../../abis";
+import { LensHubInterface, NetworkManagerInterface } from "../../../abis";
 import { CHAIN_ID } from "../../../constant/provider";
 import { Result } from "ethers/lib/utils";
-import { QueryResult, useQuery } from "@apollo/client";
+import { ApolloQueryResult, QueryResult, useQuery } from "@apollo/client";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../../modules/user/UserGQLQueries";
 import { ethers, Event } from "ethers";
 import {
   GET_CONTRACTS_BY_EMPLOYER,
   GET_CONTRACTS_BY_WORKER,
   GET_PURCHASED_SERVICES_BY_CLIENT,
-  GET_SERVICES_BY_CREATOR
+  GET_SERVICES_BY_CREATOR,
 } from "../../../modules/contract/ContractGQLQueries";
 import JobDisplay from "../../../modules/market/components/JobDisplay";
 import { create } from "ipfs-http-client";
@@ -52,11 +49,16 @@ import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import { ConfirmationDialog } from "../../../common/components/ConfirmationDialog";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../../../modules/user/userReduxSlice";
-import { getLensFollowingStateByAddressQuery, lensGetFollowersStateByProfileId, LENS_GET_COMPLETE_FOLLOW_STATE_BY_ADDRESS_AND_PROFILE_ID, LENS_GET_FOLLOWERS_STATE_BY_PROFILE_ID, LENS_GET_FOLLOWING_STATE_BY_ADDRESS } from "../../../modules/lens/LensGQLQueries";
+import {
+  getLensFollowingStateByAddressQuery,
+  getLensProfileById,
+  lensGetFollowersStateByProfileId,
+} from "../../../modules/lens/LensGQLQueries";
 import { lens_client } from "../../../apollo";
 import { a11yProps } from "../../../common/components/TabPanel/helper";
 import { EIP712UnlimitedExpiry } from "../../../constant/util";
 import TabPanel from "../../../common/components/TabPanel/TabPanel";
+import { GET_MARKET_DETAILS_BY_ID } from "../../../modules/market/MarketGQLQueries";
 
 const getDomain = () => {
   return {
@@ -124,22 +126,24 @@ const ProfilePage: NextPage<any> = () => {
   const userAddress = useSelector(selectUserAddress);
 
   const [value, setValue] = React.useState<number>(0);
-  const [connectDialogIsOpen, setConnectDialogIsOpen] = useState<boolean>(false);
-  const [following, setFollowing] = useState<Array<any>>([])
-  const [followers, setFollowers] = useState<Array<any>>([])
+  const [connectDialogIsOpen, setConnectDialogIsOpen] =
+    useState<boolean>(false);
+  const [following, setFollowing] = useState<Array<any>>([]);
+  const [followers, setFollowers] = useState<Array<any>>([]);
 
-  const [general, setGeneral] = useState<any>({})
-  const [lensProfileId, setLensProfileId] = useState<number>(0)
-  const [lensProfile, setLensProfile] = useState<any>({})
-  const [verifiedFreelancerData, setVerifiedFreelancerData] = useState<any>({})
+  const [general, setGeneral] = useState<any>({});
+  const [lensProfileId, setLensProfileId] = useState<number>(0);
+  const [lensProfile, setLensProfile] = useState<any>({});
+  const [verifiedFreelancerData, setVerifiedFreelancerData] = useState<any>({});
+  const [contractsByEmployer, setContractsByEmployer] = useState<Array<any>>(
+    []
+  );
+  const [contractsByWorker, setContractByWorker] = useState<Array<any>>([]);
+  const [servicesCreated, setServicesCreated] = useState<Array<any>>([]);
 
-  const { signTypedData } =
-    useSignTypedData({
-      onSettled(data, error) {
-
-      },
-      onError(error) { console.log(error) },
-    });
+  const { signTypedData } = useSignTypedData({
+    onSettled(data, error) {},
+  });
 
   const verifiedUserQuery: QueryResult = useQuery(
     GET_VERIFIED_FREELANCER_BY_ADDRESS,
@@ -171,22 +175,38 @@ const ProfilePage: NextPage<any> = () => {
   );
 
   //services created
-  const servicesCreated: QueryResult = useQuery(GET_SERVICES_BY_CREATOR, {
+  const servicesCreatedQuery: QueryResult = useQuery(GET_SERVICES_BY_CREATOR, {
     variables: {
       creator: address,
     },
   });
 
-  const lensFollowingStateQuery: QueryResult = useQuery(getLensFollowingStateByAddressQuery(address), {
-    client: lens_client,
-    skip: true
+  //market details by id
+  const marketDetailsByIdQuery: QueryResult = useQuery(
+    GET_MARKET_DETAILS_BY_ID,
+    {
+      skip: true,
+      variables: {
+        marketId: 0,
+      },
+    }
+  );
 
-  })
+  const lensFollowingStateQuery: QueryResult = useQuery(
+    getLensFollowingStateByAddressQuery(address),
+    {
+      client: lens_client,
+      skip: true,
+    }
+  );
 
-  const lensFollowerStateQuery: QueryResult = useQuery(lensGetFollowersStateByProfileId(String(lensProfileId)), {
-    client: lens_client,
-    skip: true
-  })
+  const lensFollowerStateQuery: QueryResult = useQuery(
+    lensGetFollowersStateByProfileId(String(lensProfileId)),
+    {
+      client: lens_client,
+      skip: true,
+    }
+  );
 
   const networkManager_getLensProfileIdFromAddress = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -197,27 +217,9 @@ const ProfilePage: NextPage<any> = () => {
     chainId: CHAIN_ID,
     args: [accountData?.address],
     onSuccess: (data: Result) => {
-      console.log(data)
-      setLensProfileId(data?._hex)
+      setLensProfileId(data?._hex);
     },
-    onError: (error) => { },
-  });
-
-  //getProfile
-  const lensHub_getProfile = useContractRead({
-    addressOrName: LENS_HUB_PROXY,
-    contractInterface: LensHubInterface,
-    functionName: "getProfile",
-    enabled: false,
-    watch: false,
-    chainId: CHAIN_ID,
-    args: [Number(lensProfileId)],
-    onSuccess: (data: Result) => {
-      setLensProfile({
-        ...lensProfile,
-        ...data
-      })
-    },
+    onError: (error) => {},
   });
 
   const { data: userLensSigNonce } = useContractRead({
@@ -230,7 +232,7 @@ const ProfilePage: NextPage<any> = () => {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
     },
-  })
+  });
 
   const { write: follow } = useContractWrite({
     addressOrName: LENS_HUB_PROXY,
@@ -243,53 +245,144 @@ const ProfilePage: NextPage<any> = () => {
       gasPrice: 90000000000,
     },
     onSettled(data, error) {
-      lensFollowingStateQuery.refetch()
+      lensFollowingStateQuery.refetch();
     },
   });
 
   useEffect(() => {
-    if (!verifiedUserQuery.loading && verifiedUserQuery.data) {
-      setVerifiedFreelancerData(verifiedUserQuery.data?.verifiedUsers[0])
-
-      //only fetch profile id and created services if the user is a verified freelancers
-      if (verifiedUserQuery.data?.verifiedUsers[0]?.metadata) {
-        downloadMetadata(verifiedUserQuery.data?.verifiedUsers[0]?.metadata);
-      }
-
-      networkManager_getLensProfileIdFromAddress.refetch();
-      servicesCreated.refetch();
-    }
-  }, [verifiedUserQuery.loading]);
+    fetchLensProfileState();
+  }, [address, lensProfileId]);
 
   useEffect(() => {
-    async function fetchLensProfileState() {
-      if (Number(lensProfileId) > 0) {
-        lensHub_getProfile.refetch();
-        await lensFollowerStateQuery.refetch()
-          .then((queryResult) => {
-            setFollowers([...queryResult?.data?.followers?.items])
-          })
-          .catch((error) => { })
-      }
-
-      await lensFollowingStateQuery.refetch()
-        .then((queryResult) => {
-          setFollowing([...queryResult?.data?.following?.items])
-        })
-        .catch((error) => { })
-    }
-
-    fetchLensProfileState()
-
-  }, [address, lensProfileId])
-
-  useEffect(() => {
-    networkManager_getLensProfileIdFromAddress.refetch();
-    contractsByEmployerQuery.refetch();
-    contractsByWorkerQuery.refetch();
-    verifiedUserQuery.refetch();
-    servicesCreated.refetch();
+    onRefreshProfile();
   }, [address]);
+
+  async function loadProfileIdentityData() {
+    const profile = await getLensProfileById(lensProfileId);
+
+    setLensProfile({
+      ...lensProfile,
+      ...profile,
+    });
+  }
+
+  async function fetchLensProfileState() {
+    if (Number(lensProfileId) > 0) {
+      loadProfileIdentityData();
+      await lensFollowerStateQuery
+        .refetch()
+        .then((queryResult) => {
+          setFollowers([...queryResult?.data?.followers?.items]);
+        })
+        .catch((error) => {});
+    }
+
+    await lensFollowingStateQuery
+      .refetch()
+      .then((queryResult) => {
+        setFollowing([...queryResult?.data?.following?.items]);
+      })
+      .catch((error) => {});
+  }
+
+  const onRefreshProfile = async () => {
+    networkManager_getLensProfileIdFromAddress.refetch();
+
+    await servicesCreatedQuery
+      .refetch()
+      .then(async (result: ApolloQueryResult<any>) => {
+        if (!result.error) {
+          //load data
+          const services = result.data?.services;
+          let serviceMetadata = {};
+          let displayedServicesData = [];
+
+          let marketDetails = {};
+
+          for (const service of services) {
+            await marketDetailsByIdQuery
+              .refetch({ marketId: service.marketId })
+              .then((result) => {
+                marketDetails = result.data.markets[0];
+              });
+
+            serviceMetadata = await fleek.getService(
+              String(service?.metadataPtr).slice(13)
+            );
+
+            displayedServicesData.push({
+              ...service,
+              ...serviceMetadata,
+              marketDetails: {
+                ...marketDetails,
+              },
+            });
+          }
+
+          //set contract
+          setServicesCreated(displayedServicesData);
+        } else {
+        }
+      });
+
+    await contractsByEmployerQuery
+      .refetch()
+      .then((result: ApolloQueryResult<any>) => {
+        if (!result.error) {
+          //load data
+          const updatedContracts = result.data.contracts.map(
+            async (contract) => {
+              const contractMetadata = await fleek.getContract(
+                String(contract?.metadata).slice(13)
+              );
+
+              return {
+                ...contract,
+                ...contractMetadata,
+              };
+            }
+          );
+
+          //set contract
+          setContractsByEmployer(updatedContracts);
+        } else {
+        }
+      });
+
+    await contractsByWorkerQuery
+      .refetch()
+      .then((result: ApolloQueryResult<any>) => {
+        if (!result.error) {
+          //load data
+          const updatedContracts = result.data.contracts.map(
+            async (contract) => {
+              const contractMetadata = await fleek.getContract(
+                String(contract?.metadata).slice(13)
+              );
+
+              return {
+                ...contract,
+                ...contractMetadata,
+              };
+            }
+          );
+
+          //set contract
+          setContractsByEmployer(updatedContracts);
+        } else {
+        }
+      });
+
+    await verifiedUserQuery.refetch().then((result: ApolloQueryResult<any>) => {
+      if (!result.error) {
+        setVerifiedFreelancerData(result.data?.verifiedUsers[0]);
+
+        if (result.data?.verifiedUsers[0]?.metadata) {
+          downloadMetadata(result.data?.verifiedUsers[0]?.metadata);
+        }
+      }
+    });
+  };
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -307,7 +400,7 @@ const ProfilePage: NextPage<any> = () => {
       profileIds: [Number(lensProfileId)],
       datas: [[]],
       nonce: userLensSigNonce,
-      deadline: EIP712UnlimitedExpiry
+      deadline: EIP712UnlimitedExpiry,
     };
   };
 
@@ -337,25 +430,27 @@ const ProfilePage: NextPage<any> = () => {
 
         setGeneral({
           ...general,
-          ...parsedData
-        })
-
+          ...parsedData,
+        });
       } else {
         retVal = await fleek.getUser(String(ptr).slice(10));
-
         setGeneral({
           ...general,
-          ...retVal
-        })
+          ...retVal,
+        });
       }
-
-    } catch (error) { console.log(error) }
+    } catch (error) {}
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 2, height: 'calc(100vh - 65px)', }}>
+    <Container maxWidth="lg" sx={{ mt: 2, height: "calc(100vh - 65px)" }}>
       <Box mb={2}>
-        <Stack pb={2} direction='row' alignItems='flex-start' justifyContent='space-between'>
+        <Stack
+          pb={2}
+          direction="row"
+          alignItems="flex-start"
+          justifyContent="space-between"
+        >
           <Box>
             {lensProfile?.imageURI ? (
               <img
@@ -370,51 +465,94 @@ const ProfilePage: NextPage<any> = () => {
                 seed={jsNumberForAddress(String(address))}
               />
             )}
-            <Box>
+            <Stack spacing={1}>
               <Typography
-                fontWeight="600"
+                fontWeight="bold"
                 color="black"
-                fontSize={23}
-                py={1}
+                fontSize={26}
+                letterSpacing={1.5}
               >
-                {verifiedFreelancerData?.handle}
-
+                Elijah Hampton
               </Typography>
-              <Chip sx={{ py: 1, borderRadius: 1, color: '#747474', maxWidth: 100, fontSize: 12 }} size='small' variant='filled' label={address} />
-            </Box>
+              <Typography variant="subtitle2">
+                {verifiedFreelancerData?.handle
+                  ? `@ ${verifiedFreelancerData?.handle}`
+                  : "This user is not registered on Lens Talent"}
+              </Typography>
+              <Chip
+                sx={{
+                  py: 1,
+                  borderRadius: 1,
+                  color: "#747474",
+                  maxWidth: 100,
+                  fontSize: 12,
+                }}
+                size="small"
+                variant="filled"
+                label={address}
+              />
+            </Stack>
           </Box>
           <Box sx={{ width: 350 }}>
-            <Card sx={{ width: 350, height: 150, bgcolor: 'rgb(246, 248, 250)' }} variant='outlined'>
+            <Card
+              sx={{
+                width: 350,
+                height: 150,
+                bgcolor: "#fafafa",
+                border: "1px solid #eee",
+              }}
+              variant="outlined"
+            >
               <CardContent>
-                <Typography fontWeight='600' my={1} mb={1.5} fontSize={12}>
+                <Typography fontWeight="600" my={1} mb={1.5} fontSize={12}>
                   Value: 0 DAI
                 </Typography>
-                <Stack my={1} spacing={1} direction='row' alignItems='center'>
+                <Stack my={1} spacing={1} direction="row" alignItems="center">
                   <Typography fontWeight="medium" py={1} fontSize={12}>
                     Skills:
                   </Typography>
 
-                  {general?.skills &&
-                    general?.skills?.length ? (
-                    <Stack direction="row" alignItems="center" spacing={2}>
+                  {general?.skills && general?.skills?.length ? (
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
                       {general?.skills.map((cert) => {
-                        return <Chip key={cert} sx={{ fontSize: 12, borderRadius: 1, border: '1px solid #ddd' }} label={cert} size="small" />;
+                        return (
+                          <Chip
+                            key={cert}
+                            sx={{
+                              fontSize: 12,
+                              borderRadius: 1,
+                              border: "1px solid #ddd",
+                            }}
+                            label={cert}
+                            size="small"
+                          />
+                        );
                       })}
                     </Stack>
                   ) : (
                     <Typography>No skills</Typography>
                   )}
                 </Stack>
-                <Stack my={1} spacing={1} direction='row' alignItems='center'>
+                <Stack my={1} spacing={1} direction="row" alignItems="center">
                   <Typography fontWeight="medium" py={1} fontSize={12}>
                     Languages:
                   </Typography>
 
-                  {general?.languages &&
-                    general?.languages?.length ? (
-                    <Stack direction="row" alignItems="center" spacing={2}>
+                  {general?.languages && general?.languages?.length ? (
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
                       {general?.languages.map((cert) => {
-                        return <Chip key={cert} sx={{ fontSize: 12, borderRadius: 1, border: '1px solid #ddd' }} label={cert} size="small" />;
+                        return (
+                          <Chip
+                            key={cert}
+                            sx={{
+                              fontSize: 12,
+                              borderRadius: 1,
+                              border: "1px solid #ddd",
+                            }}
+                            label={cert}
+                            size="small"
+                          />
+                        );
                       })}
                     </Stack>
                   ) : (
@@ -423,10 +561,15 @@ const ProfilePage: NextPage<any> = () => {
                 </Stack>
               </CardContent>
             </Card>
-            <Stack my={1} spacing={1} direction='row' alignItems='center' justifyContent='flex-end'>
-              {String(
-                verifiedFreelancerData?.address
-              ).toLowerCase() !== String(address).toLowerCase() ? (
+            <Stack
+              my={1}
+              spacing={1}
+              direction="row"
+              alignItems="center"
+              justifyContent="flex-end"
+            >
+              {String(verifiedFreelancerData?.address).toLowerCase() !==
+                String(address).toLowerCase() && accountData.isConnected ? (
                 <Button
                   color="primary"
                   sx={{ borderRadius: 5 }}
@@ -434,33 +577,49 @@ const ProfilePage: NextPage<any> = () => {
                   variant="contained"
                   onClick={() => setConnectDialogIsOpen(true)}
                 >
-                  <Typography sx={{ color: 'white' }} fontWeight='600' fontSize={12}>
+                  <Typography
+                    sx={{ color: "white" }}
+                    fontWeight="600"
+                    fontSize={12}
+                  >
                     Follow
                   </Typography>
-
                 </Button>
               ) : null}
 
-              <Button
-                variant="outlined"
-                color="secondary"
-                sx={{ border: '1px solid #ddd', borderRadius: 1 }}
-                onClick={() =>
-                  router.push(
-                    `/view/profile/${address}/settings?metadata=${verifiedUserQuery?.data?.verifiedUsers[0]?.metadata}`
-                  )
-                }
-              >
-                <Typography color='text.secondary' fontWeight='600' fontSize={12}>
-                  Edit Profile
-                </Typography>
-              </Button>
+              {String(verifiedFreelancerData?.address).toLowerCase() !==
+                String(address).toLowerCase() ||
+              !accountData.isConnected ? null : (
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  sx={{ border: "1px solid #ddd", borderRadius: 1 }}
+                  onClick={() =>
+                    router.push(
+                      `/view/profile/${address}/settings?metadata=${verifiedUserQuery?.data?.verifiedUsers[0]?.metadata}`
+                    )
+                  }
+                >
+                  <Typography
+                    color="text.secondary"
+                    fontWeight="600"
+                    fontSize={12}
+                  >
+                    Edit Profile
+                  </Typography>
+                </Button>
+              )}
             </Stack>
           </Box>
         </Stack>
         <Box>
           {general?.description ? (
-            <Typography paragraph variant='body2' color="text.secondary">
+            <Typography
+              fontSize={16}
+              paragraph
+              variant="body2"
+              color="text.secondary"
+            >
               {general?.description}
             </Typography>
           ) : (
@@ -475,42 +634,45 @@ const ProfilePage: NextPage<any> = () => {
           spacing={1}
         >
           <Box>
-            <Stack spacing={0.5} direction='row' alignItems="center">
+            <Stack spacing={0.5} direction="row" alignItems="center">
               <Typography
                 textAlign="center"
-                color='text.secondary'
+                color="text.secondary"
                 fontSize={12}
-
               >
                 Followers:
               </Typography>
 
-              <Typography fontSize={12} fontWeight='bold' color='text.secondary'>
+              <Typography
+                fontSize={12}
+                fontWeight="bold"
+                color="text.secondary"
+              >
                 {followers.length}
               </Typography>
             </Stack>
           </Box>
 
           <Box>
-            <Stack spacing={0.5} direction='row' alignItems="center">
+            <Stack spacing={0.5} direction="row" alignItems="center">
               <Typography
                 textAlign="center"
-                color='text.secondary'
+                color="text.secondary"
                 fontSize={12}
-
               >
                 Following:
-              </Typography>
-              {" "}
-              <Typography fontSize={12} fontWeight='bold' color='text.secondary'>
+              </Typography>{" "}
+              <Typography
+                fontSize={12}
+                fontWeight="bold"
+                color="text.secondary"
+              >
                 {following.length}
               </Typography>
             </Stack>
           </Box>
         </Box>
-
       </Box>
-
 
       <Grid
         container
@@ -524,38 +686,80 @@ const ProfilePage: NextPage<any> = () => {
               <Tabs
                 textColor="secondary"
                 indicatorColor="secondary"
-
                 value={value}
                 onChange={handleChange}
                 aria-label="basic tabs example"
               >
                 <Tab
-                  sx={{ color: value === 0 ? '#212121' : '#9e9e9e' }}
+                  sx={{ color: value === 0 ? "#212121" : "#9e9e9e" }}
                   label="All Activity"
                   {...a11yProps(0)}
                 />
-                <Tab label="Worked Contracts" sx={{ color: value === 2 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={contractsByWorkerQuery.data?.contracts.filter(
-                  (contract) => contract.owner === 2
-                ).length} size='small' variant='filled' />} iconPosition='end' {...a11yProps(1)} />
-                <Tab label="Published Services" sx={{ color: value === 3 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={servicesCreated.data?.services?.length} size='small' variant='filled' />} iconPosition='end' {...a11yProps(2)} />
-                <Tab label="Published Contracts" sx={{ color: value === 4 ? '#212121' : '#9e9e9e' }} icon={<Chip sx={{ fontSize: 10, color: '#757575' }} label={contractsByEmployerQuery.data?.contracts?.length} size='small' variant='filled' />} iconPosition='end' {...a11yProps(3)} />
+                <Tab
+                  label="Worked Contracts"
+                  sx={{ color: value === 2 ? "#212121" : "#9e9e9e" }}
+                  icon={
+                    <Chip
+                      sx={{ fontSize: 10, color: "#757575" }}
+                      label={
+                        contractsByWorkerQuery.data?.contracts.filter(
+                          (contract) => contract.owner === 2
+                        ).length
+                      }
+                      size="small"
+                      variant="filled"
+                    />
+                  }
+                  iconPosition="end"
+                  {...a11yProps(1)}
+                />
+                <Tab
+                  label="Published Services"
+                  sx={{ color: value === 3 ? "#212121" : "#9e9e9e" }}
+                  icon={
+                    <Chip
+                      sx={{ fontSize: 10, color: "#757575" }}
+                      label={servicesCreated.length}
+                      size="small"
+                      variant="filled"
+                    />
+                  }
+                  iconPosition="end"
+                  {...a11yProps(2)}
+                />
+                <Tab
+                  label="Published Contracts"
+                  sx={{ color: value === 4 ? "#212121" : "#9e9e9e" }}
+                  icon={
+                    <Chip
+                      sx={{ fontSize: 10, color: "#757575" }}
+                      label={contractsByEmployer.length}
+                      size="small"
+                      variant="filled"
+                    />
+                  }
+                  iconPosition="end"
+                  {...a11yProps(3)}
+                />
               </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
               <Typography>No publications</Typography>
             </TabPanel>
             <TabPanel value={value} index={1}>
-              <Grid
-                container
-                direction="row"
-                alignItems="center"
-
-              >
-                {contractsByWorkerQuery.data?.contracts.filter((contract) => contract.owner === 2) &&
-                  contractsByWorkerQuery.data?.contracts.filter((contract) => contract.owner === 2)?.length > 0 ? (
-                  contractsByWorkerQuery.data?.contracts.filter((contract) => contract.owner === 2)?.map((contract) => {
-                    return <JobDisplay data={contract} />;
-                  })
+              <Grid container direction="row" alignItems="center" spacing={2}>
+                {contractsByWorker.filter((contract) => contract.owner === 2) &&
+                contractsByWorker.filter((contract) => contract.owner === 2)
+                  ?.length > 0 ? (
+                  contractsByWorker
+                    .filter((contract) => contract.owner === 2)
+                    ?.map((contract) => {
+                      return (
+                        <Grid item xs={4}>
+                          <JobDisplay data={contract} />
+                        </Grid>
+                      );
+                    })
                 ) : (
                   <Typography>
                     {verifiedFreelancerData?.handle}s hasn't created any
@@ -565,23 +769,16 @@ const ProfilePage: NextPage<any> = () => {
               </Grid>
             </TabPanel>
             <TabPanel value={value} index={2}>
-              <Grid
-                container
-                direction="row"
-                alignItems="center"
-
-              >
-
-                {servicesCreated.data?.services &&
-                  servicesCreated.data?.services?.length > 0 ? (
-                  servicesCreated.data?.services?.map((service) => {
+              <Grid container direction="row" alignItems="center">
+                {servicesCreated && servicesCreated.length > 0 ? (
+                  servicesCreated.map((service) => {
                     return (
                       <ServiceCard
                         outlined={true}
                         id={service?.serviceId}
                         data={service}
                       />
-                    )
+                    );
                   })
                 ) : (
                   <Typography>
@@ -590,20 +787,16 @@ const ProfilePage: NextPage<any> = () => {
                   </Typography>
                 )}
               </Grid>
-
-
             </TabPanel>
             <TabPanel value={value} index={3}>
-              <Grid
-                container
-                direction="row"
-                alignItems="center"
-
-              >
-                {contractsByEmployerQuery.data?.contracts &&
-                  contractsByEmployerQuery.data?.contracts?.length > 0 ? (
-                  contractsByEmployerQuery.data?.contracts.map((contract) => {
-                    return <JobDisplay data={contract} />;
+              <Grid container direction="row" alignItems="center" spacing={2}>
+                {contractsByEmployer && contractsByEmployer?.length > 0 ? (
+                  contractsByEmployer.map((contract) => {
+                    return (
+                      <Grid item xs={4}>
+                        <JobDisplay data={contract} />
+                      </Grid>
+                    );
                   })
                 ) : (
                   <Typography>
@@ -613,14 +806,13 @@ const ProfilePage: NextPage<any> = () => {
                 )}
               </Grid>
             </TabPanel>
-
           </Box>
         </Grid>
       </Grid>
 
       <ConfirmationDialog
         open={connectDialogIsOpen}
-        onOpen={() => { }}
+        onOpen={() => {}}
         onClose={() => {
           setConnectDialogIsOpen(false);
         }}

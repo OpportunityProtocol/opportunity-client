@@ -64,7 +64,7 @@ export const ConfirmationDialog: FC<
     switch (activeStep) {
       case 0:
         return (
-          <Button onClick={() => setActiveStep((prevState) => prevState + 1)}>
+          <Button variant='contained' onClick={() => setActiveStep((prevState) => prevState + 1)}>
             {" "}
             Next{" "}
           </Button>
@@ -117,16 +117,16 @@ export const ConfirmationDialog: FC<
   const getBackButton = () => {
     switch (activeStep) {
       case 0:
-        return <Button onClick={handleClose}>Cancel</Button>;
+        return <Button variant='outlined' onClick={handleClose}>Cancel</Button>;
       case 1:
         return (
-          <Button onClick={() => setActiveStep((prevState) => prevState - 1)}>
+          <Button variant='outlined'  onClick={() => setActiveStep((prevState) => prevState - 1)} disabled={success}>
             Back
           </Button>
         );
       case 2:
         return (
-          <Button onClick={() => setActiveStep((prevState) => prevState - 1)}>
+          <Button variant='outlined' onClick={() => setActiveStep((prevState) => prevState - 1)} disabled={success}>
             Back
           </Button>
         );

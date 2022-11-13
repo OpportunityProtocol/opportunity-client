@@ -1,4 +1,3 @@
-
 import {
   Grid,
   Container,
@@ -9,6 +8,7 @@ import {
   IconButton,
   Stack,
   CardContent,
+  Skeleton,
 } from "@mui/material";
 
 import { useContext } from "react";
@@ -18,8 +18,7 @@ import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
-import SearchIcon from '@mui/icons-material/Search';
-
+import SearchIcon from "@mui/icons-material/Search";
 
 import { useEffect, useState } from "react";
 import { db, auth, storage } from "../../firebase";
@@ -39,22 +38,31 @@ import {
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import User from "../modules/user/components/Messenger/User";
 import MessageForm from "../modules/user/components/Messenger/MessageForm";
-import { IMessageProp, ProposalMessage, RegularMessage } from "../modules/user/components/Messenger/Message";
 import {
-  useAccount,
-} from "wagmi";
+  IMessageProp,
+  ProposalMessage,
+  RegularMessage,
+} from "../modules/user/components/Messenger/Message";
+import { useAccount } from "wagmi";
 import { NextPage } from "next";
 import { AddBoxTwoTone, Refresh } from "@mui/icons-material";
 import { QueryResult, useQuery } from "@apollo/client";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../modules/user/UserGQLQueries";
 import { ZERO_ADDRESS } from "../constant";
-import { getLensProfileById, LENS_GET_PROFILE_BY_PROFILE_ID } from "../modules/lens/LensGQLQueries";
+import {
+  getLensProfileById,
+  LENS_GET_PROFILE_BY_PROFILE_ID,
+} from "../modules/lens/LensGQLQueries";
 import { useSelector } from "react-redux";
-import { selectLens, selectUserAccountData, userLensDataStored } from "../modules/user/userReduxSlice";
+import {
+  selectLens,
+  selectUserAccountData,
+  userLensDataStored,
+} from "../modules/user/userReduxSlice";
 
 enum MessageType {
   ContractProposal,
-  Regular
+  Regular,
 }
 
 const Messenger: NextPage<any> = () => {
@@ -63,28 +71,33 @@ const Messenger: NextPage<any> = () => {
   const [text, setText] = useState<string>("");
   const [img, setImg] = useState<string>("");
   const [msgs, setMsgs] = useState<Array<any>>([]);
-  const account = useSelector(selectUserAccountData)
+  const [messagesLoading, setMessagesLoading] = useState<boolean>(false)
+  const account = useSelector(selectUserAccountData);
   const user1 = String(account?.address).toLowerCase();
-  const [loadingUsers, setLoadingUsers] = useState<boolean>(false)
-  const userLensData = useSelector(selectLens)
-  
-  console.log({ msgs })
+  const [loadingUsers, setLoadingUsers] = useState<boolean>(false);
+  const userLensData = useSelector(selectLens);
 
-  
-  console.log({ users })
-  const userDataQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
-    skip: true,
-    variables: {
-      userAddress: ZERO_ADDRESS
-    }
-  })
+  const accountData = useAccount();
 
-  const lensGetUserProfileByProfileId: QueryResult = useQuery(LENS_GET_PROFILE_BY_PROFILE_ID, {
-    skip: true,
-    variables: {
-      id: 0
+  const userDataQuery: QueryResult = useQuery(
+    GET_VERIFIED_FREELANCER_BY_ADDRESS,
+    {
+      skip: true,
+      variables: {
+        userAddress: ZERO_ADDRESS,
+      },
     }
-  })
+  );
+
+  const lensGetUserProfileByProfileId: QueryResult = useQuery(
+    LENS_GET_PROFILE_BY_PROFILE_ID,
+    {
+      skip: true,
+      variables: {
+        id: 0,
+      },
+    }
+  );
 
   useEffect(() => {
     const usersRef = collection(db, "users", user1, "selectedUser");
@@ -93,34 +106,43 @@ const Messenger: NextPage<any> = () => {
     // execute query
     const unsub = onSnapshot(q, async (querySnapshot) => {
       let users = [];
+      
+      setMessagesLoading(true)
       await querySnapshot.forEach((doc) => {
         users.push(doc.data());
-      });
+      })
 
-      let completeUserData = []
+      let completeUserData = [];
 
       await users.forEach(async (user) => {
-        await userDataQuery.refetch({
-          userAddress: user?.uid
-        })
-        .then(async (userData) => {
-            if (userData?.data?.verifiedUsers && userData?.data?.verifiedUsers[0]?.id) {
-              const profile = await getLensProfileById(`0x${Math.abs(Number(userData?.data?.verifiedUsers && userData?.data?.verifiedUsers[0]?.id)).toString(16)}`)
+        await userDataQuery
+          .refetch({
+            userAddress: user?.uid,
+          })
+          .then(async (userData) => {
+            if (
+              userData?.data?.verifiedUsers &&
+              userData?.data?.verifiedUsers[0]?.id
+            ) {
+              const profile = await getLensProfileById(
+                `0x${Math.abs(
+                  Number(
+                    userData?.data?.verifiedUsers &&
+                      userData?.data?.verifiedUsers[0]?.id
+                  )
+                ).toString(16)}`
+              );
 
               completeUserData.push({
                 ...user,
                 ...userData?.data?.verifiedUsers[0],
-                ...profile
-              })
+                ...profile,
+              });
 
-              setUsers(completeUserData)
-
-              console.log({ completeUserData })
+              setUsers(completeUserData);
             }
-          })
-      })
-
-
+          }).finally(() => setMessagesLoading(false))
+      });
     });
     return () => unsub();
   }, []);
@@ -190,13 +212,13 @@ const Messenger: NextPage<any> = () => {
   const renderMessage = (idx: number, msg: IMessageProp) => {
     switch (msg?.type) {
       case MessageType.Regular:
-        return <RegularMessage key={idx} msg={msg} user1={user1} />
+        return <RegularMessage key={idx} msg={msg} user1={user1} />;
       case MessageType.ContractProposal:
-        return <ProposalMessage key={idx} msg={msg} user1={user1} />
+        return <ProposalMessage key={idx} msg={msg} user1={user1} />;
       default:
-        return <RegularMessage key={idx} msg={msg} user1={user1} />
+        return <RegularMessage key={idx} msg={msg} user1={user1} />;
     }
-  }
+  };
 
   return (
     <Box
@@ -214,20 +236,31 @@ const Messenger: NextPage<any> = () => {
           flexGrow: 1,
         }}
       >
-        <Box sx={{ height: '100%' }}>
-          <Box px={1} sx={{ height: '65px' }}>
-      
-              <Typography variant='subtitle2'>
-                Messages
-              </Typography>
-              <Typography paragraph variant='body2'>
-                4 conversations
-              </Typography>
-     
+        <Box sx={{ height: "100%" }}>
+          <Box px={1} sx={{ height: "65px" }}>
+            <Typography variant="subtitle2">Messages</Typography>
+            <Typography paragraph variant="body2">
+              {users.length} conversations
+            </Typography>
           </Box>
           <Divider />
-          <Box sx={{ overflow: 'scroll', width: 250, height: '100%' }}>
-            {users.map((user) => (
+          <Box sx={{ overflow: "scroll", width: 250, height: "100%" }}>
+            <Box>
+            {
+              messagesLoading && [0,1,2,3,4,5].map((num) => {
+                return (
+                <Stack spacing={1} sx={{ padding: '10px', width: '100%' }} direction='row' alignItems='center'>
+                  <Skeleton variant='rounded' sx={{ width: 45, height: 45, borderRadius: 60 }} />
+                  <Box>
+                    <Skeleton variant='text' sx={{ width: 120 }} />
+                    <Skeleton variant='text' sx={{ width: 120 }} />
+                  </Box>
+                </Stack>
+                )
+              })
+            }
+              </Box>
+            {users.length === 0 ? null : users.map((user) => (
               <User
                 key={user.handle}
                 user={user}
@@ -238,14 +271,17 @@ const Messenger: NextPage<any> = () => {
             ))}
           </Box>
         </Box>
-
-        <Divider sx={{ height: '100%' }} orientation='vertical' />
-
-        <Box sx={{ overflow: 'hidden', width: '100%', height: '100%' }}>
-          <Box display="flex" justifyContent="space-between" alignItems='space-between' sx={{ height: '65px', px: 1, borderBottom: '1px solid #ddd' }} >
-            <Stack direction="row" alignItems='center'>
+        <Divider sx={{ height: "100%" }} orientation="vertical" />
+        <Box sx={{ overflow: "hidden", width: "100%", height: "100%" }}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="space-between"
+            sx={{ height: "65px", px: 1, borderBottom: "1px solid #ddd" }}
+          >
+            <Stack direction="row" alignItems="center">
               <Avatar
-                alt=''
+                alt=""
                 src={userLensData?.profile?.picture?.original?.url}
                 sx={{
                   width: 40,
@@ -255,7 +291,7 @@ const Messenger: NextPage<any> = () => {
                   marginRight: "15px",
                 }}
               />
-              <Typography display='flex' sx={{ fontSize: "20px" }}>
+              <Typography display="flex" sx={{ fontSize: "20px" }}>
                 {chat.name}
               </Typography>
             </Stack>
@@ -264,37 +300,42 @@ const Messenger: NextPage<any> = () => {
             </IconButton>
           </Box>
 
-          {
-
-            !account.isConnected ?
-              <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                Connect a wallet to see your messages
+          {!accountData.isConnected ? (
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              Connect a wallet to see your messages
+            </Box>
+          ) : chat ? (
+            <Box sx={{ height: "100%", overflow: "scroll" }}>
+              <Box sx={{ position: "relative", flexGrow: 1, height: "100%" }}>
+                {msgs.length === 0 ? <Box p={2}><Typography>Select a user to view a conversation</Typography></Box> : msgs.map((msg, idx) => renderMessage(idx, msg))}
+                <MessageForm
+                  handleSubmit={handleSubmit}
+                  text={text}
+                  setText={setText}
+                  setImg={setImg}
+                />
               </Box>
-              :
-
-              chat ? (
-                <Box sx={{ height: '100%', overflow: 'scroll' }}>
-
-
-                  <Box sx={{ position: 'relative', flexGrow: 1, height: '100%', }}>
-                    {msgs.length
-                      ? msgs.map((msg, idx) => renderMessage(idx, msg))
-                      : null}
-                    <MessageForm
-                      handleSubmit={handleSubmit}
-                      text={text}
-                      setText={setText}
-                      setImg={setImg}
-                    />
-                  </Box>
-                </Box>
-              ) : (
-                <Typography color='text.secondary' sx={{ fontSize: '20px', textAlign: 'center' }}>Select a user to start conversation</Typography>
-              )}
+            </Box>
+          ) : (
+            <Typography
+              color="text.secondary"
+              sx={{ fontSize: "20px", textAlign: "center" }}
+            >
+              Select a user to start conversation
+            </Typography>
+          )}
         </Box>
       </Box>
     </Box>
   );
-}
+};
 
 export default Messenger;

@@ -51,9 +51,6 @@ const getTypes = () => {
   };
 };
 
-const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
-  fontSize: 14
-}));
 
 const UserCard: FC = ({ freelancer }) => {
   const router: NextRouter = useRouter()
@@ -65,6 +62,7 @@ const UserCard: FC = ({ freelancer }) => {
   const onOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
   const onCloseUserMenu = () => {
     setAnchorEl(null);
   };
@@ -146,7 +144,7 @@ const UserCard: FC = ({ freelancer }) => {
   }
 
   return (
-    <Card onClick={onViewProfile} variant='elevation' sx={{ boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;', cursor: 'pointer', width: '100%' }}>
+    <Card onClick={onViewProfile} variant='elevation' sx={{ border: '1px solid #ddd', boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;', cursor: 'pointer', width: '100%' }}>
       <CardContent>
         <Stack mb={2} direction='row' alignItems='flex-start' sx={{ width: '100%' }}>
           <Stack spacing={1} direction='row' alignItems='center' sx={{ width: '100%' }}>
@@ -161,7 +159,7 @@ const UserCard: FC = ({ freelancer }) => {
             </Box>
           </Stack>
 
-          <IconButton size="small" sx={{ bgcolor: '#F5F5F5', border: '1px solid #eee' }}>
+          <IconButton onClick={onOpenUserMenu} size="small">
             <MoreVert fontSize='small' />
           </IconButton>
         </Stack>

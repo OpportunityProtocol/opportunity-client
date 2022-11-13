@@ -1,6 +1,6 @@
 import React, { FC, useRef, useEffect, useState } from "react";
 import Moment from "react-moment";
-import { Card, Grid, styled, Typography, Box, Button, Stack, DialogContentText, AvatarGroup, Avatar } from "@mui/material";
+import { Card, Grid, styled, Typography, Box, List, ListItem, ListItemText, Button, Stack, DialogContentText, AvatarGroup, Avatar } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useContractWrite } from "wagmi";
 import { DAI_ADDRESS, NETWORK_MANAGER_ADDRESS, ZERO_ADDRESS } from "../../../../constant";
@@ -10,6 +10,8 @@ import { ConfirmationDialog } from "../../../../common/components/ConfirmationDi
 import { BigNumber } from "ethers";
 import { useSelector } from "react-redux";
 import { selectUserAddress } from "../../userReduxSlice";
+import { ApolloQueryResult, QueryResult, useQuery } from "@apollo/client";
+import { GET_CONTRACT_BY_ID } from "../../../contract/ContractGQLQueries";
 
 const useStyles = makeStyles({
   containerOwn: {
@@ -25,7 +27,7 @@ const useStyles = makeStyles({
   },
 
   MessageOwn: {
-    background: '#b8e0d0',
+    background: 'rgb(241, 243, 244)',
     color: '#333',
 
 
@@ -70,6 +72,7 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
     success: false,
     loading: false
   })
+  const [contractState, setContractState] = useState<number>(-1)
   const userAddress = useSelector(selectUserAddress)
 
   const checkMsg = msg.from === user1;
@@ -77,6 +80,19 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [msg]);
+
+  const contractQuery: QueryResult = useQuery(GET_CONTRACT_BY_ID, {
+    variables: {
+      contractId: msg.data?.contractId
+    }
+  })
+
+  useEffect(() => {
+    contractQuery.refetch().then((result: ApolloQueryResult<any>) => {
+      const contract = result.data?.contract
+      setContractState(contract?.ownership)
+    })
+  }, [msg.data?.contractId])
 
   const { write: approveDaiTransfer, status: approveDaiTransferStatus } = useContractWrite({
     addressOrName: DAI_ADDRESS,
@@ -96,7 +112,6 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
         error: false
       })
       acceptProposal()
-      alert('Successful dai transfer!')
     },
     onError(error, variables, context) {
       setConfirmationDialogState({
@@ -105,7 +120,6 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
         success: false,
         error: true
       })
-      alert('Error dai transfer!')
     },
   })
 
@@ -129,7 +143,7 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
         open: false,
         error: false
       })
-      alert('Accept proposal success')
+  
     },
     onError(error, variables, context) {
       setConfirmationDialogState({
@@ -138,7 +152,7 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
         success: false,
         error: true
       })
-      alert('Accept proposal error')
+      
     },
   })
 
@@ -146,22 +160,23 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
     <DialogContentText id="alert-dialog-description">
       <Typography fontSize={20} fontWeight="bold" py={1}>
         {" "}
-        You are about to accept a contract proposal.
+        You are about to accept a contract proposal. This will involve:
       </Typography>
 
-      <ul>
-        <li>
-          {" "}
-          <Typography>Signing a transaction</Typography>
-        </li>
-        <li>
-          {" "}
-          <Typography>Approving the funds</Typography>
-        </li>
-        <li>
-          <Typography>Executing the transaction</Typography>
-        </li>
-      </ul>
+      <List>
+        <ListItem>
+          <ListItemText primary="Signing a transaction" secondary="Your wallet provider will instruct you to sign the transaction." />
+        </ListItem>
+
+        <ListItem>
+          <ListItemText primary="Approving the funds" secondary="This will approve Lens Talent to move the appropriate funds out of your wallet and into an escrow." />
+        </ListItem>
+
+        <ListItem>
+          <ListItemText primary="Executing the transaction" secondary="Finally, you will confirm your transaction. A message will appear in your wallet provider to confirm." />
+        </ListItem>
+      </List>
+
     </DialogContentText>,
 
     <DialogContentText id="alert-dialog-description">
@@ -170,11 +185,10 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
           Accept Proposal
         </Typography>
         <Typography variant="subtitle2">
-          Your wallet will prompt you to approve dai and then confirm the transaction. Only accept
-          transaction from addresses you trust.
+          Once you accept the proposal your wallet provider will be ask you to confirm the transactions.
         </Typography>
       </Box>
-    </DialogContentText>,
+    </DialogContentText>
   ];
 
   return (
@@ -209,10 +223,10 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
             ? null
             :
             <Stack sx={{ my: 1 }} spacing={3} direction='row' alignItems='center' justifyContent='flex-start'>
-              <Button variant='contained' size="large" onClick={() => setConfirmationDialogState({ ...confirmationDialogState, open: true })}>
+              <Button disabled={confirmationDialogState.success || contractState >= 0 } variant='contained' size="large" onClick={() => setConfirmationDialogState({ ...confirmationDialogState, open: true })}>
                 Accept
               </Button>
-              <Button>
+              <Button disabled={confirmationDialogState.success || contractState >= 0 }>
                 Decline
               </Button>
             </Stack>
@@ -228,7 +242,6 @@ const ProposalMessage: FC<IProposalMessageProps> = ({ msg, user1 }) => {
 const RegularMessage: FC<IRegularMessageProps> = ({ msg, user1 }) => {
   const classes = useStyles();
   const scrollRef = useRef();
-
   const checkMsg = msg.from === user1;
 
   useEffect(() => {
@@ -255,7 +268,7 @@ const RegularMessage: FC<IRegularMessageProps> = ({ msg, user1 }) => {
   )
 }
 
-export { ProposalMessage, RegularMessage, IRegularMessageData, IProposalMessageData, IMessageProp, IProposalMessageProps, IRegularMessageProps }
+export { ProposalMessage, RegularMessage, type IRegularMessageData, type IProposalMessageData, type IMessageProp, type IProposalMessageProps, type IRegularMessageProps }
 
 
 

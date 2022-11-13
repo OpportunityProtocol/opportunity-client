@@ -170,14 +170,12 @@ const TransactionTokenDialog: FC<
       
     },
     onError(error, variables, context) {
-      alert(error)
+ 
     },
     overrides: {
       gasLimit: BigNumber.from("900000"),
     },
   })
-
-  console.log({ tokenAddress })
 
   const { write: onSellTokens } = useContractWrite({
     mode: "recklesslyUnprepared",
@@ -190,8 +188,7 @@ const TransactionTokenDialog: FC<
         gasPrice: 90000000000,
       },
       onError(error, variables, context) {
-        alert(error)
-        console.log({ variables })
+
       },
   });
 

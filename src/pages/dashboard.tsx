@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, SetStateAction, useEffect, useState } from "react";
 import { useStyles } from "../modules/market/MarketStyles";
 import {
   Container,
@@ -24,7 +24,7 @@ import { withStyles } from "@mui/styles";
 import ServiceCard from "../modules/contract/components/ServiceCard/ServiceCard";
 
 import { NextPage } from "next";
-import { QueryResult, useQuery } from "@apollo/client";
+import { ApolloQueryResult, QueryResult, useQuery } from "@apollo/client";
 import {
   GET_ACTIVE_SERVICES_BY_CREATOR,
   GET_CONTRACTS,
@@ -127,13 +127,51 @@ const ExplorePage: NextPage = () => {
     },
   });
 
+  const loadAndSetContracts = async (
+    contracts: Array<any>,
+    setStateFunction: SetStateAction<any>
+  ): Promise<void> => {
+    let contractMetadata: any = {};
+    const updatedContracts = [];
+
+    for (const contractData of contracts) {
+      contractMetadata = await fleek.getContract(
+        String(contractData?.metadata).slice(13)
+      );
+
+      updatedContracts.push({
+        ...contractData,
+        ...contractMetadata,
+      });
+    }
+
+    setStateFunction(updatedContracts);
+  };
+
+  const onLoadContractsCreatedByEmployer = () =>
+    contractsCreatedByEmployerQuery
+      .refetch()
+      .then((result: ApolloQueryResult<any>) =>
+        loadAndSetContracts(result.data?.contracts, setContractsHiring)
+      )
+      .catch((err) => alert(err));
+
+  const onLoadContractsWorking = () =>
+    workingContractsQuery
+      .refetch()
+      .then((result: ApolloQueryResult<any>) =>
+        loadAndSetContracts(result.data?.contracts, setContractsWorking)
+      )
+      .catch((err) => alert(err));
+
   const onRefresh = (): void => {
+    onLoadContractsCreatedByEmployer();
+    onLoadContractsWorking();
+
     servicesByCreatorQuery.refetch();
     serviceQuery.refetch();
     purchasedServicesByClientQuery.refetch();
     activeServicesByCreatorQuery.refetch();
-    contractsCreatedByEmployerQuery.refetch();
-    workingContractsQuery.refetch();
   };
 
   const onChangePersona = (): void => {
@@ -207,34 +245,6 @@ const ExplorePage: NextPage = () => {
     syncActiveServices();
   }, [activeServicesByCreatorQuery.loading]);
 
-  useEffect(() => {
-    console.log(searchQuery);
-  }, [searchQuery]);
-
-  useEffect(() => {
-    async function loadWorkingContracts() {
-      if (!workingContractsQuery.loading && workingContractsQuery.data) {
-        const contracts = workingContractsQuery.data.contracts;
-
-        let contractMetadata = {};
-        let displayedContractsData = [];
-        await contracts.forEach(async (contract) => {
-          contractMetadata = await fleek.getContract(
-            String(contract?.metadata).slice(13)
-          );
-          displayedContractsData.push({
-            ...contract,
-            ...contractMetadata,
-          });
-
-          setContractsWorking(displayedContractsData);
-        });
-      }
-    }
-
-    loadWorkingContracts();
-  }, [workingContractsQuery.loading]);
-
   //hiring
   useEffect(() => {
     async function syncPurchasedServices() {
@@ -284,42 +294,11 @@ const ExplorePage: NextPage = () => {
   }, [purchasedServicesByClientQuery.loading]);
 
   useEffect(() => {
-    if (
-      !contractsCreatedByEmployerQuery.loading &&
-      contractsCreatedByEmployerQuery.data
-    ) {
-      async function loadContractsHiring() {
-        const contracts = contractsCreatedByEmployerQuery.data.contracts;
-
-        let contractMetadata = {};
-        let displayedContractsData = [];
-        await contracts.forEach(async (contract) => {
-          contractMetadata = await fleek.getContract(
-            String(contract?.metadata).slice(13)
-          );
-          displayedContractsData.push({
-            ...contract,
-            ...contractMetadata,
-          });
-
-          console.log({ displayedContractsData });
-
-          setContractsHiring(displayedContractsData);
-        });
-      }
-
-      loadContractsHiring();
-    }
-  }, [contractsCreatedByEmployerQuery.loading]);
-
-  useEffect(() => {
     if (!servicesByCreatorQuery.loading && servicesByCreatorQuery.data) {
       async function loadCreatedServices() {
         const services = servicesByCreatorQuery.data.services;
-
         let serviceMetadata = {};
         let displayedServicesData = [];
-        let creatorLensProfile = {};
 
         await services.forEach(async (service) => {
           //fetch metadata
@@ -339,6 +318,10 @@ const ExplorePage: NextPage = () => {
       loadCreatedServices();
     }
   }, [servicesByCreatorQuery.loading]);
+
+  useEffect(() => {
+    onRefresh();
+  }, []);
 
   const renderContracts = () => {
     switch (state.persona) {
@@ -550,7 +533,9 @@ const ExplorePage: NextPage = () => {
       maxWidth="xl"
       sx={{
         overflow: "scroll",
-        padding: "0px 0px !important",
+        paddingLeft: "0px",
+        paddingRight: "0px",
+        paddingBottom: "15px",
       }}
     >
       <Box
@@ -713,11 +698,7 @@ const ExplorePage: NextPage = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
 
-              <IconButton
-                sx={{ bgcolor: "#fff", border: "1px solid #ddd" }}
-                size="medium"
-                onClick={onRefresh}
-              >
+              <IconButton size="medium" onClick={onRefresh}>
                 <Refresh fontSize="small" />
               </IconButton>
             </Stack>

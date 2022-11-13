@@ -82,7 +82,6 @@ const Explore: NextPage<any> = () => {
   const usersQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCERS);
   const userLensData = useSelector(selectLens);
   const userData = useSelector(selectUserAccountData);
-  console.log({ userLensData });
   const servicesQuery: QueryResult = useQuery(GET_SERVICES);
   const { data: signer } = useSigner();
 
@@ -193,7 +192,7 @@ const Explore: NextPage<any> = () => {
                     <Typography
                       py={2}
                       fontWeight="600"
-                      fontSize={25}
+                      fontSize={35}
                       color="#fff"
                     >
                       Work from anywhere, with anyone
@@ -269,7 +268,7 @@ const Explore: NextPage<any> = () => {
                   alignItems="center"
                   justifyContent="space-between"
                 >
-                  <Typography fontWeight="600" fontSize={16} color="#212121">
+                  <Typography fontWeight="600" fontSize={22} color="rgba(33, 33, 33, .85)">
                     Markets
                   </Typography>
 
@@ -283,7 +282,7 @@ const Explore: NextPage<any> = () => {
                 </Stack>
 
                 <Grid container direction="row" alignItems="center" spacing={2}>
-                  {markets.map((marketDetails) => {
+                  {markets.slice(0,4).map((marketDetails) => {
                     return (
                       <Grid xs={12} md={6} lg={6} item>
                         <MarketDisplay marketDetails={marketDetails} />
@@ -300,8 +299,8 @@ const Explore: NextPage<any> = () => {
                   alignItems="center"
                   justifyContent="space-between"
                 >
-                  <Typography fontWeight="600" fontSize={16} color="#212121">
-                    Freelancers
+                  <Typography fontWeight="600" fontSize={22} color="rgba(33, 33, 33, .85)">
+                    Users
                   </Typography>
 
                   <Button
@@ -309,12 +308,12 @@ const Explore: NextPage<any> = () => {
                     variant="text"
                     endIcon={<KeyboardArrowRight />}
                   >
-                    All Freelancers
+                    All Users
                   </Button>
                 </Stack>
 
                 <Grid container direction="row" alignItems="center" spacing={2}>
-                  {activeFreelancers.map((freelancer) => (
+                  {activeFreelancers.slice(0,4).map((freelancer) => (
                     <Grid item xs={12} md={6} lg={6}>
                       <UserCard freelancer={freelancer} />
                     </Grid>
@@ -332,8 +331,8 @@ const Explore: NextPage<any> = () => {
                   <Typography
                     pb={2}
                     fontWeight="600"
-                    fontSize={16}
-                    color="#212121"
+                    fontSize={22}
+                    color="rgba(33, 33, 33, .85)"
                   >
                     Discover Services
                   </Typography>
@@ -378,7 +377,7 @@ const Explore: NextPage<any> = () => {
               >
                 <CardContent>
                   <Stack spacing={3}>
-                    {userLensData.profileId === 0 || !userLensData.profileId ? (
+                    {userLensData.profileId <= 0  ? (
                       <Typography variant="body2">
                         Sign up and find work or start working instantly 🎉
                       </Typography>
@@ -392,7 +391,7 @@ const Explore: NextPage<any> = () => {
                         <Avatar src={userLensData.user?.imageURI} />
                         <Box>
                           <Typography fontSize={14}>
-                            @{userLensData.user?.handle}
+                            @{userLensData.profile.handle}
                           </Typography>
                         </Box>
                       </Box>
@@ -429,7 +428,7 @@ const Explore: NextPage<any> = () => {
                 direction="row"
                 alignItems="center"
               >
-                <Typography fontWeight="600" fontSize={16} color="#212121">
+                <Typography fontWeight="600" fontSize={22} color="rgba(33, 33, 33, .85)">
                   Advertisements and Publications
                 </Typography>
               </Stack>

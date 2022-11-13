@@ -37,7 +37,6 @@ const Market: NextPage = () => {
   const [displayedContracts, setDisplayedContracts] = useState<Array<any>>([])
   const { id, routedSearchQuery } = router.query;
 
-
   const marketDetailsQuery: QueryResult = useQuery(GET_MARKET_DETAILS_BY_ID, {
     variables: {
       marketId: 1
@@ -47,8 +46,6 @@ const Market: NextPage = () => {
     },
   })
 
-
-
   const contractsQuery: QueryResult = useQuery(GET_CONTRACTS_BY_MARKET_ID, {
     variables: {
       id: 1,
@@ -57,7 +54,6 @@ const Market: NextPage = () => {
   })
 
   const servicesQuery: QueryResult = useQuery(GET_SERVICES_BY_MARKET_ID, {
-
     variables: {
       id: 1
     }
@@ -79,6 +75,7 @@ const Market: NextPage = () => {
     if (e.target.value === "") {
       setDisplayedContracts(cachedContracts)
       setDisplayedServices(cachedServices)
+      return
     }
     
     const filteredContracts = cachedContracts.filter((contract) => String(contract.contract_title).includes(e.target.value))
@@ -89,7 +86,6 @@ const Market: NextPage = () => {
   }
 
   useEffect(() => {
-    console.log({ marketDetailsQuery })
     loadMarketData()
   }, [id])
 
@@ -118,16 +114,17 @@ const Market: NextPage = () => {
 
       let contractMetadata = {}
       let displayedContractsData = []
-      await contracts.forEach(async (contract: any) => {
-        contractMetadata = await fleek.getContract(String(contract?.metadata).slice(13))
+
+      for (const contractData of contracts) {
+        contractMetadata = await fleek.getContract(String(contractData?.metadata).slice(13))
         displayedContractsData.push({
-          ...contract,
+          ...contractData,
           ...contractMetadata
         })
+      }
 
-        setDisplayedContracts(displayedContractsData)
-        setCachedContracts(displayedContractsData)
-      })
+      setDisplayedContracts(displayedContractsData)
+      setCachedContracts(displayedContractsData)
     }
   }
 
@@ -163,7 +160,7 @@ const Market: NextPage = () => {
     <Container maxWidth='xl'>
       <Box sx={{ width: "100%" }}>
 
-<Box>
+<Box pb={4}>
 <Typography
             fontWeight="bold"
             fontSize={24}
@@ -175,8 +172,8 @@ const Market: NextPage = () => {
             {MARKET_DESCRIPTION_MAPPING[marketDetails?.name]}
           </Typography>
           <Stack spacing={3} direction='row' alignItems='center'>
-            <Chip size='small' label='Volume: $2923.23' />
-            <Chip size='small' label='Liquidty: $2923.23' />
+            <Chip size='small' label='Volume: $2923.23' sx={{ fontWeight: '600' }} />
+            <Chip size='small' label='Liquidty: $2923.23' sx={{ fontWeight: '600' }} />
           </Stack>
        
 </Box>

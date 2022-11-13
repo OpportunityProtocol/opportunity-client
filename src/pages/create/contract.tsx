@@ -122,22 +122,31 @@ const CreateContractPage: NextPage = (): JSX.Element => {
   const [marketDetails, setMarketDetails] = useState<any>({});
   const createContractDialogOnOpen = (): void => { };
 
+  const displayDerivedError = (error: any): string => {
+    if (error.toLowerCase().includes('action_rejected')) {
+      return 'The transaction was rejected. Try again.'
+    } else {
+      return error
+    }
+  }
+
   const createContractDialogContent: Array<ReactNode> = [
-    <DialogContent>
-      <DialogContentText>
-        You are about to publish a contract to Lens Talent. This will involve
-        signing a transaction with your wallet.
-      </DialogContentText>
+    <DialogContent sx={{ height: 120}}>
+      <Typography variant="body2" paragraph fontSize={15}>
+      You are about to publish a contract to Lens Talent. Once your transaction is completed your contract will be live after 3-5 minutes.
+      </Typography>
+     
       <Typography variant="caption">
         Note: This transaction will cost MATIC.
       </Typography>
     </DialogContent>,
-    <DialogContent>
-      <DialogContentText>
-        {createContractDialogState?.loading
-          ? "Waiting for confirmation..."
-          : createContractDialogState?.error ? createContractDialogState.errorMessage :  "After pressing create your wallet provider will prompt you to accept the transaction."}
-      </DialogContentText>
+    <DialogContent sx={{ height: 120 }}>
+         <Typography variant="body2" paragraph fontSize={15}>
+         {createContractDialogState?.loading
+          ? "Waiting for confirmation. Please check your wallet provider."
+          : createContractDialogState?.error ? displayDerivedError(createContractDialogState.errorMessage) :  "After pressing create your wallet provider will prompt you to accept the transaction."}
+      </Typography>
+
     </DialogContent>
   ]
 

@@ -161,9 +161,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   
           setTokenInfo(tokenInfo)
         }
-        console.log('@@@@')
-        console.log(serviceData)
-        console.log(res.data)
       })
     }
 
@@ -223,7 +220,6 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     async function loadProfile() {
       if (serviceOwnerLensProfileId > 0) {
         const profile = await getLensProfileById(`0x${Math.abs(Number(serviceOwnerLensProfileId)).toString(16)}`)
-        console.log({ profile })
         setServiceOwnerLensProfile(profile)
       }
     }

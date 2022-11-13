@@ -137,12 +137,9 @@ const ServiceCard = ({
     onSettled(data, error, variables, context) {
 
       if (!error) {
-        alert('hi')
-        console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
         onResolveService()
       } else {
-        console.log("BBBBBSOJISJFOISJEOJREOJROESJROIEJROIESJROSEJROEJROSEJSER")
-        alert(error)
+       
       }
     },
   })
@@ -217,7 +214,6 @@ const ServiceCard = ({
     async function loadProfile() {
       if (serviceOwnerLensProfileId > 0) {
         const profile = await getLensProfileById(`0x${Math.abs(Number(serviceOwnerLensProfileId)).toString(16)}`)
-        console.log({ profile })
         setServiceOwnerLensData(profile);
       }
     }
@@ -254,8 +250,6 @@ const ServiceCard = ({
 
     },
   })
-
-  console.log({ service })
 
   const getValues = async () => {
     return {
@@ -492,7 +486,7 @@ const ServiceCard = ({
 
             <Box sx={{ width: '100%' }}>
               <Typography variant='caption' color='rgb(128, 128, 128)'>
-                {service.marketDetails.name}
+                {service?.marketDetails?.name}
               </Typography>
               <Typography
                 fontWeight="medium"

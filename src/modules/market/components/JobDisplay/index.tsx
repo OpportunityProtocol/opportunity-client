@@ -16,7 +16,7 @@ import {
   Stack,
   Divider,
 } from "@mui/material";
-import { withStyles } from '@mui/styles'
+import { withStyles } from "@mui/styles";
 import { NextRouter, useRouter } from "next/router";
 import { useAccount, useContractRead } from "wagmi";
 import {
@@ -37,7 +37,11 @@ interface IJobDisplayProps {
   showStatus?: boolean;
 }
 
-const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatus = false }) => {
+const JobDisplay: React.FC<IJobDisplayProps> = ({
+  data,
+  table = false,
+  showStatus = false,
+}) => {
   const router: NextRouter = useRouter();
   const accountData = useAccount();
   const [contractOwnerData, setContractOwnerData] = useState<any>({
@@ -45,12 +49,9 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
   });
   const [contractMetadata, setContractMetadata] = useState({});
   const [metadataString, setMetadataString] = useState("");
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
-  const userAddress = useSelector(selectUserAddress)
-
-  console.log({ data })
-
+  const userAddress = useSelector(selectUserAddress);
 
   const networkManager_getLensProfileIdFromAddress = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
@@ -65,7 +66,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
         lensProfileId: hexToDecimal(data?._hex),
       });
     },
-    onError: (error) => { },
+    onError: (error) => {},
   });
 
   const lensHub_getProfile = useContractRead({
@@ -92,176 +93,154 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({ data, table = false, showStatu
   }, [data?.employer]);
 
   const border = () => {
-    switch(data?.ownership) {
-      case 1: 
-      return '1px solid blue'
+    switch (data?.ownership) {
+      case 1:
+        return "1px solid blue";
       case 2: //resolved
-        return '1px solid green'
+        return "1px solid green";
       default:
-        return '1px solid #ddd'
+        return "1px solid #ddd";
     }
-  }
+  };
 
   return (
-      <Card
+    <Card
       key={data?.id}
-        onClick={() => router.push(`/view/contract/${data?.id}`)}
-
-        square
-         variant="outlined"
+      onClick={() => router.push(`/view/contract/${data?.id}`)}
+      square
+      variant="outlined"
+      sx={{
+        border: border(),
+        boxShadow:
+          "rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px",
+        cursor: "pointer",
+        width: "100%",
+        height: "200px",
+        "&:hover": {
+          color: (theme) => theme.palette.primary.main,
+        },
+      }}
+    >
+      <CardContent
         sx={{
-          border: border(),
-          boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
-          cursor: "pointer",
-          width: "100%",
-          height: '200px',
-          "&:hover": {
-            color: (theme) => theme.palette.primary.main,
-          },
+          display: "flex",
+          height: 210,
+          flexDirection: "column",
+          justifyContent: "space-evenly",
         }}
       >
-        <CardContent
+        {data?.contract_title ? (
+          <Typography fontWeight="600">{data?.contract_title}</Typography>
+        ) : (
+          <Typography fontWeight="600">
+            Unable to load contract title
+          </Typography>
+        )}
+
+        <Box
+          component={Typography}
+          paragraph
+          color="rgb(90, 104,119)"
+          fontSize={13}
+          fontWeight="medium"
           sx={{
-            display: "flex",
-            height: 210,
-            flexDirection: "column",
-            justifyContent: "space-evenly",
+            height: 60,
+            display: "-webkit-box",
+            overflow: "hidden",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 2,
+            textOverflow: "ellipsis",
           }}
         >
-       
-          {
-              data?.contract_title ? (
-                <Typography fontWeight="600">
-                  {data?.contract_title}
-                </Typography>
-              ) : (
-                <Typography fontWeight="600">
-                  Unable to load contract title
-                </Typography>
-              )}
+          {data?.contract_description
+            ? data?.contract_description
+            : "Unable to load description"}
+        </Box>
 
-          <Box
-            component={Typography}
-            paragraph
-            color="rgb(90, 104,119)"
-            fontSize={13}
-            fontWeight="medium"
-            sx={{
-              height: 60,
-              display: "-webkit-box",
-              overflow: "hidden",
-              WebkitBoxOrient: "vertical",
-              WebkitLineClamp: 2,
-              textOverflow: "ellipsis",
-            }}
-          >
-            {
+        <Grid
+          pb={2}
+          container
+          direction="row"
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="flex-start"
+        >
+          {data?.tags && data?.tags?.length > 0 ? (
+            data?.tags?.map((tag) => {
+              return (
+                <Grid item mr={1} key={tag}>
+                  <Chip
+                    variant="filled"
+                    sx={{ fontSize: 12, padding: 1, backgroundColor: "#eee" }}
+                    label={tag}
+                    size="small"
+                  />
+                </Grid>
+              );
+            })
+          ) : (
+            <Typography variant="caption">Unable to load tags</Typography>
+          )}
+        </Grid>
 
-                data?.contract_description
-                  ? data?.contract_description
-                  : "Unable to load description"}
-          </Box>
+        <Grid
+          sx={{ width: "100%" }}
+          container
+          item
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Grid item sx={{ display: "flex", alignItems: "center" }}>
+            <Typography mr={0.5} variant="body2" component="span" fontSize={13}>
+              Budget:{" "}
+            </Typography>
 
-          <Grid
-            pb={2}
-            container
-            direction="row"
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="flex-start"
-          >
-            {
-
-               data?.tags && data?.tags?.length > 0 ? (
-                  data?.tags?.map((tag) => {
-                    return (
-                      <Grid item mr={1} key={tag}>
-                        <Chip
-                          variant="filled"
-                          sx={{ fontSize: 12, padding: 1, backgroundColor: "#eee" }}
-                          label={tag}
-                          size="small"
-                        />
-                      </Grid>
-                    );
-                  })
-                ) : (
-                  <Typography variant="caption">Unable to load tags</Typography>
-                )}
-          </Grid>
-
-          <Grid
-            sx={{ width: "100%" }}
-            container
-            item
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Grid item sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography mr={0.5} variant='body2' component='span' fontSize={13} >
-                Budget: {" "}
-              </Typography>
-
-              <Stack direction='row' alignItems='center'>
+            <Stack direction="row" alignItems="center">
               <img
-                  src="/assets/images/dai.svg"
-                  style={{ margin: '3px 3px', width: 15, height: 20 }}
-                />
-                <Typography variant='body2' fontSize={13}>
-                  {
-                    data?.contract_budget
-                      ? data?.contract_budget
-                      : 0}{" "}
-                </Typography>
-              </Stack>
-            </Grid>
-            <Grid item>
-              <Stack direction='row' alignItems='center'>
-                <Typography fontSize={12}>
-                  Predicted Duration:
-                </Typography>
-                &nbsp;
-                {
-                  <Typography fontSize={12} fontWeight='600'>
-                    {
-                      data?.duration
-                      ? data?.duration
-                      : "Undefined"
-                    }
-                  </Typography>
-                
-                }
-              
-              </Stack>
-
-            </Grid>
+                src="/assets/images/dai.svg"
+                style={{ margin: "3px 3px", width: 15, height: 20 }}
+              />
+              <Typography variant="body2" fontSize={13}>
+                {data?.contract_budget ? data?.contract_budget : 0}{" "}
+              </Typography>
+            </Stack>
           </Grid>
-        </CardContent>
+          <Grid item>
+            <Stack direction="row" alignItems="center">
+              <Typography fontSize={12}>Predicted Duration:</Typography>
+              &nbsp;
+              {
+                <Typography fontSize={12} fontWeight="600">
+                  {data?.duration ? data?.duration : "Undefined"}
+                </Typography>
+              }
+            </Stack>
+          </Grid>
+        </Grid>
+      </CardContent>
 
-        {
-          showStatus && (
-            <>
-              <Divider />
-              <CardContent>
-                <Box display="flex" alignItems="center" justifyContent="center">
-                  <Typography fontSize={13} color="text.secondary">
-                    Status:{" "}
-                    <Typography
-                      fontSize={13}
-                      fontWeight="medium"
-                      component="span"
-                      color="green"
-                    >
-                      Resolved
-                    </Typography>
-                  </Typography>
-                </Box>
-              </CardContent>
-            </>
-          )
-        }
-      </Card>
+      {showStatus && (
+        <>
+          <Divider />
+          <CardContent>
+            <Box display="flex" alignItems="center" justifyContent="center">
+              <Typography fontSize={13} color="text.secondary">
+                Status:{" "}
+                <Typography
+                  fontSize={13}
+                  fontWeight="medium"
+                  component="span"
+                  color="green"
+                >
+                  Resolved
+                </Typography>
+              </Typography>
+            </Box>
+          </CardContent>
+        </>
+      )}
+    </Card>
   );
 };
 

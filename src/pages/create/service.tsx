@@ -264,13 +264,10 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           JSON.stringify(createServiceForm)
         );
 
-        // deepCopyCreateServiceForm.serviceThumbnail = ""
-        //deepCopyCreateServiceForm.thumbnail = ""
-
         retVal = await fleek.uploadService(
           String(accountData.address) + ":" + createServiceForm.serviceTitle,
           JSON.stringify(deepCopyCreateServiceForm)
-        ); //await pinJSONToIPFSPinata(data)
+        );
       }
 
       setServiceMetadataKey(retVal);
@@ -341,7 +338,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
   const onTagInputKeyPress = (e: KeyboardEventHandler<HTMLDivElement>) => {
     if (e.code === "Space") {
       if (createServiceForm.tags.length >= 5) {
-        alert("No more tags");
         return;
       }
 

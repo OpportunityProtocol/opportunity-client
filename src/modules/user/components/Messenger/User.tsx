@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "../../../../../firebase";
-import { Avatar, Grid, Typography } from "@mui/material";
-import { Box } from "@mui/system";
+import { Avatar, Box, Typography } from "@mui/material";
 
 const User = ({ user1, user, selectUser, chat }) => {
   const user2 = user?.uid;
@@ -19,7 +18,7 @@ const User = ({ user1, user, selectUser, chat }) => {
 
   return (
     <>
-      <Grid
+      <Box
         sx={{
           bgcolor: "",
           marginBottom: "10px",
@@ -29,12 +28,12 @@ const User = ({ user1, user, selectUser, chat }) => {
           flexDirection: "row",
           textOverflow: "ellipsis",
           overflow: "hidden",
-          maxWidth: "287px",
+         // maxWidth: "287px",
         }}
         className={`user_wrapper ${chat.name === user.name && "selected_user"}`}
         onClick={() => selectUser(user)}
       >
-        <Grid
+        <Box
           sx={{
             bgcolor: "",
             display: "flex",
@@ -55,7 +54,7 @@ const User = ({ user1, user, selectUser, chat }) => {
             alt={user?.name}
           />
 
-          <Grid
+          <Box
             sx={{
               display: "flex",
               alignItems: "start",
@@ -112,14 +111,14 @@ const User = ({ user1, user, selectUser, chat }) => {
                 {data.text}
               </Typography>
             )}
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid
+          </Box>
+        </Box>
+      </Box>
+      <Box
         sx={{ bgcolor: "" }}
         onClick={() => selectUser(user)}
         className={`sm_container ${chat.name === user.name && "selected_user"}`}
-      ></Grid>
+      ></Box>
     </>
   );
 };

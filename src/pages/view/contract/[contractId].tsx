@@ -24,7 +24,7 @@ import JobDisplay from "../../../modules/market/components/JobDisplay";
 
 import { useRouter } from "next/router";
 import { NextPage } from "next/types";
-import { QueryResult, useQuery } from "@apollo/client";
+import { ApolloQueryResult, QueryResult, useQuery } from "@apollo/client";
 import { GET_CONTRACT_BY_ID } from "../../../modules/contract/ContractGQLQueries";
 import {
   useAccount,
@@ -162,7 +162,7 @@ const ViewContract: NextPage<any> = () => {
 
   const { write: onReleaseContract } = useContractWrite(releaseContractConfig);
 
-  const { write: onResolveContract, isLoading: isLoadingResolveContractTransaction } = useContractWrite({
+  const { write: onResolveContract, isLoading: isLoadingResolveContractTransaction, isSuccess: isSuccessResolveContractTransaction } = useContractWrite({
     mode: "recklesslyUnprepared",
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
@@ -188,8 +188,8 @@ const ViewContract: NextPage<any> = () => {
 
   async function loadContractData() {
     if (contractId) {
-      contractByIdQuery.refetch().then(async (res) => {
-        const updatedContractData = res.data.contract;
+      contractByIdQuery.refetch().then(async (result: ApolloQueryResult<any>) => {
+        const updatedContractData = result.data.contract;
         const contractMetadata = await fleek.getContract(String(updatedContractData?.metadata).slice(13))
 
         setContractData({
@@ -293,6 +293,7 @@ const ViewContract: NextPage<any> = () => {
               color="primary"
               disableElevation
               disableRipple
+              disabled={isSuccessResolveContractTransaction || isLoadingResolveContractTransaction }
               onClick={handleResolveContract}
             >
               Accept Work
@@ -423,8 +424,6 @@ const ViewContract: NextPage<any> = () => {
       Number(contractData?.ownership) == 0
 
     ) {
-
-
       return (
         <>
           <Button
@@ -448,12 +447,9 @@ const ViewContract: NextPage<any> = () => {
 
             sx={{
               '& .MuiDialog-paper': {
-
                 backgroundColor: '#fafafa'
               },
             }}
-
-
           >
             <Grid sx={{
               maxWidth: '1300px',
@@ -464,9 +460,6 @@ const ViewContract: NextPage<any> = () => {
               marginLeft: 'auto',
               paddingTop: '10em',
               paddingBottom: '10em',
-
-
-
             }}>
               <Grid sx={{
                 justifyContent: 'center',
@@ -488,25 +481,18 @@ const ViewContract: NextPage<any> = () => {
                   flexDirection: 'column',
 
                 }}>
-
                   <Grid sx={{
                     width: "100%",
                     boxShadow: '0px 21px 41px -13px rgba(0, 0, 0, 0.18)',
-
                   }}>
-
                     <Grid sx={{
                       display: 'flex',
                       flexDirection: 'row',
                       flexWrap: 'wrap',
                       marginRight: '0',
                       marginLeft: '0',
-
                     }}>
-
-
                       <Grid sx={{
-
                         paddingRight: '0',
                         paddingLeft: '0',
                         alignItems: 'stretch !important',
@@ -519,10 +505,6 @@ const ViewContract: NextPage<any> = () => {
                         height: "100%",
 
                       }}>
-
-
-
-
                         <Grid sx={{
                           marginTop: '-20px',
                           marginBottom: '-20px',
@@ -530,62 +512,29 @@ const ViewContract: NextPage<any> = () => {
                           background: 'rgb(217, 243, 232) !important',
                           width: '100% !important',
                           padding: '3rem !important',
-                          height: '83%',
+                          height: '100%',
                           maxHeight: '83%',
                         }}>
-
-
                           <List >
-                            <Grid sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', padding: '0px' }}>
                               <ListItem >
-                                <ListItemText primary=" Title" secondary="Titania" primaryTypographyProps={{ fontWeight: '550' }} />
+                                <ListItemText primary="Title" secondary={contractData.contract_title} primaryTypographyProps={{ fontWeight: '600' }} />
                               </ListItem>
                               <ListItem >
-                                <ListItemText primary="Description" secondary="Tethys" primaryTypographyProps={{ fontWeight: '550' }} />
+                                <ListItemText primary="Description" secondary={contractData.contract_description} primaryTypographyProps={{ fontWeight: '600'}} />
                               </ListItem>
                               <ListItem >
-                                <ListItemText primary="Market Id" secondary="Tethys" primaryTypographyProps={{ fontWeight: '550' }} />
+                                <ListItemText primary="Budget" secondary={contractData.contract_budget} primaryTypographyProps={{ fontWeight: '600' }} />
                               </ListItem>
-                              <ListItem >
-                                <ListItemText primary="Budget" secondary="Tethys" primaryTypographyProps={{ fontWeight: '550' }} />
-                              </ListItem>
-                            </Grid>
                           </List>
-
                           <List sx={{ padding: '0px' }}>
                             <ListItem >
-                              <ListItemText primary="Definition of done" secondary="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit sem.
-              Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque pellentesque
-              tortor tortor, at convallis metus ornare ac. Aenean quis pellentesque nisl. Ut
-              suscipit a nisi sed porttitor. Donec cursus velit diam, non accumsan urna aliquet.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit sem.
-              Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque pellentesque
-              tortor tortor, at convallis metus ornare ac. Aenean quis pellentesque nisl. Ut
-              suscipit a nisi sed porttitor. Donec cursus velit diam, non accumsan urna aliquet
-              hendrerit.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit sem.
-              Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque pellentesque
-              tortor tortor, at convallis metus ornare ac. Aenean quis pellentesque nisl. Ut
-              suscipit a nisi sed porttitor. Donec cursus velit diam, non accumsan urna aliquet
-              hendrerit.Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque pellentesque
-              tortor tortor, at convallis metus ornare ac. Aenean quis pellentesque nisl. Ut
-              suscipit a nisi sed porttitor. Donec cursus velit diam, non accumsan urna aliquet
-              hendrerit.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed hendrerit sem.
-              Donec nec mi sit amet nisl accumsan fringilla quis eget lectus. Quisque pellentesque
-              tortor tortor, at convallis metus ornare ac. Aenean quis pellentesque nisl. Ut
-              suscipit a nisi sed porttitor. Donec cursus velit diam, non accumsan urna aliquet
-              hendrerit."
+                              <ListItemText primary="Definition of done" secondary={contractData.contract_definition_of_done}
                                 primaryTypographyProps={{ fontWeight: '550', }}
-
                                 secondaryTypographyProps={{ height: ' 468px', overflow: 'scroll', }} />
                             </ListItem>
 
                           </List>
-
-
-
-
                         </Grid>
-
-
                       </Grid>
                       <Grid sx={{
 
@@ -631,12 +580,7 @@ const ViewContract: NextPage<any> = () => {
                             fontSize: '1.75rem',
 
                           }}>Create Proposal</Typography>
-
-
-
-
                           <List >
-
                             <ListItem sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
                               <ListItemText primary="Proposal Payout" secondary="Enter a proposed payout you would like to receive for this job." primaryTypographyProps={{ fontWeight: '550' }} />
                               <FormControl >
@@ -658,17 +602,12 @@ const ViewContract: NextPage<any> = () => {
                                 />
                               </FormControl>
                             </ListItem>
-
-
-
                           </List>
                           <Grid sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', marginBottom: '11px' }}>
                             <Button size="large" type="submit" onClick={handleProposalSubmit} >
                               Send Proposal
                             </Button>
                           </Grid>
-
-
                         </Grid>
                       </Grid>
                     </Grid>

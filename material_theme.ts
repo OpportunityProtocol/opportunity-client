@@ -8,8 +8,8 @@ const theme = createTheme({
       dark: "#1b4f31",
     },
     text: {
-      primary: "#000000",
-      secondary: "rgba(33, 33, 33, .85)",
+      primary: "rgba(33, 33, 33, .85)",
+      //secondary: "rgba(33, 33, 33, .85)",
     },
     secondary: {
       main: "#212121",
@@ -94,6 +94,14 @@ const theme = createTheme({
         },
       },
     },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#F5F5F5', 
+          border: '1px solid #eee'
+        }
+      }
+    }
   },
 });
 

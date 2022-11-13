@@ -460,6 +460,16 @@ query Following($address: String!) {
   }
 `
 
+export const LENS_GET_DISPATCHER_BY_PROFILE_ID = gql`
+query Profile($profileId: ProfileId!) {
+  profile(request: { profileId: $profileId }) {
+    dispatcher { 
+      address
+      canUseRelay
+    }
+  }
+}`
+
 export const LENS_GET_PROFILE_BY_PROFILE_ID = gql`
 query Profile {
   profile(request: { profileId: $id }) {
