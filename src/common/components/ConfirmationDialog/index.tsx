@@ -72,6 +72,7 @@ export const ConfirmationDialog: FC<
       case 1:
         return hasSigningStep ? (
           <Button
+          variant='contained'
             onClick={() => {
               signAction();
               setActiveStep((prevState) => prevState + 1); //How to listen for metamask sign?
@@ -120,13 +121,13 @@ export const ConfirmationDialog: FC<
         return <Button variant='outlined' onClick={handleClose}>Cancel</Button>;
       case 1:
         return (
-          <Button variant='outlined'  onClick={() => setActiveStep((prevState) => prevState - 1)} disabled={success}>
+          <Button variant='outlined'  onClick={() => setActiveStep((prevState) => prevState - 1)} disabled={success || loading}>
             Back
           </Button>
         );
       case 2:
         return (
-          <Button variant='outlined' onClick={() => setActiveStep((prevState) => prevState - 1)} disabled={success}>
+          <Button variant='outlined' onClick={() => setActiveStep((prevState) => prevState - 1)} disabled={success || loading}>
             Back
           </Button>
         );

@@ -190,7 +190,6 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
     write: onCreateService,
     writeAsync: onCreateServiceAsync,
     error: createServiceError,
-    isError: isCreateServiceError,
     status: createServiceStatus,
   } = useContractWrite({
     mode: "recklesslyUnprepared",
@@ -406,15 +405,12 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
 
   return (
     <Container maxWidth="xl">
-      <Box>
+      <Box py={3}>
         <Typography fontWeight="600" fontSize={25}>
           Create a service
         </Typography>
-        <Typography color="text.secondary" variant="body2">
-          Create a service to share across lens social networks.{" "}
-          <Typography variant="button" color="primary">
-            Learn more
-          </Typography>
+        <Typography color="text.secondary" variant='subtitle2' fontSize={16}>
+          Lens Talent allows <Typography fontWeight='600' component='span'>anyone</Typography> to create a service for <Typography fontWeight='600' component='span'>anything</Typography>
         </Typography>
       </Box>
       <Box sx={{ width: "100%" }}>
@@ -428,18 +424,15 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           <Tab {...a11yProps(1)} label="Basic Information" />
           <Tab {...a11yProps(1)} label="Summary" />
         </Tabs>
-        <Divider sx={{ borderBottom: "1px solid #eee" }} />
+        <Divider sx={{ border: 'none' }} />
       </Box>
       <TabPanel index={0} value={tabValue}>
-        <Box width={600} maxWidth={600} pb={2}>
-          <Typography color="text.secondary" fontWeight="500" fontSize={14}>
+        <Box pb={2}>
+          <Typography 
+          color="text.secondary"
+            fontWeight="500"
+            fontSize={14}>
             Select or search for the appropriate market to deploy your contract.
-          </Typography>
-          <Typography variant="caption">
-            Can't find a market?{" "}
-            <Typography component="span" color="primary" variant="button">
-              Learn about market proposals.
-            </Typography>
           </Typography>
         </Box>
         <Grid container direction="row" alignItems="center" spacing={3}>
@@ -472,7 +465,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           </Typography>
           <Card
             variant="outlined"
-            sx={{ border: "none", backgroundColor: "#eee", width: "100%" }}
+            sx={{  width: "100%" }}
           >
             <CardContent>
               <Box
@@ -531,7 +524,7 @@ const CreateServicePage: NextPage<any, any> = (): JSX.Element => {
           </Card>
 
           <Card elevation={0} sx={{ mb: 3, width: "100%" }}>
-            <Stack spacing={2} sx={{ bgcolor: "#fafafa" }}>
+            <Stack spacing={2}>
               <StyledTextField
                 margin="normal"
                 sx={{ width: "100%" }}

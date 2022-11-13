@@ -12,7 +12,7 @@ import {
   alpha,
   Chip,
 } from "@mui/material";
-import { QueryResult, useQuery } from "@apollo/client";
+import { ApolloQueryResult, QueryResult, useQuery } from "@apollo/client";
 import { GET_MARKETS } from "../../../modules/market/MarketGQLQueries";
 import MarketDisplay from "../../../modules/market/components/MarketDisplay";
 import { NextPage } from "next";
@@ -30,20 +30,22 @@ const MarketHome: NextPage<any> = () => {
   const usersQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCERS);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  useEffect(() => {
-    if (!marketsQuery.loading && marketsQuery.data) {
-      setMarkets([...marketsQuery.data?.markets]);
-    }
-  }, [marketsQuery.loading]);
+  const onLoad = () => {
+    marketsQuery.refetch().then((result: ApolloQueryResult<any>) => {
+      setMarkets([...result.data?.markets]);
+    })
 
-  useEffect(() => {
-    if (!usersQuery.loading && usersQuery.data) {
-      setActiveFreelancers([...usersQuery.data?.verifiedUsers]);
-    }
-  }, [usersQuery.loading]);
+    usersQuery.refetch().then((result: ApolloQueryResult<any>) => {
+      setActiveFreelancers([...result.data?.verifiedUsers]);
+    })
+  }
 
   const handleOnSearchMarket = (event: React.ChangeEvent<HTMLInputElement>) =>
     setSearchQuery(event.target.value);
+  
+  useEffect(() => {
+    onLoad()
+  }, [])
 
   return (
     <Container maxWidth="xl" sx={{ height: "100%" }}>
@@ -60,14 +62,14 @@ const MarketHome: NextPage<any> = () => {
         </Box>
         <Grid container direction="row" alignItems="center" spacing={3}>
           {markets
-            .filter((market) =>
-              String(market.name)
+            .filter((marketDetails) =>
+              String(marketDetails.name)
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase())
             )
             .map((marketDetails) => {
               return (
-                <Grid xs={12} md={6} lg={4} item>
+                <Grid key={marketDetails.name} xs={12} md={6} lg={4} item>
                   <MarketDisplay marketDetails={marketDetails} />
                 </Grid>
               );

@@ -11,6 +11,9 @@ import {
   CardActions,
   Divider,
   Stack,
+  List,
+  ListItem,
+  ListItemText,
   Typography,
   Chip,
   CardActionArea,
@@ -18,6 +21,7 @@ import {
   TableCell,
   TableRow,
   Paper,
+  DialogContent,
 } from "@mui/material";
 import { useStyles } from "./ServiceCardStyle";
 import DAIIcon from "../../../../node_modules/cryptocurrency-icons/svg/color/dai.svg";
@@ -80,8 +84,6 @@ const Box = withStyles((theme) => ({
   },
 }))(TableCell);
 
-
-
 const abiencoder = ethers.utils.defaultAbiCoder;
 
 const ServiceCard = ({
@@ -105,10 +107,6 @@ const ServiceCard = ({
     metadataError: false,
   });
 
-  const [resolveServiceSuccessful, setResolveServiceSuccessful] =
-    useState<boolean>(false);
-  const [resolveServiceLoading, setResolveServiceLoading] =
-    useState<boolean>(false);
   const [resolveServiceDialogIsOpen, setResolveServiceDialogIsOpen] =
     useState<boolean>(false);
 
@@ -118,7 +116,7 @@ const ServiceCard = ({
     onError(error) { },
   });
 
-  const { write: approveDai } = useContractWrite({
+  const { write: approveDai, isLoading: isLoadingApproveDai, isSuccess: isSuccessApproveDai } = useContractWrite({
     addressOrName: DAI_ADDRESS,
     contractInterface: DaiInterface,
     mode: "recklesslyUnprepared",
@@ -144,7 +142,7 @@ const ServiceCard = ({
     },
   })
 
-  const { write: resolveService } = useContractWrite({
+  const { write: resolveService, isLoading: isLoadingResolveSerivce, isSuccess: isSuccessResolveService } = useContractWrite({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
     enabled: false,
@@ -153,33 +151,7 @@ const ServiceCard = ({
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
-    },
-    onSettled: (data, error) => {
-      if (error) {
-
-        setResolveServiceSuccessful(false);
-      } else {
-        setResolveServiceSuccessful(true);
-      }
-
-      setResolveServiceLoading(false);
-    },
-    onError(error, variables, context) {
-
-    },
-  });
-
-  const lensHub_getProfile = useContractRead({
-    addressOrName: LENS_HUB_PROXY,
-    contractInterface: LensHubInterface,
-    functionName: "getProfile",
-    enabled: false,
-    watch: false,
-    chainId: CHAIN_ID,
-    args: [serviceOwnerLensProfileId],
-    onSuccess: (data) => {
-      setServiceOwnerLensData(data);
-    },
+    }
   });
 
   const networkManager_getLensProfileIdFromAddress = useContractRead({
@@ -255,7 +227,7 @@ const ServiceCard = ({
     return {
       profileId: Number(serviceOwnerLensProfileId),
       pubId: Number(service?.id),
-      data: abiencoder.encode(["uint256", "uint256"], [DAI_ADDRESS, 100]),
+      data: abiencoder.encode(["uint256", "uint256"], [DAI_ADDRESS, service["offers"][0]]),
       nonce: Number(userLensSigNonce),
       deadline: '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
     }
@@ -296,40 +268,49 @@ const ServiceCard = ({
     }
   };
 
-  const confirmationDialogContent = [
+  const resolveServiceDialogContent = [
     <DialogContentText id="alert-dialog-description">
-      <Typography fontSize={20} fontWeight="bold" py={1}>
+      <Typography fontSize={18} fontWeight="bold" py={1}>
         {" "}
-        You are about to purchase a service which will require three actions:
+        You are about to complete {service?.serviceTitle} which will require three actions:
       </Typography>
-      <ul>
-        <li>
-          {" "}
-          <Typography>Signing a transaction</Typography>
-        </li>
-        <li>
-          {" "}
-          <Typography>Approving the funds</Typography>
-        </li>
-        <li>
-          <Typography>Executing the transaction</Typography>
-        </li>
-      </ul>
+      <List>
+        <ListItem>
+          <ListItemText primary="Signing a transaction" secondary="Your wallet provider will instruct you to sign the transaction." />
+        </ListItem>
+
+        <ListItem>
+          <ListItemText primary="Approving the funds" secondary="This will approve Lens Talent to move the appropriate funds out of your wallet and into an escrow." />
+        </ListItem>
+
+        <ListItem>
+          <ListItemText primary="Executing the transaction" secondary="Finally, you will confirm your transaction. A message will appear in your wallet provider to confirm." />
+        </ListItem>
+      </List>
     </DialogContentText>,
 
-    <DialogContentText>Sign</DialogContentText>,
-
-    <DialogContentText id="alert-dialog-description">
-      <Box py={2}>
-        <Typography fontSize={20} fontWeight="bold" py={1}>
-          Confirm purchase
+  <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            <Typography fontSize={20} fontWeight="bold" py={1}>
+         Sign
         </Typography>
-        <Typography variant="subtitle2">
-          Your wallet will prompt you to sign the transaction. Only accept
+        </DialogContentText>
+    <DialogContentText>
+      Your wallet will prompt you to sign the transaction.
+    </DialogContentText>
+  </DialogContent>,
+
+    <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+        <Typography fontSize={20} fontWeight="bold" py={1}>
+          Confirmation
+        </Typography>
+    </DialogContentText>
+      <Typography variant="subtitle2">
+          Your wallet will prompt you confirm the transaction. Only accept
           transaction from addresses you trust.
         </Typography>
-      </Box>
-    </DialogContentText>,
+    </DialogContent>
   ];
 
   const renderButtonState = () => {
@@ -382,7 +363,7 @@ const ServiceCard = ({
                 <Button
                   fullWidth
                   variant="outlined"
-                  disabled
+                  disabled={isLoadingApproveDai || isLoadingResolveSerivce || (isSuccessApproveDai && isSuccessResolveService)}
                   startIcon={<Check />}
                 >
                   Confirmed
@@ -521,12 +502,10 @@ const ServiceCard = ({
                 {service?.serviceDescription ? service?.serviceDescription : 'Unable to load description'}
               </Typography>
             </Box>
-
             <Stack direction="row" alignItems="center" spacing={0.5}>
               <Typography fontWeight="medium" fontSize={13} color="rgb(94, 94, 94)">
                 Price:
               </Typography>
-
               <Stack direction="row" alignItems="center" spacing={0.5}>
                 <img
                   src="/assets/images/dai.svg"
@@ -538,20 +517,16 @@ const ServiceCard = ({
               </Stack>
             </Stack>
           </Box>
-
-
-
-
         </CardContent>
         {renderButtonState()}
         <ConfirmationDialog
-          success={resolveServiceSuccessful}
-          loading={resolveServiceLoading}
+          success={(isSuccessApproveDai && isSuccessResolveService)}
+          loading={isLoadingApproveDai || isLoadingResolveSerivce}
           open={resolveServiceDialogIsOpen}
           onOpen={() => { }}
           onClose={() => setResolveServiceDialogIsOpen(false)}
           hasSigningStep={true}
-          content={confirmationDialogContent}
+          content={resolveServiceDialogContent}
           signAction={onSign}
           primaryAction={approveDai}
           primaryActionTitle="Confirm"

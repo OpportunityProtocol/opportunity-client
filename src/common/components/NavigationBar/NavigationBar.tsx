@@ -60,7 +60,7 @@ import {
   NetworkManagerInterface,
 } from "../../../abis";
 
-import { FormatTypes, Result } from "ethers/lib/utils";
+import { FormatTypes, Result, sha256 } from "ethers/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
   userWalletDataStored,
@@ -132,17 +132,18 @@ const CheckRequiredDispatcherDialog = ({ isConnected, profileId }) => {
   useEffect(() => {
     if (isConnected && profileId !== 0) {
       checkDispatcherQuery.refetch().then((result: ApolloQueryResult<any>) => {
-        const { stateDispatcher } = result.data.profile;
+        const { dispatcher: { address } } = result.data.profile;
 
         if (result.data) {
-          setStateDispatcher(stateDispatcher);
+          setStateDispatcher(address);
         }
 
-        if (stateDispatcher) {
-          setOpen(false);
-        } else {
+        if ((String(address).toLowerCase() !== String(NETWORK_MANAGER_ADDRESS).toLowerCase())) {
           setOpen(true);
+        } else {
+          setOpen(false);
         }
+
       });
     }
   }, [isConnected, profileId]);
@@ -156,7 +157,7 @@ const CheckRequiredDispatcherDialog = ({ isConnected, profileId }) => {
     addressOrName: LENS_HUB_PROXY,
     functionName: "setDispatcher",
     args: [profileId, NETWORK_MANAGER_ADDRESS],
-    contractInterface: NetworkManagerInterface,
+    contractInterface: LensHubInterface,
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: 90000000000,
@@ -170,7 +171,7 @@ const CheckRequiredDispatcherDialog = ({ isConnected, profileId }) => {
   });
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onClose={() => setOpen(false)}>
       {isLoadingSetDispatcher ? (
         <LinearProgress variant="indeterminate" />
       ) : null}

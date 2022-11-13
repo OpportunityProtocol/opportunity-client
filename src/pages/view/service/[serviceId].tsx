@@ -31,7 +31,7 @@ import {
 import { useStyles } from "../../../modules/contract/ContractStyles";
 import Paper from "@mui/material/Paper";
 
-import { AccountCircleOutlined, ShareOutlined } from "@mui/icons-material";
+import { AccountCircleOutlined, KeyboardArrowRight, ShareOutlined } from "@mui/icons-material";
 import { NextPage } from "next";
 import { NextRouter, withRouter } from "next/router";
 import {
@@ -71,40 +71,6 @@ import { getLensProfileById } from "../../../modules/lens/LensGQLQueries";
 import { GET_VERIFIED_FREELANCER_BY_ADDRESS } from "../../../modules/user/UserGQLQueries";
 import { GET_TOKEN_INFO_BY_SERVICE_ID } from "../../../modules/market/MarketGQLQueries";
 
-const confirmationDialogContent = [
-  <DialogContentText id="alert-dialog-description">
-    <Typography fontSize={20} fontWeight="bold" py={1}>
-      {" "}
-      You are about to purchase a service which will require three actions:
-    </Typography>
-
-    <ul>
-      <li>
-        {" "}
-        <Typography>Signing a transaction</Typography>
-      </li>
-      <li>
-        {" "}
-        <Typography>Approving the funds</Typography>
-      </li>
-      <li>
-        <Typography>Executing the transaction</Typography>
-      </li>
-    </ul>
-  </DialogContentText>,
-
-  <DialogContentText id="alert-dialog-description">
-    <Box py={2}>
-      <Typography fontSize={20} fontWeight="bold" py={1}>
-        Confirm purchase
-      </Typography>
-      <Typography variant="subtitle2">
-        Your wallet will prompt you to sign the transaction. Only accept
-        transaction from addresses you trust.
-      </Typography>
-    </Box>
-  </DialogContentText>,
-];
 
 const abiencoder = ethers.utils.defaultAbiCoder;
 
@@ -141,6 +107,43 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
   const userAddress = useSelector(selectUserAddress);
 
   const [tokenInfo, setTokenInfo] = useState<any>({})
+
+  
+
+  const confirmationDialogContent = [
+    <DialogContentText id="alert-dialog-description">
+      <Typography fontSize={18} fontWeight="bold" py={1}>
+        {" "}
+        You are about to purchase {serviceData?.serviceTitle} which will require three actions:
+      </Typography>
+  
+      <List>
+        <ListItem>
+          <ListItemText primary="Signing a transaction" secondary="Your wallet provider will instruct you to sign the transaction." />
+        </ListItem>
+
+        <ListItem>
+          <ListItemText primary="Approving the funds" secondary="This will approve Lens Talent to move the appropriate funds out of your wallet and into an escrow." />
+        </ListItem>
+
+        <ListItem>
+          <ListItemText primary="Executing the transaction" secondary="Finally, you will confirm your transaction. A message will appear in your wallet provider to confirm." />
+        </ListItem>
+      </List>
+    </DialogContentText>,
+  
+    <DialogContentText id="alert-dialog-description">
+      <Box py={2}>
+        <Typography fontSize={20} fontWeight="bold" py={1}>
+          Confirm purchase
+        </Typography>
+        <Typography variant="subtitle2">
+          Your wallet will prompt you to sign the transaction. Only accept
+          transaction from addresses you trust.
+        </Typography>
+      </Box>
+    </DialogContentText>,
+  ];
 
   const tokenInfoQuery: QueryResult = useQuery(GET_TOKEN_INFO_BY_SERVICE_ID, {
     skip: true,
@@ -263,7 +266,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     }
   }, []);
 
-  const { write: approveDai } = useContractWrite({
+  const { write: approveDai, isLoading: isLoadingApproveDai, isSuccess: isSuccessApproveDai } = useContractWrite({
     addressOrName: DAI_ADDRESS,
     contractInterface: DaiInterface,
     mode: "recklesslyUnprepared",
@@ -286,7 +289,7 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
     },
   })
 
-  const { write: purchaseService } = useContractWrite({
+  const { write: purchaseService, isLoading: isLoadingPurchaseService, isSuccess: isSuccessPurchaseService } = useContractWrite({
     mode: "recklesslyUnprepared",
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
@@ -348,16 +351,14 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
             {successfulPaymentAlertVisible && (
               <Alert severity="success">
                 <AlertTitle>Successful Purchase</AlertTitle>
-                Your funds have been stored in an escrow until the task is
-                completed. Head over to{" "}
-                <Typography
-                  variant="button"
-                  onClick={() => router.push("/view")}
-                >
-                  {" "}
-                  <strong>contracts</strong>{" "}
-                </Typography>{" "}
-                for more details.
+                <Typography variant='body2' paragraph>
+                {serviceOwnerLensProfile?.handle} has been notified of your request. Your funds have been stored in an escrow until the task is
+                completed.
+                </Typography>
+                <Stack spacing={1}>
+                <Box display='flex'><Typography>Go to Dashboard</Typography> <KeyboardArrowRight /></Box>
+                 <Box display='flex'><Typography>Send a Message to {serviceOwnerLensProfile?.handle} </Typography> <KeyboardArrowRight /></Box>
+                </Stack>
               </Alert>
             )}
           </Box>
@@ -595,6 +596,8 @@ const ViewContractPage: NextPage<IViewContractPage> = ({ router }) => {
         onClose={() => {
           setPurchaseDialogIsOpen(false);
         }}
+        success={isSuccessApproveDai && isSuccessPurchaseService}
+        loading={isLoadingApproveDai || isLoadingPurchaseService}
         primaryAction={onPurchase}
         primaryActionTitle={"Purchase"}
         hasSigningStep={false}

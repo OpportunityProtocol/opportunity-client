@@ -14,6 +14,9 @@ import {
   Tab,
   DialogContentText,
   Chip,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import ServiceCard from "../../../modules/contract/components/ServiceCard/ServiceCard";
 import { NextRouter, useRouter } from "next/router";
@@ -86,15 +89,15 @@ const connectDialogContent: Array<JSX.Element> = [
       {" "}
       You are about to follow another user which will require two actions:
     </Typography>
-    <ul>
-      <li>
-        {" "}
-        <Typography>Signing a transaction</Typography>
-      </li>
-      <li>
-        <Typography>Executing the transaction</Typography>
-      </li>
-    </ul>
+        <List>
+        <ListItem>
+          <ListItemText primary="Signing a transaction" secondary="Your wallet provider will instruct you to sign the transaction." />
+        </ListItem>
+
+        <ListItem>
+          <ListItemText primary="Executing the transaction" secondary="Finally, you will confirm your transaction. A message will appear in your wallet provider to confirm." />
+        </ListItem>
+      </List>
   </DialogContentText>,
   <DialogContentText id="alert-dialog-description">
     <Box py={2}>

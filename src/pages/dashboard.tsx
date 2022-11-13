@@ -35,7 +35,7 @@ import {
   GET_SERVICES_BY_CREATOR,
   GET_SERVICE_BY_ID,
 } from "../modules/contract/ContractGQLQueries";
-import { GET_MARKETS } from "../modules/market/MarketGQLQueries";
+import { GET_MARKETS, GET_MARKET_DETAILS_BY_ID } from "../modules/market/MarketGQLQueries";
 import { GET_VERIFIED_FREELANCERS } from "../modules/user/UserGQLQueries";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import SearchBarV1 from "../common/components/SearchBarV1/SearchBarV1";
@@ -164,17 +164,29 @@ const ExplorePage: NextPage = () => {
       )
       .catch((err) => alert(err));
 
-  const onRefresh = (): void => {
-    onLoadContractsCreatedByEmployer();
-    onLoadContractsWorking();
+  const onRefreshContracts = () => {
+      onLoadContractsCreatedByEmployer();
+      onLoadContractsWorking();
+  }
 
+  const onRefreshServices = () => {
     servicesByCreatorQuery.refetch();
     serviceQuery.refetch();
     purchasedServicesByClientQuery.refetch();
     activeServicesByCreatorQuery.refetch();
+  }
+
+  const onRefresh = () => {
+    if (contractViewPersona === ContractsViewingPersona.CONTRACTS) {
+    onRefreshContracts()
+    }
+
+    if (contractViewPersona === ContractsViewingPersona.SERVICES) {
+      onRefreshServices()
+    }
   };
 
-  const onChangePersona = (): void => {
+  const onChangePersona = () => {
     switch (state.persona) {
       case Persona.WORKING:
         if (contractViewPersona == ContractsViewingPersona.CONTRACTS) {
@@ -200,7 +212,7 @@ const ExplorePage: NextPage = () => {
 
   //working
   useEffect(() => {
-    async function syncActiveServices() {
+    const syncActiveServices = async ()=> {
       const activeServices = [];
       if (
         !activeServicesByCreatorQuery.loading &&
@@ -224,15 +236,22 @@ const ExplorePage: NextPage = () => {
                   .serviceId,
             })
             .then(async (serviceData) => {
+              let marketDetails = {}
+
               const serviceMetadata = await fleek.getService(
                 String(serviceData.data.service?.metadataPtr).slice(13)
               );
+
+              await marketDetailsQuery.refetch({ marketId: serviceData?.data.service.marketId }).then((result: ApolloQueryResult<any>) => {
+                marketDetails = result.data?.markets[0]
+              })
 
               activeServices[i] = {
                 ...activeServices[i],
                 serviceData: {
                   ...serviceData.data.service,
                   ...serviceMetadata,
+                  marketDetails
                 },
               };
             });
@@ -247,7 +266,7 @@ const ExplorePage: NextPage = () => {
 
   //hiring
   useEffect(() => {
-    async function syncPurchasedServices() {
+    const syncPurchasedServices = async () => {
       const purchasedServices = [];
 
       if (
@@ -272,15 +291,22 @@ const ExplorePage: NextPage = () => {
                   .serviceId,
             })
             .then(async (serviceData) => {
+              let marketDetails = {}
+
               const serviceMetadata = await fleek.getService(
                 String(serviceData.data.service?.metadataPtr).slice(13)
               );
+
+              await marketDetailsQuery.refetch({ marketId: serviceData?.data.service.marketId }).then((result: ApolloQueryResult<any>) => {
+                marketDetails = result.data?.markets[0]
+              })
 
               purchasedServices[i] = {
                 ...purchasedServices[i],
                 serviceData: {
                   ...serviceData.data.service,
                   ...serviceMetadata,
+                  marketDetails
                 },
               };
             });
@@ -293,26 +319,43 @@ const ExplorePage: NextPage = () => {
     syncPurchasedServices();
   }, [purchasedServicesByClientQuery.loading]);
 
+  const marketDetailsQuery: QueryResult = useQuery(GET_MARKET_DETAILS_BY_ID, {
+    skip: true,
+    variables: {
+      marketId: -1
+    }
+  })
+
   useEffect(() => {
     if (!servicesByCreatorQuery.loading && servicesByCreatorQuery.data) {
       async function loadCreatedServices() {
         const services = servicesByCreatorQuery.data.services;
         let serviceMetadata = {};
         let displayedServicesData = [];
+        let marketDetails = {}
 
-        await services.forEach(async (service) => {
-          //fetch metadata
-          serviceMetadata = await fleek.getService(
-            String(service?.metadataPtr).slice(13)
-          );
+        if (services) {
+          for (const serviceData of services) {
+            serviceMetadata = await fleek.getService(
+              String(serviceData?.metadataPtr).slice(13)
+            );
 
-          displayedServicesData.push({
-            ...service,
-            ...serviceMetadata,
-          });
+        
+            await marketDetailsQuery.refetch({ marketId: serviceData?.marketId }).then((result: ApolloQueryResult<any>) => {
+              marketDetails = result.data?.markets[0]
+            })
 
-          setCreatedServices(displayedServicesData);
-        });
+            displayedServicesData.push({
+              ...serviceData,
+              ...serviceMetadata,
+              marketDetails
+            });
+          }
+        } else {
+          displayedServicesData = []
+        }
+
+        setCreatedServices(displayedServicesData);
       }
 
       loadCreatedServices();
@@ -429,7 +472,7 @@ const ExplorePage: NextPage = () => {
               )
               .map((item) => {
                 return (
-                  <Grid item xs={4}>
+                  <Grid item minWidth='350px'>
                     <ServiceCard
                       service={item?.serviceData}
                       purchase
@@ -441,7 +484,7 @@ const ExplorePage: NextPage = () => {
           ) : (
             servicesHired.map((item) => {
               return (
-                <Grid item xs={4}>
+                <Grid item minWidth='350px'>
                   <ServiceCard
                     service={item?.serviceData}
                     purchase
