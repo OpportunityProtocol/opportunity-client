@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material/styles";
+import { alpha, createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
   palette: {
@@ -99,6 +99,15 @@ const theme = createTheme({
         root: {
           backgroundColor: '#F5F5F5', 
           border: '1px solid #eee'
+        }
+      }
+    },
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#fff',
+          border: `2px ${alpha('rgb(98, 202, 161)', .6)} solid`,
+          fontWeight: 'regular'
         }
       }
     }

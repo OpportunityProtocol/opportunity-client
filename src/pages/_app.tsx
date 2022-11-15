@@ -28,6 +28,7 @@ import { Provider as ReduxProvider } from "react-redux";
 import { store } from "../store";
 import { ApolloProvider } from "@apollo/react-hooks";
 import apolloClient from '../apollo'
+import { ALCHEMY_RPC } from "../constant/provider";
 
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat],
@@ -37,16 +38,12 @@ const { chains, provider, webSocketProvider } = configureChains(
       priority: 1,
       weight: 100,
     }),
-    publicProvider(),
-    jsonRpcProvider({
-      rpc: (chain) => ({
-        http: "http://127.0.0.1:8545",
-      }),
-      static: false,
-    }),
+    publicProvider()
   ]
 );
+
 const client = createClient({
+  autoConnect: false,
   connectors: [
     new MetaMaskConnector({ chains, }),
     new CoinbaseWalletConnector({

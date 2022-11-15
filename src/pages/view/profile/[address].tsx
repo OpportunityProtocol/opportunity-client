@@ -229,7 +229,7 @@ const ProfilePage: NextPage<any> = () => {
     addressOrName: LENS_HUB_PROXY,
     contractInterface: LensHubInterface,
     functionName: "sigNonces",
-    args: [userAddress],
+    args: [accountData.address],
     enabled: true,
     overrides: {
       gasLimit: ethers.BigNumber.from("2000000"),
@@ -272,6 +272,7 @@ const ProfilePage: NextPage<any> = () => {
   async function fetchLensProfileState() {
     if (Number(lensProfileId) > 0) {
       loadProfileIdentityData();
+      
       await lensFollowerStateQuery
         .refetch()
         .then((queryResult) => {
@@ -410,7 +411,7 @@ const ProfilePage: NextPage<any> = () => {
   const onConnect = async () => {
     follow({
       recklesslySetUnpreparedArgs: [[Number(lensProfileId)], [[]]],
-    });
+    })
   };
 
   const downloadMetadata = async (ptr: string) => {
@@ -443,7 +444,10 @@ const ProfilePage: NextPage<any> = () => {
         });
       }
     } catch (error) {}
+    
   };
+
+  const isFollowingProfile = followers.filter((follower) => String(follower.wallet.address).toLowerCase() === String(accountData.address).toLowerCase()).length > 0
 
   return (
     <Container maxWidth="lg" sx={{ mt: 2, height: "calc(100vh - 65px)" }}>
@@ -571,12 +575,13 @@ const ProfilePage: NextPage<any> = () => {
               alignItems="center"
               justifyContent="flex-end"
             >
-              {String(verifiedFreelancerData?.address).toLowerCase() !==
+              {String(accountData.address).toLowerCase() !==
                 String(address).toLowerCase() && accountData.isConnected ? (
+                  !isFollowingProfile ? 
                 <Button
                   color="primary"
-                  sx={{ borderRadius: 5 }}
-                  disabled={lensProfileId <= 0}
+                  sx={{ borderRadius: 1, border: '1px solid #ddd' }}
+                  disabled={lensProfileId <= 0 || isFollowingProfile}
                   variant="contained"
                   onClick={() => setConnectDialogIsOpen(true)}
                 >
@@ -585,12 +590,27 @@ const ProfilePage: NextPage<any> = () => {
                     fontWeight="600"
                     fontSize={12}
                   >
-                    Follow
+                    Follow ${lensProfile.handle}
+                  </Typography>
+                </Button>
+                :
+                <Button
+                  color="primary"
+                  sx={{ borderRadius: 1, border: '1px solid #ddd' }}
+                  disabled={true/*lensProfileId <= 0 || !isFollowingProfile*/}
+                  variant="contained"
+                >
+                  <Typography
+                    sx={{ color: "white" }}
+                    fontWeight="600"
+                    fontSize={12}
+                  >
+                    Unfollow ${lensProfile.handle} (Coming Soon)
                   </Typography>
                 </Button>
               ) : null}
 
-              {String(verifiedFreelancerData?.address).toLowerCase() !==
+              {String(accountData.address).toLowerCase() !==
                 String(address).toLowerCase() ||
               !accountData.isConnected ? null : (
                 <Button

@@ -32,4 +32,4 @@ export const shuffle = (array) => {
     return array;
   }
 
-export const hexToDecimal = (num: number) => parseInt(num, 16);
+export const hexToDecimal = (num: number) => parseInt(String(num), 16);

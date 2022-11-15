@@ -5,11 +5,15 @@ import { AuthenticateDocument, ChallengeDocument, ChallengeRequest, RefreshDocum
 
 const setAuthenticationToken = (token: string) => {
     localStorage.setItem('LENS_API_AUTHENTICATION_TOKEN', token)
-
   };
   
 export const getAuthenticationToken = (): string => {
+  if (typeof window !== 'undefined') {
+    // Perform localStorage action
     return localStorage.getItem('LENS_API_AUTHENTICATION_TOKEN')
+  }
+   
+  return ""
 };
 
 const setRefreshToken = (token: string) => {
@@ -17,7 +21,13 @@ const setRefreshToken = (token: string) => {
 }
 
 export const getRefreshToken = (): string => {
+  if (typeof window !== 'undefined') {
+    // Perform localStorage action
     return localStorage.getItem('LENS_API_REFRESH_TOKEN')
+  }
+   
+  return ""
+   
 }
 
 export const generateChallenge = async (request: ChallengeRequest) => {
@@ -56,7 +66,6 @@ export const login = async (signer: any) => {
   const signature = await signer.signMessage(challengeResponse.text);
 
   const authenticatedResult = await authenticate({ address, signature });
-
   setAuthenticationToken(authenticatedResult.accessToken);
 
   return authenticatedResult;

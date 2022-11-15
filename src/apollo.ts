@@ -1,6 +1,7 @@
 import { createHttpLink, InMemoryCache, HttpLink, ApolloClient, ApolloProvider, gql, ApolloLink, NormalizedCacheObject } from '@apollo/client';
 import { APOLLO_CLIENT_URI, LENS_API } from './constant';
 import { setContext } from '@apollo/client/link/context';
+import { getAuthenticationToken } from './modules/lens/LensAPIAuthentication';
 
 const httpLink = new HttpLink({
   uri: APOLLO_CLIENT_URI,
@@ -25,6 +26,7 @@ const client = new ApolloClient({
 const lens_client = new ApolloClient({
   link: lensLink,
   headers: {
+    'Authorization': getAuthenticationToken(),
     'Access-Control-Allow-Origin': 'https://api-sandbox-mumbai.lens.dev'
   },
   cache: new InMemoryCache(),

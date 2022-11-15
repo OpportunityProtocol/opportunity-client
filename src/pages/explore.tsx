@@ -21,6 +21,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Select,
 } from "@mui/material";
 import { QueryResult, useQuery } from "@apollo/client";
 
@@ -53,8 +54,13 @@ import Image from "next/image";
 import Post from "../common/components/Post/Post";
 import fleek from "../fleek";
 import CreatePostDialog from "../modules/lens/components/CreatePostDialog";
-import { createPost } from "../modules/lens/LensGQLQueries";
+import {
+  createPost,
+  getProfileFeed,
+  LENS_GET_PROFILE_FEED_QUERY,
+} from "../modules/lens/LensGQLQueries";
 import { useSigner, useSignTypedData } from "wagmi";
+import { login } from "../modules/lens/LensAPIAuthentication";
 
 //temporary
 const tags = [
@@ -70,6 +76,11 @@ const tags = [
   "hindu",
 ];
 
+enum FeedPreference {
+  Global,
+  Network,
+}
+
 const Explore: NextPage<any> = () => {
   const router: NextRouter = useRouter();
   const [markets, setMarkets] = useState<Array<any>>([]);
@@ -77,13 +88,19 @@ const Explore: NextPage<any> = () => {
   const [highestValuedServices, setHighestValuedServices] = useState<
     Array<any>
   >([]);
+  const [profileFeed, setProfileFeed] = useState<Array<any>>([]);
 
   const marketsQuery: QueryResult = useQuery(GET_MARKETS);
   const usersQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCERS);
   const userLensData = useSelector(selectLens);
   const userData = useSelector(selectUserAccountData);
   const servicesQuery: QueryResult = useQuery(GET_SERVICES);
+
   const { data: signer } = useSigner();
+
+  const [feedPreference, setFeedPreference] = useState<FeedPreference>(
+    FeedPreference.Network
+  );
 
   const {
     data: signTypedDataResult,
@@ -96,6 +113,8 @@ const Explore: NextPage<any> = () => {
     types: {},
     value: {},
   });
+
+  const { data: ethersSigner } = useSigner();
 
   const marketDetailsByIdQuery: QueryResult = useQuery(
     GET_MARKET_DETAILS_BY_ID,
@@ -160,6 +179,15 @@ const Explore: NextPage<any> = () => {
     usersQuery.refetch();
     marketsQuery.refetch();
   }, []);
+
+  useEffect(() => {
+    getProfileFeed(
+      userData?.address,
+      `0x${Math.abs(Number(userLensData.profileId)).toString(16)}`
+    ).then((result: any) => {
+      setProfileFeed(result.items);
+    });
+  }, [userData?.address, userLensData.profileId]);
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -268,7 +296,11 @@ const Explore: NextPage<any> = () => {
                   alignItems="center"
                   justifyContent="space-between"
                 >
-                  <Typography fontWeight="600" fontSize={22} color="rgba(33, 33, 33, .85)">
+                  <Typography
+                    fontWeight="600"
+                    fontSize={22}
+                    color="rgba(33, 33, 33, .85)"
+                  >
                     Markets
                   </Typography>
 
@@ -282,7 +314,7 @@ const Explore: NextPage<any> = () => {
                 </Stack>
 
                 <Grid container direction="row" alignItems="center" spacing={2}>
-                  {markets.slice(0,4).map((marketDetails) => {
+                  {markets.slice(0, 4).map((marketDetails) => {
                     return (
                       <Grid xs={12} md={6} lg={6} item>
                         <MarketDisplay marketDetails={marketDetails} />
@@ -299,7 +331,11 @@ const Explore: NextPage<any> = () => {
                   alignItems="center"
                   justifyContent="space-between"
                 >
-                  <Typography fontWeight="600" fontSize={22} color="rgba(33, 33, 33, .85)">
+                  <Typography
+                    fontWeight="600"
+                    fontSize={22}
+                    color="rgba(33, 33, 33, .85)"
+                  >
                     Users
                   </Typography>
 
@@ -313,7 +349,7 @@ const Explore: NextPage<any> = () => {
                 </Stack>
 
                 <Grid container direction="row" alignItems="center" spacing={2}>
-                  {activeFreelancers.slice(0,4).map((freelancer) => (
+                  {activeFreelancers.slice(0, 4).map((freelancer) => (
                     <Grid item xs={12} md={6} lg={6}>
                       <UserCard freelancer={freelancer} />
                     </Grid>
@@ -377,7 +413,7 @@ const Explore: NextPage<any> = () => {
               >
                 <CardContent>
                   <Stack spacing={3}>
-                    {userLensData.profileId <= 0  ? (
+                    {userLensData.profileId === 0 ? (
                       <Typography variant="body2">
                         Sign up and find work or start working instantly 🎉
                       </Typography>
@@ -398,7 +434,7 @@ const Explore: NextPage<any> = () => {
                     )}
 
                     <TextField
-                      disabled
+                      disabled={userLensData.profileId < 1}
                       InputProps={{
                         disableUnderline: true,
                       }}
@@ -406,12 +442,22 @@ const Explore: NextPage<any> = () => {
                       placeholder="What do you want to say?"
                     />
                     <Button
-                      disabled={
-                        userLensData.profileId === 0 || !userLensData.profileId
-                      }
-                      onClick={() =>
-                        createPost("identifer9", userLensData.profileId, signer)
-                      }
+                      disabled={userLensData.profileId < 1}
+                      onClick={() => {
+                        login(signer).then((val) => {
+                          createPost(
+                            String(
+                              userData.address +
+                                "-" +
+                                userLensData.profileId +
+                                "-" +
+                                Math.random()
+                            ),
+                            userLensData.profileId,
+                            ethersSigner
+                          );
+                        });
+                      }}
                       startIcon={<Create size="small" />}
                       sx={{ width: "max-content", alignSelf: "flex-end" }}
                       variant="contained"
@@ -423,14 +469,40 @@ const Explore: NextPage<any> = () => {
               </Card>
               <Stack
                 mb={1}
-                justifyContent="space-between"
-                alignItems="center"
+                sx={{ display: "flex" }}
+                spacing={2}
                 direction="row"
                 alignItems="center"
               >
-                <Typography fontWeight="600" fontSize={22} color="rgba(33, 33, 33, .85)">
+                <Typography
+                  noWrap
+                  sx={{ minWidth: "max-content" }}
+                  fontWeight="600"
+                  fontSize={22}
+                  color="rgba(33, 33, 33, .85)"
+                >
                   Advertisements and Publications
                 </Typography>
+                <Select
+                  fullWidth
+                  size="small"
+                  value={feedPreference}
+                  defaultValue={feedPreference}
+                >
+                  <MenuItem
+                    disabled
+                    value={FeedPreference.Global}
+                    key={FeedPreference.Global}
+                  >
+                    Global (Coming Soon)
+                  </MenuItem>
+                  <MenuItem
+                    key={FeedPreference.Network}
+                    value={FeedPreference.Network}
+                  >
+                    My Network
+                  </MenuItem>
+                </Select>
               </Stack>
 
               <Stack>
@@ -442,23 +514,20 @@ const Explore: NextPage<any> = () => {
                       "rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px",
                   }}
                 >
-                  <Post />
-                  <Divider />
-                  <Post />
-                  <Divider />
-                  <Post />
-                  <Divider />
-                  <Post />
-                  <Divider />
-                  <Post />
-                  <Divider />
-                  <Post />
-                  <Divider />
-                  <Post />
-                  <Divider />
-                  <Post />
-                  <Divider />
-                  <Post />
+                  {profileFeed.length === 0 ? (
+                    <CardContent>
+                      <Typography variant="body2"> No post found </Typography>
+                    </CardContent>
+                  ) : (
+                    profileFeed.map((feedItem) => {
+                      return (
+                        <React.Fragment>
+                          <Post data={feedItem} />
+                          <Divider />
+                        </React.Fragment>
+                      );
+                    })
+                  )}
                 </Paper>
               </Stack>
             </Grid>

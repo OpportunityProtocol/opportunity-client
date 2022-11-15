@@ -132,18 +132,22 @@ const CheckRequiredDispatcherDialog = ({ isConnected, profileId }) => {
   useEffect(() => {
     if (isConnected && profileId !== 0) {
       checkDispatcherQuery.refetch().then((result: ApolloQueryResult<any>) => {
-        const { dispatcher: { address } } = result.data.profile;
+        const {
+          dispatcher: { address },
+        } = result.data.profile;
 
         if (result.data) {
           setStateDispatcher(address);
         }
 
-        if ((String(address).toLowerCase() !== String(NETWORK_MANAGER_ADDRESS).toLowerCase())) {
+        if (
+          String(address).toLowerCase() !==
+          String(NETWORK_MANAGER_ADDRESS).toLowerCase()
+        ) {
           setOpen(true);
         } else {
           setOpen(false);
         }
-
       });
     }
   }, [isConnected, profileId]);
@@ -357,7 +361,7 @@ const NavigationBar: FC = (): JSX.Element => {
     } else {
       daiBalance = 0;
     }
-
+    
     dispatch(
       userWalletDataStored({
         balance: ethBalance,
@@ -371,10 +375,14 @@ const NavigationBar: FC = (): JSX.Element => {
           isLoading: connectData.isLoading,
           isError: connectData.isError,
           isIdle: connectData.isIdle,
-          ...connectData.data,
+          account: connectData.data.account,
+          chain: connectData.data.chain,
+          connector: connectData.data.connector,
+          provider: connectData.data.provider
         },
         account: {
-          ...accountData,
+          address: accountData.address,
+          isConnected: accountData.isConnected
         },
       })
     );

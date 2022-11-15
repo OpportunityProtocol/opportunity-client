@@ -35,7 +35,9 @@ const initialState: UserReducerState = {
     address: ZERO_ADDRESS,
     connector: null,
     connection: null,
-    account: null,
+    account: { 
+        address: ZERO_ADDRESS
+    },
     metadataUri: '',
     lensProfile: {
         user: {

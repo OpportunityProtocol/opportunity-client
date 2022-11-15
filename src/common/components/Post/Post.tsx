@@ -2,7 +2,11 @@ import { Comment, CommentOutlined, PostAdd, PostAddOutlined } from "@mui/icons-m
 import { Avatar, Card, CardContent, Stack, Typography, Box, CardActions, IconButton } from "@mui/material"
 import { FC } from "react"
 
-const Post: FC<any> = ({ }) => {
+interface IPostProps {
+    data: any;
+}
+
+const Post: FC<IPostProps> = ({ data }) => {
     return (
         <Card variant='outlined' sx={{ border: 'none', cursor: 'pointer', width: '100%' }}>
             <CardContent>
