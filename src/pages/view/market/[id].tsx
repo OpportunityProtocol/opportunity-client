@@ -203,7 +203,7 @@ const Market: NextPage = () => {
             />
             <Chip
               size="small"
-              label="Liquidty: $2923.23"
+              label="Liquidity: $2923.23"
               sx={{ fontWeight: "600" }}
             />
           </Stack>
