@@ -106,3 +106,7 @@ dist
 # TernJS port file
 .tern-port
 .vercel
+
+# Ignore Mac system files
+.DS_store
+
