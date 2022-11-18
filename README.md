@@ -46,7 +46,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 <div align="left">
-      Lens Talent is a decentralized and permission-less freelancing network built with LensProtocol. Lens Talent allows freelancers and employers to find work or create contracts regardless of geographical location. Employers are able to create one time contracts that freelancers may accept, while freelancers are able to create long term services in which employers can invest in in order to bet on their success and quality of work. Through this method freelancers are incentivized to always provide the best quality work as it means a higher chance of passive income. Contracts and services created on Lens Talent have the ability to gain exposure across any networking application that interfaces with LensProtocol. Other important features of Lens Talent include one time identity creation which is persistent along  with self statistics, the ability to leverage your network through content referrals, decentralized dispute services and decentralized payouts. We imagine a world where freelancers can instantly find work at any moment and carry their services across any network based application. Welcome to the cooperation layer of the internet.
+      Lens Talent is a decentralized and permission-less job board that allows anyone (freelancers and employers) to post bounties, contracts or services. Employers are able to create one time contracts that freelancers may accept, while freelancers are able to create long term services in which employers can invest in in order to bet on their success and quality of work. Through this method freelancers are incentivized to always provide the best quality work as it means a higher chance of passive income. Bounties, contracts and services created on Lens Talent have the ability to gain exposure across any networking application that interfaces with Lens Protocol. We imagine a world where anyone can instantly find work at any moment and carry their services across any network based application. Welcome to the cooperation layer of the internet.
   </div>
 
 
@@ -58,7 +58,6 @@
 * [Material-UI](https://mui.com/)
 * [The Graph](https://thegraph.com/en/)
 * [IPFS](https://ipfs.io/)
-* [Waku](https://wakuconnect.dev/)
 * [Firebase](https://firebase.google.com/)
 * [Solidity](https://docs.soliditylang.org/en/v0.8.14/)
 * [EthersJS](https://docs.ethers.io/v5/)
@@ -70,7 +69,47 @@ To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
+You will need to create a .env.development file with the following environment variabels:
+
+
+```sh
+Alchemy (You can obtain a free API key from https://auth.alchemy.com)
+NEXT_PUBLIC_ALCHEMY_API_KEY=
+NEXT_PUBLIC_ALCHEMY_HTTPS=
+NEXT_PUBLIC_CHAIN_ID=1337
+NEXT_PUBLIC_CHAIN_ENV=development
+NEXT_PUBLIC_RPC_URL=
+
+Smart Contracts
+NEXT_PUBLIC_LENS_HUB=
+NEXT_PUBLIC_NETWORK_MANAGER_ADDRESS=
+NEXT_PUBLIC_INTEREST_MANAGER_AAVE=0
+NEXT_PUBLIC_TOKEN_FACTORY_ADDRESS=
+NEXT_PUBLIC_SERVICE_TOKEN_LOGIC_ADDRESS=
+NEXT_PUBLIC_TOKEN_EXCHANGE_ADDRESS=
+NEXT_PUBLIC_DAI_ADDRESS=
+NEXT_PUBLIC_LENS_INTERACTION_LOGIC=
+NEXT_PUBLIC_LENS_FREE_FOLLOW_MODULE=
+NEXT_PUBLIC_FEE_COLLECT_MODULE=
+NEXT_PUBLIC_FOLLOWER_ONLY_REFERENCE_MODULE=
+
+Subgraph (The Graph)
+NEXT_PUBLIC_APP_SUBGRAPH_ENDPOINT=
+
+Cloud Firestore (Messaging)
+NEXT_PUBLIC_API_KEY=
+NEXT_PUBLIC_AUTH_DOMAIN=
+NEXT_PUBLIC_DATABASE_URL=
+NEXT_PUBLIC_PROJECT_ID=
+NEXT_PUBLIC_STORAGE_BUCKET=
+NEXT_PUBLIC_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_APP_ID=
+
+Fleek (IPFS)
+NEXT_PUBLIC_FLEEK_HOSTING_API_KEY=
+NEXT_PUBLIC_FLEEK_STORAGE_API_SECRET=
+NEXT_PUBLIC_FLEEK_STORAGE_API_KEY=
+```
 
 ### Installation
 
@@ -85,21 +124,20 @@ This is an example of how to list things you need to use the software and how to
    ```
 4. Run the client locally
    ```sh
-   yarn dev
+   yarn start:local
    ```
 
 <!-- ROADMAP -->
-<!--
 ## Roadmap
 
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
+Our roadmap consist of a set of goals to bring our application closer to a completely decentralized state and to provide a smooth experience for users.
+
+- [ ] Complete a basic MVP that is deployed on Vercel (client) and the Polygon Mumbai testnet (smart contracts).
+- [ ] Implement gasless transactions on Lens Protocol.
+- [ ] Complete a smart contract audit.
+- [ ] Deploy protocol to the Polygon mainnet.
 
 See the [open issues](https://github.com/elijahhampton/opportunity-client/issues) for a full list of proposed features (and known issues).
--->
-
 
 <!-- CONTRIBUTING -->
 ## Contributing
@@ -107,6 +145,7 @@ See the [open issues](https://github.com/elijahhampton/opportunity-client/issues
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+
 Don't forget to give the project a star! Thanks again!
 
 1. Fork the Project
@@ -123,13 +162,9 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Elijah Hampton - [@elihampton_](https://twitter.com/elihampton_) - hamptonelijahj@gmail.com
-
-
-Nathan Farley - natefarley@live.com
+Elijah Hampton - [@elihampton_](https://twitter.com/elihampton_) - elijahhamptonj@proton.me
 
 Project Link: Contact us for a free demo!
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
