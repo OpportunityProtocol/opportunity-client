@@ -654,6 +654,24 @@ const NavigationBar: FC = (): JSX.Element => {
                           }}
                         >
                           <List>
+                          <ListItemButton
+                              disabled={true}
+                            >
+                              <ListItemText
+                                primary="Bounty"
+                                secondary="Create a bounty that anyone can claim and complete"
+                                primaryTypographyProps={{
+                                  fontWeight: "bold",
+                                  fontSize: 14,
+                                }}
+                                secondaryTypographyProps={{
+                                  fontSize: 12,
+                                  fontWeight: "medium",
+                                  color: "#444",
+                                }}
+                              />
+                            </ListItemButton>
+
                             <ListItemButton
                               disabled={userLensProfile?.handle}
                               onClick={() => router.push("/create/contract")}
@@ -780,13 +798,14 @@ const NavigationBar: FC = (): JSX.Element => {
                     <Chip
                       color="primary"
                       size="medium"
-                      label="Connect"
+                      label={`🌐${" "}${" "}Connect`}
                       component={Button}
                       disableRipple
                       disableFocusRipple
                       disableTouchRipple
                       sx={{
                         fontWeight: "600",
+                        borderRadius: '2px',
                         border: "1px solid #ddd",
                         fontSize: "11px",
                         bgcolor: "rgb(245, 245, 245)",

@@ -185,6 +185,7 @@ const Explore: NextPage<any> = () => {
       userData?.address,
       `0x${Math.abs(Number(userLensData.profileId)).toString(16)}`
     ).then((result: any) => {
+      console.log({ result })
       setProfileFeed(result.items);
     });
   }, [userData?.address, userLensData.profileId]);
@@ -446,6 +447,7 @@ const Explore: NextPage<any> = () => {
                       onClick={() => {
                         login(signer).then((val) => {
                           createPost(
+                            "",
                             String(
                               userData.address +
                                 "-" +

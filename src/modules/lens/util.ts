@@ -1,7 +1,7 @@
 import { lens_client } from "../../apollo";
 import { HasTxHashBeenIndexedDocument, HasTxHashBeenIndexedRequest } from "./LensTypes";
 
-const hasTxBeenIndexed = async (request: HasTxHashBeenIndexedRequest) => {
+export const hasTxBeenIndexed = async (request: HasTxHashBeenIndexedRequest) => {
   const result = await lens_client.query({
     query: HasTxHashBeenIndexedDocument,
     variables: {

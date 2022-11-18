@@ -1,4 +1,5 @@
 import fleekStorage from "@fleekhq/fleek-storage-js";
+import { Metadata } from "./modules/lens/LensInterface";
 
 export const USER_DATA_FOLDER = "user-data/";
 export const CONTRACT_DATA_FOLDER = "contract-data/";
@@ -97,13 +98,13 @@ const uploadServiceData = async (
 
 const uploadPost = async (
   keyIdentifier: string,
-  data: any
+  data: Metadata
 ): Promise<object> => {
   const { key, hash, publicUrl } = await fleekStorage.upload({
     apiKey: process.env.NEXT_PUBLIC_FLEEK_STORAGE_API_KEY,
     apiSecret: process.env.NEXT_PUBLIC_FLEEK_STORAGE_API_SECRET,
     key: String("post-metadata" + keyIdentifier),
-    data,
+    data: JSON.stringify(data),
   });
 
   return { key, hash, publicUrl }

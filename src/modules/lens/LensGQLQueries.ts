@@ -11,6 +11,7 @@ import {
   FeedRequest,
   HasTxHashBeenIndexedDocument,
   HasTxHashBeenIndexedRequest,
+  MediaOutput,
   ProfileDocument,
   ProfileFeedDocument,
   PublicationMainFocus,
@@ -20,6 +21,7 @@ import { v4 as uuidv4 } from "uuid";
 import { login } from "./LensAPIAuthentication";
 import { FREE_COLLECT_MODULE, ZERO_ADDRESS } from "../../constant/contracts";
 import { signedTypeData } from "../../common/helper/web3";
+import { hasTxBeenIndexed } from "./util";
 
 const abiCoder = ethers.utils.defaultAbiCoder;
 
@@ -624,15 +626,16 @@ export const createPost = async (
   profileId: number,
   signer: any
 ) => {
-  const { publicUrl }: any = await fleek.uploadPostMetadata(
+
+  const { hash }: any = await fleek.uploadPostMetadata(
     identifier,
-    JSON.stringify({
+    {
       version: "2.0.0",
       mainContentFocus: PublicationMainFocus.TextOnly,
       metadata_id: uuidv4(),
       description: "Description",
       locale: "en-US",
-      content,
+      content: "Content",
       external_url: null,
       image: null,
       imageMimeType: null,
@@ -640,13 +643,15 @@ export const createPost = async (
       attributes: [],
       tags: [],
       appId: "lens-talent",
-    })
+    }
   );
+
+  console.log(hash)
 
   new ethers.Contract(LENS_HUB_PROXY, LensHubInterface, signer).post(
     {
       profileId,
-      contentURI: publicUrl,
+      contentURI: `https://ipfs.fleek.co/ipfs/${hash}`,
       collectModule: FREE_COLLECT_MODULE,
       collectModuleInitData: abiCoder.encode(["bool"], [true]),
       referenceModule: ZERO_ADDRESS,

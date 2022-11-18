@@ -1356,6 +1356,19 @@ export type Media = {
   width?: Maybe<Scalars['Int']>;
 };
 
+export type MediaOutput = {
+  __typename?: 'MediaOutput';
+  /** The alt tags for accessibility */
+  altTag?: Maybe<Scalars['String']>;
+  /** The cover for any video or audio you attached */
+  cover?: Maybe<Scalars['Url']>;
+  item: Scalars['Url'];
+  source?: Maybe<PublicationMediaSource>;
+  /** This is the mime type of media */
+  type?: Maybe<Scalars['MimeType']>;
+};
+
+
 /** The Media Set */
 export type MediaSet = {
   __typename?: 'MediaSet';

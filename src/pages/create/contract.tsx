@@ -238,7 +238,6 @@ const CreateContractPage: NextPage = (): JSX.Element => {
   const onTagInputKeyPress = (e: KeyboardEventHandler<HTMLDivElement>) => {
     if (e.code === "Space") {
       if (createContractForm?.tags?.length >= 5) {
-        alert("No more tags");
         return;
       }
 
