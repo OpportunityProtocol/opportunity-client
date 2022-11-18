@@ -164,7 +164,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 Elijah Hampton - [@elihampton_](https://twitter.com/elihampton_) - elijahhamptonj@proton.me
 
-Project Link: Contact us for a free demo!
+Project Link: Contact us for a free demo or feel free to interact with our development environment here: https://opportunity-client-5d8ec7vch-opportunity.vercel.app
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
