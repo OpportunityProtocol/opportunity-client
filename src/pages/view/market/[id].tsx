@@ -154,22 +154,23 @@ const Market: NextPage = () => {
 
     let serviceMetadata = {};
     let displayedServicesData = [];
-    let marketDetails = {}
+    let marketDetails = {};
 
     for (const service of services) {
       serviceMetadata = await fleek.getService(
         String(service?.metadataPtr).slice(13)
       );
 
-
-      await marketDetailsQuery.refetch({ marketId: service?.marketId }).then((result: ApolloQueryResult<any>) => {
-        marketDetails = result.data?.markets[0]
-      })
+      await marketDetailsQuery
+        .refetch({ marketId: service?.marketId })
+        .then((result: ApolloQueryResult<any>) => {
+          marketDetails = result.data?.markets[0];
+        });
 
       displayedServicesData.push({
         ...service,
         ...serviceMetadata,
-        marketDetails
+        marketDetails,
       });
     }
 
@@ -198,13 +199,8 @@ const Market: NextPage = () => {
           <Stack spacing={3} direction="row" alignItems="center">
             <Chip
               size="small"
-              label="Volume: $2923.23"
-              sx={{ fontWeight: "600" }}
-            />
-            <Chip
-              size="small"
-              label="Liquidity: $2923.23"
-              sx={{ fontWeight: "600" }}
+              label="Unclaimed: $2923.23"
+              sx={{ fontWeight: "600", bgcolor: "#b8e0d0" }}
             />
           </Stack>
         </Box>
@@ -220,8 +216,8 @@ const Market: NextPage = () => {
               textColor="secondary"
               indicatorColor="secondary"
             >
-              <Tab value={0} label="Contracts" />
-              <Tab value={1} label="Services" />
+              <Tab sx={{ fontSize: 16 }} value={0} label="Contracts" />
+              <Tab sx={{ fontSize: 16 }} value={1} label="Services" />
             </Tabs>
             <Stack direction="row" alignItems="center" spacing={1}>
               <SearchBarV1
@@ -284,7 +280,7 @@ const Market: NextPage = () => {
                       service.serviceTags.includes(searchQuery)
                   )
                   .map((service: any, idx: number) => (
-                    <Grid item minWidth='350px'>
+                    <Grid item minWidth="350px">
                       <ServiceCard
                         purchase={false}
                         id={service.id}

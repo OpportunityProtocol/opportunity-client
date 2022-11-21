@@ -658,7 +658,7 @@ const NavigationBar: FC = (): JSX.Element => {
                               disabled={true}
                             >
                               <ListItemText
-                                primary="Bounty"
+                                primary="Bounty (Coming soon)"
                                 secondary="Create a bounty that anyone can claim and complete"
                                 primaryTypographyProps={{
                                   fontWeight: "bold",

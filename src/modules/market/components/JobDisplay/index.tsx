@@ -53,6 +53,18 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({
 
   const userAddress = useSelector(selectUserAddress);
 
+  const getDuration = (duration: string) => {
+    console.log(duration);
+    switch (duration) {
+      case "quick":
+        return "A couple of days/weeks";
+      case "short":
+        return "1 month - 2 months";
+      case "long":
+        return "Greater than 2 months";
+    }
+  };
+
   const networkManager_getLensProfileIdFromAddress = useContractRead({
     addressOrName: NETWORK_MANAGER_ADDRESS,
     contractInterface: NetworkManagerInterface,
@@ -208,11 +220,11 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({
           </Grid>
           <Grid item>
             <Stack direction="row" alignItems="center">
-              <Typography fontSize={12}>Predicted Duration:</Typography>
+              <Typography fontSize={12}>Duration:</Typography>
               &nbsp;
               {
                 <Typography fontSize={12} fontWeight="600">
-                  {data?.duration ? data?.duration : "Undefined"}
+                  {data?.duration ? getDuration(data?.duration) : "Undefined"}
                 </Typography>
               }
             </Stack>

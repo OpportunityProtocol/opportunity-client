@@ -22,6 +22,7 @@ import {
   Menu,
   MenuItem,
   Select,
+  AlertTitle,
 } from "@mui/material";
 import { QueryResult, useQuery } from "@apollo/client";
 
@@ -193,6 +194,14 @@ const Explore: NextPage<any> = () => {
   return (
     <Box sx={{ width: "100%" }}>
       <Container maxWidth="xl" sx={{ height: "100%" }}>
+      <Alert icon={null} variant='outlined'>
+        <AlertTitle>
+          Notice
+        </AlertTitle>
+        <Box>
+          <Typography>The protocol is an extremely rough MVP, so expect things to break and/or not behaving in the optimal way.</Typography>
+        </Box>
+      </Alert>
         <Box mb={3}>
           <Box
             my={2}
@@ -238,6 +247,7 @@ const Explore: NextPage<any> = () => {
                       variant="subtitle2"
                       fontWeight="bold"
                       color="#fff"
+                      fontSize={18}
                     >
                       Try out one of these tags:
                     </Typography>
@@ -246,6 +256,7 @@ const Explore: NextPage<any> = () => {
                       {tags.map((tag: string) => {
                         return (
                           <Chip
+                          variant='filled'
                             onClick={() =>
                               router.push({
                                 pathname: "/view/market/1",
@@ -264,10 +275,13 @@ const Explore: NextPage<any> = () => {
                               p: 1.5,
                               py: 1.8,
                               fontSize: 13,
-                              color: "black",
+                              //color: "black",
                               fontWeight: "400",
                               width: "fit-content",
-                              bgcolor: "#eee",
+                              bgcolor: "#fff",
+                              '&:hover': {
+                                bgcolor: 'rgba(255, 255, 255, 0.8)'
+                              },
                               height: 25,
                               border: "none",
                               borderRadius: 0.8,
