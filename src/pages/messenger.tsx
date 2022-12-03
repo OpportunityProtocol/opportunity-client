@@ -72,6 +72,7 @@ const Messenger: NextPage<any> = () => {
   const [img, setImg] = useState<string>("");
   const [msgs, setMsgs] = useState<Array<any>>([]);
   const [messagesLoading, setMessagesLoading] = useState<boolean>(false)
+  const [messagesError, setMessagesError] = useState<boolean>(false)
   const account = useSelector(selectUserAccountData);
   const user1 = String(account?.address).toLowerCase();
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false);
@@ -89,16 +90,6 @@ const Messenger: NextPage<any> = () => {
     }
   );
 
-  const lensGetUserProfileByProfileId: QueryResult = useQuery(
-    LENS_GET_PROFILE_BY_PROFILE_ID,
-    {
-      skip: true,
-      variables: {
-        id: 0,
-      },
-    }
-  );
-
   useEffect(() => {
     const usersRef = collection(db, "users", user1, "selectedUser");
     // create query object
@@ -107,6 +98,7 @@ const Messenger: NextPage<any> = () => {
     const unsub = onSnapshot(q, async (querySnapshot) => {
       let users = [];
       
+      setMessagesError(false)
       setMessagesLoading(true)
       await querySnapshot.forEach((doc) => {
         users.push(doc.data());
@@ -141,7 +133,9 @@ const Messenger: NextPage<any> = () => {
 
               setUsers(completeUserData);
             }
-          }).finally(() => setMessagesLoading(false))
+          })
+          .catch(error => setMessagesError(true))
+          .finally(() => setMessagesLoading(false))
       });
     });
     return () => unsub();

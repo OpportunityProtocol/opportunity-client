@@ -30,22 +30,26 @@ const MarketHome: NextPage<any> = () => {
   const usersQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCERS);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  const marketSearchResults = markets.filter((marketDetails) =>
+    String(marketDetails.name).toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const onLoad = () => {
     marketsQuery.refetch().then((result: ApolloQueryResult<any>) => {
       setMarkets([...result.data?.markets]);
-    })
+    });
 
     usersQuery.refetch().then((result: ApolloQueryResult<any>) => {
       setActiveFreelancers([...result.data?.verifiedUsers]);
-    })
-  }
+    });
+  };
 
   const handleOnSearchMarket = (event: React.ChangeEvent<HTMLInputElement>) =>
     setSearchQuery(event.target.value);
-  
+
   useEffect(() => {
-    onLoad()
-  }, [])
+    onLoad();
+  }, []);
 
   return (
     <Container maxWidth="xl" sx={{ height: "100%" }}>
@@ -57,23 +61,50 @@ const MarketHome: NextPage<any> = () => {
             onChange={handleOnSearchMarket}
           />
           <Typography variant="caption" fontWeight="medium">
-            Current displaying {markets.length} markets
+            Currently displaying {marketSearchResults.length} markets
           </Typography>
         </Box>
+        {marketSearchResults.length === 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "800px",
+              width: "100%",
+            }}
+          >
+            <Typography variant="h5" fontWeight="700" py={3}>
+              No results found for markets relating to "{searchQuery}"
+            </Typography>
+            <figure
+              style={{
+                margin: 0,
+                background: "#eee",
+                padding: "1em",
+                borderRadius: "5px",
+              }}
+            >
+              <blockquote>
+                {" "}
+                "The contrary investor is every human when he resigns
+                momentarily from the herd and thinks for himself"{" "}
+              </blockquote>
+              <figcaption>
+                &mdash; Archibald MacLeish{" "}
+              </figcaption>
+            </figure>
+          </Box>
+        )}
         <Grid container direction="row" alignItems="center" spacing={3}>
-          {markets
-            .filter((marketDetails) =>
-              String(marketDetails.name)
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-            )
-            .map((marketDetails) => {
-              return (
-                <Grid key={marketDetails.name} xs={12} md={6} lg={4} item>
-                  <MarketDisplay marketDetails={marketDetails} />
-                </Grid>
-              );
-            })}
+          {marketSearchResults.map((marketDetails) => {
+            return (
+              <Grid key={marketDetails.name} xs={12} md={6} lg={4} item>
+                <MarketDisplay marketDetails={marketDetails} />
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
     </Container>
