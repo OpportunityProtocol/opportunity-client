@@ -6,7 +6,7 @@ import Opportunity from "../Opportunity";
 import theme from "../../material_theme";
 import { ThemeProvider } from "@mui/material/styles";
 import Header from "../common/components/Head";
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, Box } from "@mui/material";
 import {
   WagmiConfig,
   createClient,
@@ -14,6 +14,7 @@ import {
   configureChains,
   chain,
   useSigner,
+  useAccount,
 } from "wagmi";
 
 import { alchemyProvider } from "wagmi/providers/alchemy";
@@ -24,11 +25,14 @@ import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 
 import { ethers, getDefaultProvider } from "ethers";
-import { Provider as ReduxProvider } from "react-redux";
+import { Provider as ReduxProvider, useSelector } from "react-redux";
 import { store } from "../store";
 import { ApolloProvider } from "@apollo/react-hooks";
 import apolloClient from '../apollo'
 import { ALCHEMY_RPC } from "../constant/provider";
+import { UserContext } from "../context/UserContext";
+import { selectLens, selectUserAccountData } from "../modules/user/userReduxSlice";
+import { ZERO_ADDRESS } from "../constant";
 
 const { chains, provider, webSocketProvider } = configureChains(
   [chain.polygon, chain.polygonMumbai, chain.localhost, chain.hardhat],
@@ -85,8 +89,8 @@ function MyApp({ Component, pageProps }: AppProps) {
       <WagmiConfig client={client}>
         <ReduxProvider store={store}>
           <ThemeProvider theme={theme}>
-            <CssBaseline />
             <ApolloProvider client={apolloClient}>
+              <CssBaseline />
               <Opportunity>
                 <Component {...pageProps} />
               </Opportunity>

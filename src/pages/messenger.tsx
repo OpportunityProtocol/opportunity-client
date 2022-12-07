@@ -59,6 +59,7 @@ import {
   selectUserAccountData,
   userLensDataStored,
 } from "../modules/user/userReduxSlice";
+import AuthRedirect from "../common/components/AuthRedirect";
 
 enum MessageType {
   ContractProposal,
@@ -328,6 +329,7 @@ const Messenger: NextPage<any> = () => {
           )}
         </Box>
       </Box>
+      <AuthRedirect />
     </Box>
   );
 };

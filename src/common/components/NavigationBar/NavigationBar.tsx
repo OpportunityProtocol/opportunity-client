@@ -329,6 +329,8 @@ const NavigationBar: FC = (): JSX.Element => {
             ).toString(16)}`
           );
 
+          console.log(updatedUserData.data.verifiedUsers[0])
+            
           dispatch(
             userLensDataStored({
               user: {
