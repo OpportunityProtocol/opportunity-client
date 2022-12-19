@@ -44,8 +44,8 @@ import MarketDisplay from "../modules/market/components/MarketDisplay";
 import { GET_VERIFIED_FREELANCERS } from "../modules/user/UserGQLQueries";
 import { useSelector } from "react-redux";
 import {
-  selectLens,
-  selectUserAccountData,
+  ILensProfile,
+  selectLens, selectUserAddress
 } from "../modules/user/userReduxSlice";
 import UserCard from "../modules/user/components/UserCard/UserCard";
 import { GET_SERVICES } from "../modules/contract/ContractGQLQueries";
@@ -57,11 +57,11 @@ import fleek from "../fleek";
 import CreatePostDialog from "../modules/lens/components/CreatePostDialog";
 import {
   createPost,
-  getProfileFeed,
-  LENS_GET_PROFILE_FEED_QUERY,
+  getProfileFeed
 } from "../modules/lens/LensGQLQueries";
 import { useSigner, useSignTypedData } from "wagmi";
 import { login } from "../modules/lens/LensAPIAuthentication";
+import { ZERO_ADDRESS } from "../constant";
 
 //temporary
 const tags = [
@@ -93,9 +93,10 @@ const Explore: NextPage<any> = () => {
 
   const marketsQuery: QueryResult = useQuery(GET_MARKETS);
   const usersQuery: QueryResult = useQuery(GET_VERIFIED_FREELANCERS);
-  const userLensData = useSelector(selectLens);
-  const userData = useSelector(selectUserAccountData);
+  const userLensData: ILensProfile = useSelector(selectLens);
   const servicesQuery: QueryResult = useQuery(GET_SERVICES);
+
+  const userAddress: string = useSelector(selectUserAddress)
 
   const { data: signer } = useSigner();
 
@@ -137,23 +138,25 @@ const Explore: NextPage<any> = () => {
         let marketDetails = {};
 
         for (const service of services) {
-          await marketDetailsByIdQuery
+          if (service?.metadataPtr) {
+            await marketDetailsByIdQuery
             .refetch({ marketId: service.marketId })
             .then((result) => {
               marketDetails = result.data.markets[0];
             });
+            console.log(service?.metadataPtr)
+            serviceMetadata = await fleek.getService(
+              String(service?.metadataPtr).slice(13)
+            );
 
-          serviceMetadata = await fleek.getService(
-            String(service?.metadataPtr).slice(13)
-          );
-
-          displayedServicesData.push({
-            ...service,
-            ...serviceMetadata,
-            marketDetails: {
-              ...marketDetails,
-            },
-          });
+            displayedServicesData.push({
+              ...service,
+              ...serviceMetadata,
+              marketDetails: {
+                ...marketDetails,
+              },
+            });
+          }
         }
 
         setHighestValuedServices(displayedServicesData);
@@ -182,27 +185,70 @@ const Explore: NextPage<any> = () => {
   }, []);
 
   useEffect(() => {
+    if (userAddress != ZERO_ADDRESS && userAddress && userLensData?.profileId != -1) {
     getProfileFeed(
-      userData?.address,
-      `0x${Math.abs(Number(userLensData.profileId)).toString(16)}`
+      userAddress,
+      `0x${Math.abs(Number(userLensData?.profileId)).toString(16)}`
     ).then((result: any) => {
-      console.log({ result })
+      console.log({ result });
       setProfileFeed(result.items);
     });
-  }, [userData?.address, userLensData.profileId]);
+  }
+  }, [userAddress, userLensData?.profileId]);
 
   return (
     <Box sx={{ width: "100%" }}>
       <Container maxWidth="xl" sx={{ height: "100%" }}>
-      <Alert icon={null} variant='outlined'>
-        <AlertTitle>
-          Notice
-        </AlertTitle>
         <Box>
-          <Typography>The protocol is an extremely rough MVP, so expect things to break and/or not behaving in the optimal way.</Typography>
-        </Box>
-      </Alert>
-        <Box mb={3}>
+            <Typography
+              py={1}
+              variant="subtitle2"
+              fontWeight="bold"
+              color="#fff"
+              fontSize={18}
+            >
+              Try out one of these tags:
+            </Typography>
+
+            <Stack spacing={2} direction="row" alignItems="center">
+              {tags.map((tag: string) => {
+                return (
+                  <Chip
+                    variant="filled"
+                    onClick={() =>
+                      router.push({
+                        pathname: "/view/market/1",
+                        query: {
+                          routedSearchQuery: tag,
+                        },
+                      })
+                    }
+                    clickable
+                    label={
+                      String(tag).charAt(0).toUpperCase() + String(tag).slice(1)
+                    }
+                    size="small"
+                    sx={{
+                      p: 1.5,
+                      py: 1.8,
+                      fontSize: 13,
+                      //color: "black",
+                      fontWeight: "400",
+                      width: "fit-content",
+                      bgcolor: "#eee",
+                      "&:hover": {
+                        bgcolor: "rgba(255, 255, 255, 0.8)",
+                      },
+                      height: 25,
+                      border: "none",
+                      borderRadius: 0.8,
+                    }}
+                  />
+                );
+              })}
+            </Stack>
+          </Box>
+        <Box>
           <Box
             my={2}
             sx={{
@@ -229,68 +275,21 @@ const Explore: NextPage<any> = () => {
                   <Box sx={{ py: 2 }}>
                     <Typography
                       py={2}
-                      fontWeight="600"
+                      fontWeight="bold"
                       fontSize={35}
                       color="#fff"
                     >
                       Work from anywhere, with anyone
                     </Typography>
-                    <Typography variant="body2" color="#fff">
+                    <Typography fontSize={18} color="#fff">
                       Don't waste time with high fees and temporary platforms.
                       Create once and earn forever.
                     </Typography>
                   </Box>
 
-                  <Box mt={3}>
-                    <Typography
-                      py={1}
-                      variant="subtitle2"
-                      fontWeight="bold"
-                      color="#fff"
-                      fontSize={18}
-                    >
-                      Try out one of these tags:
-                    </Typography>
-
-                    <Stack spacing={2} direction="row" alignItems="center">
-                      {tags.map((tag: string) => {
-                        return (
-                          <Chip
-                          variant='filled'
-                            onClick={() =>
-                              router.push({
-                                pathname: "/view/market/1",
-                                query: {
-                                  routedSearchQuery: tag,
-                                },
-                              })
-                            }
-                            clickable
-                            label={
-                              String(tag).charAt(0).toUpperCase() +
-                              String(tag).slice(1)
-                            }
-                            size="small"
-                            sx={{
-                              p: 1.5,
-                              py: 1.8,
-                              fontSize: 13,
-                              //color: "black",
-                              fontWeight: "400",
-                              width: "fit-content",
-                              bgcolor: "#fff",
-                              '&:hover': {
-                                bgcolor: 'rgba(255, 255, 255, 0.8)'
-                              },
-                              height: 25,
-                              border: "none",
-                              borderRadius: 0.8,
-                            }}
-                          />
-                        );
-                      })}
-                    </Stack>
-                  </Box>
+                  <Button size='large' variant='contained'>
+                    Explore markets
+                  </Button>
                 </Box>
               </CardContent>
             </Box>
@@ -420,15 +419,15 @@ const Explore: NextPage<any> = () => {
               <Card
                 variant="outlined"
                 sx={{
-                  boxShadow:
-                    "rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px",
+                  border: "1px solid #eaeaea",
+                  boxShadow: '0px 6px 15px -3px rgba(0,0,0,0.1)',
                   bgcolor: "#fff",
                   mb: 2,
                 }}
               >
                 <CardContent>
                   <Stack spacing={3}>
-                    {userLensData.profileId === 0 ? (
+                    {userLensData?.profileId === 0 ? (
                       <Typography variant="body2">
                         Sign up and find work or start working instantly 🎉
                       </Typography>
@@ -439,17 +438,17 @@ const Explore: NextPage<any> = () => {
                         alignItems="center"
                         spacing={2}
                       >
-                        <Avatar src={userLensData.user?.imageURI} />
+                        <Avatar src={userLensData?.user?.imageURI} />
                         <Box>
                           <Typography fontSize={14}>
-                            @{userLensData.profile.handle}
+                            @{userLensData?.user?.handle}
                           </Typography>
                         </Box>
                       </Box>
                     )}
 
                     <TextField
-                      disabled={userLensData.profileId < 1}
+                      disabled={userLensData?.profileId < 1}
                       InputProps={{
                         disableUnderline: true,
                       }}
@@ -457,24 +456,24 @@ const Explore: NextPage<any> = () => {
                       placeholder="What do you want to say?"
                     />
                     <Button
-                      disabled={userLensData.profileId < 1}
+                      disabled={userLensData?.profileId < 1}
                       onClick={() => {
                         login(signer).then((val) => {
                           createPost(
                             "",
                             String(
-                              userData.address +
+                              userAddress +
                                 "-" +
-                                userLensData.profileId +
+                                userLensData?.profileId +
                                 "-" +
                                 Math.random()
                             ),
-                            userLensData.profileId,
+                            Number(userLensData?.profileId),
                             ethersSigner
                           );
                         });
                       }}
-                      startIcon={<Create size="small" />}
+                      startIcon={<Create fontSize="small" />}
                       sx={{ width: "max-content", alignSelf: "flex-end" }}
                       variant="contained"
                     >
@@ -525,9 +524,8 @@ const Explore: NextPage<any> = () => {
                 <Paper
                   elevation={0}
                   sx={{
-                    border: "1px solid #ddd !important",
-                    boxShadow:
-                      "rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px",
+                    border: "1px solid #eaeaea",
+                    boxShadow: '0px 6px 15px -3px rgba(0,0,0,0.1)',
                   }}
                 >
                   {profileFeed.length === 0 ? (

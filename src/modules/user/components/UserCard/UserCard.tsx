@@ -29,7 +29,7 @@ import { LensHubInterface } from "../../../../abis";
 import { lens_client } from "../../../../apollo";
 import { LENS_HUB_PROXY } from "../../../../constant";
 import fleek from "../../../../fleek";
-import { getLensFollowingStateByAddressQuery } from "../../../lens/LensGQLQueries";
+import { getLensFollowingStateByAddressQuery, getLensProfileById, getProfileFeed } from "../../../lens/LensGQLQueries";
 const getDomain = () => {
   return {
     name: "Lens Protocol Profiles",
@@ -57,15 +57,15 @@ const UserCard: FC = ({ freelancer }) => {
   const [loading, setLoading] = useState<boolean>(false)
   const [metadata, setMetadata] = useState<any>({})
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [lensProfileData, setLensProfileData] = useState<any>({})
+
   const open = Boolean(anchorEl);
 
-  const onOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const lensFollowingStateQuery: QueryResult = useQuery(getLensFollowingStateByAddressQuery(freelancer.address), {
+    client: lens_client,
+    skip: true
 
-  const onCloseUserMenu = () => {
-    setAnchorEl(null);
-  };
+  })
 
   useEffect(() => {
     async function downloadMetadata() {
@@ -76,13 +76,20 @@ const UserCard: FC = ({ freelancer }) => {
 
     setLoading(true)
     downloadMetadata().catch(error => console.log(error)).finally(() => setLoading(false))
+
   }, [freelancer?.metadata])
 
-  const lensFollowingStateQuery: QueryResult = useQuery(getLensFollowingStateByAddressQuery(freelancer.address), {
-    client: lens_client,
-    skip: true
+  useEffect(() => {
+    async function getProfile() {
+      const profile = await getLensProfileById(`0x${Math.abs(Number(freelancer?.id)).toString(16)}`)
+      setLensProfileData(profile)
 
-  })
+      console.log(profile)
+    }
+
+    getProfile()
+   
+  }, [freelancer?.address])
 
   const { data: userLensSigNonce } = useContractRead({
     addressOrName: LENS_HUB_PROXY,
@@ -127,6 +134,14 @@ const UserCard: FC = ({ freelancer }) => {
     };
   };
 
+  const onOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const onCloseUserMenu = () => {
+    setAnchorEl(null);
+  };
+
   const onViewProfile = () => {
     router.push(`/view/profile/${freelancer?.address}`)
 
@@ -144,18 +159,18 @@ const UserCard: FC = ({ freelancer }) => {
   }
 
   return (
-    <Card onClick={onViewProfile} variant='elevation' sx={{ border: '1px solid #ddd', boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;', cursor: 'pointer', width: '100%' }}>
+    <Card onClick={onViewProfile} variant='elevation' sx={{ border: '1px solid #eaeaea', boxShadow: '0px 6px 15px -3px rgba(0,0,0,0.1)', cursor: 'pointer', width: '100%' }}>
       <CardContent>
         <Stack mb={2} direction='row' alignItems='flex-start' sx={{ width: '100%' }}>
           <Stack spacing={1} direction='row' alignItems='center' sx={{ width: '100%' }}>
             <Avatar src={freelancer?.imageURI} />
             <Box>
-              <Typography fontWeight='500' fontSize={14} variant='subtitle1'>
-                Elijah Hampton
-              </Typography>
               <Typography color='primary' variant='subtitle2'>
                 @{freelancer?.handle}
               </Typography>
+              <Box>
+                <Chip label={lensProfileData?.ownedBy} variant='filled' sx={{ bgcolor: '#eee' }} />
+              </Box>
             </Box>
           </Stack>
 
@@ -169,7 +184,7 @@ const UserCard: FC = ({ freelancer }) => {
               <Skeleton variant='text' component='h4' sx={{ height: 30, width: '100%' }} />
               :
               <Typography color='text.secondary' variant='body2' paragraph sx={{ height: 40 }}>
-                {metadata?.description ? metadata?.description : 'Unable to load user about me'}
+                {metadata?.description ? metadata?.description : ''}
               </Typography>
           }
         </Box>

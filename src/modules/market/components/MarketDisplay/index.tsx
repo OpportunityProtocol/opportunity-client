@@ -57,13 +57,12 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
     <Card
       variant="elevation"
       sx={{
-        boxShadow:
-          "rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px;",
+        boxShadow: '0px 6px 15px -3px rgba(0,0,0,0.1)',
         cursor: "pointer",
         border: (theme) =>
           selected
             ? `2px solid ${theme.palette.primary.main}`
-            : `1px solid #ddd`,
+            : `1px solid #eaeaea`,
       }}
       onClick={
         selectable

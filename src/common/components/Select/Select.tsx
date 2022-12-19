@@ -31,7 +31,7 @@ const SelectInput = styled(InputBase)(({ theme }) => ({
     '&:focus': {
       borderRadius: 4,
       borderColor: '#4CAF50',
-      boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
+      boxShadow: '0px 6px 15px -3px rgba(0,0,0,0.1)',
     },
   },
 }));

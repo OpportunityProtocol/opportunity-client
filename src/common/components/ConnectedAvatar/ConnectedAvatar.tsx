@@ -33,13 +33,10 @@ import { ethers, BigNumber } from "ethers";
 import { styled } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  selectErc20Balance,
   selectLens,
   selectUserAddress,
   selectUserBalance,
-  selectUserConnectionStatus,
   selectUserConnector,
-  userERC20BalanceChanged,
 } from "../../../modules/user/userReduxSlice";
 import VerificationDialog from "../../../modules/user/components/VerificationDialog";
 import { DAI_ADDRESS, ZERO_ADDRESS } from "../../../constant";
@@ -73,7 +70,7 @@ const StyledBadge = styled(Badge, {
     color: "#44b700",
     bottom: 13,
     right: 12,
-    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    boxShadow: '0px 6px 15px -3px rgba(0,0,0,0.1)',
     "&::after": {
       width: "100%",
       height: "100%",
@@ -103,13 +100,10 @@ const ConnectedAvatar: FC = () => {
     useState<boolean>(false);
 
   const userAddress: string = useSelector(selectUserAddress);
-  const userBalance: number = useSelector(selectUserBalance);
-  const daiBalance: number = useSelector((state: RootState) =>
-    selectErc20Balance(state, DAI_ADDRESS)
-  );
+  const userBalance = useSelector(selectUserBalance);
+
   const userLensData: any = useSelector(selectLens)
   const userConnector: any = useSelector(selectUserConnector);
-  const connected: boolean = useSelector(selectUserConnectionStatus);
 
   const feeData = useFeeData({ enabled: false, watch: false });
   const accountData = useAccount()
@@ -126,7 +120,7 @@ const ConnectedAvatar: FC = () => {
 
   return (
     <StyledBadge
-      connected={connected}
+      connected={accountData.isConnected}
       overlap="circular"
       anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       variant="dot"
@@ -182,7 +176,7 @@ const ConnectedAvatar: FC = () => {
               </ListItemIcon>
               <ListItemText
                 primary="MATIC Balance"
-                secondary={accountData.status == 'connected' ? Number(userBalance).toPrecision(3) : 0}
+                secondary={0}
                 primaryTypographyProps={{
                   fontSize: 10,
                   fontWeight: "medium",
@@ -200,7 +194,7 @@ const ConnectedAvatar: FC = () => {
               </ListItemIcon>
               <ListItemText
                 primary="DAI Balance"
-                secondary={accountData.status == 'connected' ? daiBalance : 0}
+                secondary={accountData.status == 'connected' ? userBalance : 0}
                 primaryTypographyProps={{
                   fontSize: 10,
                   fontWeight: "medium",

@@ -2,85 +2,83 @@ import { createSlice } from '@reduxjs/toolkit'
 import { ZERO_ADDRESS } from '../../constant';
 import { RootState } from '../../store';
 
-interface UserReducerState {
-    balance: number;
-    address: string;
-    erc20Balance: ERC20Balance
-    connector: string;
-    connection: any;
-    account: any;
+type UserReducerState  = {
+    wallet: IWalletData;
     lensProfile: ILensProfile;
-    metadataUri
+    metadataUri: string;
 }
 
-interface ERC20Balance {
-    [address:string]: number
+type IWalletData = {
+    balance: number,
+    address: string,
+    connector: string,
+    chain: number;
 }
 
-interface ILensProfileUser {
+type ILensProfileUser = {
     handle: string;
             imageURI: string;
             metadataPtr: string;
 }
 
-interface ILensProfile {
+type ILensProfile = {
     user: ILensProfileUser;
-    profileId: 0;
-    profile: any;
+    profileId: number | string;
+    profile: any | null;
     error: String;
 }
 
 const initialState: UserReducerState = {
-    balance: 0,
-    address: ZERO_ADDRESS,
-    connector: null,
-    connection: null,
-    account: { 
-        address: ZERO_ADDRESS
+    wallet: {
+        balance: 0,
+        address: ZERO_ADDRESS,
+        connector: null,
+        chain: -1
     },
-    metadataUri: '',
     lensProfile: {
         user: {
             handle: "",
             imageURI: "",
             metadataPtr: "",
         },
-        profileId: 0,
+        profileId: -1,
         profile: null,
         error: null
     },
-    erc20Balance: {}
+    metadataUri: '',
 }   
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    userDataStored(state, action) {
-        return action.payload
-    },
     userLensDataStored(state, action) {
-        state.lensProfile = action.payload
+        console.log(action.payload)
+        return  { ...state, lensProfile: { ...action.payload } }
     },
     userWalletDataStored(state, action) {
-        return { ...state,  ...action.payload }
+        state.wallet = { ...state.wallet, ...action.payload}
     },
     userWalletDataCleared(state, action) {
-        return initialState 
+        return { ...state, wallet: initialState.wallet }
     },
-    userERC20BalanceChanged(state, action) {
-        state.erc20Balance = { ...state, ...action.payload }
-    },
+    userUpdateDaiBalance(state, action) {
+        return { 
+            ...state,
+            wallet: {
+                ...state.wallet,
+                balance: action.payload
+            }
+        }
+    }
   }
 })
 
-export const selectLens = (state: RootState) => state.user.lensProfile
-export const selectUserBalance = (state: RootState) => state.user.balance
-export const selectErc20Balance = (state: RootState, erc20Address: string) => state.user.erc20Balance[erc20Address]
-export const selectUserAddress = (state: RootState) => state.user.address
-export const selectUserConnector = (state: RootState) => state.user.connector
-export const selectUserConnectionStatus = (state: RootState) => state.user.connection
-export const selectUserAccountData = (state: RootState) => state.user.account
-export const selectUser = (state: RootState) => state.user;
-export const { userWalletDataStored, userWalletDataCleared, userERC20BalanceChanged, userLensDataStored,  } = userSlice.actions
+export { type IWalletData, type ILensProfile }
+export const selectLens = (state: UserReducerState) => state?.lensProfile
+export const selectUserBalance = (state: UserReducerState) => state.wallet?.balance
+export const selectUserAddress = (state: UserReducerState) => state.wallet?.address
+export const selectUserConnector = (state: UserReducerState) => state.wallet?.connector
+export const selectWallet = (state: UserReducerState) => state?.wallet;
+export const { userUpdateDaiBalance, userWalletDataStored, userWalletDataCleared, userLensDataStored,  } = userSlice.actions
 export default userSlice.reducer

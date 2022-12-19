@@ -67,17 +67,13 @@ import {
   userLensDataStored,
   selectUserAddress,
   selectLens,
-  userERC20BalanceChanged,
+  IWalletData,
+  ILensProfile,
+  userUpdateDaiBalance,
 } from "../../../modules/user/userReduxSlice";
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import {
-  AddCircleOutline,
   Book,
-  Help,
-  HelpOutline,
-  HelpSharp,
-  Language,
-  LocalGasStation,
   QuestionAnswer,
   QuestionMarkOutlined,
   WebAsset,
@@ -92,17 +88,15 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
 import {
-  getRefreshToken,
   login,
 } from "../../../modules/lens/LensAPIAuthentication";
-import SearchBar from "../SearchBar/SearchBar";
 import {
   getLensProfileById,
-  LENS_GET_DISPATCHER_BY_PROFILE_ID,
 } from "../../../modules/lens/LensGQLQueries";
 import { AnyAction } from "redux";
 import VerificationDialog from "../../../modules/user/components/VerificationDialog";
 import { lens_client } from "../../../apollo";
+import { QueryObserverResult } from "@tanstack/react-query";
 
 const CheckRequiredDispatcherDialog = ({ isConnected, profileId }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -238,8 +232,8 @@ const NavigationBar: FC = (): JSX.Element => {
     null
   );
 
-  const userAddress = useSelector(selectUserAddress);
-  const userLensProfile = useSelector(selectLens);
+  const userAddress: string = useSelector(selectUserAddress);
+  const userLensProfile: ILensProfile = useSelector(selectLens);
 
   const userData: QueryResult = useQuery(GET_VERIFIED_FREELANCER_BY_ADDRESS, {
     variables: {
@@ -249,6 +243,19 @@ const NavigationBar: FC = (): JSX.Element => {
 
   const helpMenuIsOpen = Boolean(helpMenuAnchorEl);
   const createMenuIsOpen = Boolean(createMenuAnchorEl);
+
+  const handleOnClickHelpIcon = (event: React.MouseEvent<HTMLButtonElement>) =>
+    setHelpMenuAnchorEl(event.currentTarget);
+
+  const handleOnCloseHelpMenu = () => setHelpMenuAnchorEl(null);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) =>
+    setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+  const handleOnClickCreateIcon = (event: React.MouseEvent<HTMLElement>) =>
+    setCreateMenuAnchorEl(event.currentTarget);
+  const handleOnCloseCreateMenu = () => setCreateMenuAnchorEl(null);
+  const handleClickOpen = () => setmodelOpen(true);
+  const handlesClose = () => setmodelOpen(false);
 
   const dai_balanceOf = useContractRead({
     addressOrName: DAI_ADDRESS,
@@ -283,20 +290,11 @@ const NavigationBar: FC = (): JSX.Element => {
       feeData.refetch();
       ethBalanceData.refetch();
 
-      signer.refetch().then((signer) => {
+      signer.refetch().then(async (signer) => {
         login(signer.data)
-          .then(() => {})
-          .finally(() => handleOnIsConnected())
+          .then(() => handleOnIsConnected())
           .catch((error) => {
-            dispatch(
-              userWalletDataStored({
-                balance: 0,
-                erc20Balance: {},
-                connector: null,
-                address: ZERO_ADDRESS,
-                connected: false,
-              })
-            );
+            alert("You must authenticate... try again");
           });
       });
     }
@@ -315,9 +313,32 @@ const NavigationBar: FC = (): JSX.Element => {
     }
   }, [feeData.isLoading]);
 
+  const handleOnAddFunds = async () => {
+    await daiWrite
+      .writeAsync()
+      .then((response: ethers.providers.TransactionResponse) => {
+        response.wait().then((receipt: ethers.providers.TransactionReceipt) => {
+          if (receipt.status > 0) {
+            dai_balanceOf
+              .refetch()
+              .then((result: QueryObserverResult<Result, Error>) => {
+                dispatch(userUpdateDaiBalance(Number(result.data?._hex)));
+              });
+          }
+        });
+      });
+  };
+
   async function handleOnIsConnected() {
-    let ethBalance: string | number = 0,
-      daiBalance: Result | number = 0;
+    let daiBalance: number = 0;
+
+    await dai_balanceOf.refetch().then((result) => {
+      if (result.isSuccess) {
+        daiBalance = Number(result.data?._hex);
+      } else {
+        daiBalance = 0;
+      }
+    });
 
     if (accountData.isConnected) {
       userData
@@ -329,20 +350,42 @@ const NavigationBar: FC = (): JSX.Element => {
             ).toString(16)}`
           );
 
-          dispatch(
-            userLensDataStored({
-              user: {
-                ...updatedUserData.data.verifiedUsers[0],
-              },
-              profileId: updatedUserData.data?.verifiedUsers[0]?.id,
-              profile,
-              error: null,
-            })
-          );
+          console.log(profile)
+
+          const walletPayload: IWalletData = {
+            balance: daiBalance,
+            connector: accountData.connector.name,
+            address: accountData.address,
+            chain: await accountData.connector.getChainId(),
+          };
+
+          const lensPayload: ILensProfile = {
+            user: {
+              handle: profile.handle,
+              imageURI: updatedUserData.data[0]?.imageURI,
+              metadataPtr: updatedUserData.data[0]?.metadata,
+            },
+            profileId: profile.id,
+            profile,
+            error: null,
+          };
+
+          dispatch(userLensDataStored({ ...lensPayload }));
+          dispatch(userWalletDataStored({ ...walletPayload }));
         })
         .catch((error) => {
           dispatch(
+            userWalletDataStored({
+              balance: 0,
+              connector: "",
+              address: ZERO_ADDRESS,
+              chain: -1,
+            })
+          );
+
+          dispatch(
             userLensDataStored({
+              user: null,
               profileId: 0,
               profile: null,
               error: error.message,
@@ -350,68 +393,7 @@ const NavigationBar: FC = (): JSX.Element => {
           );
         });
     }
-
-    if (ethBalanceData.isSuccess) {
-      ethBalance = ethBalanceData.data.formatted;
-    }
-
-    const result = await dai_balanceOf.refetch();
-    if (result.isSuccess) {
-      daiBalance = Number(dai_balanceOf.data?._hex);
-    } else {
-      daiBalance = 0;
-    }
-    
-    dispatch(
-      userWalletDataStored({
-        balance: ethBalance,
-        erc20Balance: {
-          [DAI_ADDRESS]: daiBalance,
-        },
-        address: accountData.address,
-        connector: String(accountData.connector.name),
-        connection: {
-          isSuccess: connectData.isSuccess,
-          isLoading: connectData.isLoading,
-          isError: connectData.isError,
-          isIdle: connectData.isIdle,
-          account: connectData.data.account,
-          chain: connectData.data.chain,
-          connector: connectData.data.connector,
-          provider: connectData.data.provider
-        },
-        account: {
-          address: accountData.address,
-          isConnected: accountData.isConnected
-        },
-      })
-    );
   }
-
-  const handleOnClickHelpIcon = (event: React.MouseEvent<HTMLButtonElement>) =>
-    setHelpMenuAnchorEl(event.currentTarget);
-
-  const handleOnCloseHelpMenu = () => setHelpMenuAnchorEl(null);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) =>
-    setAnchorEl(event.currentTarget);
-  const handleClose = () => setAnchorEl(null);
-  const handleOnClickCreateIcon = (event: React.MouseEvent<HTMLElement>) =>
-    setCreateMenuAnchorEl(event.currentTarget);
-  const handleOnCloseCreateMenu = () => setCreateMenuAnchorEl(null);
-  const handleClickOpen = () => setmodelOpen(true);
-  const handlesClose = () => setmodelOpen(false);
-
-  const handleOnAddFunds = async () => {
-    await daiWrite.write();
-
-    const result = await dai_balanceOf.refetch();
-
-    dispatch(
-      userERC20BalanceChanged({
-        [DAI_ADDRESS]: Number(result.data._hex),
-      })
-    );
-  };
 
   return (
     <React.Fragment>
@@ -419,11 +401,10 @@ const NavigationBar: FC = (): JSX.Element => {
         elevation={0}
         sx={{
           width: { sm: `calc(100%)` },
-          boxShadow:
-            "rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px",
+          boxShadow: "0px 6px 15px -3px rgba(0,0,0,0.1)",
           bgcolor: "#fff",
           border: "none",
-          borderBottom: `1px solid #ddd !important`,
+          //   borderBottom: `1px solid #ddd !important`,
           height: "65px !important",
         }}
       >
@@ -595,7 +576,7 @@ const NavigationBar: FC = (): JSX.Element => {
                   )}
 
                   {accountData.status === "connected" &&
-                    userLensProfile.profile?.handle && (
+                    userLensProfile?.profile?.handle && (
                       <>
                         <Tooltip title="Create">
                           <Typography
@@ -654,9 +635,7 @@ const NavigationBar: FC = (): JSX.Element => {
                           }}
                         >
                           <List>
-                          <ListItemButton
-                              disabled={true}
-                            >
+                            <ListItemButton disabled={true}>
                               <ListItemText
                                 primary="Bounty (Coming soon)"
                                 secondary="Create a bounty that anyone can claim and complete"
@@ -798,17 +777,17 @@ const NavigationBar: FC = (): JSX.Element => {
                     <Chip
                       color="primary"
                       size="medium"
-                      label={`🌐${" "}${" "}Connect`}
+                      label={`Connect a wallet`}
                       component={Button}
                       disableRipple
                       disableFocusRipple
                       disableTouchRipple
                       sx={{
                         fontWeight: "600",
-                        borderRadius: '2px',
-                        border: "1px solid #ddd",
-                        fontSize: "11px",
-                        bgcolor: "rgb(245, 245, 245)",
+                        borderRadius: "2px",
+                        p: 1,
+                        color: "#ffffff",
+                        bgcolor: (theme) => theme.palette.primary.main,
                       }}
                       onClick={handleClickOpen}
                     />
@@ -989,7 +968,7 @@ const NavigationBar: FC = (): JSX.Element => {
 
       <CheckRequiredDispatcherDialog
         isConnected={accountData.isConnected}
-        profileId={userLensProfile.profileId}
+        profileId={userLensProfile?.profileId}
       />
     </React.Fragment>
   );

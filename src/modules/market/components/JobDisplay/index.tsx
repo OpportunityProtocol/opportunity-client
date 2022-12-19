@@ -111,7 +111,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({
       case 2: //resolved
         return "1px solid green";
       default:
-        return "1px solid #ddd";
+        return "1px solid #eaeaea";
     }
   };
 
@@ -123,8 +123,7 @@ const JobDisplay: React.FC<IJobDisplayProps> = ({
       variant="outlined"
       sx={{
         border: border(),
-        boxShadow:
-          "rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px",
+        boxShadow: '0px 6px 15px -3px rgba(0,0,0,0.1)',
         cursor: "pointer",
         width: "100%",
         height: "200px",

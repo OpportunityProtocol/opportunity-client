@@ -419,8 +419,8 @@ const ServiceCard = ({
 
   return (
       <Card variant="elevation" className={cx(cardStyles.root)} sx={{
-        border: '1px solid #ddd !important',
-        boxShadow: 'rgba(17, 17, 26, 0.05) 0px 4px 16px, rgba(17, 17, 26, 0.05) 0px 8px 32px',
+        border: '1px solid #eaeaea !important',
+        boxShadow: '0px 6px 15px -3px rgba(0,0,0,0.1)',
       }}>
         <CardActionArea
           onClick={handleOnNavigateToServicePage}
