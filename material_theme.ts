@@ -7,15 +7,10 @@ const theme = createTheme({
       main: "#49A882",
       dark: "#1b4f31",
     },
-    text: {
-      primary: "rgba(33, 33, 33, .85)",
-      //secondary: "rgba(33, 33, 33, .85)",
-    },
     secondary: {
-      main: "#212121",
-
+      main: '#212121',
     },
-    divider: "#ddd",
+    divider: "#eee",
   },
   typography: {
     fontFamily: ["Open Sans", "sans-serif"].join(","),

@@ -30,6 +30,7 @@ import {
   alpha,
   CircularProgress,
   LinearProgress,
+  Drawer,
 } from "@mui/material";
 
 import { NextRouter, useRouter } from "next/router";
@@ -87,16 +88,17 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  login,
-} from "../../../modules/lens/LensAPIAuthentication";
-import {
-  getLensProfileById,
-} from "../../../modules/lens/LensGQLQueries";
+import { login } from "../../../modules/lens/LensAPIAuthentication";
+import { getLensProfileById } from "../../../modules/lens/LensGQLQueries";
 import { AnyAction } from "redux";
 import VerificationDialog from "../../../modules/user/components/VerificationDialog";
 import { lens_client } from "../../../apollo";
 import { QueryObserverResult } from "@tanstack/react-query";
+
+import InboxIcon from "@mui/icons-material/MoveToInbox";
+import MailIcon from "@mui/icons-material/Mail";
+import AuthenticationDialog from "../AuthenticationDialog";
+import MainDrawer from "../Drawer";
 
 const CheckRequiredDispatcherDialog = ({ isConnected, profileId }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -350,8 +352,6 @@ const NavigationBar: FC = (): JSX.Element => {
             ).toString(16)}`
           );
 
-          console.log(profile)
-
           const walletPayload: IWalletData = {
             balance: daiBalance,
             connector: accountData.connector.name,
@@ -396,47 +396,49 @@ const NavigationBar: FC = (): JSX.Element => {
   }
 
   return (
-    <React.Fragment>
-      <AppBar
-        elevation={0}
-        sx={{
-          width: { sm: `calc(100%)` },
-          boxShadow: "0px 6px 15px -3px rgba(0,0,0,0.1)",
-          bgcolor: "#fff",
-          border: "none",
-          //   borderBottom: `1px solid #ddd !important`,
-          height: "65px !important",
-        }}
-      >
-        <Toolbar disableGutters>
-          <Container
-            maxWidth="xl"
-            sx={{ display: "flex", flexDirection: "column" }}
-          >
-            <Grid
-              width="100%"
-              container
-              xs={12}
-              direction="row"
-              flexDirection="row"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Grid item sx={{ display: "flex", alignItems: "center" }}>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    spacing={1}
-                    sx={{ mr: 5 }}
-                  >
-                    <img
-                      src="/assets/logo.svg"
-                      style={{ width: 40, height: 50 }}
-                    />
-                    <Typography fontWeight="bold">Lens Talent</Typography>
+    <Box sx={{ display: "flex" }}>
+      <Box>
+        <AppBar
+          position="fixed"
+          elevation={0}
+          sx={{
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            width: { sm: `calc(100%)` },
+            boxShadow: "0px 6px 15px -3px rgba(0,0,0,0.1)",
+            bgcolor: "#fff",
+            //  border: "none",
+            borderBottom: `1px solid #eee !important`,
+            height: "65px !important",
+          }}
+        >
+          <Toolbar disableGutters>
+            <Box sx={{ px: 2, width: "100%" }}>
+              <Grid
+                width="100%"
+                container
+                xs={12}
+                direction="row"
+                flexDirection="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Grid item sx={{ display: "flex", alignItems: "center" }}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      spacing={1}
+                      sx={{ mr: 5 }}
+                    >
+                      <img
+                        src="/assets/logo.svg"
+                        style={{ width: 40, height: 50 }}
+                      />
+                      <Typography fontWeight="bold">Lens Talent</Typography>
+                    </Stack>
                   </Stack>
-
+                </Grid>
+                <Grid item>
                   <Stack direction="row" alignItems="center" spacing={2}>
                     <ListItem
                       sx={{ my: 1, "&:hover": { cursor: "pointer" } }}
@@ -450,25 +452,6 @@ const NavigationBar: FC = (): JSX.Element => {
                             fontWeight: "medium",
                             color:
                               router.pathname === "/" ? "primary" : "black",
-                            fontSize: 14,
-                          }}
-                        />
-                      </Link>
-                    </ListItem>
-
-                    <ListItem
-                      sx={{ my: 1, "&:hover": { cursor: "pointer" } }}
-                      disablePadding
-                      disableGutters
-                    >
-                      <Link href="/view/market">
-                        <ListItemText
-                          primary="Markets"
-                          primaryTypographyProps={{
-                            fontWeight: "medium",
-                            color: router.pathname.includes("/market")
-                              ? "primary"
-                              : "black",
                             fontSize: 14,
                           }}
                         />
@@ -540,423 +523,282 @@ const NavigationBar: FC = (): JSX.Element => {
                       </ListItem>
                     )}
                   </Stack>
-                </Stack>
-              </Grid>
-              <Grid item />
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Stack direction="row" alignItems="center" spacing={3}>
-                  {accountData?.status === "connected" &&
-                  userLensProfile?.profileId === 0 ? (
-                    <Chip
-                      clickable
-                      onClick={() => setVerificationDialogOpen(true)}
-                      sx={{ bgcolor: "#eee", fontWeight: "600" }}
-                      label={`🌍 ${" "} Sign up`}
-                    />
-                  ) : null}
-
-                  {accountData?.status === "connected" && (
-                    <Typography
-                      variant="button"
-                      sx={{
-                        fontWeight: "700",
-                        fontSize: "12px",
-                      }}
-                      onClick={handleOnAddFunds}
-                    >
-                      Add Funds
-                    </Typography>
-                  )}
-
-                  {accountData.status === "connected" &&
-                    userLensProfile?.profile?.handle && (
-                      <>
-                        <Tooltip title="Create">
-                          <Typography
-                            variant="button"
-                            sx={{
-                              fontWeight: "700",
-
-                              fontSize: "12px",
-                            }}
-                            onClick={handleOnClickCreateIcon}
-                          >
-                            Create
-                          </Typography>
-                        </Tooltip>
-
-                        <Menu
-                          anchorEl={createMenuAnchorEl}
-                          id="create-menu"
-                          open={createMenuIsOpen}
-                          onClose={handleOnCloseCreateMenu}
-                          onClick={handleOnCloseCreateMenu}
-                          PaperProps={{
-                            elevation: 0,
-                            sx: {
-                              overflow: "visible",
-                              filter:
-                                "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                              mt: 1.5,
-                              "& .MuiAvatar-root": {
-                                width: 32,
-                                height: 32,
-                                ml: -0.5,
-                                mr: 1,
-                              },
-                              "&:before": {
-                                content: '""',
-                                display: "block",
-                                position: "absolute",
-                                top: 0,
-                                right: 14,
-                                width: 10,
-                                height: 10,
-                                bgcolor: "background.paper",
-                                transform: "translateY(-50%) rotate(45deg)",
-                                zIndex: 0,
-                              },
-                            },
-                          }}
-                          transformOrigin={{
-                            horizontal: "right",
-                            vertical: "top",
-                          }}
-                          anchorOrigin={{
-                            horizontal: "right",
-                            vertical: "bottom",
-                          }}
-                        >
-                          <List>
-                            <ListItemButton disabled={true}>
-                              <ListItemText
-                                primary="Bounty (Coming soon)"
-                                secondary="Create a bounty that anyone can claim and complete"
-                                primaryTypographyProps={{
-                                  fontWeight: "bold",
-                                  fontSize: 14,
-                                }}
-                                secondaryTypographyProps={{
-                                  fontSize: 12,
-                                  fontWeight: "medium",
-                                  color: "#444",
-                                }}
-                              />
-                            </ListItemButton>
-
-                            <ListItemButton
-                              disabled={userLensProfile?.handle}
-                              onClick={() => router.push("/create/contract")}
-                            >
-                              <ListItemText
-                                primary="Contract"
-                                secondary="Create a contract if you're looking for a one time deal"
-                                primaryTypographyProps={{
-                                  fontWeight: "bold",
-                                  fontSize: 14,
-                                }}
-                                secondaryTypographyProps={{
-                                  fontSize: 12,
-                                  fontWeight: "medium",
-                                  color: "#444",
-                                }}
-                              />
-                            </ListItemButton>
-
-                            <ListItemButton
-                              onClick={() => router.push("/create/service")}
-                              disabled={userLensProfile?.handle}
-                            >
-                              <ListItemText
-                                primary="Service"
-                                secondary="Publish a service and allow your peers to invest in its success"
-                                primaryTypographyProps={{
-                                  fontWeight: "bold",
-                                  fontSize: 14,
-                                }}
-                                secondaryTypographyProps={{
-                                  fontSize: 12,
-                                  fontWeight: "medium",
-                                  color: "#444",
-                                }}
-                              />
-                            </ListItemButton>
-                          </List>
-                        </Menu>
-                      </>
-                    )}
-                  <>
-                    <Typography
-                      variant="button"
-                      sx={{
-                        fontWeight: "700",
-
-                        fontSize: "12px",
-                      }}
-                      onClick={handleOnClickHelpIcon}
-                    >
-                      Help
-                    </Typography>
-                    <Menu
-                      anchorEl={helpMenuAnchorEl}
-                      id="help-menu"
-                      open={helpMenuIsOpen}
-                      onClose={handleOnCloseHelpMenu}
-                      onClick={handleOnCloseHelpMenu}
-                      PaperProps={{
-                        elevation: 0,
-                        sx: {
-                          borderRadius: 0,
-                          overflow: "visible",
-                          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                          mt: 1.5,
-                          "& .MuiAvatar-root": {
-                            width: 32,
-                            height: 32,
-                            ml: -0.5,
-                            mr: 1,
-                          },
-                          "&:before": {
-                            content: '""',
-                            display: "block",
-                            position: "absolute",
-                            top: 0,
-                            right: 14,
-                            width: 10,
-                            height: 10,
-                            bgcolor: "background.paper",
-                            transform: "translateY(-50%) rotate(45deg)",
-                            zIndex: 0,
-                          },
-                        },
-                      }}
-                      transformOrigin={{ horizontal: "right", vertical: "top" }}
-                      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-                    >
-                      <List sx={{ width: 250 }}>
-                        <ListItemButton>
-                          <ListItemIcon>
-                            <QuestionMarkOutlined fontSize="small" />
-                          </ListItemIcon>
-                          <ListItemText primary="Get Help (Discord)" />
-                        </ListItemButton>
-
-                        <ListItemButton>
-                          <ListItemIcon>
-                            <Book fontSize="small" />
-                          </ListItemIcon>
-                          <ListItemText primary="Tutorial" />
-                        </ListItemButton>
-
-                        <ListItemButton>
-                          <ListItemIcon>
-                            <WebAsset fontSize="small" />
-                          </ListItemIcon>
-                          <ListItemText primary="Blog" />
-                        </ListItemButton>
-                        <ListItemButton>
-                          <ListItemIcon>
-                            <QuestionAnswer fontSize="small" />
-                          </ListItemIcon>
-                          <ListItemText primary="FAQ" />
-                        </ListItemButton>
-                      </List>
-                    </Menu>
-                  </>
-
-                  {accountData.isConnected ? (
-                    <ConnectedAvatar />
-                  ) : (
-                    <Chip
-                      color="primary"
-                      size="medium"
-                      label={`Connect a wallet`}
-                      component={Button}
-                      disableRipple
-                      disableFocusRipple
-                      disableTouchRipple
-                      sx={{
-                        fontWeight: "600",
-                        borderRadius: "2px",
-                        p: 1,
-                        color: "#ffffff",
-                        bgcolor: (theme) => theme.palette.primary.main,
-                      }}
-                      onClick={handleClickOpen}
-                    />
-                  )}
-                </Stack>
-              </Grid>
-            </Grid>
-          </Container>
-        </Toolbar>
-        <Dialog
-          sx={{ width: "100%", maxWidth: "425" }}
-          open={modelopen}
-          onClose={handlesClose}
-        >
-          <DialogContent
-            sx={{
-              border: "1px solid #eee",
-              bordeRadius: "0.5rem",
-              padding: "48px 56px",
-            }}
-          >
-            <CloseIcon
-              fontSize="large"
-              onClick={handlesClose}
-              sx={{
-                padding: "0px",
-                height: "20px",
-                position: "absolute",
-                right: "17px",
-                top: "17px",
-                width: "20px",
-                cursor: "pointer",
-              }}
-            />
-            <Box my={2}>
-              <DialogTitle
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "0px",
-                  fontSize: 25,
-                  fontWeight: "600",
-                }}
-              >
-                Login
-              </DialogTitle>
-              <Typography variant="caption">
-                New to Lens Talent? Start by connecting a wallet.
-              </Typography>
-            </Box>
-
-            <div>
-              {connectData.connectors.slice(-2, 1).map((connector) => (
-                <Button
-                  variant="outlined"
-                  disabled={!connector.ready}
-                  key={connector.id}
-                  onClick={() => connectData.connect({ connector })}
+                </Grid>
+                <Grid
+                  item
                   sx={{
-                    paddingLeft: "24px",
-                    paddingRight: "163px",
-                    paddingTop: "15px",
-                    border: "1px solid #ddd",
-                    paddingBottom: "15px",
-                    borderRadius: "0.1875rem",
-                  }}
-                >
-                  <img
-                    src="/assets/images/metamaskconnect.png"
-                    alt="metamaskwalletlogo"
-                    style={{ width: 28, height: 28 }}
-                  />
-                  <Typography
-                    sx={{
-                      fontFamily: "sans-serif",
-                      fontStyle: "normal",
-
-                      lineHeight: "normal",
-                      fontSize: "0.875rem",
-                      fontWeight: "700",
-                      color: "#000000",
-                      marginLeft: "1.3125rem",
-                    }}
-                  >
-                    Login with {connector.name}
-                    {connectData.status === "loading" &&
-                      connector.id === connectData.pendingConnector?.id &&
-                      " (connecting)"}
-                  </Typography>
-                </Button>
-              ))}
-
-              <Divider>
-                <Typography
-                  sx={{
-                    fontFamily: "sans-serif",
-                    fontStyle: "normal",
-                    fontWeight: "400",
-                    lineHeight: "normal",
-                    fontSize: "0.75rem",
+                    display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    margin: "2rem 0;",
+                    justifyContent: "flex-end",
                   }}
                 >
-                  OR
-                </Typography>
-              </Divider>
-              {connectData.connectors.slice(1).map((connector) => (
-                <Button
-                  variant="outlined"
-                  disabled={!connector.ready}
-                  key={connector.id}
-                  onClick={() => connectData.connect({ connector })}
-                  sx={{
-                    paddingLeft: "24px",
-                    paddingRight: "122px",
-                    border: "1px solid #ddd",
-                    paddingTop: "12px",
-                    paddingBottom: "12px",
-                    borderRadius: "0.1875rem",
-                  }}
-                >
-                  <img
-                    src="/assets/images/coinbaseconnect.png"
-                    alt="coinbasewalletlogo"
-                    style={{ width: 28, height: 28 }}
-                  />
+                  <Stack direction="row" alignItems="center" spacing={3}>
+                    {accountData?.status === "connected" &&
+                    userLensProfile?.profileId === 0 ? (
+                      <Chip
+                        clickable
+                        onClick={() => setVerificationDialogOpen(true)}
+                        sx={{ bgcolor: "#eee", fontWeight: "600" }}
+                        label={`🌍 ${" "} Sign up`}
+                      />
+                    ) : null}
 
-                  <Typography
-                    sx={{
-                      fontFamily: "sans-serif",
-                      fontStyle: "normal",
+                    {accountData?.status === "connected" && (
+                      <Typography
+                        variant="button"
+                        sx={{
+                          fontWeight: "700",
+                          fontSize: "12px",
+                        }}
+                        onClick={handleOnAddFunds}
+                      >
+                        Add Funds
+                      </Typography>
+                    )}
 
-                      lineHeight: "normal",
-                      fontSize: "0.875rem",
-                      fontWeight: "700",
-                      color: "#000000",
-                      marginLeft: "1.3125rem",
-                    }}
-                  >
-                    Login with {connector.name}
-                    {!connector.ready && " (unsupported)"}
-                    {connectData.status === "loading" &&
-                      connector.id === connectData.pendingConnector?.id &&
-                      " (connecting)"}
-                  </Typography>
-                </Button>
-              ))}
-              {connectData.error && <div>{connectData.error.message}</div>}
-            </div>
-            <Box mt={2}>
-              <Typography variant="caption">
-                Want to learn more about Lens Talent?{" "}
-                <Typography
-                  component="span"
-                  variant="caption"
-                  color="primary"
-                  sx={{ cursor: "pointer" }}
-                >
-                  {" "}
-                  Read our guide{" "}
-                </Typography>
-              </Typography>
+                    {accountData.status === "connected" &&
+                      userLensProfile?.profile?.handle && (
+                        <>
+                          <Tooltip title="Create">
+                            <Typography
+                              variant="button"
+                              sx={{
+                                fontWeight: "700",
+
+                                fontSize: "12px",
+                              }}
+                              onClick={handleOnClickCreateIcon}
+                            >
+                              Create
+                            </Typography>
+                          </Tooltip>
+
+                          <Menu
+                            anchorEl={createMenuAnchorEl}
+                            id="create-menu"
+                            open={createMenuIsOpen}
+                            onClose={handleOnCloseCreateMenu}
+                            onClick={handleOnCloseCreateMenu}
+                            PaperProps={{
+                              elevation: 0,
+                              sx: {
+                                overflow: "visible",
+                                filter:
+                                  "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                                mt: 1.5,
+                                "& .MuiAvatar-root": {
+                                  width: 32,
+                                  height: 32,
+                                  ml: -0.5,
+                                  mr: 1,
+                                },
+                                "&:before": {
+                                  content: '""',
+                                  display: "block",
+                                  position: "absolute",
+                                  top: 0,
+                                  right: 14,
+                                  width: 10,
+                                  height: 10,
+                                  bgcolor: "background.paper",
+                                  transform: "translateY(-50%) rotate(45deg)",
+                                  zIndex: 0,
+                                },
+                              },
+                            }}
+                            transformOrigin={{
+                              horizontal: "right",
+                              vertical: "top",
+                            }}
+                            anchorOrigin={{
+                              horizontal: "right",
+                              vertical: "bottom",
+                            }}
+                          >
+                            <List>
+                              <ListItemButton disabled={true}>
+                                <ListItemText
+                                  primary="Bounty (Coming soon)"
+                                  secondary="Create a bounty that anyone can claim and complete"
+                                  primaryTypographyProps={{
+                                    fontWeight: "bold",
+                                    fontSize: 14,
+                                  }}
+                                  secondaryTypographyProps={{
+                                    fontSize: 12,
+                                    fontWeight: "medium",
+                                    color: "#444",
+                                  }}
+                                />
+                              </ListItemButton>
+
+                              <ListItemButton
+                                disabled={userLensProfile?.handle}
+                                onClick={() => router.push("/create/contract")}
+                              >
+                                <ListItemText
+                                  primary="Contract"
+                                  secondary="Create a contract if you're looking for a one time deal"
+                                  primaryTypographyProps={{
+                                    fontWeight: "bold",
+                                    fontSize: 14,
+                                  }}
+                                  secondaryTypographyProps={{
+                                    fontSize: 12,
+                                    fontWeight: "medium",
+                                    color: "#444",
+                                  }}
+                                />
+                              </ListItemButton>
+
+                              <ListItemButton
+                                onClick={() => router.push("/create/service")}
+                                disabled={userLensProfile?.handle}
+                              >
+                                <ListItemText
+                                  primary="Service"
+                                  secondary="Publish a service and allow your peers to invest in its success"
+                                  primaryTypographyProps={{
+                                    fontWeight: "bold",
+                                    fontSize: 14,
+                                  }}
+                                  secondaryTypographyProps={{
+                                    fontSize: 12,
+                                    fontWeight: "medium",
+                                    color: "#444",
+                                  }}
+                                />
+                              </ListItemButton>
+                            </List>
+                          </Menu>
+                        </>
+                      )}
+                    <>
+                      <Typography
+                        variant="button"
+                        sx={{
+                          fontWeight: "700",
+
+                          fontSize: "12px",
+                        }}
+                        onClick={handleOnClickHelpIcon}
+                      >
+                        Help
+                      </Typography>
+                      <Menu
+                        anchorEl={helpMenuAnchorEl}
+                        id="help-menu"
+                        open={helpMenuIsOpen}
+                        onClose={handleOnCloseHelpMenu}
+                        onClick={handleOnCloseHelpMenu}
+                        PaperProps={{
+                          elevation: 0,
+                          sx: {
+                            borderRadius: 0,
+                            overflow: "visible",
+                            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                            mt: 1.5,
+                            "& .MuiAvatar-root": {
+                              width: 32,
+                              height: 32,
+                              ml: -0.5,
+                              mr: 1,
+                            },
+                            "&:before": {
+                              content: '""',
+                              display: "block",
+                              position: "absolute",
+                              top: 0,
+                              right: 14,
+                              width: 10,
+                              height: 10,
+                              bgcolor: "background.paper",
+                              transform: "translateY(-50%) rotate(45deg)",
+                              zIndex: 0,
+                            },
+                          },
+                        }}
+                        transformOrigin={{
+                          horizontal: "right",
+                          vertical: "top",
+                        }}
+                        anchorOrigin={{
+                          horizontal: "right",
+                          vertical: "bottom",
+                        }}
+                      >
+                        <List sx={{ width: 250 }}>
+                          <ListItemButton>
+                            <ListItemIcon>
+                              <QuestionMarkOutlined fontSize="small" />
+                            </ListItemIcon>
+                            <ListItemText primary="Get Help (Discord)" />
+                          </ListItemButton>
+
+                          <ListItemButton>
+                            <ListItemIcon>
+                              <Book fontSize="small" />
+                            </ListItemIcon>
+                            <ListItemText primary="Tutorial" />
+                          </ListItemButton>
+
+                          <ListItemButton>
+                            <ListItemIcon>
+                              <WebAsset fontSize="small" />
+                            </ListItemIcon>
+                            <ListItemText primary="Blog" />
+                          </ListItemButton>
+                          <ListItemButton>
+                            <ListItemIcon>
+                              <QuestionAnswer fontSize="small" />
+                            </ListItemIcon>
+                            <ListItemText primary="FAQ" />
+                          </ListItemButton>
+                        </List>
+                      </Menu>
+                    </>
+
+                    {accountData.isConnected ? (
+                      <ConnectedAvatar />
+                    ) : (
+                      <Chip
+                      clickable
+                      variant='outlined'
+                      //  color="primary"
+                       // size="medium"
+                        label={`🌎 Connect a wallet`}
+                        //component={Button}
+                       // disableRipple
+                       // disableFocusRipple
+                        //disableTouchRipple
+                        sx={{
+                          fontWeight: "600",
+                          borderRadius: "2px",
+                          border: '1px solid #ddd',
+                          borderRadius: 6,
+                          fontSize: 12
+                          //p: 1,
+                        //  color: "#ffffff",
+                         // bgcolor: (theme) => theme.palette.primary.main,
+                        }}
+                        onClick={handleClickOpen}
+                      />
+                    )}
+                  </Stack>
+                </Grid>
+              </Grid>
             </Box>
-          </DialogContent>
-        </Dialog>
-      </AppBar>
+          </Toolbar>
+          <AuthenticationDialog
+            modelopen={modelopen}
+            handlesClose={handlesClose}
+            userLensProfile={userLensProfile}
+            connectData={connectData}
+          />
+        </AppBar>
+      </Box>
+
+      <MainDrawer />
 
       <VerificationDialog
         open={verificationDialogOpen}
@@ -970,7 +812,7 @@ const NavigationBar: FC = (): JSX.Element => {
         isConnected={accountData.isConnected}
         profileId={userLensProfile?.profileId}
       />
-    </React.Fragment>
+    </Box>
   );
 };
 

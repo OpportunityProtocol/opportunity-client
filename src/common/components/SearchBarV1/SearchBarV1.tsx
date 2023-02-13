@@ -35,7 +35,7 @@ const SearchBarV1: FunctionComponent<any> = ({ width, ...inputProps }) => {
    
         width: width ? width : "auto",
         border: "1px solid #CFD0D7",
-        minWidth: "300px",
+        //minWidth: "300px",
         marginBottom: 0.5,
         backgroundColor: "#FCFCFD",
         borderRadius: 1.5

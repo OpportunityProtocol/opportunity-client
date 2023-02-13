@@ -20,7 +20,6 @@ import {
   GET_SERVICES_BY_MARKET_ID,
 } from "../../../modules/contract/ContractGQLQueries";
 import ServiceCard from "../../../modules/contract/components/ServiceCard/ServiceCard";
-import SearchBar from "../../../common/components/SearchBar/SearchBar";
 import { Refresh } from "@mui/icons-material";
 import { NextPage } from "next";
 import { GET_MARKET_DETAILS_BY_ID } from "../../../modules/market/MarketGQLQueries";
@@ -62,17 +61,8 @@ const Market: NextPage = () => {
     },
   });
 
-  useEffect(() => {
-    if (routedSearchQuery) {
-      handleOnSearch({ target: { value: routedSearchQuery } });
-    }
-  }, [routedSearchQuery]);
-
   const handleOnSearch = (e: any) => {
     setSearchQuery(e.target.value);
-
-    if (routedSearchQuery) {
-    }
 
     if (e.target.value === "") {
       setDisplayedContracts(cachedContracts);
@@ -90,10 +80,6 @@ const Market: NextPage = () => {
     setDisplayedContracts(filteredContracts);
     setDisplayedServices(filteredServices);
   };
-
-  useEffect(() => {
-    loadMarketData();
-  }, [id]);
 
   const loadMarketData = async () => {
     if (id) {
@@ -182,6 +168,16 @@ const Market: NextPage = () => {
     setTabValue(newValue);
   };
 
+  useEffect(() => {
+    if (routedSearchQuery) {
+      handleOnSearch({ target: { value: routedSearchQuery } });
+    }
+  }, [routedSearchQuery]);
+
+  useEffect(() => {
+    loadMarketData();
+  }, [id]);
+
   return (
     <Container maxWidth="xl">
       <Box sx={{ width: "100%" }}>
@@ -220,6 +216,10 @@ const Market: NextPage = () => {
               <Tab sx={{ fontSize: 16 }} value={1} label="Services" />
             </Tabs>
             <Stack direction="row" alignItems="center" spacing={1}>
+              <IconButton onClick={loadMarketData}>
+                <Refresh />
+              </IconButton>
+
               <SearchBarV1
                 onChange={handleOnSearch}
                 value={searchQuery}
@@ -227,9 +227,6 @@ const Market: NextPage = () => {
                   tabValue === 0 ? "Search contracts" : "Search services"
                 }
               />
-              <IconButton size="small" onClick={loadMarketData}>
-                <Refresh fontSize="small" />
-              </IconButton>
             </Stack>
           </Box>
         </Box>
@@ -283,7 +280,6 @@ const Market: NextPage = () => {
                     <Grid item minWidth="350px">
                       <ServiceCard
                         purchase={false}
-                        id={service.id}
                         service={service}
                       />
                     </Grid>

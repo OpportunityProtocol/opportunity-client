@@ -1,6 +1,5 @@
-import { createHttpLink, InMemoryCache, HttpLink, ApolloClient, ApolloProvider, gql, ApolloLink, NormalizedCacheObject } from '@apollo/client';
+import { InMemoryCache, HttpLink, ApolloClient, ApolloProvider, gql, ApolloLink, NormalizedCacheObject } from '@apollo/client';
 import { APOLLO_CLIENT_URI, LENS_API } from './constant';
-import { setContext } from '@apollo/client/link/context';
 import { getAuthenticationToken } from './modules/lens/LensAPIAuthentication';
 
 const httpLink = new HttpLink({

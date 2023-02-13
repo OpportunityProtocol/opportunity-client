@@ -71,14 +71,6 @@ const MarketDisplay: FC<IMarketDisplayProps> = ({
       }
     >
       <CardContent className={classes.primaryContentContainer}>
-        <Box style={{ width: 100, height: 60, borderRadius: 2 }}>
-          <img
-            src="/assets/images/writing_and_translation.jpeg"
-            style={{ borderRadius: 2 }}
-            width="100%"
-            height="100%"
-          />
-        </Box>
 
         <Box px={2}>
           <Grid
